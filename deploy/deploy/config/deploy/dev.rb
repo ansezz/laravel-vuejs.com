@@ -15,5 +15,4 @@ set :deploy_to, "/home/#{fetch(:user)}/domains/#{fetch(:domain)}/public_html"
 
 set :tmp_dir, "/home/#{fetch(:user)}/tmp"
 
-set :linked_files, %w{.htaccess .htpasswd .env}
-
+set :linked_files, %w{htdocs/.htaccess htdocs/.htpasswd .env}
