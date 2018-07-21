@@ -1,0 +1,34 @@
+{
+  "name": "laravel-vuejs/theme",
+  "description": "Laravel-vuejs.com theme.",
+  "keywords": [
+    "Laravel-VueJs.com",
+    "framework",
+    "WordPress",
+    "VueJs",
+    "Laravel",
+    "theme"
+  ],
+  "license": "GPL-2.0+",
+  "authors": [
+    {
+      "name": "Anass EZ-ZOUAINE",
+      "email": "ans-ezzouaine@hotmail.com",
+      "homepage": "https://www.laravel-vuejs.com/"
+    }
+  ],
+  "type": "wordpress-theme",
+  "require": {
+    "php": ">=5.6.4",
+    "composer/installers": "~1.2",
+    "filp/whoops": "^2.1",
+    "twig/twig": "~1.0",
+    "illuminate/routing": "^5.4",
+    "illuminate/container": "^5.4",
+    "illuminate/http": "^5.4",
+    "illuminate/events": "^5.4",
+    "illuminate/view": "^5.4",
+    "illuminate/filesystem": "^5.4",
+    "illuminate/database": "^5.4"
+  }
+}
