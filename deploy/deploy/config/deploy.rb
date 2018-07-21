@@ -80,7 +80,7 @@ end
 namespace :pm2 do
   task :start do
     on roles(:server) do
-        execute "cd #{release_path}/htdocs/content/themes/laravel-vuejs/front && pm2 start npm --name "laravel-vuejs" -- run start"
+        execute "cd #{release_path}/htdocs/content/themes/laravel-vuejs/front && pm2 start npm --name 'laravel-vuejs' -- run start"
     end
   end
 end
@@ -93,6 +93,8 @@ after "app:build", "app:symlink"
 
 after "deploy:updating", "npm:install"
 after "npm:install", "npm:build"
+
+after "npm:build", "pm2:start"
 
 #after "app:build", "httpd:restart"
 after "deploy:finished", "app:done"
