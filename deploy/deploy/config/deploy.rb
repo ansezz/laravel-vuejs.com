@@ -18,12 +18,12 @@ set :keep_releases, 3
 namespace :httpd do
   task :htaccess do
     on roles(:server) do
-        upload! "../config/test/.htaccess" , "/home/#{fetch(:user)}/domains/#{fetch(:domain)}/public_html/shared/.htaccess"
+        upload! "../config/#{fetch(:stage)}/.htaccess" , "/home/#{fetch(:user)}/domains/#{fetch(:domain)}/public_html/shared/.htaccess"
     end
   end
   task :htpasswd do
      on roles(:server) do
-       upload! "../config/.htpasswd", "/home/#{fetch(:user)}/domains/#{fetch(:domain)}/public_html/shared/.htpasswd"
+       upload! "../config/#{fetch(:stage)}/.htpasswd", "/home/#{fetch(:user)}/domains/#{fetch(:domain)}/public_html/shared/.htpasswd"
      end
   end
   task :restart do
@@ -51,6 +51,13 @@ namespace :app do
       end
     end
   end
+  task :symlink do
+      on roles(:server) do
+        within release_path do
+          execute "ln -nfs /home/#{fetch(:user)}/domains/#{fetch(:domain)}/public_html/static/uploads #{release_path}/htdocs/content/uploads"
+        end
+      end
+  end
   task :done do
       on roles(:server) do
         print "Done by user #{fetch(:user)} on #{fetch(:domain)} :D"
@@ -61,5 +68,6 @@ end
 before 'deploy:started', 'httpd:htaccess'
 before 'deploy:started', 'httpd:htpasswd'
 after "deploy:updating", "app:build"
+after "app:build", "app:symlink"
 #after "app:build", "httpd:restart"
 after "deploy:finished", "app:done"
