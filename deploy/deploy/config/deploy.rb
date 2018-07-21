@@ -47,7 +47,6 @@ namespace :app do
     on roles(:server) do
       within release_path do
         execute "cd #{release_path} && composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader"
-        #execute "cd #{release_path}/htdocs/content/themes/laravel-vuejs && npm i && npm run dev"
       end
     end
   end
@@ -65,9 +64,35 @@ namespace :app do
   end
 end
 
+namespace :npm do
+  task :install do
+    on roles(:server) do
+        execute "cd #{release_path}/htdocs/content/themes/laravel-vuejs/front && npm install"
+    end
+  end
+  task :build do
+    on roles(:server) do
+        execute "cd #{release_path}/htdocs/content/themes/laravel-vuejs/front && npm run build"
+    end
+  end
+end
+
+namespace :pm2 do
+  task :start do
+    on roles(:server) do
+        execute "cd #{release_path}/htdocs/content/themes/laravel-vuejs/front && pm2 start npm --name "laravel-vuejs" -- run start"
+    end
+  end
+end
+
+
 before 'deploy:started', 'httpd:htaccess'
 before 'deploy:started', 'httpd:htpasswd'
 after "deploy:updating", "app:build"
 after "app:build", "app:symlink"
+
+after "deploy:updating", "npm:install"
+after "npm:install", "npm:build"
+
 #after "app:build", "httpd:restart"
 after "deploy:finished", "app:done"
