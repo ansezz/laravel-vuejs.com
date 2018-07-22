@@ -7,9 +7,9 @@ set :branch, "master"
 
 set :domain, "dev.laravel-vuejs.com"
 
-server '138.68.253.178', user: fetch(:user), roles: %w{app}
+server '209.97.189.26', user: fetch(:user), roles: %w{app}
 
-role :server, %w{138.68.253.178}
+role :server, %w{209.97.189.26}
 
 set :deploy_to, "/home/#{fetch(:user)}/domains/#{fetch(:domain)}/public_html"
 

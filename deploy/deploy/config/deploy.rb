@@ -18,12 +18,12 @@ set :keep_releases, 3
 namespace :httpd do
   task :htaccess do
     on roles(:server) do
-        upload! "../config/#{fetch(:stage)}/.htaccess" , "/home/#{fetch(:user)}/domains/#{fetch(:domain)}/public_html/shared/.htaccess"
+        upload! "../config/#{fetch(:stage)}/.htaccess" , "/var/www/#{fetch(:user)}/domains/#{fetch(:domain)}/public_html/shared/htdocs/.htaccess"
     end
   end
   task :htpasswd do
      on roles(:server) do
-       upload! "../config/#{fetch(:stage)}/.htpasswd", "/home/#{fetch(:user)}/domains/#{fetch(:domain)}/public_html/shared/.htpasswd"
+       upload! "../config/#{fetch(:stage)}/.htpasswd", "/var/www/#{fetch(:user)}/domains/#{fetch(:domain)}/public_html/shared/htdocs/.htpasswd"
      end
   end
   task :restart do
@@ -37,7 +37,7 @@ end
 namespace :conf do
   task :update do
     on roles(:server) do
-        upload! "../config/dev/.env" , "/home/#{fetch(:user)}/domains/#{fetch(:domain)}/public_html/shared/.env"
+        upload! "../config/dev/.env" , "/var/www/#{fetch(:user)}/domains/#{fetch(:domain)}/public_html/shared/.env"
     end
   end
 end
@@ -53,7 +53,7 @@ namespace :app do
   task :symlink do
       on roles(:server) do
         within release_path do
-          execute "ln -nfs /home/#{fetch(:user)}/domains/#{fetch(:domain)}/public_html/static/uploads #{release_path}/htdocs/content/uploads"
+          execute "ln -nfs /var/www/#{fetch(:user)}/domains/#{fetch(:domain)}/public_html/static/uploads #{release_path}/htdocs/content/uploads"
         end
       end
   end
