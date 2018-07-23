@@ -104,7 +104,7 @@ namespace :pm2 do
   end
   task :restart do
     on roles(:server) do
-        execute "pm2 restart laravel-vuejs"
+        execute "pm2 restart all"
     end
   end
   task :kill do
