@@ -4,11 +4,11 @@
     <header>
       <nav class="navbar" role="navigation" aria-label="main navigation">
         <div class="navbar-brand">
-          <a class="navbar-item" href="https://bulma.io">
-            <h2 class="title is-4">The Media</h2>
+          <a class="navbar-item" href="/">
+            <h2 class="title is-4">DEV</h2>
           </a>
           <a class="navbar-item bd-navbar-item-documentation  is-active" href="/">
-            Accueil
+            Home Desktop
           </a>
           <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
             <span aria-hidden="true"></span>
