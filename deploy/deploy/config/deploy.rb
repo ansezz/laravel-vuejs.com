@@ -102,7 +102,7 @@ namespace :pm2 do
         upload! "../ops/pm2/dev-ecosystem.json" , "/var/www/#{fetch(:username)}/domains/#{fetch(:domain)}/public_html/shared/dev-ecosystem.json"
     end
   end
-  task :start do
+  task :restart do
     on roles(:server) do
         execute "pm2 startOrRestart /var/www/laravel-vuejs/domains/dev.laravel-vuejs.com/public_html/shared/ecosystem.json"
     end
@@ -117,8 +117,8 @@ after "deploy:updating", "npm:install"
 after "npm:install", "npm:build"
 
 after "npm:build", "pm2:conf"
-after "pm2:conf", "pm2:start"
 
 after "deploy:finished", "nginx:restart"
 after "deploy:finished", "php:restart"
+after "deploy:finished", "pm2:restart"
 after "deploy:finished", "app:done"
