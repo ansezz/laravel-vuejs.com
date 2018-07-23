@@ -1,7 +1,9 @@
 
 #set :user, "#{`whoami`.strip}"
 
-set :user, "laravel-vuejs"
+set :user, "root"
+
+set :username, "laravel-vuejs"
 
 set :branch, "master"
 
@@ -11,8 +13,10 @@ server '209.97.189.26', user: fetch(:user), roles: %w{app}
 
 role :server, %w{209.97.189.26}
 
-set :deploy_to, "/home/#{fetch(:user)}/domains/#{fetch(:domain)}/public_html"
+set :deploy_to, "/var/www/#{fetch(:username)}/domains/#{fetch(:domain)}/public_html"
 
-set :tmp_dir, "/home/#{fetch(:user)}/tmp"
+set :tmp_dir, "/var/www/#{fetch(:username)}/tmp"
 
-set :linked_files, %w{htdocs/.htaccess htdocs/.htpasswd .env}
+#set :linked_files, %w{htdocs/.htaccess htdocs/.htpasswd .env}
+
+set :linked_files, %w{.env}

@@ -1,5 +1,5 @@
 <template lang="html">
-  <Hero title="Media Nuxt Home Page" subtitle="I m all desktop bro!" type="success"/>
+  <Hero title="Media Nuxt Home Page" subtitle="I m all news desktop bro!" type="success"/>
 </template>
 
 <script>
