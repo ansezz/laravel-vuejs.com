@@ -8,7 +8,7 @@
             <h2 class="title is-4">DEV</h2>
           </a>
           <a class="navbar-item bd-navbar-item-documentation  is-active" href="/">
-            Home Mobile
+            Home Mobile :D
           </a>
           <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
             <span aria-hidden="true"></span>
