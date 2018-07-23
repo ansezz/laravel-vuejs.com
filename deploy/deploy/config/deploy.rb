@@ -107,6 +107,11 @@ namespace :pm2 do
         execute "pm2 restart laravel-vuejs"
     end
   end
+  task :kill do
+    on roles(:server) do
+        execute "pm2 kill"
+    end
+  end
 end
 
 
@@ -116,9 +121,10 @@ after "app:build", "app:symlink"
 after "deploy:updating", "npm:install"
 after "npm:install", "npm:build"
 
-#after "npm:build", "pm2:start"
+after "npm:build", "pm2:kill"
+after "pm2:kill", "pm2:start"
 
-after "npm:build", "pm2:restart"
+#after "npm:build", "pm2:restart"
 
 after "deploy:finished", "nginx:restart"
 after "deploy:finished", "php:restart"
