@@ -97,19 +97,14 @@ namespace :npm do
 end
 
 namespace :pm2 do
+  task :conf do
+    on roles(:server) do
+        upload! "../ops/pm2/dev-ecosystem.json" , "/var/www/#{fetch(:username)}/domains/#{fetch(:domain)}/public_html/shared/dev-ecosystem.json"
+    end
+  end
   task :start do
     on roles(:server) do
-        execute "cd #{release_path}/htdocs/content/themes/laravel-vuejs/front && pm2 start npm --name 'laravel-vuejs' -- run start"
-    end
-  end
-  task :restart do
-    on roles(:server) do
-        execute "pm2 restart all"
-    end
-  end
-  task :kill do
-    on roles(:server) do
-        execute "pm2 kill"
+        execute "pm2 startOrRestart /var/www/laravel-vuejs/domains/dev.laravel-vuejs.com/public_html/shared/ecosystem.json"
     end
   end
 end
@@ -121,10 +116,8 @@ after "app:build", "app:symlink"
 after "deploy:updating", "npm:install"
 after "npm:install", "npm:build"
 
-after "npm:build", "pm2:kill"
-after "pm2:kill", "pm2:start"
-
-#after "npm:build", "pm2:restart"
+after "npm:build", "pm2:conf"
+after "pm2:conf", "pm2:start"
 
 after "deploy:finished", "nginx:restart"
 after "deploy:finished", "php:restart"
