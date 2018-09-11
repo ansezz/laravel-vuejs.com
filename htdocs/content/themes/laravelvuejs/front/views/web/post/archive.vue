@@ -1,14 +1,14 @@
 <!--waiting designer-->
 <template lang="html">
   <div>
-    archive article web
+    posts web
   </div>
 </template>
 
 <script>
   export default {
     components: {},
-    name: "archive-article"
+    name: "posts"
   }
 </script>
 

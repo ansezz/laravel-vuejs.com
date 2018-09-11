@@ -1,7 +1,7 @@
 
 <template lang="html">
   <div>
-    single news mobile
+    post mobile
   </div>
 </template>
 
@@ -11,7 +11,7 @@
   export default {
     components: {
     },
-    name: 'article'
+    name: 'post'
   }
 </script>
 

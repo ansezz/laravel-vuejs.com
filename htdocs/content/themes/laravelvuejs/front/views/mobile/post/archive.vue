@@ -1,13 +1,13 @@
 <template lang="html">
   <div>
-    archive article mobile
+    posts mobile
   </div>
 </template>
 
 <script>
   export default {
     components: {},
-    name: "archive-article"
+    name: "posts"
   }
 </script>
 

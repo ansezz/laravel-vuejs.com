@@ -8,7 +8,7 @@
 <script>
   export default {
     components: {},
-    name: "home"
+    name: "index"
   }
 </script>
 

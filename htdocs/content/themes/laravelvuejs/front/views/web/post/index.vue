@@ -1,7 +1,7 @@
 <!--laravelvuejs_News_details.jpg-->
 <template lang="html">
   <div>
-    single news web
+    post web
   </div>
 </template>
 
@@ -10,7 +10,7 @@
 
   export default {
     components: {},
-    name: 'article'
+    name: 'post'
   }
 </script>
 
