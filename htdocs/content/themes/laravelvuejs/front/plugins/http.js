@@ -9,97 +9,30 @@ export default ({app}) => {
     // .then(response => response ? response.data : null)
   }
 
-// - Search
   let search = (params) => request(`${lang}/search/`, params)
 
-// - Search
-  let live = (params) => request(`${lang}/live/`, params)
+  let posts = {
 
-// - Channels
-  let channels = {
-    // - All channels:
-    all: (params) => request(`channels/`, params)
-  }
+    list: (params) => request(`${lang}/posts/`, params),
 
+    singular: (slug, params) => request(`${lang}/posts/${slug}/`, params),
 
-// - Menu
-  let menu = {
+    category: (slug, params) => request(`${lang}/posts/category/${slug}/`, params),
 
-    // - All menus:
-    all: (params) => request(`menus/`, params),
-
-    // - Singular menu:
-    singular: (slug, params) => request(`menus/${slug}/`, params),
+    featured: (params) => request(`${lang}/posts/featured/`, params),
 
   }
 
-// - Archive
-  let archive = {
-
-    // - All author posts:
-    author: (username, params) => request(`${lang}/authors/${username}/`, params),
-
-    // - All Category posts:
-    category: (slug, params) => request(`${lang}/categories/${slug}/`, params),
-
-    // - All tag news:
-    tag: (slug, params) => request(`${lang}/tags/${slug}/`, params)
-
-  }
-
-// News
-  let news = {
-
-    // - Singular news:
-    singular: (slug, params) => request(`${lang}/news/${slug}/`, params),
-
-    // - Category news:
-    category: (slug, params) => request(`${lang}/categories/${slug}/news/`, params),
-
-    // - Latest news:
-    latest: (params) => request(`${lang}/news/latest/`, params),
-
-    // - Related news:
-    related: (slug, params) => request(`${lang}/news/${slug}/related/`, params),
-
-    // - Featured news:
-    featured: (params) => request(`${lang}/news/featured/`, params),
-
-    // - Breaking news:
-    breaking: (params) => request(`${lang}/news/breaking/`, params)
-
-  }
-
-
-// Videos
-  let videos = {
-
-    // - Singular videos:
-    singular: () => {
-    },
-
-    // - Category videos:
-    category: (slug, params) => request(`${lang}/categories/${slug}/videos/`, params),
-
-    // - Latest videos:
-    latest: (params) => request(`${lang}/videos/latest/`, params),
-
-    // - Related videos:
-    related: () => {
-    },
-
-  }
-
-// - settings
   let settings = {
 
-    // - Home Blocks:
-    homeBlocks: (params) => request(`${lang}/settings/home-blocks`, params)
+    all: (params) => request(`${lang}/settings`, params)
 
   }
 
 
   app.$http = {
-    news
+    search,
+    posts,
+    settings
   }
 }

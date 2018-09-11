@@ -9,8 +9,8 @@
     middleware: ['home'],
 
     components: {
-      mobile: () => import(`~/views/mobile/home.vue`),
-      web: () => import(`~/views/web/home.vue`)
+      mobile: () => import(`~/views/mobile`),
+      web: () => import(`~/views/web`)
     }
   }
 </script>

@@ -1,5 +1,4 @@
 export default function(context) {
 
-  return context.store.dispatch('news/LOAD_NEWS_LATEST')
-
+  return context.store.dispatch('post/LOAD_FEATURED_POSTS')
 }

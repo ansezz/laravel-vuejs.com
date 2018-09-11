@@ -6,11 +6,11 @@
   export default {
     layout: ({store}) => store.state.platform,
 
-    middleware: ['home'],
+    middleware: ['post'],
 
     components: {
-      mobile: () => import(`~/views/mobile/journaux.vue`),
-      web: () => import(`~/views/web/journaux.vue`)
+      mobile: () => import(`~/views/mobile/post`),
+      web: () => import(`~/views/web/post`)
     }
   }
 </script>

@@ -51,7 +51,11 @@ class BoxOptions
      */
     protected static function addLanguage()
     {
-        self::$fields[] = Field::select(\Core\Models\BaseModel::LOCALE, [['ar' => 'Arabic'], ['fr' => 'French']], ['title' => 'Language']);
+        self::$fields[] = Field::select(\Core\Models\BaseModel::LOCALE, [
+            ['en' => 'English'],
+            ['ar' => 'Arabic'],
+            ['fr' => 'French']
+        ], ['title' => 'Language']);
     }
 
 }
