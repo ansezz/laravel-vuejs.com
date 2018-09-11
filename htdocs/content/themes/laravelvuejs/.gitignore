@@ -1,0 +1,12 @@
+# Miscellaneous
+.DS_Store
+Thumbs.db
+.idea/
+
+# Theme
+node_modules/
+vendor/
+composer.lock
+assets/components/
+package-lock.json
+.nuxt
