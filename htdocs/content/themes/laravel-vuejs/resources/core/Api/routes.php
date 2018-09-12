@@ -10,4 +10,6 @@ Route::group(['prefix' => '{locale}'], function () {
     Route::get('posts', 'PostController@index');
 
     Route::get('search', 'SearchController@index');
+
+    Route::get('settings', 'SettingsController@index');
 });

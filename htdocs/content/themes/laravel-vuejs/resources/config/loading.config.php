@@ -10,6 +10,7 @@ return [
     */
     'Theme\\Controllers\\' => themosis_path('theme.resources') . 'controllers',
     'Theme\\Models\\' => themosis_path('theme.resources') . 'models',
+    'Theme\\Admin\\' => themosis_path('theme.resources') . 'admin',
     'Theme\\Providers\\' => themosis_path('theme.resources') . 'providers',
     'Core\\' => themosis_path('theme.resources') . 'core',
     'Core\\Exceptions\\' => themosis_path('theme.resources') . 'core' . DS . 'Exceptions',
