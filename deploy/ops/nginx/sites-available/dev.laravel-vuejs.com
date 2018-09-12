@@ -17,9 +17,14 @@ server {
     gzip_min_length 1000;
 
     #catch cms admin
-    location /cms {
-        try_files $uri $uri/ /index.php?$query_string;
-    }
+        location /cms {
+            try_files $uri $uri/ /index.php?$query_string;
+        }
+
+        location /content {
+            try_files $uri $uri/ /index.php?$query_string;
+        }
+
     #catch nuxt application
     location / {
         auth_basic "Restricted";
@@ -34,6 +39,14 @@ server {
         proxy_read_timeout          1m;
         proxy_connect_timeout       1m;
         proxy_pass                          http://127.0.0.1:3000; # set the adress of the Node.js instance here
+    }
+
+
+    location /api {
+        auth_basic Off;
+        client_max_body_size    2000m;
+        client_body_buffer_size 512k;
+        try_files $uri $uri/ /index.php?$args;
     }
 
 
