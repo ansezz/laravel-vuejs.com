@@ -66,6 +66,7 @@ namespace :app do
     on roles(:server) do
       within release_path do
         execute "cd #{release_path} && composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader"
+        execute "cd #{release_path}/htdocs/content/themes/laravel-vuejs && composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader"
       end
     end
   end
