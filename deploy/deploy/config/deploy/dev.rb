@@ -17,6 +17,4 @@ set :deploy_to, "/var/www/#{fetch(:username)}/domains/#{fetch(:domain)}/public_h
 
 set :tmp_dir, "/var/www/#{fetch(:username)}/tmp"
 
-#set :linked_files, %w{htdocs/.htaccess htdocs/.htpasswd .env}
-
-set :linked_files, %w{.env}
+set :linked_files, %w{.env htdocs/content/themes/laravel-vuejs/front/.env}
