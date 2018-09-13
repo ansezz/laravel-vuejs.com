@@ -2,6 +2,7 @@
 
 namespace Theme\Admin;
 
+use Core\Models\Menu;
 use Themosis\Facades\Config;
 use Themosis\Facades\Field;
 use Themosis\Facades\Page;
@@ -87,12 +88,12 @@ class SettingsFeature
 
     private static function menusSettingsFields()
     {
-        // $menus = Menu::all();
+        $menus = Menu::all();
         $selectionMenus = [];
 
-        /*foreach ($menus as $menu) {
+        foreach ($menus as $menu) {
             $selectionMenus[] = [$menu->term()->first()->slug => $menu->term()->first()->name];
-        }*/
+        }
 
         return [
             Field::select('main_menu', $selectionMenus, ['title' => 'Main Menu']),
@@ -109,7 +110,7 @@ class SettingsFeature
 
         foreach ($this->supported_locale as $item) {
             $sections[] = Section::make('menus_settings_' . $item['code'], $item['title']);
-            $settings['menus_settings_' . $item['code']] = self::globalSettingsFields();
+            $settings['menus_settings_' . $item['code']] = self:: menusSettingsFields();
         }
 
 
@@ -138,7 +139,7 @@ class SettingsFeature
 
         foreach ($this->supported_locale as $item) {
             $sections[] = Section::make('links_settings_' . $item['code'], $item['title']);
-            $settings['links_settings_' . $item['code']] = self::globalSettingsFields();
+            $settings['links_settings_' . $item['code']] = self::linksSettingsFields();
         }
 
         $this->linksSettingPage->addSections($sections);
