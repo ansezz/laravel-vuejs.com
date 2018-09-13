@@ -13,7 +13,7 @@ remove_action('template_redirect', 'redirect_canonical');
 
 Route::group(['prefix' => '{locale}'], function () {
     Route::get('settings', 'SettingsController@index');
-    Route::get('settings/breaking-news', 'SettingsController@breakingNews');
+
     Route::get('search', 'SearchController@index');
 
     Route::get('post/{arg}', 'PostController@show');
