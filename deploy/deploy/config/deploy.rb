@@ -19,7 +19,7 @@ namespace :conf do
   task :update do
     on roles(:server) do
         upload! "../config/dev/.env" , "/var/www/#{fetch(:username)}/domains/#{fetch(:domain)}/public_html/shared/.env"
-        upload! "../config/dev/front/.env" , "/var/www/#{fetch(:username)}/domains/#{fetch(:domain)}/public_html/shared/front/.env"
+        upload! "../config/dev/front/.env" , "/var/www/#{fetch(:username)}/domains/#{fetch(:domain)}/public_html/shared/htdocs/content/themes/laravel-vuejs/front/.env"
     end
   end
 end
