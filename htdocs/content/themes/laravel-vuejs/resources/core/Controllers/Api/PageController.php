@@ -22,13 +22,16 @@ class PageController extends ApiBaseController
 
     public function index($locale = null)
     {
-        try {
-            $pages = $this->pageService->getAll($locale);
+        $perPage = $this->request->get('perPage') === null ? 15 : $this->request->get('perPage');
+        $page = $this->request->get('page') === null ? 1 : $this->request->get('page');
 
-            return $this->responseBuilder->json($pages);
+        try {
+            $pages = $this->pageService->getAll($page, $perPage, $locale);
         } catch (ModelNotFoundException $e) {
             return $this->responseBuilder->withNotFound('not found');
         }
+
+        return $this->responseBuilder->withItems('page', $pages);
     }
 
     public function getPageByIdOrSlug($locale = null, $arg)

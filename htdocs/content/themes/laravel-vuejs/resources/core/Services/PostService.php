@@ -97,7 +97,7 @@ class PostService
 
         $posts = $builder->paginate($perPage, ['*'], 'page', $page);
 
-        return ['posts' => $posts];
+        return ['items' => $posts];
     }
 
     /**

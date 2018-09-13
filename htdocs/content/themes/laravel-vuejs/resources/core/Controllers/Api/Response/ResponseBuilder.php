@@ -3,6 +3,7 @@
 namespace Core\Controllers\Api\Response;
 
 
+use Core\Transformers\PageTransformer;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Response;
 use Core\Models\BaseModelInterface;
@@ -16,12 +17,15 @@ class ResponseBuilder
     protected $response;
     /** @var PostTransformer */
     protected $postTransformer;
+    /** @var PageTransformer */
+    protected $pageTransformer;
     /** @var TaxonomyTransformer */
     protected $taxonomyTransformer;
 
-    public function __construct(PostTransformer $postTransformer, TaxonomyTransformer $taxonomyTransformer)
+    public function __construct(PostTransformer $postTransformer, TaxonomyTransformer $taxonomyTransformer, PageTransformer $pageTransformer)
     {
         $this->postTransformer = $postTransformer;
+        $this->pageTransformer = $pageTransformer;
         $this->taxonomyTransformer = $taxonomyTransformer;
     }
 
@@ -46,8 +50,8 @@ class ResponseBuilder
             $this->error(502, 'posts not found in results');
         }
 
-        /** @var LengthAwarePaginator $posts */
-        $posts = $result['posts'];
+        /** @var LengthAwarePaginator $items */
+        $items = $result['items'];
 
         if (isset($result['category'])) {
             $results['category'] = $this->taxonomyTransformer->item('category', $result['category']);
@@ -57,12 +61,16 @@ class ResponseBuilder
             $results['tag'] = $this->taxonomyTransformer->item('tag', $result['tag']);
         }
 
+        if ('post' === $postType || 'page' === $postType) {
+            $results['total'] = $items->total();
+            $results['perPage'] = $items->perPage();
+            $results['currentPage'] = $items->currentPage();
+            $results['pages'] = $items->lastPage();
+        }
         if ('post' === $postType) {
-            $results['total'] = $posts->total();
-            $results['perPage'] = $posts->perPage();
-            $results['currentPage'] = $posts->currentPage();
-            $results['pages'] = $posts->lastPage();
-            $results['posts'] = $this->postTransformer->items($posts);
+            $results['posts'] = $this->postTransformer->items($items);
+        } elseif ('page' === $postType) {
+            $results['pages'] = $this->pageTransformer->items($items);
         }
 
         return $results;

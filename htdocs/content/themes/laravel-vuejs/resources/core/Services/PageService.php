@@ -4,6 +4,7 @@ namespace Core\Services;
 
 
 use Core\Models\Page;
+use Core\Repository\PageRepository;
 use Core\Repository\TaxonomyRepository;
 use Core\Transformers\PageTransformer;
 use Illuminate\Database\Eloquent\Builder;
@@ -12,22 +13,31 @@ class PageService
 {
 
     protected $pageTransformer;
+    protected $pageRepository;
     protected $taxonomyRepository;
 
-    public function __construct(PageTransformer $pageTransformer, TaxonomyRepository $taxonomyRepository)
+    public function __construct(PageTransformer $pageTransformer, TaxonomyRepository $taxonomyRepository, PageRepository $pageRepository)
     {
         $this->pageTransformer = $pageTransformer;
         $this->taxonomyRepository = $taxonomyRepository;
+        $this->pageRepository = $pageRepository;
     }
 
-    public function getAll($locale)
+    public function getAll($page = 1, $perPage = 15, $locale = null)
     {
 
-        $pages = Page::where('post_status', 'publish')
-            ->hasMeta('locale', $locale)
-            ->get();
+        /** @var Builder $builder */
+        $builder = $this->pageRepository
+            ->getModel()
+            ->published();
 
-        return $this->pageTransformer->items($pages);
+        if ($locale !== null) {
+            $builder = $builder->hasMeta('locale', $locale);
+        }
+
+        $pages = $builder->paginate($perPage, ['*'], 'page', $page);
+
+        return ['items' => $pages];
     }
 
     public function getByIdOrSlug($locale, $arg)
