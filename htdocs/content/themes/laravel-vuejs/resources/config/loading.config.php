@@ -12,11 +12,13 @@ return [
     'Theme\\Models\\' => themosis_path('theme.resources') . 'models',
     'Theme\\Admin\\' => themosis_path('theme.resources') . 'admin',
     'Theme\\Providers\\' => themosis_path('theme.resources') . 'providers',
+
     'Core\\' => themosis_path('theme.resources') . 'core',
+    'Core\\Controllers\\API\\' => themosis_path('theme.resources') . 'core' . DS . 'Api' . DS . 'Controllers',
     'Core\\Exceptions\\' => themosis_path('theme.resources') . 'core' . DS . 'Exceptions',
-    'Core\\API\\Controllers\\' => themosis_path('theme.resources') . 'core' . DS . 'Api' . DS . 'Controllers',
-    'Core\\API\\Providers\\' => themosis_path('theme.resources') . 'core' . DS . 'Providers',
-    'Core\\API\\Models\\' => themosis_path('theme.resources') . 'core' . DS . 'Models',
-    'Core\\API\\Services\\' => themosis_path('theme.resources') . 'core' . DS . 'Services',
-    'Core\\API\\Transformers\\' => themosis_path('theme.resources') . 'core' . DS . 'Transformers',
+    'Core\\Models\\' => themosis_path('theme.resources') . 'core' . DS . 'Models',
+    'Core\\Providers\\' => themosis_path('theme.resources') . 'core' . DS . 'Providers',
+    'Core\\Repository\\' => themosis_path('theme.resources') . 'core' . DS . 'repository',
+    'Core\\Services\\' => themosis_path('theme.resources') . 'core' . DS . 'Services',
+    'Core\\Transformers\\' => themosis_path('theme.resources') . 'core' . DS . 'Transformers',
 ];

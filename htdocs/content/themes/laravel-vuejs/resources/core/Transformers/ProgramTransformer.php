@@ -3,14 +3,16 @@
 namespace Core\Transformers;
 
 use Core\Helper;
+use Core\Models\Attachment;
 use Core\Models\Post;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Core\Models\Program;
 
 /**
- * Class PostTransformers
+ * Class ProgramTransformer
  * @package Core\Transformers
  */
-class PostTransformer implements TransformerInterface
+class ProgramTransformer implements TransformerInterface
 {
     /** @var UserTransformer */
     protected $userTransformer;
@@ -21,21 +23,26 @@ class PostTransformer implements TransformerInterface
     }
 
     /**
-     * @param Post $post
+     * @param Program $post
      * @return array
      */
-    public function item(Post $post)
+    public function item(Program $post)
     {
         $taxonomies = $post->getTaxonomies();
 
         return [
             'id' => $post->getKey(),
             'title' => $post->getTitle(),
+            'source-id' => $post->meta->sourceId,
+            'author-name' => $post->meta->authorName,
             'slug' => urldecode($post->getSlug()),
             'type' => $post->getPostType(),
-            'excerpt' => $post->getExcerpt(),
             'content' => $post->getContent(),
+            'subtitle' => $post->meta->diffusionDate,
             'image' => Helper::staticUrl($post->getImage()),
+            'image-slide' => Helper::staticUrl($post->getImageSlideUrl()),
+            'language' => $post->meta->language,
+            'description' => $post->meta->description,
             'author' => $this->userTransformer->item($post->getAuthor()),
             'main-category' => $post->getMainCategory(),
             'categories' => isset($taxonomies['category']) ? $taxonomies['category'] : [],
@@ -43,9 +50,7 @@ class PostTransformer implements TransformerInterface
             'keywords' => $post->getKeywords(),
             'keywords-str' => $post->getKeywordsStr(),
             'format' => $post->getFormat(),
-            'locale' => $post->getLocale(),
             'status' => $post->getStatus(),
-            'related' => isset($post->related['posts']) ? $this->items($post->related['posts']) : [],
             'created' => $post->getCreatedAt()->format('Y-m-d H:m:i'),
             'updated' => $post->getUpdatedAt()->format('Y-m-d H:m:i')
         ];

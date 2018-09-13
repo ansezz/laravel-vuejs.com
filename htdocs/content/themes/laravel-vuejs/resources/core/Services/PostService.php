@@ -1,97 +1,194 @@
 <?php
 
-namespace Core\API\Services;
+namespace Core\Services;
 
+
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Core\Models\Category;
 use Core\Models\Post;
+use Core\Models\Program;
+use Core\Models\Taxonomy;
+use Core\Models\Term;
+use Core\Repository\PostRepository;
+use Core\Repository\TaxonomyRepository;
+use Core\Transformers\PostTransformer;
 
-class PostService extends Service
+class PostService
 {
-    const POST_TYPES = ['post'];
+    /** @var PostRepository */
+    protected $postRepository;
+    /** @var TaxonomyRepository */
+    protected $taxonomyRepository;
+    /** @var PostTransformer */
+    protected $postTransformer;
 
-    /**
-     * PostService constructor.
-     * @param Post $post
-     */
-    public function __construct(Post $post)
+    public function __construct(PostRepository $postRepository, TaxonomyRepository $taxonomyRepository, PostTransformer $postTransformer)
     {
-        parent::__construct($post);
+        $this->postRepository = $postRepository;
+        $this->postTransformer = $postTransformer;
+        $this->taxonomyRepository = $taxonomyRepository;
     }
 
+    private function hydrateWithRelatedByMainCategory(Post $post, $locale = null)
+    {
+        $category = $post->getTaxonomies()->get('category')->first();
+        $post->related = $this->getByCategoryIdOrSlug($category['id'], 1, 10, $locale);
+
+        return $post;
+    }
+
+    public function getByMetaValue($meta, $value)
+    {
+        $builder = $this->postRepository->getModel()->type('program')->published()->hasMeta($meta, $value);
+        $post = $builder->first();
+
+        if (null === $post) {
+            throw new ModelNotFoundException();
+        }
+
+        return $post;
+    }
 
     /**
+     * @param $locale
      * @param $arg
-     * @param $locale
-     * @return mixed
+     * @return array
      */
-    public function findByIdOrSlug($arg, $locale)
+    public function getByIdOrSlug($arg, $locale = null)
     {
-        return $this->model
-            ->postType(self::POST_TYPES)
-            ->setLocale($locale)
-            ->findByIdOrSlug($arg);
+        $field = is_numeric($arg) ? Post::PRIMARY_KEY : Post::SLUG;
+        /** @var Builder $builder */
+        $builder = $this->postRepository->getModel()->where($field, urlencode($arg));
+
+
+        if (null != $locale) {
+            $builder = $builder->hasMeta('locale', $locale);
+        }
+
+        $post = $builder->first();
+
+        if (null === $post) {
+            throw new ModelNotFoundException();
+        }
+
+        $post = $this->hydrateWithRelatedByMainCategory($post, $locale);
+
+        return $post;
     }
 
     /**
-     * @param $s
-     * @param $page
-     * @param $limit
-     * @param $locale
-     * @return \WP_Query
+     * @param int $page
+     * @param int $perPage
+     * @param null $locale
+     * @return array
      */
-    public function search($s, $page, $limit, $locale)
+    public function all($page = 1, $perPage = 15, $locale = null)
     {
-        return $this->model
-            ->postType(self::POST_TYPES)
-            ->setLocale($locale)
-            ->paginate($page, $limit)
-            ->search($s);
+        /** @var Builder $builder */
+        $builder = $this->postRepository
+            ->getModel()
+            ->published();
+
+        if ($locale != null) {
+            $builder = $builder->hasMeta('locale', $locale);
+        }
+
+        $posts = $builder->paginate($perPage, ['*'], 'page', $page);
+
+        return ['posts' => $posts];
     }
 
     /**
-     * @param $page
-     * @param $limit
-     * @param $locale
-     * @return \WP_Query
+     * @param int $page
+     * @param int $perPage
+     * @param null $locale
+     * @return array
      */
-    public function paginate($page, $limit, $locale)
+    public function getFeatured($page = 1, $perPage = 15, $locale = null)
     {
-        return $this->model
-            ->postType(self::POST_TYPES)
-            ->setLocale($locale)
-            ->paginate($page, $limit)
-            ->get();
+        /** @var Builder $builder */
+        $builder = $this->postRepository
+            ->getModel()
+            ->published()
+            ->hasMeta('featured', 1);
+
+        if ($locale != null) {
+            $builder = $builder->hasMeta('locale', $locale);
+        }
+
+        $posts = $builder->paginate($perPage, ['*'], 'page', $page);
+
+        return ['posts' => $posts];
     }
 
-    /**
-     * @param $arg
-     * @param $page
-     * @param $limit
-     * @param $locale
-     * @return mixed
-     */
-    public function findByCategoryIdOrSlug($arg, $page, $limit, $locale)
+    public function getByCategoryIdOrSlug($arg, $page = 1, $perPage = 15, $locale = null)
     {
-        return $this->model
-            ->postType(self::POST_TYPES)
-            ->setLocale($locale)
-            ->paginate($page, $limit)
-            ->findByCategoryIdOrSlug($arg);
+        $field = is_numeric($arg) ? 'id' : 'slug';
+        /** @var Taxonomy */
+        $taxonomy = $this->taxonomyRepository
+            ->getModel()
+            ->category()
+            ->$field(urlencode($arg))
+            ->first();
+
+
+        if (null === $taxonomy) {
+            throw new ModelNotFoundException();
+        }
+
+        /** @var Category $category */
+        $category = $taxonomy->term->first();
+
+        if (null === $category) {
+            throw new ModelNotFoundException();
+        }
+
+        /** @var Builder $builder */
+        $builder = $taxonomy->posts()->published();
+
+        if ($locale != null) {
+            $builder = $builder->hasMeta('locale', $locale);
+        }
+
+        /** @var LengthAwarePaginator $posts */
+        $posts = $builder->paginate($perPage, ['*'], 'page', $page);
+
+        return [
+            'category' => $taxonomy,
+            'posts' => $posts,
+        ];
     }
 
-    /**
-     * @param $page
-     * @param $limit
-     * @param $locale
-     * @return \WP_Query
-     */
-    public function featured($page, $limit, $locale)
+    public function getByTag($arg, $page = 1, $perPage = 15, $locale = null)
     {
-        return $this->model
-            ->postType(self::POST_TYPES)
-            ->paginate($page, $limit)
-            ->setMetas([Post::FEATURED => 1])
-            ->setLocale($locale)
-            ->get();
-    }
 
+        $tag = Term::where('slug', urlencode($arg))->first();
+
+        if (null === $tag) {
+            throw new ModelNotFoundException();
+        }
+
+        $taxonomy = $tag->taxonomy()->first();
+
+        if (null === $taxonomy) {
+            throw new ModelNotFoundException();
+        }
+
+        /** @var Builder $builder */
+        $builder = $taxonomy->posts()->published();
+
+        if ($locale != null) {
+            $builder = $builder->hasMeta('locale', $locale);
+        }
+
+        /** @var LengthAwarePaginator $posts */
+        $posts = $builder->paginate($perPage, ['*'], 'page', $page);
+
+        return [
+            'tag' => $taxonomy,
+            'posts' => $posts,
+        ];
+    }
 }

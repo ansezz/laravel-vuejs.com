@@ -1,11 +1,12 @@
 <?php
 
-namespace Core\API\Providers;
+namespace Core\Providers;
 
+
+use Illuminate\Support\ServiceProvider;
 use Themosis\Facades\Route;
-use Themosis\Foundation\ServiceProvider;
 
-class RouteServiceProvider extends ServiceProvider
+class RouteApiServiceProvider extends ServiceProvider
 {
     /**
      * Define theme routes namespace.
@@ -15,10 +16,10 @@ class RouteServiceProvider extends ServiceProvider
     public function register()
     {
         Route::group([
-            'namespace' => 'Core\API\Controllers',
+            'namespace' => 'Core\Controllers\Api',
             'prefix' => 'api'
         ], function () {
-            require themosis_path('theme.resources') . 'core/Api/routes.php';
+            require __DIR__ . '/../Controllers/Api/routes.php';
         });
     }
 }

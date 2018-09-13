@@ -12,10 +12,15 @@
   "authors": [
     {
       "name": "NextMedia",
-      "email": "contact@nextmedia.ma",
-      "homepage": "http://www.nextmedia.ma/"
+      "email": "contact@laravel-vuejs.com",
+      "homepage": "http://www.laravel-vuejs.com/"
     }
   ],
+  "autoload": {
+    "psr-4": {
+      "Core\\": "resources/core"
+    }
+  },
   "type": "wordpress-theme",
   "require": {
     "php": ">=5.6.4",
@@ -29,6 +34,7 @@
     "illuminate/view": "^5.4",
     "illuminate/filesystem": "^5.4",
     "illuminate/database": "^5.4",
-    "guzzlehttp/guzzle": "^6.3"
+    "guzzlehttp/guzzle": "^6.3",
+    "illuminate/pagination": "^5.6"
   }
 }

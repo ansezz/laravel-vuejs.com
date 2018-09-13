@@ -7,7 +7,7 @@ use Core\API\Services\SettingService;
 
 /**
  * Class PostController
- * @package Next\Controllers\Api
+ * @package Core\Controllers\Api
  */
 class SettingsController extends BaseController
 {

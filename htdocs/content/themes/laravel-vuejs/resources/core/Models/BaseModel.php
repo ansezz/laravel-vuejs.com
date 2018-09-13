@@ -2,140 +2,167 @@
 
 namespace Core\Models;
 
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Str;
 
-use Themosis\Facades\Config;
-
-class BaseModel
+class BaseModel extends Model implements BaseModelInterface
 {
 
     const FEATURED = 'FEATURED';
     const LOCALE = 'LOCALE';
-
     /**
-     * @var
+     * @var string
      */
-    protected $args = [];
+    protected $postType;
 
     /**
-     * PostService constructor
+     * Replace the original hasMany function to forward the connection name.
      *
-     * @param array $args
-     * @return \WP_Query
+     * @param string $related
+     * @param string $foreignKey
+     * @param string $localKey
+     * @return HasMany
      */
-    public function get(array $args = [])
+    public function hasMany($related, $foreignKey = null, $localKey = null)
     {
-        $result = new \WP_Query(
-            $this->args = array_merge_recursive($this->args, $args)
+        $foreignKey = $foreignKey ?: $this->getForeignKey();
+        $instance = $this->setInstanceConnection(
+            new $related()
         );
-
-        $this->args = [];
-
-        return $result;
+        $localKey = $localKey ?: $this->getKeyName();
+        return new HasMany($instance->newQuery(), $this, $foreignKey, $localKey);
     }
 
     /**
-     * @param array $args
-     * @return \WP_Query
+     * Replace the original hasOne function to forward the connection name.
+     *
+     * @param string $related
+     * @param string $foreignKey
+     * @param string $localKey
+     * @return HasOne
      */
-    public function getPosts(array $args = [])
+    public function hasOne($related, $foreignKey = null, $localKey = null)
     {
-        $result = new \WP_Query(
-            array_merge_recursive($this->args, $args)
+        $foreignKey = $foreignKey ?: $this->getForeignKey();
+        $instance = $this->setInstanceConnection(
+            new $related()
         );
-
-        $this->args = [];
-
-        return $result;
+        $localKey = $localKey ?: $this->getKeyName();
+        return new HasOne($instance->newQuery(), $this, $instance->getTable() . '.' . $foreignKey, $localKey);
     }
 
     /**
-     * Set meta for the query.
+     * Replace the original belongsTo function to forward the connection name.
      *
-     * @param $meta
-     * @return $this
+     * @param string $related
+     * @param string $foreignKey
+     * @param string $otherKey
+     * @param string $relation
+     * @return BelongsTo
      */
-    public function setMetas($meta)
+    public function belongsTo($related, $foreignKey = null, $otherKey = null, $relation = null)
     {
-        $metaQuery = collect($meta)->map(function ($value, $key) {
-            return [
-                'key' => $key,
-                'value' => $value
-            ];
-        });
-
-        $this->args = array_merge_recursive($this->args, ['meta_query' => $metaQuery->toArray()]);
-
-        return $this;
-    }
-
-
-    /**
-     * @param $s
-     * @param array $type
-     * @return \WP_Query
-     */
-    public function search($s, array $type = ['post'])
-    {
-        return $this
-            ->postType($type)
-            ->get(
-                [
-                    's' => esc_html($s),
-                    'orderby' => 'date',
-                ]
-            );
+        if (is_null($relation)) {
+            list(, $caller) = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
+            $relation = $caller['function'];
+        }
+        if (is_null($foreignKey)) {
+            $foreignKey = Str::snake($relation) . '_id';
+        }
+        $instance = $this->setInstanceConnection(
+            new $related()
+        );
+        $query = $instance->newQuery();
+        $otherKey = $otherKey ?: $instance->getKeyName();
+        return new BelongsTo($query, $this, $foreignKey, $otherKey, $relation);
     }
 
     /**
-     * Set the post type.
+     * Replace the original belongsToMany function to forward the connection name.
      *
-     * @param mixed $postType
-     * @return $this
+     * @param string $related
+     * @param string $table
+     * @param string $foreignPivotKey
+     * @param string $relatedPivotKey
+     * @param string $parentKey
+     * @param string $relatedKey
+     * @param string $relation
+     * @return BelongsToMany
      */
-    public function postType($postType)
+    public function belongsToMany($related, $table = null, $foreignPivotKey = null, $relatedPivotKey = null,
+                                  $parentKey = null, $relatedKey = null, $relation = null)
     {
-        $this->args = array_merge_recursive($this->args, ['post_type' => $postType]);
-
-        return $this;
+        if (is_null($relation)) {
+            $relation = $this->guessBelongsToManyRelation();
+        }
+        $instance = $this->setInstanceConnection(
+            $this->newRelatedInstance($related)
+        );
+        $foreignPivotKey = $foreignPivotKey ?: $this->getForeignKey();
+        $relatedPivotKey = $relatedPivotKey ?: $instance->getForeignKey();
+        if (is_null($table)) {
+            $table = $this->joiningTable($related);
+        }
+        return new BelongsToMany(
+            $instance->newQuery(), $this, $table, $foreignPivotKey,
+            $relatedPivotKey, $parentKey ?: $this->getKeyName(),
+            $relatedKey ?: $instance->getKeyName(), $relation
+        );
     }
 
-
     /**
-     * Paginate the result.
+     * Get the relation value setting the connection name.
      *
-     * @param int $page
-     * @param $limit
-     * @return $this
+     * @param string $key
+     * @return mixed
      */
-    public function paginate($page = 1, $limit = null)
+    public function getRelationValue($key)
     {
-        $this->args = array_merge_recursive($this->args, [
-            'posts_per_page' => !empty($limit) ?: Config::get('api.posts_limit'),
-            'paged' => !empty($page) ? $page : 1,
-            'page' => !empty($page) ? $page : 1,
-        ]);
-        return $this;
+        $relation = parent::getRelationValue($key);
+        if ($relation instanceof Collection) {
+            $relation->each(function ($model) {
+                $this->setRelationConnection($model);
+            });
+            return $relation;
+        }
+        $this->setRelationConnection($relation);
+        return $relation;
     }
 
     /**
-     * @param $args
-     * @return $this
+     * Set the connection name to model.
+     *
+     * @param $model
      */
-    protected function setArgs($args)
+    protected function setRelationConnection($model)
     {
-        $this->args = array_merge_recursive($this->args, $args);
-
-        return $this;
+        if ($model instanceof Eloquent) {
+            $model->setConnection($this->getConnectionName());
+        }
     }
 
     /**
-     * @param $locale
-     * @return BaseModel
+     * @return string
      */
-    public function setLocale($locale)
+    public function getConnectionName()
     {
-        return $this->setMetas([self::LOCALE => $locale]);
+        return $this->connection;
     }
 
-
+    /**
+     * @param $instance
+     */
+    protected function setInstanceConnection($instance)
+    {
+        return $instance->setConnection(
+            $instance instanceof self ?
+                $this->getConnection()->getName() :
+                $instance->getConnection()->getName()
+        );
+    }
 }

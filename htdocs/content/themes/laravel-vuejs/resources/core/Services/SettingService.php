@@ -1,7 +1,15 @@
 <?php
 
-namespace Core\API\Services;
 
+namespace Core\Services;
+
+
+use Core\Models\Attachment;
+use Core\Models\Menu;
+use Core\Themosis\Admin\Features\MultiLanguageFeature;
+use Core\Transformers\AttachmentTransformer;
+use Core\Transformers\MenuTransformer;
+use Core\Transformers\PostTransformer;
 
 class SettingService
 {
@@ -11,13 +19,28 @@ class SettingService
 
     const LINKS_SETTINGS_LOCALE_KEY = 'links_settings_%s';
 
-    public function __construct()
+    const BREAKING_NEWS_SETTINGS_LOCALE_KEY = 'breaking_news_settings_%s';
+
+    protected $postService;
+    protected $postTransformer;
+
+    public function __construct(PostService $postService, PostTransformer $postTransformer)
     {
+        $this->postService = $postService;
+        $this->postTransformer = $postTransformer;
     }
 
     private function getAttachment($attachmentId)
     {
-        return wp_get_attachment_image_url($attachmentId);
+        $attributes = [
+            'post_title',
+            'guid',
+            'post_mime_type',
+            'post_content',
+            'post_excerpt'
+        ];
+
+        return Attachment::select($attributes)->find($attachmentId);
     }
 
     public function getGlobalSettings($locale = null)
@@ -27,11 +50,11 @@ class SettingService
         $settings = \Option::get($optionKey);
 
         if ($headerLogo = $this->getAttachment($settings['header_logo'])) {
-            $settings['header_logo'] = $headerLogo;
+            $settings['header_logo'] = AttachmentTransformer::item($headerLogo);
         }
 
         if ($footerLogo = $this->getAttachment($settings['footer_logo'])) {
-            $settings['footer_logo'] = $footerLogo;
+            $settings['footer_logo'] = AttachmentTransformer::item($footerLogo);
         }
 
         return $settings;
@@ -45,8 +68,8 @@ class SettingService
 
         if (is_array($settings)) {
             foreach ($settings as $key => $value) {
-                $menu = wp_get_nav_menu_items($value);
-                $settings[$key] = $menu;
+                $menu = Menu::slug($value)->first();
+                $settings[$key] = MenuTransformer::item($menu);
             }
         }
 
@@ -60,5 +83,23 @@ class SettingService
         $settings = \Option::get($optionKey);
 
         return $settings;
+    }
+
+    public function getBreakingNewsSettings($locale = null)
+    {
+        $optionKey = sprintf(self::BREAKING_NEWS_SETTINGS_LOCALE_KEY, $locale);
+
+        $result = \Option::get($optionKey);
+
+        $post = null;
+        if ($result['selected_post']) {
+            $post = $this->postService->getByIdOrSlug((int)$result['selected_post'], $locale);
+            $post = $this->postTransformer->item($post);
+        }
+
+        return [
+            'is_active' => isset($result['is_active']) ? $result['is_active'] : false,
+            'post' => $post
+        ];
     }
 }

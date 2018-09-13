@@ -11,12 +11,12 @@ return [
     /* --------------------------------------------------------------- */
     // Theme textdomain
     /* --------------------------------------------------------------- */
-    'textdomain' => 'themosis',
+    'textdomain' => 'laravel-vuejs',
 
     /* --------------------------------------------------------------- */
     // Global Javascript namespace of your theme
     /* --------------------------------------------------------------- */
-    'namespace' => 'themosis',
+    'namespace' => 'laravel-vuejs',
 
     /* --------------------------------------------------------------- */
     // Set WordPress admin ajax file without the PHP extension
