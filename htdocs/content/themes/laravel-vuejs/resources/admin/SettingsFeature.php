@@ -2,6 +2,7 @@
 
 namespace Theme\Admin;
 
+use Themosis\Facades\Config;
 use Themosis\Facades\Field;
 use Themosis\Facades\Page;
 use Themosis\Facades\Section;
@@ -15,11 +16,14 @@ class SettingsFeature
     /** @var Page */
     public $linksSettingPage;
 
+    public $supported_locale;
+
     public function __construct()
     {
         $this->globalSettingsPage = self::makeGlobalSettingsPage();
         $this->menusSettingsPage = self::makeMenusSettingsPage();
         $this->linksSettingPage = self::makeLinksSettingsPage();
+        $this->supported_locale = Config::get('laravelvuejs.supported_locale');
     }
 
     private static function makeGlobalSettingsPage()
@@ -68,15 +72,17 @@ class SettingsFeature
 
     public function buildGlobalSettingsPage()
     {
-        $this->globalSettingsPage->addSections([
-            Section::make('global_settings_fr', 'FR'),
-            Section::make('global_settings_ar', 'AR')
-        ]);
+        $sections = [];
+        $settings = [];
 
-        $this->globalSettingsPage->addSettings([
-            'global_settings_fr' => self::globalSettingsFields(),
-            'global_settings_ar' => self::globalSettingsFields()
-        ]);
+        foreach ($this->supported_locale as $item) {
+            $sections[] = Section::make('global_settings_' . $item['code'], $item['title']);
+            $settings['global_settings_' . $item['code']] = self::globalSettingsFields();
+        }
+
+        $this->globalSettingsPage->addSections($sections);
+
+        $this->globalSettingsPage->addSettings($settings);
     }
 
     private static function menusSettingsFields()
@@ -98,15 +104,18 @@ class SettingsFeature
 
     public function buildMenusSettingsPage()
     {
-        $this->menusSettingsPage->addSections([
-            Section::make('menus_settings_fr', 'FR'),
-            Section::make('menus_settings_ar', 'AR')
-        ]);
+        $sections = [];
+        $settings = [];
 
-        $this->menusSettingsPage->addSettings([
-            'menus_settings_fr' => self::menusSettingsFields(),
-            'menus_settings_ar' => self::menusSettingsFields(),
-        ]);
+        foreach ($this->supported_locale as $item) {
+            $sections[] = Section::make('menus_settings_' . $item['code'], $item['title']);
+            $settings['menus_settings_' . $item['code']] = self::globalSettingsFields();
+        }
+
+
+        $this->menusSettingsPage->addSections($sections);
+
+        $this->menusSettingsPage->addSettings($settings);
 
     }
 
@@ -124,14 +133,15 @@ class SettingsFeature
 
     public function buildLinksSettingsPage()
     {
-        $this->linksSettingPage->addSections([
-            Section::make('links_settings_fr', 'FR'),
-            Section::make('links_settings_ar', 'AR')
-        ]);
+        $sections = [];
+        $settings = [];
 
-        $this->linksSettingPage->addSettings([
-            'links_settings_fr' => self::linksSettingsFields(),
-            'links_settings_ar' => self::linksSettingsFields(),
-        ]);
+        foreach ($this->supported_locale as $item) {
+            $sections[] = Section::make('links_settings_' . $item['code'], $item['title']);
+            $settings['links_settings_' . $item['code']] = self::globalSettingsFields();
+        }
+
+        $this->linksSettingPage->addSections($sections);
+        $this->linksSettingPage->addSettings($settings);
     }
 }

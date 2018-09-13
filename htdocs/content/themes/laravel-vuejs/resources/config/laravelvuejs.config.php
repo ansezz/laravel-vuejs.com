@@ -1,23 +1,23 @@
 <?php
 
 return [
-    /**
-     * List of supported post types.
-     */
     'POST_TYPES' => ['post'],
     'default_locale' => 'en',
     'supported_locale' => [
-        'ar' => [
-            'name' => 'Arabic',
-            'code' => 'ar'
+        'en' => [
+            'name' => 'English',
+            'title' => 'EN',
+            'code' => 'en',
         ],
         'fr' => [
             'name' => 'French',
-            'code' => 'fr'
+            'title' => 'FR',
+            'code' => 'fr',
         ],
-        'en' => [
-            'name' => 'English',
-            'code' => 'en'
-        ],
+        'ar' => [
+            'name' => 'Arabic',
+            'title' => 'AR',
+            'code' => 'ar',
+        ]
     ]
 ];
