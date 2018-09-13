@@ -19,6 +19,7 @@ namespace :conf do
   task :update do
     on roles(:server) do
         upload! "../config/dev/.env" , "/var/www/#{fetch(:username)}/domains/#{fetch(:domain)}/public_html/shared/.env"
+        upload! "../config/dev/front/.env" , "/var/www/#{fetch(:username)}/domains/#{fetch(:domain)}/public_html/shared/front/.env"
     end
   end
 end
@@ -100,12 +101,27 @@ end
 namespace :pm2 do
   task :conf do
     on roles(:server) do
-        upload! "../ops/pm2/dev-ecosystem.json" , "/var/www/#{fetch(:username)}/domains/#{fetch(:domain)}/public_html/shared/dev-ecosystem.json"
+        upload! "../ops/pm2/dev-ecosystem.json" , "#{release_path}/htdocs/content/themes/laravel-vuejs/front/dev-ecosystem.json"
     end
   end
-  task :restart do
+  task :list do
     on roles(:server) do
-        execute "pm2 startOrRestart /var/www/laravel-vuejs/domains/dev.laravel-vuejs.com/public_html/shared/ecosystem.json"
+      execute "pm2 list"
+    end
+  end
+  task :reload do
+    on roles(:server) do
+      execute "pm2 reload laravel-vuejs-dev"
+    end
+  end
+  task :start do
+    on roles(:server) do
+      execute "cd #{release_path}/htdocs/content/themes/laravel-vuejs/front && pm2 start npm dev-ecosystem.json --name laravel-vuejs-dev -- start"
+    end
+  end
+  task :delete do
+    on roles(:server) do
+      execute "pm2 delete laravel-vuejs-dev"
     end
   end
 end
@@ -121,5 +137,7 @@ after "npm:build", "pm2:conf"
 
 after "deploy:finished", "nginx:restart"
 after "deploy:finished", "php:restart"
-after "deploy:finished", "pm2:restart"
+#after "deploy:finished", "pm2:reload"
+after "deploy:finished", "pm2:delete"
+after "deploy:finished", "pm2:start"
 after "deploy:finished", "app:done"
