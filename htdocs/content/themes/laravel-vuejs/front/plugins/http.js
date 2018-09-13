@@ -2,37 +2,41 @@ import { DEFAULT_LANG } from '~/config'
 
 export default ({app}) => {
 
-  let lang = DEFAULT_LANG
+    let lang = DEFAULT_LANG
 
-  let request = (endpoint, params) => {
-    return app.$axios.$get(endpoint, {params})
-    // .then(response => response ? response.data : null)
-  }
+    let request = (endpoint, params) => {
+        return app.$axios.$get(endpoint, {params})
+        // .then(response => response ? response.data : null)
+    }
 
-  let search = (params) => request(`${lang}/search/`, params)
+    let search = (params) => request(`${lang}/search/`, params)
 
-  let posts = {
+    let posts = {
 
-    list: (params) => request(`${lang}/posts/`, params),
+        list: (params) => request(`${lang}/posts/`, params),
 
-    singular: (slug, params) => request(`${lang}/posts/${slug}/`, params),
+        singular: (slug, params) => request(`${lang}/posts/${slug}/`, params),
 
-    category: (slug, params) => request(`${lang}/posts/category/${slug}/`, params),
+        category: (slug, params) => request(`${lang}/posts/category/${slug}/`, params),
 
-    featured: (params) => request(`${lang}/posts/featured/`, params),
+        featured: (params) => request(`${lang}/posts/featured/`, params),
 
-  }
+    }
 
-  let settings = {
+    let pages = {
+        list: (params) => request(`${lang}/pages/`, params),
+        singular: (slug, params) => request(`${lang}/page/${slug}/`, params),
+    }
 
-    all: (params) => request(`${lang}/settings`, params)
+    let settings = {
+        all: (params) => request(`${lang}/settings`, params)
+    }
 
-  }
 
-
-  app.$http = {
-    search,
-    posts,
-    settings
-  }
+    app.$http = {
+        search,
+        posts,
+        pages,
+        settings
+    }
 }
