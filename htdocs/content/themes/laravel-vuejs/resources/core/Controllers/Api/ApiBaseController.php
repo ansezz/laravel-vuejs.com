@@ -18,4 +18,10 @@ class ApiBaseController
         $this->responseBuilder = $responseBuilder;
         $this->request = Request::createFromGlobals();
     }
+
+
+    public function status()
+    {
+        return $this->responseBuilder->withArray(['active' => true]);
+    }
 }

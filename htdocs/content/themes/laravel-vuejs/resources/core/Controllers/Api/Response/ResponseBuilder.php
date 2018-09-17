@@ -46,7 +46,7 @@ class ResponseBuilder
         $this->setHeader();
         $results = [];
 
-        if (!isset($result['posts'])) {
+        if (!isset($result['items'])) {
             $this->error(502, 'posts not found in results');
         }
 
