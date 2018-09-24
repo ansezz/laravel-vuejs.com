@@ -1,6 +1,6 @@
 <?php
 
-namespace Theme\Admin;
+namespace Theme\Admin\Features;
 
 use Core\Models\Menu;
 use Themosis\Facades\Config;
@@ -134,15 +134,14 @@ class SettingsFeature
 
     public function buildLinksSettingsPage()
     {
-        $sections = [];
         $settings = [];
+        $sections = [];
 
-        foreach ($this->supported_locale as $item) {
-            $sections[] = Section::make('links_settings_' . $item['code'], $item['title']);
-            $settings['links_settings_' . $item['code']] = self::linksSettingsFields();
-        }
+        $sections[] = Section::make('links_settings', 'Social Links');
+        $settings['links_settings'] = self::linksSettingsFields();
 
         $this->linksSettingPage->addSections($sections);
+
         $this->linksSettingPage->addSettings($settings);
     }
 }

@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'POST_TYPES' => ['post'],
+    'post_types' => ['post', 'qa'],
     'default_locale' => 'en',
     'supported_locale' => [
         'en' => [
