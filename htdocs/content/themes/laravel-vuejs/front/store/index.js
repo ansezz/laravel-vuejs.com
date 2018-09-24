@@ -1,11 +1,23 @@
-
 export const state = () => ({
-  platform: '',
+  platform: "",
+  navigation: {
+    visibility: false
+  }
 })
 
 export const mutations = {
-  //Set the latest news to state
-  SET_PLATFORM: (state, {platform}) => {
+  SET_PLATFORM: (state, { platform }) => {
     state.platform = platform
   },
+  SET_NAVIGATION_VISIBILITY: (state, val) => {
+    state.navigation.visibility = val
+  }
+}
+
+export const getters = {}
+
+export const actions = {
+  toggleNavigationVisibility({ commit, state }) {
+    commit("SET_NAVIGATION_VISIBILITY", !state.navigation.visibility)
+  }
 }
