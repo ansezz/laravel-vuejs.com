@@ -48,3 +48,5 @@ define('DISALLOW_FILE_EDIT', true);
 define('WP_DEFAULT_THEME', 'themosis-theme');
 
 /* That's all, stop editing! Happy blogging. */
+
+define('FS_METHOD', 'direct');
