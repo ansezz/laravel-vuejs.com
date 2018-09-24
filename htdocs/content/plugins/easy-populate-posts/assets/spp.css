@@ -1,0 +1,119 @@
+.spp_figure {
+    border: 0px solid #FFF;
+    border-radius: 3px;
+    box-sizing: border-box;
+    display: inline-block;
+    height: 45px;
+    margin-bottom: 3px;
+    margin-right: 3px;
+    overflow: hidden;
+    position: relative;
+    vertical-align: middle;
+    width: 60px;
+}
+
+.spp_figure.text {
+    background-color: #FFF;
+    clear: both;
+    display: block;
+    height: auto;
+    line-height: 1rem;
+    padding: 0px;
+    text-align: left;
+    width: 100%;
+}
+
+.spp_figure img {
+    height: auto;
+    left: -5px;
+    max-height: 120px;
+    max-width: 120px;
+    min-height: 100%;
+    min-width: 100%;
+    position: absolute;
+    top: -5px;
+    width: auto;
+}
+
+.spp_figure .icon {
+    background-color: #000;
+    border-radius: 4px;
+    color: #FFF;
+    cursor: pointer;
+    display: inline-block;
+    font-size: 22px;
+    height: 22px;
+    line-height: 22px;
+    overflow: hidden;
+    position: absolute;
+    right: -15px;
+    text-decoration: none;
+    top: 2px;
+    width: 35px;
+    z-index: 999;
+}
+
+.spp_figure .icon:hover {
+    background-color: #C00;
+    color: #FFF;
+    right: -10px;
+}
+
+.spp_figure .icon span {
+    font-size: 22px;
+    line-height: 22px;
+    margin: 0px;
+    padding: 0px;
+}
+
+#spp_initial_images {
+    display: none;
+}
+
+.spp em {
+    font-size: 10px;
+    color: #888;
+}
+
+.spp select, .spp textarea {
+    min-width: 100%;
+    width: 100%;
+}
+
+.spp ::-webkit-input-placeholder {
+    color: #CCC;
+    font-style: italic !important;
+}
+
+.spp :-moz-placeholder {
+    color: #CCC;
+    font-style: italic !important;
+}
+
+.spp ::-moz-placeholder {
+    color: #CCC;
+    font-style: italic !important;
+}
+
+.spp :-ms-input-placeholder {
+    color: #CCC;
+    font-style: italic !important;
+}
+
+.spp-spinner {
+    margin: 0px;
+    margin-right: 5px;
+    vertical-align: middle;
+}
+
+.spp-will-cleanup {
+    color: red;
+}
+
+.spp-table input {
+    width: 100%;
+}
+
+.spp-table h3 {
+    margin: 0;
+}
