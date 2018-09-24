@@ -120,7 +120,7 @@ class PostService
 
         $posts = $builder->paginate($perPage, ['*'], 'page', $page);
 
-        return ['posts' => $posts];
+        return ['items' => $posts];
     }
 
     public function getByCategoryIdOrSlug($arg, $page = 1, $perPage = 15, $locale = null)
@@ -157,7 +157,7 @@ class PostService
 
         return [
             'category' => $taxonomy,
-            'posts' => $posts,
+            'items' => $posts,
         ];
     }
 
@@ -188,7 +188,7 @@ class PostService
 
         return [
             'tag' => $taxonomy,
-            'posts' => $posts,
+            'items' => $posts,
         ];
     }
 }

@@ -4,9 +4,9 @@
   "description": "MLaravelVuejs Radio theme.",
   "author": "Next Media <contact@nextmedia.ma>",
   "private": true,
+  "license": "UNLICENSED",
   "engines": {
-    "yarn": "1.7.0",
-    "nuxt": "1.4.1"
+    "yarn": "1.*"
   },
   "scripts": {
     "dev": "nuxt",

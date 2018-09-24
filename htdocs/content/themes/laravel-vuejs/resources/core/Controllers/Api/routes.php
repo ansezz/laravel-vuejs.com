@@ -11,6 +11,9 @@
 
 remove_action('template_redirect', 'redirect_canonical');
 
+Route::get('/', 'ApiBaseController@status');
+Route::get('status', 'ApiBaseController@status');
+
 Route::group(['prefix' => '{locale}'], function () {
     Route::get('settings', 'SettingsController@index');
 
