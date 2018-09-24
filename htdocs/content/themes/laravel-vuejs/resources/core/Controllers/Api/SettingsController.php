@@ -181,7 +181,7 @@ class SettingsController extends ApiBaseController
         return $this->responseBuilder->withArray([
             'global' => $global,
             'menus' => $this->settingService->getMenusSettings($locale),
-            'links' => $this->settingService->getLinksSettings($locale)
+            'links' => $this->settingService->getLinksSettings()
         ]);
 
     }

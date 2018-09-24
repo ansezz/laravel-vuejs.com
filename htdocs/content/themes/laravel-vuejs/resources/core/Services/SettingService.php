@@ -17,7 +17,7 @@ class SettingService
 
     const MENUS_SETTINGS_LOCALE_KEY = 'menus_settings_%s';
 
-    const LINKS_SETTINGS_LOCALE_KEY = 'links_settings_%s';
+    const LINKS_SETTINGS_KEY = 'links_settings';
 
     const BREAKING_NEWS_SETTINGS_LOCALE_KEY = 'breaking_news_settings_%s';
 
@@ -76,11 +76,9 @@ class SettingService
         return $settings;
     }
 
-    public function getLinksSettings($locale = null)
+    public function getLinksSettings()
     {
-        $optionKey = sprintf(self::LINKS_SETTINGS_LOCALE_KEY, $locale);
-
-        $settings = \Option::get($optionKey);
+        $settings = \Option::get(self::LINKS_SETTINGS_KEY);
 
         return $settings;
     }

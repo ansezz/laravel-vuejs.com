@@ -1,6 +1,6 @@
 <?php
 
-foreach (Config::get('laravelvuejs.POST_TYPES') as $postType) {
+/*foreach (Config::get('laravelvuejs.post_types') as $postType) {
     MetaBox::make(
         'Post options',
         $postType,
@@ -12,4 +12,4 @@ MetaBox::make(
     'Post options',
     'page',
     ['priority' => 'high', 'context' => 'side']
-)->set(BoxOptions::addLanguageOnly());
+)->set(BoxOptions::addLanguageOnly());*/
