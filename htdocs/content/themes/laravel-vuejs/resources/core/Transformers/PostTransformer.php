@@ -35,7 +35,8 @@ class PostTransformer implements TransformerInterface
             'type' => $post->getPostType(),
             'excerpt' => $post->getExcerpt(),
             'content' => $post->getContent(),
-            'image' => Helper::staticUrl($post->getImage()),
+            // @TODO : config static url
+            'image' => $post->getImage(),//Helper::staticUrl($post->getImage()),
             'author' => $this->userTransformer->item($post->getAuthor()),
             'main-category' => $post->getMainCategory(),
             'categories' => isset($taxonomies['category']) ? $taxonomies['category'] : [],
