@@ -6,7 +6,7 @@
 
 <script>
 export default {
-  name: "AppRow"
+  name: "Row"
 }
 </script>
 

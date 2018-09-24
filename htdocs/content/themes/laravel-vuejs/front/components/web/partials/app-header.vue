@@ -1,14 +1,14 @@
 <template>
   <header class="header has-background:tertiary">
-    <app-container>
+    <container>
       
-      <app-column>
+      <column>
 
         <div class="swiper:thumbnail">
           <div class="is-relative embed:wide" ref="thumbnailSwiper" v-swiper:headerSwiper="swiper.thumbnail">
             <div class="swiper-wrapper is-absolute:all">
               <div class="swiper-slide" v-for="(article, index) in articles" :key="index">
-                <app-thumbnail :src="`https://unsplash.it/450/290?random=${index}`" href="/article" :index="index" :alt="article.title"/>
+                <thumbnail :src="`https://unsplash.it/450/290?random=${index}`" href="/article" :index="index" :alt="article.title"/>
               </div>
             </div>
             <button class="swiper-button:prev" slot="button-prev">
@@ -30,9 +30,9 @@
           </div>
         </div>
 
-      </app-column>
+      </column>
       
-      <app-column>
+      <column>
         <app-form class="header-form">
           
           <template slot="header">
@@ -49,8 +49,8 @@
           </template>
 
         </app-form>
-      </app-column>
-    </app-container>
+      </column>
+    </container>
   </header>
 </template>
 

@@ -1,43 +1,40 @@
-import { DEFAULT_LANG } from '~/config'
+import { DEFAULT_LANG } from "~/config"
 
-export default ({app}) => {
+export default ({ app }) => {
+  let lang = DEFAULT_LANG
 
-    let lang = DEFAULT_LANG
+  let request = (endpoint, params) => {
+    console.log(" request " + endpoint)
+    return app.$axios.$get(endpoint, { params })
+    // .then(response => response ? response.data : null)
+  }
 
-    let request = (endpoint, params) => {
-      console.log(' request ' + endpoint)
-        return app.$axios.$get(endpoint, {params})
-        // .then(response => response ? response.data : null)
-    }
+  let search = params => request(`${lang}/search/`, params)
 
-    let search = (params) => request(`${lang}/search/`, params)
+  let posts = {
+    list: params => request(`${lang}/posts/`, params),
 
-    let posts = {
+    singular: (slug, params) => request(`${lang}/post/${slug}/`, params),
 
-        list: (params) => request(`${lang}/posts/`, params),
+    category: (slug, params) =>
+      request(`${lang}/posts/category/${slug}/`, params),
 
-      singular: (slug, params) => request(`${lang}/post/${slug}/`, params),
+    featured: params => request(`${lang}/posts/featured/`, params)
+  }
 
-        category: (slug, params) => request(`${lang}/posts/category/${slug}/`, params),
+  let pages = {
+    list: params => request(`${lang}/pages/`, params),
+    singular: (slug, params) => request(`${lang}/page/${slug}/`, params)
+  }
 
-        featured: (params) => request(`${lang}/posts/featured/`, params),
+  let settings = {
+    all: params => request(`${lang}/settings`, params)
+  }
 
-    }
-
-    let pages = {
-        list: (params) => request(`${lang}/pages/`, params),
-        singular: (slug, params) => request(`${lang}/page/${slug}/`, params),
-    }
-
-    let settings = {
-        all: (params) => request(`${lang}/settings`, params)
-    }
-
-
-    app.$http = {
-        search,
-        posts,
-        pages,
-        settings
-    }
+  app.$http = {
+    search,
+    posts,
+    pages,
+    settings
+  }
 }

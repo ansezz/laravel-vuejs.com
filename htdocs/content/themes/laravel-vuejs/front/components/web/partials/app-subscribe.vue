@@ -1,11 +1,11 @@
 <template>
   <section class="subscribe has-background:secondary">
-    <app-container>
-      <app-column half>
+    <container>
+      <column half>
         <h3>Stay in Touch</h3>
         <p>Sign up for our newsletter, and we'll send you news and tutorials on web design, coding, business, and more!</p>
-      </app-column>
-      <app-column half>
+      </column>
+      <column half>
         <app-form class="subscribe-form">
           
           <app-control id="SubscribeEmail" type="email" placeholder="E-mail" icon="ion-ios-mail" wide light/>
@@ -16,8 +16,8 @@
           </template>
 
         </app-form>
-      </app-column>
-    </app-container>
+      </column>
+    </container>
   </section>
 </template>
 

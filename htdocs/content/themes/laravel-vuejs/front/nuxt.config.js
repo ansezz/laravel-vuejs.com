@@ -85,7 +85,7 @@ module.exports = {
   /*
     ** Customize the progress bar color
     */
-  loading: { color: "#3B8070" },
+  loading: { color: "#63F9E6" },
   // @TODO : custom loading
   //  loading: '~/components/loading.vue'
 
@@ -113,6 +113,7 @@ module.exports = {
   plugins: [
     { src: "~/plugins/ui" },
     { src: "~/plugins/http" },
+    { src: "~/plugins/social-sharing" },
     { src: "~/plugins/swiper", ssr: false },
     { src: "~/plugins/lazyload", ssr: false }
   ],

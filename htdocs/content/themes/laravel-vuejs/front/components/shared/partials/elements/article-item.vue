@@ -1,7 +1,7 @@
 <template>
   <article class="article" :class="{ 'is-horizontal' : horizontal }">
     <header>
-      <app-thumbnail :src="`https://unsplash.it/450/290?random=${Math.floor(Math.random() * 11)}`" :href="href" :alt="title"/>
+      <thumbnail :src="image" :href="href" :alt="title"/>
     </header>
     <main class="article-main">
       <h1 class="article-title" v-html="title"/>
@@ -15,7 +15,7 @@
 
 <script>
 export default {
-  name: "AppArticle",
+  name: "ArticleItem",
   props: {
     horizontal: {
       type: Boolean,
@@ -33,7 +33,7 @@ export default {
       type: String,
       default: null
     },
-    src: {
+    image: {
       type: String,
       default: null
     }

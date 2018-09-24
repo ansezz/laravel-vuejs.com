@@ -11,7 +11,7 @@
 
 <script>
 export default {
-  name: "AppColumn",
+  name: "Column",
   props: {
     large: { type: Boolean, default: false },
     small: { type: Boolean, default: false },

@@ -2,8 +2,13 @@
   <section class="feed">
 
     <div class="articles-list">
-      <app-article v-for="(article, index) in articles" :key="index" :index="index" :title="article.title" :description="(index === 0) ? article.description : null"
-                   :href="'/' + article.title.toString().toLowerCase().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-').replace(/^-+/, '').replace(/-+$/, '')"/>
+      <article-item v-for="(article, index) in articles"
+                    :key="index"
+                    :index="index"
+                    :title="article.title"
+                    :description="article.excerpt"
+                    :image="article.image"
+                    :href="article.slug"/>
     </div>
 
     <div v-if="infinite">load more</div>
