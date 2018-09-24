@@ -69,6 +69,7 @@ namespace :app do
         execute "cd #{release_path} && composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader"
         execute "cd #{release_path}/htdocs/content/themes/laravel-vuejs && composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader"
         execute "chmod 777 -R #{release_path}/storage"
+        execute "chmod 777 -R #{release_path}/htdocs/content/uploads"
       end
     end
   end
