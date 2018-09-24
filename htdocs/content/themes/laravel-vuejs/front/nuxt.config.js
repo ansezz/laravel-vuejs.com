@@ -73,11 +73,7 @@ module.exports = {
       {
         rel: "stylesheet",
         href:
-          "https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
-      },
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css?family=Tajawal:300,400,700"
+          "https://fonts.googleapis.com/css?family=Montserrat:300,400,500,600,700"
       }
     ],
     script: []
