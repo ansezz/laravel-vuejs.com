@@ -69,7 +69,6 @@ namespace :app do
         execute "cd #{release_path} && composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader"
         execute "cd #{release_path}/htdocs/content/themes/laravel-vuejs && composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader"
         execute "chmod 777 -R #{release_path}/storage"
-        execute "chmod 777 -R #{release_path}/htdocs/content/uploads"
       end
     end
   end
@@ -77,6 +76,7 @@ namespace :app do
       on roles(:server) do
         within release_path do
           execute "ln -nfs /var/www/#{fetch(:username)}/domains/#{fetch(:domain)}/public_html/static/uploads #{release_path}/htdocs/content/uploads"
+          execute "chmod 777 -R /var/www/#{fetch(:username)}/domains/#{fetch(:domain)}/public_html/static/uploads"
         end
       end
   end
