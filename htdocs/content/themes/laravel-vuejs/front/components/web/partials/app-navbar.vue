@@ -1,7 +1,7 @@
 <template>
   <nav class="navbar is-sticky:top has-index:80 has-background:white">
-    <app-container class="is-relative">
-      <app-row class="is-flex has-align:center has-justify:between">
+    <container class="is-relative">
+      <row class="is-flex has-align:center has-justify:between">
 
         <ul class="navbar-list is-flex has-align:center">
           <li>
@@ -37,8 +37,8 @@
           </li>
         </ul>
 
-      </app-row>
-    </app-container>
+      </row>
+    </container>
   </nav>
 </template>
 

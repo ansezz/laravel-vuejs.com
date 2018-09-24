@@ -4,19 +4,19 @@
     
     <app-header/>
 
-    <app-container>
+    <container>
 
-      <app-column large>
-        <app-feed :articles="articles"/>
-      </app-column>
+      <column large>
+        <app-feed v-if="feed" :articles="feed.posts"/>
+      </column>
 
-      <app-column class="is-relative" small>
+      <column class="is-relative" small>
         <div class="is-sticky:top">
           <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Assumenda quidem ipsum aperiam doloremque pariatur exercitationem amet excepturi nemo veritatis atque? Commodi, aspernatur sed! Maiores explicabo, consequatur libero at expedita molestias.</p>
         </div>
-      </app-column>
+      </column>
 
-    </app-container>
+    </container>
   </section>
 </template>
 
@@ -28,51 +28,11 @@ export default {
   name: "index",
   components: { AppHeader, AppFeed },
   data() {
-    return {
-      articles: [
-        {
-          title:
-            "Promises, promises: A quick introduction to JavaScript concurrency",
-          description:
-            "Sign up for our newsletter, and we'll send you news and tutorials on web design, coding, business, and more!"
-        },
-        {
-          title: "Laravel Query Builder",
-          description:
-            "Sign up for our newsletter, and we'll send you news and tutorials on web design, coding, business, and more!"
-        },
-        {
-          title:
-            "Laravel 5.6 Dynamic Rate Limiting Provides Per-User Request Throttling",
-          description: ""
-        },
-        {
-          title: "Laravel Relationship Events",
-          description: ""
-        },
-        {
-          title: "Eventy: WordPress-like Actions and Filters for Laravel",
-          description: ""
-        },
-        {
-          title:
-            "Promises, promises: A quick introduction to JavaScript concurrency",
-          description: ""
-        },
-        {
-          title: "How learning to code changed my life",
-          description: ""
-        },
-        {
-          title: "Your First Hackathon: A Survival Guide",
-          description: ""
-        },
-        {
-          title:
-            "Student Success: How Treehouse helped George Lambert get out of a cubicle to form his own company",
-          description: ""
-        }
-      ]
+    return {}
+  },
+  computed: {
+    feed() {
+      return this.$store.state.post.featured
     }
   }
 }

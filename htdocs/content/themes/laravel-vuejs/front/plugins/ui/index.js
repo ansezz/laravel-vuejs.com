@@ -1,27 +1,27 @@
 import Vue from "vue"
 
 // Grid
-import AppContainer from "@/components/shared/partials/grid/app-container.vue"
-Vue.component("AppContainer", AppContainer)
+import Container from "@/components/shared/partials/grid/container.vue"
+Vue.component("Container", Container)
 
-import AppRow from "@/components/shared/partials/grid/app-row.vue"
-Vue.component("AppRow", AppRow)
+import Row from "@/components/shared/partials/grid/row.vue"
+Vue.component("Row", Row)
 
-import AppColumn from "@/components/shared/partials/grid/app-column.vue"
-Vue.component("AppColumn", AppColumn)
+import Column from "@/components/shared/partials/grid/column.vue"
+Vue.component("Column", Column)
 
 // Elements
-import AppThumbnail from "@/components/shared/partials/elements/app-thumbnail"
-Vue.component("AppThumbnail", AppThumbnail)
+import Breadcrumb from "@/components/shared/partials/elements/breadcrumb"
+Vue.component("Breadcrumb", Breadcrumb)
 
-import AppArticle from "@/components/shared/partials/elements/app-article"
-Vue.component("AppArticle", AppArticle)
+import Thumbnail from "@/components/shared/partials/elements/thumbnail"
+Vue.component("Thumbnail", Thumbnail)
+
+import ArticleItem from "@/components/shared/partials/elements/article-item"
+Vue.component("ArticleItem", ArticleItem)
 
 import AppForm from "@/components/shared/partials/form/app-form"
 Vue.component("AppForm", AppForm)
 
 import AppControl from "@/components/shared/partials/form/app-control"
 Vue.component("AppControl", AppControl)
-
-import AppButton from "@/components/shared/partials/form/app-button"
-Vue.component("AppButton", AppButton)

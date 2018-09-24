@@ -1,18 +1,20 @@
 <template>
-  <nuxt-link class="article-image is-relative is-clipped embed:wide" v-lazy-container="{ selector: 'img' }" :to="href">
-    <!-- <img v-if="src" class="is-absolute:all" :data-src="src" :alt="alt"> -->
-    <img class="is-absolute:all" :data-src="src" :alt="alt">
+  <div class="article-image is-relative is-clipped embed:wide" v-lazy-container="{ selector: 'img' }">
 
-    <span class="article-loader">
-      <span/>
-    </span>
+    <img v-if="src" class="is-absolute:all" :data-src="src" :alt="alt">
+
+    <span class="article-loader"> <span/> </span>
+    
     <span class="article-fallback">error</span>
-  </nuxt-link>
+    
+    <nuxt-link v-if="href" class="article-anchor is-absolute:all" :to="href"/>
+
+  </div>
 </template>
 
 <script>
 export default {
-  name: "AppThumbnail",
+  name: "Thumbnail",
   props: {
     src: {
       type: String,
@@ -36,7 +38,6 @@ export default {
     justify-content center
     align-items center
     background-color rgba($tertiary, .05)
-    background-size 50%
 
     img
       opacity 0

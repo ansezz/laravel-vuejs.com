@@ -10,7 +10,7 @@
 
 <script>
 export default {
-  name: "AppContainer",
+  name: "Container",
   props: {
     fluid: {
       type: Boolean,
