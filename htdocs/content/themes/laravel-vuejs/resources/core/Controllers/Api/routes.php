@@ -19,7 +19,7 @@ Route::group(['prefix' => '{locale}'], function () {
 
     Route::get('search', 'SearchController@index');
 
-    Route::get('pages', 'PageController@index');
+    Route::get('page', 'PageController@index');
     Route::get('page/{arg}', 'PageController@getPageByIdOrSlug');
 
 
@@ -28,6 +28,7 @@ Route::group(['prefix' => '{locale}'], function () {
 
     Route::group(['prefix' => '{type}'], function () {
         Route::get('/', 'PostController@index');
+
         Route::get('featured', 'PostController@featured');
 
         Route::get('category/{arg}', 'PostController@category');

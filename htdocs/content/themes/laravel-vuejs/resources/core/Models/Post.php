@@ -88,7 +88,7 @@ class Post extends BaseModel
     protected $with = ['meta'];
 
     /** @var array */
-    protected static $postTypes = ['post', 'program'];
+    protected static $postTypes = ['post'];
 
     /**
      * @param array $attributes

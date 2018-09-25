@@ -36,11 +36,12 @@ class PostController extends ApiBaseController
 
         $params = Route::current()->parameters();
         $postType = $params['type'];
+        Route::current()->forgetParameter('type');
 
         if (!in_array($postType, Config::get('laravelvuejs.post_types'), true))
             throw new RouteNotFoundException();
 
-        $this->postService->setPostType($postType);
+        $this->postService->setPostType([$postType]);
     }
 
     /**
