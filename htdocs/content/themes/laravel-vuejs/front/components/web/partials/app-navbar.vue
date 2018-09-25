@@ -73,6 +73,7 @@ export default {
       text-align center
       text-transform uppercase
       letter-spacing 2px
+      font-weight 600
       font-size 12px
 
     i
