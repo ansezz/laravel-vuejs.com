@@ -22,10 +22,13 @@ Route::group(['prefix' => '{locale}'], function () {
     Route::get('pages', 'PageController@index');
     Route::get('page/{arg}', 'PageController@getPageByIdOrSlug');
 
+
+    Route::get('categories', 'CategoryController@index');
+    Route::get('tags', 'TagController@index');
+
     Route::group(['prefix' => '{type}'], function () {
         Route::get('/', 'PostController@index');
         Route::get('featured', 'PostController@featured');
-        Route::get('categories', 'CategoryController@index');
 
         Route::get('category/{arg}', 'PostController@category');
         Route::get('tag/{arg}', 'PostController@tag');
