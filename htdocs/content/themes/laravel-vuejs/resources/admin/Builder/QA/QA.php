@@ -18,7 +18,7 @@ class QA
          */
         $qa = PostType::make('qa', 'QAs', 'QA')->set([
             'description' => 'Question Answers',
-            'supports' => ['title', 'thumbnail', 'editor', 'author', 'excerpt', 'comments', 'revisions'],
+            'supports' => ['title', 'thumbnail', 'editor', 'author', 'excerpt', 'comments', 'revisions', 'custom-fields'],
             'menu_icon' => 'dashicons-images-alt2',
             'taxonomies' => ['post_tag', 'category'],
             'public' => true,

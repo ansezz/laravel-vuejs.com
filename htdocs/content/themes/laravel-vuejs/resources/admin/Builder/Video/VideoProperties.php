@@ -13,8 +13,6 @@ class VideoProperties
     {
         self::addFeatured();
 
-        self::$fields[] = Field::checkbox('resolved', [1 => 'Resolved'], ['title' => 'Is Resolved']);
-
         self::$fields[] = MultiLanguageFeature::createLanguageField();
 
         return self::$fields;
@@ -22,6 +20,6 @@ class VideoProperties
 
     public static function addFeatured()
     {
-        self::$fields[] = Field::checkbox('featured', [1 => 'Featured'], ['title' => 'Is Feature:']);
+        self::$fields[] = Field::checkbox(\Core\Models\Post::FEATURED_KEY, [1 => 'Featured'], ['title' => 'Is Feature:']);
     }
 }

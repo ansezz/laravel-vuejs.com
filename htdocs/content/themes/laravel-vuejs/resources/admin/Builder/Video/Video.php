@@ -15,7 +15,7 @@ class Video
          */
         $qa = PostType::make('video', 'Videos', 'Video')->set([
             'description' => 'Videos',
-            'supports' => ['title', 'thumbnail', 'editor', 'author', 'excerpt', 'comments', 'revisions'],
+            'supports' => ['title', 'thumbnail', 'editor', 'author', 'excerpt', 'comments', 'revisions', 'custom-fields'],
             'menu_icon' => 'dashicons-playlist-video',
             'taxonomies' => ['post_tag', 'category'],
             'public' => true,

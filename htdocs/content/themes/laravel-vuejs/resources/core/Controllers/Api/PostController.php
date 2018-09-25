@@ -6,6 +6,9 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Core\Controllers\Api\Response\ResponseBuilder;
 use Core\Services\LanguageService;
 use Core\Services\PostService;
+use Symfony\Component\Routing\Exception\RouteNotFoundException;
+use Themosis\Facades\Config;
+use Themosis\Facades\Route;
 
 /**
  * Class PostController
@@ -13,6 +16,7 @@ use Core\Services\PostService;
  */
 class PostController extends ApiBaseController
 {
+    const DEFAULT_TYPE = 'post';
     /** @var PostService */
     protected $postService;
 
@@ -29,6 +33,14 @@ class PostController extends ApiBaseController
 
         $this->postService = $postService;
         $this->languageService = $languageService;
+
+        $params = Route::current()->parameters();
+        $postType = $params['type'];
+
+        if (!in_array($postType, Config::get('laravelvuejs.post_types'), true))
+            throw new RouteNotFoundException();
+
+        $this->postService->setPostType($postType);
     }
 
     /**

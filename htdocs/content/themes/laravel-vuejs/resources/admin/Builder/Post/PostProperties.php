@@ -23,6 +23,6 @@ class PostProperties
 
     public static function addFeatured()
     {
-        self::$fields[] = Field::checkbox('featured', [1 => 'Featured'], ['title' => 'Feature this post']);
+        self::$fields[] = Field::checkbox(\Core\Models\Post::FEATURED_KEY, [1 => 'Featured'], ['title' => 'Feature this post']);
     }
 }

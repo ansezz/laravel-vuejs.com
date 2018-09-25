@@ -4,6 +4,7 @@ namespace Core\Services;
 
 
 use Core\Models\Page;
+use Core\Models\Post;
 use Core\Repository\PageRepository;
 use Core\Repository\TaxonomyRepository;
 use Core\Transformers\PageTransformer;
@@ -32,7 +33,7 @@ class PageService
             ->published();
 
         if ($locale !== null) {
-            $builder = $builder->hasMeta('locale', $locale);
+            $builder = $builder->hasMeta(Post::LOCALE_KEY, $locale);
         }
 
         $pages = $builder->paginate($perPage, ['*'], 'page', $page);
@@ -47,7 +48,7 @@ class PageService
 
         $page = Page::where('post_status', 'publish')
             ->where($field, $arg)
-            ->hasMeta('locale', $locale)
+            ->hasMeta(Post::LOCALE_KEY, $locale)
             ->first();
         if ($page == null) {
             return false;

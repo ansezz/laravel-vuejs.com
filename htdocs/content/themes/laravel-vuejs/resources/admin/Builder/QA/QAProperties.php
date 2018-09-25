@@ -12,13 +12,13 @@ class QAProperties
     {
         self::addFeatured();
 
-        self::$fields[] = Field::checkbox('resolved', [1 => 'Resolved'], ['title' => 'Is Resolved']);
+        self::$fields[] = Field::checkbox(\Core\Models\Post::RESOLVED_KEY, [1 => 'Resolved'], ['title' => 'Is Resolved']);
 
         return self::$fields;
     }
 
     public static function addFeatured()
     {
-        self::$fields[] = Field::checkbox('featured', [1 => 'Featured'], ['title' => 'Is Feature:']);
+        self::$fields[] = Field::checkbox(\Core\Models\Post::FEATURED_KEY, [1 => 'Featured'], ['title' => 'Is Feature:']);
     }
 }

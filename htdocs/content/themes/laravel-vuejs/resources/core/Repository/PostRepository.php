@@ -23,4 +23,12 @@ class PostRepository
     {
         return $this->model;
     }
+
+    /**
+     * @param $postType
+     */
+    public function setPostType($postType)
+    {
+        $this->model->setPostType($postType);
+    }
 }
