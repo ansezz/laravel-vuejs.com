@@ -26,9 +26,12 @@ class PostTransformer implements TransformerInterface
      */
     public function item(Post $post)
     {
+
+
         $taxonomies = $post->getTaxonomies();
 
-        return [
+
+        $result = [
             'id' => $post->getKey(),
             'title' => $post->getTitle(),
             'slug' => urldecode($post->getSlug()),
@@ -50,6 +53,19 @@ class PostTransformer implements TransformerInterface
             'created' => $post->getCreatedAt()->format('Y-m-d H:m:i'),
             'updated' => $post->getUpdatedAt()->format('Y-m-d H:m:i')
         ];
+
+        switch ($result['type']) {
+            case 'video':
+                $result['video_url'] = $post->meta->video_url;
+                break;
+            case 'qa':
+                $result['resolved'] = (bool)$post->meta->RESOLVED;
+                $result['answer'] = $post->meta->answer;
+                $result['source'] = $post->meta->source;
+                break;
+        }
+
+        return $result;
     }
 
     public function items(LengthAwarePaginator $posts)
