@@ -1,6 +1,6 @@
 <template>
   <section class="feed">
-
+    <heading>Latest articles</heading>
     <div class="articles-list">
       <article-item v-for="(article, index) in articles"
                     :key="index"
@@ -19,25 +19,25 @@
 </template>
 
 <script>
-export default {
-  name: "AppFeed",
+  export default {
+    name: 'AppFeed',
 
-  props: {
-    articles: {
-      type: Array,
-      required: true
+    props: {
+      articles: {
+        type: Array,
+        required: true,
+      },
+      infinite: {
+        type: Boolean,
+        default: false,
+      },
     },
-    infinite: {
-      type: Boolean,
-      default: false
-    }
-  },
 
-  data() {
-    return {}
-  },
-  mounted() {}
-}
+    data() {
+      return {}
+    },
+    mounted() {},
+  }
 </script>
 
 <style lang="stylus" scoped>

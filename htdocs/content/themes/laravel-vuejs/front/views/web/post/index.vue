@@ -14,7 +14,7 @@
         </li>
         <li class="article-category is-absolute:center is-flex has-align:center">
           <i class="article-information:icon ion-ios-folder"/>
-          <nuxt-link :to="'/'" v-html="article['main-category']"/>
+          <nuxt-link :to="`/category/${article.categories[0].slug}`" v-html="article.categories[0].name"/>
         </li>
         <li class="article-publish is-flex has-align:center">
           <i class="article-information:icon ion-ios-time"/>
@@ -68,32 +68,32 @@
 </template>
 
 <script>
-export default {
-  components: {},
-  name: "post",
-  computed: {
-    article() {
-      return this.$store.state.post.single
-    },
-    breadcrumbItems() {
-      return [
-        {
-          title: "Home",
-          href: "/"
-        },
-        {
-          title: this.article["main-category"],
-          href: "/"
-        },
-        {
-          title: this.article.title,
-          href: this.article.slug,
-          isActive: true
-        }
-      ]
-    }
+  export default {
+      components: {},
+      name: 'post',
+      computed: {
+          article() {
+              return this.$store.state.post.single
+          },
+          breadcrumbItems() {
+              return [
+                  {
+                      title: 'Home',
+                      href: '/',
+                  },
+                  {
+                      title: this.article.categories[0].name,
+                      href: `/category/${this.article.categories[0].slug}`,
+                  },
+                  {
+                      title: this.article.title,
+                      href: this.article.slug,
+                      isActive: true,
+                  },
+              ]
+          },
+      },
   }
-}
 </script>
 
 <style lang="stylus" scoped>

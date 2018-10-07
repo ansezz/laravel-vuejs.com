@@ -6,36 +6,40 @@
 
     <container>
 
-      <column large>
-        <app-feed v-if="feed" :articles="feed.posts"/>
-      </column>
+      <row>
+        <app-featured v-if="feed" :articles="feed.posts"/>
+      </row>
+     
+      <row>
+        <column large>
+          <app-feed v-if="feed" :articles="feed.posts"/>
+        </column>
 
-      <column class="is-relative" small>
-        <div class="is-sticky:top">
-          <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Assumenda quidem ipsum aperiam doloremque pariatur exercitationem amet excepturi nemo veritatis atque? Commodi, aspernatur sed! Maiores explicabo, consequatur libero at expedita molestias.</p>
-        </div>
-      </column>
+        <app-aside />
+      </row>
 
     </container>
   </section>
 </template>
 
 <script>
-import AppHeader from "@/components/web/partials/app-header"
-import AppFeed from "@/components/web/partials/app-feed"
-
-export default {
-  name: "index",
-  components: { AppHeader, AppFeed },
-  data() {
-    return {}
-  },
-  computed: {
-    feed() {
-      return this.$store.state.post.featured
-    }
+  export default {
+    name: 'index',
+    components: {
+      AppHeader: () => import('@/components/web/partials/app-header'),
+      AppFeatured: () => import('@/components/web/partials/app-featured'),
+      AppFeed: () => import('@/components/web/partials/app-feed'),
+      AppAside: () => import('@/components/web/partials/app-aside'),
+    },
+    data() {
+      return {}
+    },
+    computed: {
+      feed() {
+        return this.$store.state.post.featured
+      },
+    },
   }
-}
 </script>
 
 <style lang="stylus" scoped>
