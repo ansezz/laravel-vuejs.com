@@ -22,17 +22,17 @@ export const mutations = {
 export const actions = {
   //Get the latest news
   async LOAD_FEATURED_POSTS({commit}) {
-    await this.app.$http.posts.featured().then((data) => {
+    await this.app.$http.post.featured().then((data) => {
       commit('SET_FEATURED_POSTS', data)
     })
   },
   async LOAD_POSTS({commit}) {
-    await this.app.$http.posts.list().then((data) => {
+    await this.app.$http.post.list().then((data) => {
       commit('SET_POSTS', data)
     })
   },
   async LOAD_POST({commit}, {slug}) {
-    await this.app.$http.posts.singular(slug).then((data) => {
+    await this.app.$http.post.singular(slug).then((data) => {
       commit('SET_POST', data)
     })
   },

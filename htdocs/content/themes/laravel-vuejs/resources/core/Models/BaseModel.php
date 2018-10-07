@@ -13,8 +13,10 @@ use Illuminate\Support\Str;
 class BaseModel extends Model implements BaseModelInterface
 {
 
-    const FEATURED = 'FEATURED';
-    const LOCALE = 'LOCALE';
+    const FEATURED_KEY = 'FEATURED';
+    const RESOLVED_KEY = 'RESOLVED';
+    const LOCALE_KEY = 'LOCALE';
+
     /**
      * @var string
      */

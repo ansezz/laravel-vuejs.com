@@ -22,7 +22,7 @@ class SearchService
             ->published();
 
         if (null != $locale) {
-            $builder = $builder->hasMeta('locale', $locale);
+            $builder = $builder->hasMeta(Post::LOCALE_KEY, $locale);
         }
 
         $builder = $builder
@@ -31,6 +31,6 @@ class SearchService
 
         $posts = $builder->paginate($perPage, ['*'], 'page', $page);
 
-        return ['posts' => $posts];
+        return ['items' => $posts];
     }
 }

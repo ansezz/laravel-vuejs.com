@@ -41,7 +41,7 @@ class ProgramTransformer implements TransformerInterface
             'subtitle' => $post->meta->diffusionDate,
             'image' => Helper::staticUrl($post->getImage()),
             'image-slide' => Helper::staticUrl($post->getImageSlideUrl()),
-            'language' => $post->meta->language,
+            'locale' => $post->meta->locale,
             'description' => $post->meta->description,
             'author' => $this->userTransformer->item($post->getAuthor()),
             'main-category' => $post->getMainCategory(),

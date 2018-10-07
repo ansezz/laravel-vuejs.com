@@ -88,7 +88,7 @@ class Post extends BaseModel
     protected $with = ['meta'];
 
     /** @var array */
-    protected static $postTypes = ['post', 'program'];
+    protected static $postTypes = ['post'];
 
     /**
      * @param array $attributes
@@ -257,6 +257,9 @@ class Post extends BaseModel
      */
     public function getPostType()
     {
+        if ($this->post_type)
+            return $this->post_type;
+
         return $this->postType;
     }
 
@@ -294,7 +297,7 @@ class Post extends BaseModel
      *
      * @return array
      */
-    public function getTerms()
+    public function getTermsAttribute()
     {
         return $this->taxonomies->groupBy(function ($taxonomy) {
             return $taxonomy->taxonomy == 'post_tag' ?
@@ -305,7 +308,11 @@ class Post extends BaseModel
                     return [];
                 }
 
-                return [urldecode($item->term->slug) => $item->term->name];
+                return [
+                    'id' => $item->term->name,
+                    'slug' => urldecode($item->term->slug),
+                    'name' => $item->term->name
+                ];
             });
         });
     }
@@ -334,17 +341,7 @@ class Post extends BaseModel
      */
     public function getMainCategory()
     {
-
-        $mainCategory = 'Uncategorized';
-        if (!empty($this->terms)) {
-            $taxonomies = array_values($this->terms);
-
-            if (!empty($taxonomies[0])) {
-                $terms = array_values($taxonomies[0]);
-                $mainCategory = $terms[0];
-            }
-        }
-        return $mainCategory;
+        return $this->getTaxonomies()['category']->first();
     }
 
     /**
@@ -354,9 +351,9 @@ class Post extends BaseModel
      */
     public function getKeywords()
     {
-        return collect($this->terms)->map(function ($taxonomy) {
+        return array_unique(collect($this->terms)->map(function ($taxonomy) {
             return collect($taxonomy)->values();
-        })->collapse()->toArray();
+        })->collapse()->toArray());
     }
 
     /**
@@ -371,7 +368,7 @@ class Post extends BaseModel
 
     public function getLocale()
     {
-        return $this->meta->locale;
+        return $this->meta->LOCALE;
     }
 
     public function getAuthor()

@@ -1,25 +1,22 @@
 <?php
 
-namespace Theme\Admin\Builder\QA;
+namespace Theme\Admin\Builder\Video;
 
 
-use Theme\Admin\Builder\QA\QADetails;
-use Theme\Admin\Builder\QA\QAProperties;
-use Themosis\Facades\Config;
 use Themosis\Facades\Metabox;
 use Themosis\Facades\PostType;
 
-class QA
+class Video
 {
     public static function build()
     {
         /**
          * Register the video post type.
          */
-        $qa = PostType::make('qa', 'QAs', 'QA')->set([
-            'description' => 'Question Answers',
+        $qa = PostType::make('video', 'Videos', 'Video')->set([
+            'description' => 'Videos',
             'supports' => ['title', 'thumbnail', 'editor', 'author', 'excerpt', 'comments', 'revisions', 'custom-fields'],
-            'menu_icon' => 'dashicons-images-alt2',
+            'menu_icon' => 'dashicons-playlist-video',
             'taxonomies' => ['post_tag', 'category'],
             'public' => true,
         ]);
@@ -28,13 +25,13 @@ class QA
             'Properties',
             $qa->get('name'),
             ['priority' => 'high', 'context' => 'side']
-        )->set(QAProperties::addFields());
+        )->set(VideoProperties::addFields());
 
         Metabox::make(
             'Details',
             $qa->get('name'),
             ['priority' => 'high', 'context' => 'normal']
-        )->set(QADetails::addFields());
+        )->set(VideoDetails::addFields());
     }
 
     public static function buildPermalink($postId, $permalink)

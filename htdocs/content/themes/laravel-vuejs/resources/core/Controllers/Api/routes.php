@@ -19,19 +19,22 @@ Route::group(['prefix' => '{locale}'], function () {
 
     Route::get('search', 'SearchController@index');
 
-    Route::get('post/{arg}', 'PostController@show');
-
-    Route::get('posts', 'PostController@index');
-
-    Route::get('posts/category/{arg}', 'PostController@category');
-    Route::get('posts/tag/{arg}', 'PostController@tag');
-
-
-    Route::get('posts/featured', 'PostController@featured');
-
-    Route::get('posts/categories', 'CategoryController@index');
-
-    Route::get('pages', 'PageController@index');
+    Route::get('page', 'PageController@index');
     Route::get('page/{arg}', 'PageController@getPageByIdOrSlug');
+
+
+    Route::get('categories', 'CategoryController@index');
+    Route::get('tags', 'TagController@index');
+
+    Route::group(['prefix' => '{type}'], function () {
+        Route::get('/', 'PostController@index');
+
+        Route::get('featured', 'PostController@featured');
+
+        Route::get('category/{arg}', 'PostController@category');
+        Route::get('tag/{arg}', 'PostController@tag');
+
+        Route::get('{arg}', 'PostController@show');
+    });
 
 });

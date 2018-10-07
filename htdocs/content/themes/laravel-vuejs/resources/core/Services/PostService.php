@@ -64,7 +64,7 @@ class PostService
 
 
         if (null != $locale) {
-            $builder = $builder->hasMeta('locale', $locale);
+            $builder = $builder->hasMeta(Post::LOCALE_KEY, $locale);
         }
 
         $post = $builder->first();
@@ -92,7 +92,7 @@ class PostService
             ->published();
 
         if ($locale != null) {
-            $builder = $builder->hasMeta('locale', $locale);
+            $builder = $builder->hasMeta(Post::LOCALE_KEY, $locale);
         }
 
         $posts = $builder->paginate($perPage, ['*'], 'page', $page);
@@ -112,10 +112,10 @@ class PostService
         $builder = $this->postRepository
             ->getModel()
             ->published()
-            ->hasMeta('featured', 1);
+            ->hasMeta(Post::FEATURED_KEY, 1);
 
         if ($locale != null) {
-            $builder = $builder->hasMeta('locale', $locale);
+            $builder = $builder->hasMeta(Post::LOCALE_KEY, $locale);
         }
 
         $posts = $builder->paginate($perPage, ['*'], 'page', $page);
@@ -149,7 +149,7 @@ class PostService
         $builder = $taxonomy->posts()->published();
 
         if ($locale != null) {
-            $builder = $builder->hasMeta('locale', $locale);
+            $builder = $builder->hasMeta(Post::LOCALE_KEY, $locale);
         }
 
         /** @var LengthAwarePaginator $posts */
@@ -180,7 +180,7 @@ class PostService
         $builder = $taxonomy->posts()->published();
 
         if ($locale != null) {
-            $builder = $builder->hasMeta('locale', $locale);
+            $builder = $builder->hasMeta(Post::LOCALE_KEY, $locale);
         }
 
         /** @var LengthAwarePaginator $posts */
@@ -190,5 +190,13 @@ class PostService
             'tag' => $taxonomy,
             'items' => $posts,
         ];
+    }
+
+    /**
+     * @param $postType
+     */
+    public function setPostType($postType)
+    {
+        $this->postRepository->setPostType($postType);
     }
 }

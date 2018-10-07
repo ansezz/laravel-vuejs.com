@@ -1,3 +1,5 @@
+var webpack = require('webpack') // Do not forget to add this dependency, or else you will get an error
+
 require("dotenv").config()
 const axios = require("axios")
 const resolve = require("path").resolve
@@ -15,7 +17,7 @@ module.exports = {
     "nuxt-device-detect",
     // @TODO enable component cache only in prod
     // ['@nuxtjs/component-cache', {maxAge: 1000 * 60 * 60}],
-    ["@nuxtjs/google-tag-manager", { id: process.env.GOOGLE_TAG_MANAGER }]
+    ["@nuxtjs/google-tag-manager", {id: process.env.GOOGLE_TAG_MANAGER}]
   ],
   sitemap: {
     path: "/sitemap.xml",
@@ -62,15 +64,15 @@ module.exports = {
   head: {
     title: "Nuxt Demo",
     meta: [
-      { charset: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { hid: "description", name: "description", content: "Nuxt.js project" }
+      {charset: "utf-8"},
+      {name: "viewport", content: "width=device-width, initial-scale=1"},
+      {hid: "description", name: "description", content: "Nuxt.js project"}
     ],
     htmlAttrs: {
       dir: "ltr"
     },
     link: [
-      { rel: "icon", type: "image/x-icon", href: "/favicon.ico" },
+      {rel: "icon", type: "image/x-icon", href: "/favicon.ico"},
       {
         rel: "stylesheet",
         href:
@@ -82,7 +84,7 @@ module.exports = {
   /*
     ** Customize the progress bar color
     */
-  loading: { color: "#63F9E6" },
+  loading: {color: "#63F9E6"},
   // @TODO : custom loading
   //  loading: '~/components/loading.vue'
 
@@ -90,29 +92,32 @@ module.exports = {
     ** Build configuration
     */
   build: {
+    plugins: [
+      new webpack.LoaderOptionsPlugin({
+        options: {
+          stylus: {
+            import: [
+              resolve(__dirname, "./assets/stylus/index.styl"),
+              "~rupture/rupture/index.styl",
+              "~hotory/hotory/utilities/index.styl"
+            ]
+          }
+        }
+      })
+    ],
     // vendor: ['vue-i18n'],
     postcss: [require("postcss-rtl")(), require("lost")()],
-    extend(config, { isDev, isClient }) {
-      var stylus = config.module.rules[0].options.loaders.stylus.find(
-        e => e.loader == "stylus-loader"
-      )
-      Object.assign(stylus.options, {
-        import: [
-          resolve(__dirname, "./assets/stylus/index.styl"),
-          "~rupture/rupture/index.styl",
-          "~hotory/hotory/utilities/index.styl"
-        ]
-      })
+    extend(config, {isDev, isClient}) {
     }
   },
 
   //
   plugins: [
-    { src: "~/plugins/ui" },
-    { src: "~/plugins/http" },
-    { src: "~/plugins/social-sharing" },
-    { src: "~/plugins/swiper", ssr: false },
-    { src: "~/plugins/lazyload", ssr: false }
+    {src: "~/plugins/ui"},
+    {src: "~/plugins/http"},
+    {src: "~/plugins/social-sharing"},
+    {src: "~/plugins/swiper", ssr: false},
+    {src: "~/plugins/lazyload", ssr: false}
   ],
 
   css: ["swiper/dist/css/swiper.css", "ionicons/dist/css/ionicons.min.css"],

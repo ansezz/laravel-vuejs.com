@@ -19,6 +19,15 @@ class TaxonomyBuilder extends Builder
     /**
      * @return TaxonomyBuilder
      */
+    public function tag()
+    {
+        return $this->where('taxonomy', 'post_tag');
+    }
+
+
+    /**
+     * @return TaxonomyBuilder
+     */
     public function menu()
     {
         return $this->where('taxonomy', 'nav_menu');

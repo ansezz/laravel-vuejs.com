@@ -6,6 +6,7 @@ namespace Theme\Admin\Builder;
 use Theme\Admin\Builder\Post\Page;
 use Theme\Admin\Builder\Post\Post;
 use Theme\Admin\Builder\QA\QA;
+use Theme\Admin\Builder\Video\Video;
 use Themosis\Facades\Config;
 
 class PostTypeBuilder
@@ -23,6 +24,9 @@ class PostTypeBuilder
                 break;
             case "qa":
                 QA::build();
+                break;
+            case "video":
+                Video::build();
                 break;
             case "page":
                 Page::build();

@@ -2,6 +2,7 @@
 
 namespace Theme\Admin\Features;
 
+use Core\Models\Post;
 use Illuminate\Support\Facades\Log;
 use Theme\Admin\Builder\PermalinkBuilder;
 use Theme\Admin\Features\MultiLanguage\FilterPostsLinks;
@@ -23,7 +24,7 @@ class MultiLanguageFeature
             $values[] = [$locale['code'] => $locale['name']];
         }
 
-        return Field::select('language', $values, ['title' => 'Language']);
+        return Field::select(Post::LOCALE_KEY, $values, ['title' => 'Language']);
     }
 
     public static function createLocaleField()
@@ -35,7 +36,7 @@ class MultiLanguageFeature
             $values[] = [$locale['code'] => $locale['name']];
         }
 
-        return Field::select('locale', $values, ['title' => 'Locale']);
+        return Field::select(Post::LOCALE_KEY, $values, ['title' => 'Locale']);
     }
 
     public static function customizeGetPostPermalink()
