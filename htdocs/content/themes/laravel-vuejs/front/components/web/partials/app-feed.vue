@@ -6,7 +6,7 @@
                     :key="index"
                     :index="index"
                     :title="article.title"
-                    :description="article.excerpt"
+                    :description="(index === 0) ? article.excerpt : null"
                     :image="article.image"
                     :href="article.slug"/>
     </div>
