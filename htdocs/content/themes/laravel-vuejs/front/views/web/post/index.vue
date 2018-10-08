@@ -14,18 +14,22 @@
         </li>
         <li class="article-category is-absolute:center is-flex has-align:center">
           <i class="article-information:icon ion-ios-folder"/>
-          <nuxt-link :to="'/'" v-html="article['main-category']"/>
+          <nuxt-link :to="`/category/${article.categories[0].slug}`" v-html="article.categories[0].name"/>
         </li>
         <li class="article-publish is-flex has-align:center">
           <i class="article-information:icon ion-ios-time"/>
-          <time>{{ article.created }}</time>
+          <time :datetime="article.created" v-html="$moment(article.created).fromNow()"/>
         </li>
       </ul>
 
-      <h1 class="article-title has-width:fluid" v-html="article.title"/>
     </container>
       
+    <container small>
+      <h1 class="article-title has-width:fluid" v-html="article.title"/>
+    </container>
+
     <container class="is-relative" small>
+
       <thumbnail class="article-image" :src="article.image" :alt="article.title"/>
 
       <div class="article-sticky:left is-absolute has-height:fluid">
@@ -64,32 +68,32 @@
 </template>
 
 <script>
-export default {
-  components: {},
-  name: "post",
-  computed: {
-    article() {
-      return this.$store.state.post.single
-    },
-    breadcrumbItems() {
-      return [
-        {
-          title: "Home",
-          href: "/"
-        },
-        {
-          title: this.article["main-category"],
-          href: "/"
-        },
-        {
-          title: this.article.title,
-          href: this.article.slug,
-          isActive: true
-        }
-      ]
-    }
+  export default {
+      components: {},
+      name: 'post',
+      computed: {
+          article() {
+              return this.$store.state.post.single
+          },
+          breadcrumbItems() {
+              return [
+                  {
+                      title: 'Home',
+                      href: '/',
+                  },
+                  {
+                      title: this.article.categories[0].name,
+                      href: `/category/${this.article.categories[0].slug}`,
+                  },
+                  {
+                      title: this.article.title,
+                      href: this.article.slug,
+                      isActive: true,
+                  },
+              ]
+          },
+      },
   }
-}
 </script>
 
 <style lang="stylus" scoped>
@@ -177,7 +181,7 @@ export default {
 
   .article-content
     color #616D82
-    font-weight 300
+    // font-weight 300
     font-size 18px
     line-height 28px
 

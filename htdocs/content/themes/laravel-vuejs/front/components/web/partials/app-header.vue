@@ -55,52 +55,52 @@
 </template>
 
 <script>
-export default {
-  name: "AppHeader",
-  data() {
-    return {
-      swiper: {
-        thumbnail: {
-          direction: "vertical",
-          navigation: {
-            nextEl: ".swiper-button\\:next",
-            prevEl: ".swiper-button\\:prev"
-          }
+  export default {
+    name: 'AppHeader',
+    data() {
+      return {
+        swiper: {
+          thumbnail: {
+            direction: 'vertical',
+            navigation: {
+              nextEl: '.swiper-button\\:next',
+              prevEl: '.swiper-button\\:prev',
+            },
+          },
+          details: {
+            direction: 'vertical',
+          },
         },
-        details: {
-          direction: "vertical"
-        }
-      },
-      articles: [
-        {
-          title:
-            "Promises, promises: A quick introduction to JavaScript concurrency"
-        },
-        {
-          title: "Laravel Query Builder"
-        },
-        {
-          title:
-            "Laravel 5.6 Dynamic Rate Limiting Provides Per-User Request Throttling"
-        },
-        {
-          title: "Laravel Relationship Events"
-        },
-        {
-          title: "Eventy: WordPress-like Actions and Filters for Laravel"
-        }
-      ]
-    }
-  },
-  mounted() {
-    this.$nextTick(() => {
-      const thumbnailSwiper = this.$refs.thumbnailSwiper.swiper
-      const detailsSwiper = this.$refs.detailsSwiper.swiper
-      thumbnailSwiper.controller.control = detailsSwiper
-      detailsSwiper.controller.control = thumbnailSwiper
-    })
+        articles: [
+          {
+            title:
+              'Promises, promises: A quick introduction to JavaScript concurrency',
+          },
+          {
+            title: 'Laravel Query Builder',
+          },
+          {
+            title:
+              'Laravel 5.6 Dynamic Rate Limiting Provides Per-User Request Throttling',
+          },
+          {
+            title: 'Laravel Relationship Events',
+          },
+          {
+            title: 'Eventy: WordPress-like Actions and Filters for Laravel',
+          },
+        ],
+      }
+    },
+    mounted() {
+      this.$nextTick(() => {
+        const thumbnailSwiper = this.$refs.thumbnailSwiper.swiper
+        const detailsSwiper = this.$refs.detailsSwiper.swiper
+        thumbnailSwiper.controller.control = detailsSwiper
+        detailsSwiper.controller.control = thumbnailSwiper
+      })
+    },
   }
-}
 </script>
 
 <style lang="stylus" scoped>

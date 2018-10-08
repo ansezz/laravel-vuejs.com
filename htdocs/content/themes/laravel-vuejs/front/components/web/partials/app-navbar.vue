@@ -19,7 +19,7 @@
         </ul>
 
         <nuxt-link class="navbar-brand is-absolute:center" to="/">
-          <img class="has-height:fluid" src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Netflix_2015_logo.svg/2000px-Netflix_2015_logo.svg.png" alt="LV">
+          <img class="has-height:fluid" src="@/assets/images/brand.svg" alt="LV">
         </nuxt-link>
 
         <ul class="navbar-list is-flex has-align:center">
@@ -43,14 +43,14 @@
 </template>
 
 <script>
-import { mapActions } from "vuex"
+  import { mapActions } from 'vuex'
 
-export default {
-  name: "AppNavbar",
-  methods: {
-    ...mapActions(["toggleNavigationVisibility"])
+  export default {
+      name: 'AppNavbar',
+      methods: {
+          ...mapActions(['toggleNavigationVisibility']),
+      },
   }
-}
 </script>
 
 <style lang="stylus" scoped>

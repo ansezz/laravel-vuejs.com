@@ -12,6 +12,7 @@ module.exports = {
     "@nuxtjs/google-analytics",
     "@nuxtjs/sitemap",
     "@nuxtjs/pwa",
+    "@nuxtjs/moment",
     "@nuxtjs/webpackmonitor",
     "nuxt-device-detect",
     // @TODO enable component cache only in prod
