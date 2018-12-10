@@ -1,27 +1,22 @@
-### Miscellaneous
-.DS_Store
-Thumbs.db
+# dependencies
+node_modules
 
-### Composer
-composer.lock
-vendor/
+# logs
+npm-debug.log
 
-### IDE
+# Nuxt build
+.nuxt
+
+# Nuxt generate
+dist
+
+
 .idea/
 
-### PHPCS
-cs_fixer*
+sw.*
 
-### Wordpress
-/htdocs/cms/*
-!/htdocs/cms/.gitkeep
-/htdocs/content/mu-plugins/themosis-framework/
-/htdocs/content/themes/themosis-theme/
-/htdocs/content/uploads/
-/htdocs/content/upgrade/
+package-lock.json
 
+.monitor
 
-### Environment Credentials
-/.env
-/.env.*
-!.env.local
+.env
