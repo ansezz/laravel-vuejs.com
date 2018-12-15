@@ -8,6 +8,7 @@
 
 <script>
   export default {
-    props: ['error']
+    props: ['error'],
+    layout: ({store}) => store.state.platform
   }
 </script>
