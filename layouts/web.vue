@@ -33,7 +33,6 @@ export default {
 </script>
 
 <style lang="stylus">
-  @import '../node_modules/hotory'
 
   .app
     // overflow-x hidden

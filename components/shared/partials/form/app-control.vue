@@ -56,7 +56,7 @@ export default {
 
     &.is-light
       .form-control
-        background-color rgba($white, 1)
+        background-color $white
 
     &.has-icon
       .form-control

@@ -98,8 +98,7 @@ module.exports = {
           stylus: {
             import: [
               resolve(__dirname, "./assets/stylus/index.styl"),
-              "~rupture/rupture/index.styl",
-              "~hotory/hotory/utilities/index.styl"
+              "~rupture/rupture/index.styl"
             ]
           }
         }
@@ -120,7 +119,11 @@ module.exports = {
     {src: "~/plugins/lazyload", ssr: false}
   ],
 
-  css: ["swiper/dist/css/swiper.css", "ionicons/dist/css/ionicons.min.css"],
+  css: [
+    "swiper/dist/css/swiper.css",
+    "ionicons/dist/css/ionicons.min.css",
+    "bootstrap/dist/css/bootstrap.css"
+  ],
 
   // yarn nuxt build --webpackmonitor --analyze
   webpackMonitor: {
