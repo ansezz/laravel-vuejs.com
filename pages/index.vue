@@ -3,16 +3,16 @@
 </template>
 
 <script>
-export default {
-  layout: ({ store }) => store.state.platform,
+  export default {
+    layout: ({store}) => store.state.platform,
 
-  middleware: ["home"],
+    middleware: ["home"],
 
-  components: {
-    mobile: () => import(`~/views/mobile`), // eslint-disable-line
-    web: () => import(`~/views/web`) // eslint-disable-line
+    components: {
+      mobile: () => import(`~/views/mobile`),
+      web: () => import(`~/views/web`)
+    }
   }
-}
 </script>
 
 <style>

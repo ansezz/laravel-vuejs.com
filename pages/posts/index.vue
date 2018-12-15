@@ -3,16 +3,16 @@
 </template>
 
 <script>
-export default {
-  layout: ({ store }) => store.state.platform,
+  export default {
+    layout: ({store}) => store.state.platform,
 
-  middleware: ["posts"],
+    middleware: ["posts"],
 
-  components: {
-    mobile: () => import(`~/views/mobile/post/archive.vue`), // eslint-disable-line
-    web: () => import(`~/views/web/post/archive.vue`) // eslint-disable-line
+    components: {
+      mobile: () => import(`~/views/mobile/post/archive.vue`),
+      web: () => import(`~/views/web/post/archive.vue`)
+    }
   }
-}
 </script>
 
 <style>

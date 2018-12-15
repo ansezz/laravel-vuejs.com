@@ -5,12 +5,9 @@
 <script>
   export default {
     layout: ({store}) => store.state.platform,
-
-    middleware: ["post"],
-
     components: {
-      mobile: () => import(`~/views/mobile/post`),
-      web: () => import(`~/views/web/post`)
+      mobile: () => import(`~/views/mobile/auth/forgot-password`),
+      web: () => import(`~/views/web/auth/forgot-password`)
     }
   }
 </script>
