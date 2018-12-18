@@ -173,6 +173,7 @@ return [
         LaravelVueJs\Providers\AuthServiceProvider::class,
         // LaravelVueJs\Providers\BroadcastServiceProvider::class,
         LaravelVueJs\Providers\EventServiceProvider::class,
+        LaravelVueJs\Providers\NovaServiceProvider::class,
         LaravelVueJs\Providers\RouteServiceProvider::class,
 
     ],
