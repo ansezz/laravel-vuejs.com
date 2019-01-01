@@ -1,136 +1,202 @@
 <template>
-  <div class="article-image is-relative is-clipped embed:wide" v-lazy-container="{ selector: 'img' }">
-
-    <img v-if="src" class="is-absolute:all" :data-src="src" :alt="alt">
-
-    <span class="article-loader"> <span/> </span>
-    
-    <span class="article-fallback">error</span>
-    
-    <nuxt-link v-if="href" class="article-anchor is-absolute:all" :to="href"/>
-
-  </div>
+    <nuxt-link :to="routeName" class="article-image" v-lazy-container="{ selector: 'img' }">
+        <img v-if="src" :data-src="src" :alt="alt">
+        <span class="post-loader">
+            <span class="sk-cube1 sk-cube"></span>
+            <span class="sk-cube2 sk-cube"></span>
+            <span class="sk-cube4 sk-cube"></span>
+            <span class="sk-cube3 sk-cube"></span>
+        </span>
+        <span class="post-error"></span>
+    </nuxt-link>
 </template>
 
 <script>
-export default {
-  name: "Thumbnail",
-  props: {
-    src: {
-      type: String,
-      default: null
-    },
-    href: {
-      type: String,
-      default: null
-    },
-    alt: {
-      type: String,
-      default: null
+    export default {
+        name: "Thumbnail",
+        props: {
+            routeName: {
+                type: String,
+                default: "/"
+            },
+            paramValue: {
+                type: String,
+                default: null
+            },
+            src: {
+                type: String,
+                default: null
+            },
+            alt: {
+                type: String,
+                default: null
+            }
+        }
     }
-  }
-}
+
 </script>
 
 <style lang="stylus" scoped>
-  .article-image
-    display flex
-    justify-content center
-    align-items center
-    background-color rgba($tertiary, .05)
+    .post-loader {
+        position: absolute;
+        width: 30px;
+        height: 30px;
+        transform: rotateZ(45deg);
+        transition: opacity .25s ease-in-out;
 
-    img
-      opacity 0
-      transition .25s opacity
-      object-fit cover
+        .sk-cube {
+            float: left;
+            width: 50%;
+            height: 50%;
+            position: relative;
+            transform: scale(1.1);
 
-    img[lazy=error]
-      opacity 0
+            &:before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(56,68,87,0.5);
+                animation: sk-foldCubeAngle 2.4s infinite linear both;
+                transform-origin: 100% 100%;
+            }
 
-      ~ .article-loader
-        opacity 0
+            &.sk-cube2 {
+                transform: scale(1.1) rotateZ(90deg);
 
-      ~ .article-fallback
-        opacity 1
+                &:before {
+                    animation-delay: 0.3s;
+                }
+            }
 
-    img[lazy=loading]
-      opacity 0
+            &.sk-cube3 {
+                transform: scale(1.1) rotateZ(180deg);
 
-      ~ .article-loader
-        opacity 1
+                &:before {
+                    animation-delay: 0.6s;
+                }
+            }
 
-    img[lazy=loaded]
-      opacity 1
+            &.sk-cube4 {
+                transform: scale(1.1) rotateZ(270deg);
 
-      ~ .article-loader
-        opacity 0
+                &:before {
+                    animation-delay: 0.9s;
+                }
+            }
+        }
+    }
 
-  .article-loader
-  .article-fallback
-    display flex
-    justify-content center
-    align-items center
-    opacity 0
+    @keyframes sk-foldCubeAngle {
 
-  .article-loader span
-    position relative
-    animation loading 1.5s infinite cubic-bezier(.15, .6, .9, .1)
+        0%,
+        10% {
+            -webkit-transform: perspective(140px) rotateX(-180deg);
+            transform: perspective(140px) rotateX(-180deg);
+            opacity: 0;
+        }
 
-    &
-    &::before
-    &::after
-      size 10px
-      background-color rgba($tertiary, .25)
-      radius 50%
+        25%,
+        75% {
+            -webkit-transform: perspective(140px) rotateX(0deg);
+            transform: perspective(140px) rotateX(0deg);
+            opacity: 1;
+        }
 
-    &::before
-    &::after
-      position absolute
-      top 0
-      display inline-block
-      content ''
+        90%,
+        100% {
+            -webkit-transform: perspective(140px) rotateY(180deg);
+            transform: perspective(140px) rotateY(180deg);
+            opacity: 0;
+        }
+    }
 
-    &::before
-      left -16px
-      animation loadingBefore 1.5s infinite ease-in-out
+    .post-error {
+        position: absolute;
+        opacity: 0;
+        color: #FFF;
+        font-size: 14px;
+        transition: opacity .25s ease-in-out;
 
-    &::after
-      left -32px
-      animation loadingAfter 1.5s infinite cubic-bezier(.4, 0, 1, 1)
+        &:before {
+            content: "";
+            display: block;
+            margin: auto;
+            background-image: url("../../../../assets/images/broken-pic.png");
+            background-size: contain;
+            width: 40px;
+            height: 40px;
+        }
+    }
 
-  @keyframes loading
-    0%
-      left calc(-50% - 5px)
+    .article-image {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-size: 50%;
+        position: relative;
+        overflow: hidden;
+        padding: 0;
+        width: 100%;
+        background-color: rgba($tertiary, .05);
+        height: 136px;
+        img {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0;
+            transition: opacity .25s ease-in-out,
+                transform .5s ease-in-out;
 
-    75%
-      left calc(50% + 105px)
+            &[lazy=error] {
+                opacity: 0;
 
-    100%
-      left calc(50% + 105px)
+                ~.post-loader {
+                    opacity: 0;
+                }
 
-  @keyframes loadingBefore
-    0%
-      left -50px
+                ~.post-error {
+                    opacity: 1;
+                }
+            }
 
-    50%
-      left -16px
+            &[lazy=loading] {
+                opacity: 0;
 
-    75%
-      left -50px
+                ~.post-loader {
+                    opacity: 1;
+                }
+            }
 
-    100%
-      left -50px
+            &[lazy=loaded] {
+                opacity: 1;
 
-  @keyframes loadingAfter
-    0%
-      left -100px
+                ~.post-loader {
+                    opacity: 0;
+                }
+            }
+        }
 
-    50%
-      left -32px
+        &.small {
+            img {
+                &[lazy=error] {
+                    ~.post-error {
+                        font-size: 10px;
 
-    75%
-      left -100px
+                        &:before {
+                            width: 25px;
+                            height: 25px;
+                        }
+                    }
+                }
+            }
+        }
+    }
 
-    100%
-      left -100px
 </style>

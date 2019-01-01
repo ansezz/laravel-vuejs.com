@@ -1,86 +1,88 @@
 <template>
-  <nav class="navbar is-sticky:top has-index:80 has-background:white">
-    <container class="is-relative">
-      <row class="is-flex has-align:center has-justify:between">
+    <nav class="navbar">
+        <div class="container">
+           <div class="navbar-container">
+                <ul class="navbar-list">
+                    <li>
+                        <a href="#" @click.prevent="toggleNavigationVisibility">
+                            <img src="@/assets/images/icons-menu.png" alt="LV">
+                            <span>Menu</span>
+                        </a>
+                    </li>
+                    <li>
+                        <nuxt-link to="/search">
+                            <img src="@/assets/images/icons-search.png" alt="LV">
+                            <span>Search</span>
+                        </nuxt-link>
+                    </li>
+                </ul>
 
-        <ul class="navbar-list is-flex has-align:center">
-          <li>
-            <button @click="toggleNavigationVisibility">
-              <i class="ion-ios-menu"/>
-              Menu
-            </button>
-          </li>
-          <li>
-            <button>
-              <i class="ion-ios-search"/>
-              Search
-            </button>
-          </li>
-        </ul>
+                <nuxt-link class="navbar-logo" to="/">
+                    <img src="@/assets/images/logo.png" alt="LV">
+                </nuxt-link>
 
-        <nuxt-link class="navbar-brand is-absolute:center" to="/">
-          <img class="has-height:fluid" src="@/assets/images/brand.svg" alt="LV">
-        </nuxt-link>
-
-        <ul class="navbar-list is-flex has-align:center">
-          <li>
-            <button>
-              <i class="ion-ios-mail"/>
-              Newsletter
-            </button>
-          </li>
-          <li>
-            <button>
-              <i class="ion-ios-contact"/>
-              Sign up/in
-            </button>
-          </li>
-        </ul>
-
-      </row>
-    </container>
-  </nav>
+                <ul class="navbar-list">
+                    <li>
+                        <nuxt-link to="/page/newsletter">
+                            <img src="@/assets/images/icons-email.png" alt="LV">
+                            <span>Newsletter</span>
+                        </nuxt-link>
+                    </li>
+                    <li>
+                        <nuxt-link to="/auth/signup">
+                            <img src="@/assets/images/icons-user.png" alt="LV">
+                            <span>Sign up/in</span>
+                        </nuxt-link>
+                    </li>
+                </ul>
+           </div>
+        </div>
+    </nav>
 </template>
 
 <script>
-  import { mapActions } from 'vuex'
+    import {
+        mapActions
+    } from 'vuex'
 
-  export default {
-      name: 'AppNavbar',
-      methods: {
-          ...mapActions(['toggleNavigationVisibility']),
-      },
-  }
+    export default {
+        name: 'AppNavbar',
+        methods: {
+            ...mapActions(['toggleNavigationVisibility']),
+        },
+    }
+
 </script>
 
 <style lang="stylus" scoped>
-  .navbar
-    border-bottom 1px solid $gray
+    .navbar
+        border 0
+        border-radius 0
+        margin-bottom 0
+        .navbar-container
+            display flex
+            align-items center
+            justify-content space-between
+            border-bottom 5px solid $primary
+            height 70px
+            .navbar-list
+                display flex
+                align-items center
+                li
+                    padding-right 42px
+                    &:last-child
+                        padding-right 0
+                    a
+                        font-size 12px
+                        color $secondary
+                        font-weight 600
+                        text-transform uppercase
+                        display flex
+                        align-items center
+                        letter-spacing 1px
+                        img
+                            margin-right 12px
+                        span
+                            margin-top 4px
 
-    .row
-      margin-bottom -1px
-      height 70px
-      border-bottom 5px solid $primary
-
-  .navbar-list
-    li:not(:last-child)
-      margin-right 40px
-
-    button
-      display flex
-      align-items center
-      color $secondary
-      text-align center
-      text-transform uppercase
-      letter-spacing 2px
-      font-weight 600
-      font-size 12px
-
-    i
-      margin-right 10px
-      font-size 18px
-
-  .navbar-brand
-    display block
-    height 28px
 </style>

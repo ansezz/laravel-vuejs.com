@@ -1,16 +1,20 @@
 <!--laravelvuejs_Home_M.png-->
 <template>
-  <section>
-    <h1>Reset Password Web</h1>
+  <section class="reset-password">
+    <app-reset-password />
   </section>
 </template>
 
 <script>
   export default {
-    components: {},
+    components: {
+        AppResetPassword: () => import('@/components/web/partials/app-reset-password'),
+    },
     name: "ResetPassword"
   }
 </script>
 
 <style lang="stylus" scoped>
+    .reset-password
+        padding 65px 0 120px
 </style>

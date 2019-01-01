@@ -1,5 +1,5 @@
 <!--waiting designer-->
-<template lang="html">
+<template>
   <div>
     posts web
   </div>

@@ -1,7 +1,7 @@
 <template>
   <form class="form">
-    <header class="form-header">
-      <slot name="header"/>
+    <header>
+        <slot name="desc" />
     </header>
     <main class="form-controls">
       <slot/>
@@ -20,23 +20,38 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-  .form-controls
-    display grid
-    grid-gap 15px
-    grid-template-columns repeat(2, 1fr)
+    .form-controls
+        margin-bottom 10px
+        .form-group
+            position relative
+            margin-bottom 0
+            .form-control
+                height 40px
+                border-radius 0
+                border 0
+                box-shadow none
+                color $secondary
+                text-transform uppercase
+                font-size 12px
+                font-weight 600
+                letter-spacing 2px
+                padding-left 40px
+                &::placeholder
+                    color $secondary
+            .img
+                position absolute
+                top 0
+                left 0
+                width 40px
+                height 100%
+                display flex
+                align-items center
+                justify-content center
 
   .form-actions
     display flex
     justify-content space-between
     align-items center
-    margin-top 15px
-
-    &:empty
-      display none
-
-  .form-header
-    margin-bottom 20px
-
     &:empty
       display none
 </style>

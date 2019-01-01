@@ -1,92 +1,49 @@
 <template>
-  <section class="featured is-relative has-width:fluid">
-    <heading class="is-absolute:top">Featured articles</heading>
-    <div class="swiper:articles">
-      <div class="is-relative" v-swiper:articlesSwiper="swiper.articles">
-        <div class="swiper-wrapper">
-          <article-item class="swiper-slide" v-for="(article, index) in articles"
-                        :key="index"
-                        :index="index"
-                        :title="article.title"
-                        :description="(index === 0) ? article.excerpt : null"
-                        :image="article.image"
-                        :href="article.slug"/>
+    <section class="featured-articles">
+        <div class="container">
+            <heading>Featured Posts</heading>
+            <div class="posts-grid">
+                <article-item title="Promises, promises: A quick introduction to JavaScript concurrency" />
+                <article-item title="Treehouse is Oregon Tech’s Most Disruptive" />
+                <article-item title="In defense of the modern storyboard" />
+                <article-item title="New Outer Array Functions Coming to PHP 7.3" />
+            </div>
         </div>
-        <button class="swiper-button:prev" slot="button-prev">
-          <i class="ion-ios-arrow-back"/>
-        </button>
-        <button class="swiper-button:next" slot="button-next">
-          <i class="ion-ios-arrow-forward"/>
-        </button>
-      </div>
-    </div>
-
-  </section>
+    </section>
 </template>
 
 <script>
-  export default {
-    name: 'AppFeatured',
-
-    props: {
-      articles: {
-        type: Array,
-        required: true,
-      },
-    },
-
-    data() {
-      return {
-        swiper: {
-          articles: {
-            slidesPerView: 4,
-            spaceBetween: 20,
-            navigation: {
-              nextEl: '.swiper-button\\:next',
-              prevEl: '.swiper-button\\:prev',
-            },
-          },
+    import ArticleItem from "@/components/shared/partials/elements/article-item"
+    export default {
+        name: 'AppFeatured',
+        components: {
+            ArticleItem
         },
-      }
-    },
-  }
+        data() {
+            return {
+            }
+        }
+    }
+
 </script>
 
 <style lang="stylus" scoped>
-  .featured
-    padding-bottom 20px
-    border-bottom 1px solid $gray
-
-  .swiper-container
-    padding-top 84px
-
-  .article >>> .article-title
-    color $tertiary
-    font-size 16px
-
-  .swiper-button\\:prev
-  .swiper-button\\:next
-    position absolute
-    top 32px
-    bottom initial
-    left initial
-    display flex
-    justify-content center
-    align-items center
-    size 20px
-    background-color $primary
-    font-size 12px
-    radius 50%
-
-    &.swiper-button-disabled
-      opacity .6
-      cursor not-allowed
-
-  .swiper-button\\:prev
-    right 30px
-    padding-right 1px
-
-  .swiper-button\\:next
-    right 0
-    padding-left 1px
+    .featured-articles
+        position relative
+        padding 60px 0
+        &:after
+            content ""
+            height 1px
+            width 1040px
+            background-color $gray
+            position absolute
+            bottom 0
+            left 50%
+            transform translateX(-50%)
+    
+    .posts-grid
+        display grid
+        grid-template-columns repeat(4, 1fr)
+        grid-gap 10px
+        margin-top 30px
 </style>

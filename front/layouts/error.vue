@@ -1,9 +1,18 @@
 <template>
-  <div class="container">
-    <h1 v-if="error.statusCode === 404">Page not found</h1>
-    <h1 v-else>An error occurred</h1>
-    <nuxt-link to="/">Home page</nuxt-link>
-  </div>
+    <div class="error-page">
+        <div class="error-thumb">
+            <img src="@/assets/images/404.png" alt="LV">
+        </div>
+        <div class="error-body">
+            <h1 v-if="error.statusCode === 404">Mate, page not found!</h1>
+            <h1 v-else>An error occurred</h1>
+            <p>You might not have permissions to see this page or isn’t exists anymore.</p>
+            <nuxt-link to="/" class="button has-icon">
+                <img src="@/assets/images/icons-report.svg" alt="LV">
+                <span>report this to our team</span>
+            </nuxt-link>
+        </div>
+    </div>
 </template>
 
 <script>
@@ -12,3 +21,29 @@
     layout: ({store}) => store.state.platform
   }
 </script>
+
+<style lang="stylus" scoped>
+    .error-page
+        padding 120px 0
+        .error-thumb
+            text-align center
+            margin-bottom 60px
+        .error-body
+            text-align center
+            width 460px
+            margin auto
+            h1
+                color $tertiary
+                font-size 28px
+                font-weight 600
+                margin-bottom 10px
+                line-height 1.4
+            p
+                font-size 14px
+                color #616d82
+                opacity .8
+                margin-bottom 40px
+            .button
+                width 280px
+                margin auto
+</style>

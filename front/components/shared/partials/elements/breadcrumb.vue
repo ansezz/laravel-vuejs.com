@@ -1,49 +1,47 @@
 <template>
-  <nav class="breadcrumb has-width:fluid">
-    <ul class="breadcrumb-list is-flex has-align:center has-justify:center">
-      <li v-for="(item, index) in items" :key="index" class="breadcrumb-item" :class="{ 'is-active' : item.isActive }">
-        <nuxt-link class="breadcrumb-anchor" :to="item.href" v-html="item.title"/>
-      </li>
-    </ul>
-  </nav>
+    <nav class="breadcrumbs">
+        <ul class="breadcrumb-list">
+            <li class="breadcrumb-item">
+                <nuxt-link class="breadcrumb-anchor" to="/">Home</nuxt-link>
+            </li>
+            <li class="breadcrumb-item is-active">
+                <nuxt-link class="breadcrumb-anchor" to="/">Newsletter</nuxt-link>
+            </li>
+        </ul>
+    </nav>
 </template>
 
 <script>
 export default {
-  name: "breadcrumb",
-  props: {
-    items: {
-      type: Array,
-      default: () => []
-    }
-  }
+    name: "breadcrumb",
 }
 </script>
 
 <style lang="stylus" scoped>
-  .breadcrumb
-    margin 20px 0
-
-  .breadcrumb-item
-    &:not(:last-child):after
-      display inline-flex
-      justify-content center
-      align-items center
-      margin 0 6px
-      padding-left 2px
-      size 20px
-      background-color $primary
-      color $secondary
-      content '\f3d1'
-      font-size 12px
-      font-family 'Ionicons'
-      radius 50%
+    .breadcrumbs
+        margin 20px 0 0
+        
+    .breadcrumb-list
+        display flex
+        align-items center
+        justify-content center
+        
+    .breadcrumb-item
+        display flex
+        align-items center
+        &:not(:last-child):after
+            display block
+            margin 0 5px
+            width 20px
+            height 20px
+            content ""
+            background-image url('../../../../assets/images/icons-next.svg')
 
     &.is-active .breadcrumb-anchor
-      font-weight bold
+        font-weight bold
 
-  .breadcrumb-anchor
-    color $secondary
-    font-size 12px
-    opacity .8
+    .breadcrumb-anchor
+        color $secondary
+        font-size 12px
+        opacity .8
 </style>

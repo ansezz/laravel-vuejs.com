@@ -1,16 +1,20 @@
-<!--laravelvuejs_Home_M.png-->
 <template>
-  <section>
-    <h1>Forgot Password Web</h1>
-  </section>
+    <section class="forgot-password">
+        <app-forgot-password />
+    </section>
 </template>
 
 <script>
-  export default {
-    components: {},
-    name: "ForgotPassword"
-  }
+export default {
+    name: "ForgotPassword",
+    components: {
+        AppForgotPassword: () => import('@/components/web/partials/app-forgot-password'),
+    },
+    props: {}
+}
 </script>
 
 <style lang="stylus" scoped>
+    .forgot-password
+        padding 65px 0 120px
 </style>
