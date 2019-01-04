@@ -18,6 +18,7 @@
     "heroku-postbuild": "npm run build"
   },
   "dependencies": {
+    "@johmun/vue-tags-input": "^2.0.0",
     "@nuxtjs/axios": "^5.3.2",
     "@nuxtjs/component-cache": "^1.1.2",
     "@nuxtjs/dotenv": "^1.1.1",

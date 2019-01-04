@@ -1,11 +1,8 @@
 <template>
     <nav class="breadcrumbs">
         <ul class="breadcrumb-list">
-            <li class="breadcrumb-item">
-                <nuxt-link class="breadcrumb-anchor" to="/">Home</nuxt-link>
-            </li>
-            <li class="breadcrumb-item is-active">
-                <nuxt-link class="breadcrumb-anchor" to="/">Newsletter</nuxt-link>
+           <li :class="{'is-active' : pages.length==index+1}" v-for="(page,index) in pages" class="breadcrumb-item">
+                <nuxt-link :to="page.link" class="breadcrumb-anchor">{{page.name}}</nuxt-link>
             </li>
         </ul>
     </nav>
@@ -14,6 +11,7 @@
 <script>
 export default {
     name: "breadcrumb",
+    props: ["pages"]
 }
 </script>
 
@@ -43,5 +41,5 @@ export default {
     .breadcrumb-anchor
         color $secondary
         font-size 12px
-        opacity .8
+        opacity .9
 </style>

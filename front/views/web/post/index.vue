@@ -1,5 +1,5 @@
 <template lang="html">
-
+    <div>Single Post</div>
 </template>
 
 <script>

@@ -116,7 +116,6 @@ module.exports = {
                 }
             })
         ],
-
         // vendor: ['vue-i18n'],
         postcss: [require("postcss-rtl")(), require("lost")()],
         extend(config, {
@@ -142,6 +141,10 @@ module.exports = {
         },
         {
             src: "~/plugins/lazyload",
+            ssr: false
+        },
+        {
+            src: '~/plugins/vue-tags-input',
             ssr: false
         }
     ],
