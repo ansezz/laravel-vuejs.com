@@ -1,0 +1,6 @@
+type Media {
+    id: ID!
+    name: String!
+    file_name: String!
+    full_url: String!
+}

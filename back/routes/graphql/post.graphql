@@ -4,9 +4,11 @@ type Post {
     content: String!
     slug: String!
     excerpt: String
+    image_url: String
     type: Int!
     type: Int!
     status: Int!
     comment_status: Int!
     user: User! @belongsTo
+    media: [Media] @hasOne
 }

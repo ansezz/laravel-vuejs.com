@@ -15,6 +15,8 @@ class Post extends Model implements HasMedia
 {
     use HasSlug, HasMediaTrait;
 
+    public const MEDIA_COLLECTION = 'image';
+
     /**
      * Get all of the posts for the user.
      */
@@ -42,13 +44,25 @@ class Post extends Model implements HasMedia
 
     public function registerMediaCollections(): void
     {
-        $this->addMediaCollection('image')->singleFile();
+        $this->addMediaCollection(self::MEDIA_COLLECTION)->singleFile();
     }
 
 
     public function visiblePosts($root, array $args, $context, ResolveInfo $resolveInfo): Builder
     {
         return $this->where('status', 1);
+    }
+
+    /**
+     * Get the user's Image Url.
+     *
+     * @return string
+     */
+    public function getImageUrlAttribute(): string
+    {
+        $media = $this->getFirstMedia(self::MEDIA_COLLECTION);
+
+        return $media ? $media->getFullUrl() : '';
     }
 }
 

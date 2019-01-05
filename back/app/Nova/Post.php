@@ -63,8 +63,11 @@ class Post extends Resource
                 })->sortable()
                 ->rules('required'),
 
-            Images::make('Image', 'image')
-                ->thumbnail('thumb'),
+            Images::make('Image', \LaravelVueJs\Models\Post::MEDIA_COLLECTION)
+                ->thumbnail('thumb')
+                ->customPropertiesFields([
+                    Text::make('Alt'),
+                ]),
 
             Trix::make('Content')
                 ->rules('required'),

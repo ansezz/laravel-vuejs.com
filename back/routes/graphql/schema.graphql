@@ -6,6 +6,7 @@ scalar Date @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\Date")
 
 #import user.graphql
 #import post.graphql
+#import media.graphql
 
 type Query {
     users: [User!]! @paginate(type: "paginator" model: "LaravelVueJs\\Models\\User")
