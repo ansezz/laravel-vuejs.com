@@ -2,7 +2,9 @@
 
 namespace LaravelVueJs\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use GraphQL\Type\Definition\ResolveInfo;
 use Spatie\MediaLibrary\HasMedia\HasMedia;
 use Spatie\MediaLibrary\HasMedia\HasMediaTrait;
 use Spatie\Sluggable\HasSlug;
@@ -41,6 +43,12 @@ class Post extends Model implements HasMedia
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('image')->singleFile();
+    }
+
+
+    public function visiblePosts($root, array $args, $context, ResolveInfo $resolveInfo): Builder
+    {
+        return $this->where('status', 1);
     }
 }
 
