@@ -2,7 +2,7 @@
 
 namespace LaravelVueJs\Http\Controllers\Auth;
 
-use LaravelVueJs\User;
+use LaravelVueJs\Models\User;
 use LaravelVueJs\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -61,7 +61,7 @@ class RegisterController extends Controller
      *
      * @param  array $data
      *
-     * @return \LaravelVueJs\User
+     * @return \LaravelVueJs\Models\User
      */
     protected function create(array $data)
     {

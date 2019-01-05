@@ -1,6 +1,6 @@
 <?php
 
-namespace LaravelVueJs;
+namespace LaravelVueJs\Models;
 
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -30,4 +30,13 @@ class User extends Authenticatable
         'password',
         'remember_token',
     ];
+
+
+    /**
+     * Get all of the posts for the user.
+     */
+    public function posts()
+    {
+        return $this->hasMany(Post::class);
+    }
 }

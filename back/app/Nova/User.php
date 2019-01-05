@@ -15,7 +15,7 @@ class User extends Resource
      *
      * @var string
      */
-    public static $model = 'LaravelVueJs\\User';
+    public static $model = 'LaravelVueJs\\Models\\User';
 
     /**
      * The single value that should be used to represent the resource when being displayed.
