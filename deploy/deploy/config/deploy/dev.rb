@@ -1,20 +1,20 @@
 
 #set :user, "#{`whoami`.strip}"
 
-set :user, "root"
+set :user, "laravel-vuejs"
 
 set :username, "laravel-vuejs"
 
 set :branch, "master"
 
-set :domain, "dev.laravel-vuejs.com"
+set :domain, "newdev.laravel-vuejs.com"
 
-server '209.97.189.26', user: fetch(:user), roles: %w{app}
+server '207.180.198.220', user: fetch(:user), roles: %w{app}
 
-role :server, %w{209.97.189.26}
+role :server, %w{207.180.198.220}
 
-set :deploy_to, "/var/www/#{fetch(:username)}/domains/#{fetch(:domain)}/public_html"
+set :deploy_to, "/home/#{fetch(:username)}/domains/#{fetch(:domain)}/public_html"
 
-set :tmp_dir, "/var/www/#{fetch(:username)}/tmp"
+set :tmp_dir, "/home/#{fetch(:username)}/tmp"
 
-set :linked_files, %w{.env htdocs/content/themes/laravel-vuejs/front/.env }
+set :linked_files, %w{back/.env front/.env }

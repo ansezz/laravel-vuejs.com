@@ -13,13 +13,13 @@ set :ssh_options, {
     port: 22
 }
 
-set :keep_releases, 3
+set :keep_releases, 2
 
 namespace :conf do
   task :update do
     on roles(:server) do
-        upload! "../config/dev/.env" , "/var/www/#{fetch(:username)}/domains/#{fetch(:domain)}/public_html/shared/.env"
-        upload! "../config/dev/front/.env" , "/var/www/#{fetch(:username)}/domains/#{fetch(:domain)}/public_html/shared/htdocs/content/themes/laravel-vuejs/front/.env"
+        upload! "../config/dev/back/.env" , "/home/#{fetch(:username)}/domains/#{fetch(:domain)}/public_html/shared/back/.env"
+        upload! "../config/dev/front/.env" , "/home/#{fetch(:username)}/domains/#{fetch(:domain)}/public_html/shared/front/.env"
     end
   end
 end
@@ -27,7 +27,7 @@ end
 namespace :nginx do
  task :htpasswd do
    on roles(:server) do
-     upload! "../ops/nginx/.htpasswd", "/etc/nginx/.htpasswd"
+     upload! "../ops/nginx/.htpasswd", "/home/#{fetch(:username)}/domains/#{fetch(:domain)}/public_html/.htpasswd"
    end
  end
  task :restart do
@@ -45,7 +45,7 @@ namespace :nginx do
  task :vhosts do
    on roles(:server) do
      if fetch(:stage) == :dev
-       upload! "../ops/nginx/sites-available/dev.laravel-vuejs.com", "/etc/nginx/sites-available/dev.laravel-vuejs.com"
+       #upload! "../ops/nginx/sites-available/dev.laravel-vuejs.com", "/etc/nginx/sites-available/dev.laravel-vuejs.com"
      elsif fetch(:stage) == :prod
        #upload! "../ops/nginx/sites-enabled/static.conf", "/etc/nginx/sites-enabled/static.conf"
      end
@@ -66,17 +66,17 @@ namespace :app do
   task :build do
     on roles(:server) do
       within release_path do
-        execute "cd #{release_path} && composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader"
-        execute "cd #{release_path}/htdocs/content/themes/laravel-vuejs && composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader"
-        execute "chmod 777 -R #{release_path}/storage"
+        execute "cd #{release_path}/back && composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader"
+        execute "chmod 777 -R #{release_path}/back/storage"
+        execute "cd #{release_path}/back && php artisan migrate"
       end
     end
   end
   task :symlink do
       on roles(:server) do
         within release_path do
-          execute "ln -nfs /var/www/#{fetch(:username)}/domains/#{fetch(:domain)}/public_html/static/uploads #{release_path}/htdocs/content/uploads"
-          execute "chmod 777 -R /var/www/#{fetch(:username)}/domains/#{fetch(:domain)}/public_html/static/uploads"
+          execute "ln -nfs /home/#{fetch(:username)}/domains/#{fetch(:domain)}/public_html/static/storage #{release_path}/back/storage"
+          execute "chmod 777 -R /home/#{fetch(:username)}/domains/#{fetch(:domain)}/public_html/static/storage"
         end
       end
   end
@@ -90,12 +90,12 @@ end
 namespace :npm do
   task :install do
     on roles(:server) do
-        execute "cd #{release_path}/htdocs/content/themes/laravel-vuejs/front && npm install"
+        execute "cd #{release_path}/front && npm install"
     end
   end
   task :build do
     on roles(:server) do
-        execute "cd #{release_path}/htdocs/content/themes/laravel-vuejs/front && npm run build"
+        execute "cd #{release_path}/front && npm run generate"
     end
   end
 end
@@ -135,11 +135,13 @@ after "app:build", "app:symlink"
 after "deploy:updating", "npm:install"
 after "npm:install", "npm:build"
 
-after "npm:build", "pm2:conf"
+#after "npm:build", "pm2:conf"
 
-after "deploy:finished", "nginx:restart"
-after "deploy:finished", "php:restart"
+#after "deploy:finished", "nginx:restart"
+#after "deploy:finished", "php:restart"
+
 #after "deploy:finished", "pm2:reload"
-after "deploy:finished", "pm2:delete"
-after "deploy:finished", "pm2:start"
+#after "deploy:finished", "pm2:delete"
+#after "deploy:finished", "pm2:start"
+
 after "deploy:finished", "app:done"
