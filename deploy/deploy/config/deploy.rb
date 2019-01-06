@@ -66,9 +66,9 @@ namespace :app do
   task :build do
     on roles(:server) do
       within release_path do
-        execute "cd #{release_path}/back && composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader"
+        execute "cd #{release_path}/back && composer install --prefer-dist --no-interaction --optimize-autoloader"
         execute "chmod 777 -R #{release_path}/back/storage"
-        execute "cd #{release_path}/back && php artisan migrate"
+        execute "cd #{release_path}/back && php artisan migrate:fresh --seed"
       end
     end
   end

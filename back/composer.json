@@ -17,15 +17,15 @@
         "laravel/tinker": "^1.0",
         "mll-lab/laravel-graphql-playground": "^0.3.3",
         "nuwave/lighthouse": "^2.6",
-        "spatie/laravel-sluggable": "^2.1",
-        "fzaninotto/faker": "^1.4"
+        "spatie/laravel-sluggable": "^2.1"
     },
     "require-dev": {
         "beyondcode/laravel-dump-server": "^1.0",
         "filp/whoops": "^2.0",
         "mockery/mockery": "^1.0",
         "nunomaduro/collision": "^2.0",
-        "phpunit/phpunit": "^7.0"
+        "phpunit/phpunit": "^7.0",
+        "fzaninotto/faker": "^1.4"
     },
     "repositories": [
         {
