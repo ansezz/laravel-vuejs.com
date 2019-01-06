@@ -1,6 +1,8 @@
+import postsQuery from './../graphql/queries/posts'
+
 export const state = () => ({
   single: null,
-  list: [],
+  posts: [],
   featured: []
 })
 
@@ -15,7 +17,7 @@ export const mutations = {
   },
 
   SET_POSTS: (state, val) => {
-    state.list = val
+    state.posts = val
   },
 }
 
@@ -27,9 +29,13 @@ export const actions = {
     })
   },
   async LOAD_POSTS({commit}) {
-    await this.app.$http.post.list().then((data) => {
-      commit('SET_POSTS', data)
-    })
+    let variables = {count: 5};
+    await this.app.apolloProvider.defaultClient.query({query: postsQuery, variables})
+      .then(({data}) => {
+        commit('SET_POSTS', data.posts)
+      }).catch((error) => {
+        console.log(error)
+      })
   },
   async LOAD_POST({commit}, {slug}) {
     await this.app.$http.post.singular(slug).then((data) => {
