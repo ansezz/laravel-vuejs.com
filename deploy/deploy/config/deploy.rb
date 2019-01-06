@@ -69,14 +69,16 @@ namespace :app do
         execute "cd #{release_path}/back && composer install --prefer-dist --no-interaction --optimize-autoloader"
         execute "chmod 777 -R #{release_path}/back/storage"
         execute "cd #{release_path}/back && php artisan migrate:fresh --seed"
+        execute "cd #{release_path}/back && php artisan storage:link"
       end
     end
   end
   task :symlink do
       on roles(:server) do
         within release_path do
-          execute "ln -nfs /home/#{fetch(:username)}/domains/#{fetch(:domain)}/public_html/static/storage #{release_path}/back/storage"
+          #execute "ln -nfs /home/#{fetch(:username)}/domains/#{fetch(:domain)}/public_html/static/storage #{release_path}/back"
           execute "chmod 777 -R /home/#{fetch(:username)}/domains/#{fetch(:domain)}/public_html/static/storage"
+          execute "chmod 777 -R #{release_path}/back/storage"
         end
       end
   end
@@ -90,12 +92,12 @@ end
 namespace :npm do
   task :install do
     on roles(:server) do
-        execute "cd #{release_path}/front && npm install"
+        #execute "cd #{release_path}/front && npm install"
     end
   end
   task :build do
     on roles(:server) do
-        execute "cd #{release_path}/front && npm run generate"
+        #execute "cd #{release_path}/front && npm run generate"
     end
   end
 end
