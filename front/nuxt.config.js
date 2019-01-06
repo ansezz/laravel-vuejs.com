@@ -158,7 +158,10 @@ module.exports = {
       })
     ],
     // vendor: ['vue-i18n'],
-    postcss: [require("postcss-rtl")(), require("lost")()],
+    postcss: [
+      // require("postcss-rtl")(),
+      require("lost")()
+    ],
     extend(config, {
       isDev,
       isClient
