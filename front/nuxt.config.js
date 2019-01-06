@@ -1,8 +1,10 @@
 var webpack = require('webpack') // Do not forget to add this dependency, or else you will get an error
 
 require("dotenv").config()
-const axios = require("axios")
+// const axios = require("axios")
 const resolve = require("path").resolve
+
+console.log(process.env)
 
 module.exports = {
   modules: [
