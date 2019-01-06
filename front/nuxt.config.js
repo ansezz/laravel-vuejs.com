@@ -159,8 +159,8 @@ module.exports = {
     ],
     // vendor: ['vue-i18n'],
     postcss: [
-      require("postcss-rtl")(),
-      require("lost")()
+      // require("postcss-rtl")(),
+      // require("lost")()
     ],
     extend(config, {
       isDev,
