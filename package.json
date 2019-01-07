@@ -2,6 +2,7 @@
   "name": "laravel-vuejs",
   "version": "0.1.0",
   "scripts": {
-    "postinstall": "cd front && npm install"
+    "postinstall": "cd front && npm install",
+    "heroku-postbuild": "cd front &&  npm run build"
   }
 }
