@@ -19,6 +19,4 @@ package-lock.json
 
 .monitor
 
-.env
-
 yarn-error.log
