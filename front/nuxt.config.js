@@ -4,8 +4,6 @@ require("dotenv").config()
 // const axios = require("axios")
 const resolve = require("path").resolve
 
-console.log(process.env)
-
 module.exports = {
   modules: [
     '@nuxtjs/apollo',
