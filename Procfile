@@ -1,1 +1,1 @@
-web: npm run start --prefix front
+web: cd front && npm run start
