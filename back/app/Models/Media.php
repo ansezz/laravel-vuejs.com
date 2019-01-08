@@ -6,8 +6,6 @@ use Spatie\MediaLibrary\Models\Media as SpatieMedia;
 
 class Media extends SpatieMedia
 {
-
-
     /**
      * Get the user's Image Url.
      *
