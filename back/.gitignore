@@ -1,5 +1,9 @@
 /node_modules
 /public/hot
+/public/css
+/public/js
+/public/storage
+/public/mix-manifest.json
 /public/storage
 /storage/*.key
 /vendor
@@ -10,4 +14,4 @@ Homestead.yaml
 npm-debug.log
 yarn-error.log
 package-lock.json
-/app-nova
+/nova-app
