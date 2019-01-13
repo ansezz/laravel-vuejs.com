@@ -5,25 +5,20 @@ namespace LaravelVueJs\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use GraphQL\Type\Definition\ResolveInfo;
+use LaravelVueJs\Traits\HasCategories;
 use Spatie\MediaLibrary\HasMedia\HasMedia;
 use Spatie\MediaLibrary\HasMedia\HasMediaTrait;
 use Spatie\Sluggable\HasSlug;
 use Spatie\Sluggable\SlugOptions;
 use Spatie\MediaLibrary\Models\Media;
+use Spatie\Tags\HasTags;
 
 class Post extends Model implements HasMedia
 {
-    use HasSlug, HasMediaTrait;
+    use HasSlug, HasMediaTrait, HasTags, HasCategories;
 
     public const MEDIA_COLLECTION = 'image';
 
-    /**
-     * Get all of the posts for the user.
-     */
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
 
     /**
      * Get the options for generating the slug.
@@ -63,6 +58,14 @@ class Post extends Model implements HasMedia
         $media = $this->getFirstMedia(self::MEDIA_COLLECTION);
 
         return $media ? $media->getFullUrl() : '';
+    }
+
+    /**
+     * Get all of the posts for the user.
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }
 

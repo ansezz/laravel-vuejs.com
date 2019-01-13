@@ -17,7 +17,11 @@
         "laravel/tinker": "^1.0",
         "mll-lab/laravel-graphql-playground": "^0.3.3",
         "nuwave/lighthouse": "^2.6",
-        "spatie/laravel-sluggable": "^2.1"
+        "spatie/eloquent-sortable": "^3.4",
+        "spatie/laravel-sluggable": "^2.1",
+        "spatie/nova-tags-field": "^1.1",
+        "spatie/nova-translatable": "^1.0",
+        "ansezz/nova-categories-field": "*"
     },
     "require-dev": {
         "beyondcode/laravel-dump-server": "^1.0",
@@ -31,6 +35,10 @@
         {
             "type": "path",
             "url": "./nova"
+        },
+        {
+            "type": "path",
+            "url": "./nova-components/nova-categories-field"
         }
     ],
     "config": {

@@ -3,6 +3,7 @@
 namespace LaravelVueJs\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Spatie\NovaTranslatable\Translatable;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -13,7 +14,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        Translatable::defaultLocales(['en']);
     }
 
     /**

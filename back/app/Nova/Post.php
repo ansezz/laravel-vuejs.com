@@ -8,11 +8,14 @@ use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\ID;
 use Illuminate\Http\Request;
+use Laravel\Nova\Fields\MorphToMany;
 use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Textarea;
 use Laravel\Nova\Fields\Trix;
 use Laravel\Nova\Http\Requests\NovaRequest;
+use Spatie\TagsField\Tags;
+use Ansezz\CategoriesField\Categories;
 
 class Post extends Resource
 {
@@ -64,10 +67,11 @@ class Post extends Resource
                 ->rules('required'),
 
             Images::make('Image', \LaravelVueJs\Models\Post::MEDIA_COLLECTION)
-                ->thumbnail('thumb')
                 ->customPropertiesFields([
                     Text::make('Alt'),
-                ]),
+                ])
+                ->thumbnail('thumb')
+                ->multiple(),
 
             Trix::make('Content')
                 ->rules('required'),
@@ -81,7 +85,11 @@ class Post extends Resource
                 4 => 'Future',
             ]),
 
+            Tags::make('Tags'),
+
             Boolean::make('Comment Status'),
+
+            Categories::make('Categories'),
 
         ];
     }

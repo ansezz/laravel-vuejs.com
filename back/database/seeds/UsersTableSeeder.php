@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Seeder;
 use Faker\Generator as Faker;
+
 class UsersTableSeeder extends Seeder
 {
     /**
@@ -32,6 +33,8 @@ class UsersTableSeeder extends Seeder
                 $post->addMediaFromUrl($faker->imageUrl())
                     ->toMediaCollection(\LaravelVueJs\Models\Post::MEDIA_COLLECTION);
                 $post->save();
+                $post->attachTags([$faker->text(6), $faker->text(6), $faker->text(6)]);
+                $post->attachCategories([$faker->text(6), $faker->text(6), $faker->text(6)]);
             });
 
         });

@@ -28,7 +28,7 @@ module.exports = {
     clientConfigs: {
       default: {
         httpEndpoint: process.env.GRAPHQL_URL,
-        wsEndpoint: process.env.GRAPHQL_WS
+        // wsEndpoint: process.env.GRAPHQL_WS
       }
     }
   },

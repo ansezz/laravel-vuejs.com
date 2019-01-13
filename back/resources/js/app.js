@@ -27,6 +27,8 @@ Vue.component('example-component', require('./components/ExampleComponent.vue').
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
 
+Vue.config.devtools = true
+
 const app = new Vue({
     el: '#app'
 });
