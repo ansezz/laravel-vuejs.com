@@ -17,6 +17,23 @@ class Post extends Model implements HasMedia
 {
     use HasSlug, HasMediaTrait, HasTags, HasCategories;
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'title',
+        'content',
+        'slug',
+        'type',
+        'excerpt',
+        'status',
+        'comment_status',
+        'user_id',
+    ];
+
+
     public const MEDIA_COLLECTION = 'image';
 
 
