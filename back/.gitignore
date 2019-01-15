@@ -17,4 +17,4 @@ package-lock.json
 /nova-app
 yarn.lock
 
-storage/app/wp-importer
+storage/app/wp-importer/*

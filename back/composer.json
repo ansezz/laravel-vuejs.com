@@ -9,20 +9,21 @@
     "license": "MIT",
     "require": {
         "php": "^7.1.3",
+        "ansezz/nova-categories-field": "*",
+        "ansezz/wp-importer": "*",
         "ebess/advanced-nova-media-library": "^2.1",
         "fideloper/proxy": "^4.0",
         "jameslkingsley/nova-stripe-theme": "^1.0",
         "laravel/framework": "5.7.*",
         "laravel/nova": "*",
+        "laravel/telescope": "^1.0",
         "laravel/tinker": "^1.0",
         "mll-lab/laravel-graphql-playground": "^0.3.3",
         "nuwave/lighthouse": "^2.6",
         "spatie/eloquent-sortable": "^3.4",
         "spatie/laravel-sluggable": "^2.1",
         "spatie/nova-tags-field": "^1.1",
-        "spatie/nova-translatable": "^1.0",
-        "ansezz/nova-categories-field": "*",
-        "ansezz/wp-importer": "*"
+        "spatie/nova-translatable": "^1.0"
     },
     "require-dev": {
         "beyondcode/laravel-dump-server": "^1.0",
