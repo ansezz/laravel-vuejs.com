@@ -9,7 +9,9 @@
         "prod": "npm run production",
         "production": "cross-env NODE_ENV=production node_modules/webpack/bin/webpack.js --no-progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js",
         "build-category": "cd nova-components/Category && npm run dev",
-        "build-category-prod": "cd nova-components/Category && npm run prod"
+        "build-category-prod": "cd nova-components/Category && npm run prod",
+        "build-wp-importer": "cd nova-components/WpImporter && npm run dev",
+        "build-wp-importer-prod": "cd nova-components/WpImporter && npm run prod"
     },
     "devDependencies": {
         "axios": "^0.18",

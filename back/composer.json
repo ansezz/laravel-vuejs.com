@@ -21,7 +21,8 @@
         "spatie/laravel-sluggable": "^2.1",
         "spatie/nova-tags-field": "^1.1",
         "spatie/nova-translatable": "^1.0",
-        "ansezz/nova-categories-field": "*"
+        "ansezz/nova-categories-field": "*",
+        "ansezz/wp-importer": "*"
     },
     "require-dev": {
         "beyondcode/laravel-dump-server": "^1.0",
@@ -39,6 +40,10 @@
         {
             "type": "path",
             "url": "./nova-components/nova-categories-field"
+        },
+        {
+            "type": "path",
+            "url": "./nova-components/WpImporter"
         }
     ],
     "config": {

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d11b848442c0613fb9d9bd8819c9ee5e",
+    "content-hash": "a931061d1e97877f230180d4f5937dfd",
     "packages": [
         {
             "name": "ansezz/nova-categories-field",
@@ -35,6 +35,40 @@
                 "MIT"
             ],
             "description": "A Laravel Nova field.",
+            "keywords": [
+                "laravel",
+                "nova"
+            ]
+        },
+        {
+            "name": "ansezz/wp-importer",
+            "version": "dev-master",
+            "dist": {
+                "type": "path",
+                "url": "./nova-components/WpImporter",
+                "reference": "9018f3913ac99217aea1a2c2a58ace7e5c6732a3",
+                "shasum": null
+            },
+            "require": {
+                "php": ">=7.1.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Ansezz\\WpImporter\\ToolServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Ansezz\\WpImporter\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "A Laravel Nova tool.",
             "keywords": [
                 "laravel",
                 "nova"
@@ -448,16 +482,16 @@
         },
         {
             "name": "fideloper/proxy",
-            "version": "4.0.0",
+            "version": "4.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/fideloper/TrustedProxy.git",
-                "reference": "cf8a0ca4b85659b9557e206c90110a6a4dba980a"
+                "reference": "177c79a2d1f9970f89ee2fb4c12b429af38b6dfb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/fideloper/TrustedProxy/zipball/cf8a0ca4b85659b9557e206c90110a6a4dba980a",
-                "reference": "cf8a0ca4b85659b9557e206c90110a6a4dba980a",
+                "url": "https://api.github.com/repos/fideloper/TrustedProxy/zipball/177c79a2d1f9970f89ee2fb4c12b429af38b6dfb",
+                "reference": "177c79a2d1f9970f89ee2fb4c12b429af38b6dfb",
                 "shasum": ""
             },
             "require": {
@@ -498,7 +532,7 @@
                 "proxy",
                 "trusted proxy"
             ],
-            "time": "2018-02-07T20:20:57+00:00"
+            "time": "2019-01-10T14:06:47+00:00"
         },
         {
             "name": "guzzlehttp/guzzle",
@@ -1810,16 +1844,16 @@
         },
         {
             "name": "nikic/php-parser",
-            "version": "v4.1.1",
+            "version": "v4.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/nikic/PHP-Parser.git",
-                "reference": "8aae5b59b83bb4d0dbf07b0a835f2680a658f610"
+                "reference": "594bcae1fc0bccd3993d2f0d61a018e26ac2865a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/nikic/PHP-Parser/zipball/8aae5b59b83bb4d0dbf07b0a835f2680a658f610",
-                "reference": "8aae5b59b83bb4d0dbf07b0a835f2680a658f610",
+                "url": "https://api.github.com/repos/nikic/PHP-Parser/zipball/594bcae1fc0bccd3993d2f0d61a018e26ac2865a",
+                "reference": "594bcae1fc0bccd3993d2f0d61a018e26ac2865a",
                 "shasum": ""
             },
             "require": {
@@ -1835,7 +1869,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "4.1-dev"
+                    "dev-master": "4.2-dev"
                 }
             },
             "autoload": {
@@ -1857,7 +1891,7 @@
                 "parser",
                 "php"
             ],
-            "time": "2018-12-26T11:32:39+00:00"
+            "time": "2019-01-12T16:31:37+00:00"
         },
         {
             "name": "nuwave/lighthouse",
@@ -1935,16 +1969,16 @@
         },
         {
             "name": "opis/closure",
-            "version": "3.1.3",
+            "version": "3.1.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/opis/closure.git",
-                "reference": "5e9095ce871a425ab87a854b285b7766de38a7d9"
+                "reference": "3f28ad09e82ce254d12ca01b0fb8592d0c861eb5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/opis/closure/zipball/5e9095ce871a425ab87a854b285b7766de38a7d9",
-                "reference": "5e9095ce871a425ab87a854b285b7766de38a7d9",
+                "url": "https://api.github.com/repos/opis/closure/zipball/3f28ad09e82ce254d12ca01b0fb8592d0c861eb5",
+                "reference": "3f28ad09e82ce254d12ca01b0fb8592d0c861eb5",
                 "shasum": ""
             },
             "require": {
@@ -1992,7 +2026,7 @@
                 "serialization",
                 "serialize"
             ],
-            "time": "2019-01-06T22:07:38+00:00"
+            "time": "2019-01-14T09:58:52+00:00"
         },
         {
             "name": "paragonie/random_compat",
@@ -2647,20 +2681,21 @@
         },
         {
             "name": "spatie/image",
-            "version": "1.5.2",
+            "version": "1.5.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/spatie/image.git",
-                "reference": "d4cb6afff1b98fd6e17396d91e0e584c3d91bb23"
+                "reference": "086bf7c6598ccaf8a0fdee2dcdcfc3637fe8a9eb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/spatie/image/zipball/d4cb6afff1b98fd6e17396d91e0e584c3d91bb23",
-                "reference": "d4cb6afff1b98fd6e17396d91e0e584c3d91bb23",
+                "url": "https://api.github.com/repos/spatie/image/zipball/086bf7c6598ccaf8a0fdee2dcdcfc3637fe8a9eb",
+                "reference": "086bf7c6598ccaf8a0fdee2dcdcfc3637fe8a9eb",
                 "shasum": ""
             },
             "require": {
-                "league/glide": "^1.2",
+                "ext-exif": "*",
+                "league/glide": "^1.4",
                 "php": "^7.0",
                 "spatie/image-optimizer": "^1.0",
                 "spatie/temporary-directory": "^1.0.0",
@@ -2695,31 +2730,31 @@
                 "image",
                 "spatie"
             ],
-            "time": "2018-05-05T21:44:52+00:00"
+            "time": "2019-01-10T09:02:14+00:00"
         },
         {
             "name": "spatie/image-optimizer",
-            "version": "1.1.3",
+            "version": "1.1.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/spatie/image-optimizer.git",
-                "reference": "90d6eebf9a84cc88e4cd2af3928004ba59e693a4"
+                "reference": "11f0b270669a55f90093d63ddb5214e0f7c279da"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/spatie/image-optimizer/zipball/90d6eebf9a84cc88e4cd2af3928004ba59e693a4",
-                "reference": "90d6eebf9a84cc88e4cd2af3928004ba59e693a4",
+                "url": "https://api.github.com/repos/spatie/image-optimizer/zipball/11f0b270669a55f90093d63ddb5214e0f7c279da",
+                "reference": "11f0b270669a55f90093d63ddb5214e0f7c279da",
                 "shasum": ""
             },
             "require": {
                 "ext-fileinfo": "*",
                 "php": "^7.0",
                 "psr/log": "^1.0",
-                "symfony/process": "^2.8|^3.0|^4.0"
+                "symfony/process": "^4.2"
             },
             "require-dev": {
-                "phpunit/phpunit": "^6.2|^7.0",
-                "symfony/var-dumper": "^3.0|^4.0"
+                "phpunit/phpunit": "^7.5",
+                "symfony/var-dumper": "^4.2"
             },
             "type": "library",
             "autoload": {
@@ -2745,7 +2780,7 @@
                 "image-optimizer",
                 "spatie"
             ],
-            "time": "2018-11-19T22:17:30+00:00"
+            "time": "2019-01-14T09:15:47+00:00"
         },
         {
             "name": "spatie/laravel-medialibrary",
@@ -2832,16 +2867,16 @@
         },
         {
             "name": "spatie/laravel-sluggable",
-            "version": "2.1.4",
+            "version": "2.1.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/spatie/laravel-sluggable.git",
-                "reference": "2f383e6957b544b200203ca717000b57189ca045"
+                "reference": "77b67b701ec0cbf9d5ec7f91da25f69db119b2a5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/spatie/laravel-sluggable/zipball/2f383e6957b544b200203ca717000b57189ca045",
-                "reference": "2f383e6957b544b200203ca717000b57189ca045",
+                "url": "https://api.github.com/repos/spatie/laravel-sluggable/zipball/77b67b701ec0cbf9d5ec7f91da25f69db119b2a5",
+                "reference": "77b67b701ec0cbf9d5ec7f91da25f69db119b2a5",
                 "shasum": ""
             },
             "require": {
@@ -2877,7 +2912,7 @@
                 "laravel-sluggable",
                 "spatie"
             ],
-            "time": "2018-08-28T14:09:46+00:00"
+            "time": "2019-01-10T08:17:22+00:00"
         },
         {
             "name": "spatie/laravel-tags",
@@ -3066,16 +3101,16 @@
         },
         {
             "name": "spatie/nova-translatable",
-            "version": "1.0.0",
+            "version": "1.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/spatie/nova-translatable.git",
-                "reference": "79f8f7efc63c9950c763c9bc4dadce7092adc8f5"
+                "reference": "b40416ca770815f6a4b157ed05a13a96ca4a0865"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/spatie/nova-translatable/zipball/79f8f7efc63c9950c763c9bc4dadce7092adc8f5",
-                "reference": "79f8f7efc63c9950c763c9bc4dadce7092adc8f5",
+                "url": "https://api.github.com/repos/spatie/nova-translatable/zipball/b40416ca770815f6a4b157ed05a13a96ca4a0865",
+                "reference": "b40416ca770815f6a4b157ed05a13a96ca4a0865",
                 "shasum": ""
             },
             "require": {
@@ -3111,7 +3146,7 @@
                 "laravel",
                 "nova"
             ],
-            "time": "2018-10-24T11:53:35+00:00"
+            "time": "2019-01-12T19:02:51+00:00"
         },
         {
             "name": "spatie/once",
