@@ -6,16 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 use Spatie\EloquentSortable\SortableTrait;
 use Spatie\Sluggable\HasSlug;
 use Spatie\Sluggable\SlugOptions;
-use Spatie\Translatable\HasTranslations;
 use Illuminate\Database\Eloquent\Collection as DbCollection;
-use Spatie\EloquentSortable\Sortable;
 use Illuminate\Database\Eloquent\Builder;
 
 class Category extends Model
 {
-    use SortableTrait, HasTranslations, HasSlug;
-
-    public $translatable = ['name'];
+    use SortableTrait, HasSlug;
 
     public $guarded = [];
 
@@ -28,31 +24,20 @@ class Category extends Model
         return $query->where('type', $type)->orderBy('order_column');
     }
 
-    public function scopeContaining(Builder $query, string $name, $locale = null): Builder
-    {
-        $locale = $locale ?? app()->getLocale();
-
-        $locale = '"' . $locale . '"';
-
-        return $query->whereRaw("LOWER(JSON_EXTRACT(name, '$." . $locale . "')) like ?",
-            ['"%' . strtolower($name) . '%"']);
-    }
-
     /**
      * @param array|\ArrayAccess $values
      * @param string|null $type
-     * @param string|null $locale
      *
      * @return \LaravelVueJs\Models\Category|static
      */
-    public static function findOrCreate($values, string $type = null, string $locale = null)
+    public static function findOrCreate($values, string $type = null)
     {
-        $categories = collect($values)->map(function ($value) use ($type, $locale) {
+        $categories = collect($values)->map(function ($value) use ($type) {
             if ($value instanceof Category) {
                 return $value;
             }
 
-            return static::findOrCreateFromString($value, $type, $locale);
+            return static::findOrCreateFromString($value, $type);
         });
 
         return is_string($values) ? $categories->first() : $categories;
@@ -63,49 +48,35 @@ class Category extends Model
         return static::withType($type)->orderBy('order_column')->get();
     }
 
-    public static function findFromString(string $name, string $type = null, string $locale = null)
+    public static function findFromString(string $name, string $type = null)
     {
-        $locale = $locale ?? app()->getLocale();
-
         return static::query()
-            ->where("name->{$locale}", $name)
+            ->where("name", $name)
             ->where('type', $type)
             ->first();
     }
 
-    public static function findFromStringOfAnyType(string $name, string $locale = null)
+    public static function findFromStringOfAnyType(string $name)
     {
-        $locale = $locale ?? app()->getLocale();
-
         return static::query()
-            ->where("name->{$locale}", $name)
+            ->where("name", $name)
             ->first();
     }
 
-    protected static function findOrCreateFromString(string $name, string $type = null, string $locale = null): self
+    protected static function findOrCreateFromString(string $name, string $type = null): self
     {
-        $locale = $locale ?? app()->getLocale();
 
-        $category = static::findFromString($name, $type, $locale);
+        $category = static::findFromString($name, $type);
 
         if (!$category) {
             $category = static::create([
-                'name'        => [$locale => $name],
-                'description' => [$locale => $name . ' description '],
+                'name'        => $name,
+                'description' => $name,
                 'type'        => $type,
             ]);
         }
 
         return $category;
-    }
-
-    public function setAttribute($key, $value)
-    {
-        if ($key === 'name' && !is_array($value)) {
-            return $this->setTranslation($key, app()->getLocale(), $value);
-        }
-
-        return parent::setAttribute($key, $value);
     }
 
     /**
