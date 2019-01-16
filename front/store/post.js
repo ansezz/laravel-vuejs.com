@@ -1,4 +1,7 @@
-import postsQuery from './../graphql/queries/posts'
+// import postsQuery from './../graphql/queries/posts'
+// import gql from 'graphql-tag'
+import postsQql from '@/graphql/queries/posts.graphql';
+import postBySlugQql from '@/graphql/queries/postBySlug.graphql';
 
 export const state = () => ({
   single: null,
@@ -29,8 +32,8 @@ export const actions = {
     })
   },
   async LOAD_POSTS({commit}) {
-    let variables = {count: 5};
-    await this.app.apolloProvider.defaultClient.query({query: postsQuery, variables})
+    let variables = {count: 8};
+    await this.app.apolloProvider.defaultClient.query({query: postsQql, variables})
       .then(({data}) => {
         commit('SET_POSTS', data.posts)
       }).catch((error) => {
@@ -38,8 +41,12 @@ export const actions = {
       })
   },
   async LOAD_POST({commit}, {slug}) {
-    await this.app.$http.post.singular(slug).then((data) => {
-      commit('SET_POST', data)
-    })
+    let variables = {slug};
+    await this.app.apolloProvider.defaultClient.query({query: postBySlugQql, variables})
+      .then(({data}) => {
+        commit('SET_POST', data.postBySlug)
+      }).catch((error) => {
+        console.log(error)
+      })
   },
 }

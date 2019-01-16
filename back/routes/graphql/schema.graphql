@@ -7,14 +7,15 @@ scalar Date @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\Date")
 #import user.graphql
 #import post.graphql
 #import media.graphql
+#import category.graphql
+#import tag.graphql
 
 type Query {
-    users: [User!]! @paginate(type: "paginator" model: "LaravelVueJs\\Models\\User")
-    user(id: ID @eq): User @find(model: "LaravelVueJs\\Models\\User")
+    users: [User!]! @paginate(type: "paginator" model: "User")
+    user(id: ID @eq): User @find(model: "User")
     posts: [Post!]! @paginate(builder: "LaravelVueJs\\Models\\Post@visiblePosts")
     postsAll: [Post!]! @all
     post(id: Int! @eq): Post @find
+    postBySlug(slug: String! @eq): Post
 }
-
-
 

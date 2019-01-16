@@ -127,15 +127,16 @@ module.exports = {
         }
       })
     ],
-    // vendor: ['vue-i18n'],
-    postcss: [
-      // () => require("postcss-rtl")(),
-      // () => require("lost")()
-    ],
-    extend(config, {
-      isDev,
-      isClient
-    }) {
+    postcss: {
+      // Add plugin names as key and arguments as value
+      // Install them before as dependencies with npm or yarn
+      plugins: {
+        // Disable a plugin by passing false as value
+        'postcss-rtl': {},
+        'lost': {},
+      },
+    },
+    extend(config, {isDev, isClient}) {
     }
   },
 

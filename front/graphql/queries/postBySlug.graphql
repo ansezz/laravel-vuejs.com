@@ -1,0 +1,31 @@
+query posts($slug: String!) {
+  postBySlug(
+    slug: $slug
+  ) {
+    id
+    title
+    content
+    excerpt
+    image_url
+    type
+    status
+    comment_status
+    user {
+      id
+      name
+    }
+    media {
+      id
+      full_url
+    }
+    tags {
+      id
+      name
+    }
+    categories {
+      id
+      name
+    }
+  }
+}
+

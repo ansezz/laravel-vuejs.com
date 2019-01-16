@@ -62,7 +62,7 @@ class Post extends Model implements HasMedia
 
     public function visiblePosts($root, array $args, $context, ResolveInfo $resolveInfo): Builder
     {
-        return $this->where('status', 1);
+        return $this->where('status', 1)->latest();
     }
 
     /**

@@ -11,4 +11,6 @@ type Post {
     comment_status: Int!
     user: User! @belongsTo
     media: [Media] @hasOne
+    tags: [Tag] @hasMany
+    categories: [Category] @hasMany
 }

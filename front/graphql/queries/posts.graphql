@@ -1,6 +1,5 @@
-import gql from 'graphql-tag'
 
-export default gql`query posts($count: Int!) {
+query posts($count: Int!) {
   posts(count : $count) {
     data {
       id
@@ -16,4 +15,4 @@ export default gql`query posts($count: Int!) {
       }
     }
   }
-}`
+}

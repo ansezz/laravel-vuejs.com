@@ -1,12 +1,22 @@
 <template lang="html">
-    <div>Single Post</div>
+  <div>
+    <h1>{{post.title}}</h1>
+    <pre>
+    {{post}}
+  </pre>
+  </div>
 </template>
 
 <script>
-    export default {
-        components: {},
-        name: 'post',
-    }
+  export default {
+    components: {},
+    name: 'post',
+    computed: {
+      post() {
+        return this.$store.state.post.single
+      }
+    },
+  }
 
 </script>
 
