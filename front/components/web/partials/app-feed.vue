@@ -2,18 +2,12 @@
     <section class="feed">
         <heading>Third Category</heading>
         <div class="articles-list">
-            <article-item
-                title="Promises, promises: A quick introduction to JavaScript concurrency"
-                description="Sign up for our newsletter, and we'll send you news and tutorials on web design, coding, business, and more!" />
-            <article-item title="Laravel Query Builder" />
-            <article-item title="Laravel 5.6 Dynamic Rate Limiting Provides Per-User Request Throttling" />
-            <article-item title="Laravel Relationship Events" />
-            <article-item title="Eventy: WordPress-like Actions and Filters for Laravel" />
-            <article-item title="Promises, promises: A quick introduction to JavaScript concurrency" />
-            <article-item title="How learning to code changed my life" />
-            <article-item title="Your First Hackathon: A Survival Guide" />
-            <article-item
-                title="Student Success: How Treehouse helped George Lambert get out of a cubicle to form his own company" />
+          <article-item v-for="item in posts"
+                        :title="item.title"
+                        :image="item.image_url"
+                        :description="item.excerpt"
+                        :key="item.id"
+          />
         </div>
         <pagination />
     </section>
@@ -27,6 +21,11 @@
     },
     data() {
       return {}
+    },
+    computed: {
+      posts() {
+        return this.$store.state.post.posts.data
+      }
     },
     mounted() {},
   }

@@ -3,10 +3,12 @@
         <div class="container">
             <heading>Featured Posts</heading>
             <div class="posts-grid">
-                <article-item title="Promises, promises: A quick introduction to JavaScript concurrency" />
-                <article-item title="Treehouse is Oregon Tech’s Most Disruptive" />
-                <article-item title="In defense of the modern storyboard" />
-                <article-item title="New Outer Array Functions Coming to PHP 7.3" />
+              <article-item v-for="item in featured"
+                            :title="item.title"
+                            :image="item.image_url"
+                            :description="item.excerpt"
+                            :key="item.id"
+              />
             </div>
         </div>
     </section>
@@ -19,6 +21,11 @@
         components: {
             ArticleItem
         },
+      computed: {
+        featured() {
+          return this.$store.state.post.featured.data
+        },
+      },
         data() {
             return {
             }

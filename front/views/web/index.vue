@@ -31,12 +31,7 @@
                     { title: 'Bar', href: '/', image: 'test' }
                 ]
             }
-        },
-        computed: {
-            feed() {
-                return this.$store.state.post.featured
-            },
-        },
+        }
     }
 
 </script>
@@ -46,5 +41,5 @@
         padding 60px 0 120px
     .posts-wrapper
         display flex
-        justify-content space-between    
+        justify-content space-between
 </style>

@@ -1,5 +1,5 @@
-query posts($count: Int!) {
-  posts(count : $count) {
+query featuredPosts($count: Int!) {
+  featuredPosts(count : $count) {
     data {
       id
       title

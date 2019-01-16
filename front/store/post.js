@@ -1,4 +1,5 @@
 import postsQql from '@/graphql/queries/posts.graphql';
+import featuredPostsQql from '@/graphql/queries/featuredPosts.graphql';
 import postBySlugQql from '@/graphql/queries/postBySlug.graphql';
 
 export const state = () => ({
@@ -25,9 +26,13 @@ export const mutations = {
 export const actions = {
   //Get the latest news
   async LOAD_FEATURED_POSTS({commit}) {
-    await this.app.$http.post.featured().then((data) => {
-      commit('SET_FEATURED_POSTS', data)
-    })
+    let variables = {count: 8};
+    await this.app.apolloProvider.defaultClient.query({query: featuredPostsQql, variables})
+      .then(({data}) => {
+        commit('SET_FEATURED_POSTS', data.featuredPosts)
+      }).catch((error) => {
+        console.log(error)
+      })
   },
   async LOAD_POSTS({commit}) {
     let variables = {count: 8};

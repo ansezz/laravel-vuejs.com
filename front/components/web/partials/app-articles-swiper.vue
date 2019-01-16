@@ -2,33 +2,11 @@
     <section class="articles-swiper">
         <div v-swiper:mySwiper="articlesSwiper" class="swiper-container">
             <div class="swiper-wrapper">
-                <div class="swiper-slide">
+                <div class="swiper-slide" v-for="item in featured" :key="item.id">
                     <div class="article-box">
-                        <thumbnail />
+                        <thumbnail  :src="item.image_url" :alt="item.title"/>
                         <div class="article-info">
-                            <h4>Promises, promises: A quick introduction to JavaScript concurrency</h4>
-                            <ul class="cats">
-                                <li>In News. Last update: 4 Minutes ago.</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                <div class="swiper-slide">
-                    <div class="article-box">
-                        <thumbnail />
-                        <div class="article-info">
-                            <h4>Promises, promises: A quick introduction to JavaScript concurrency</h4>
-                            <ul class="cats">
-                                <li>In News. Last update: 4 Minutes ago.</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                <div class="swiper-slide">
-                    <div class="article-box">
-                        <thumbnail />
-                        <div class="article-info">
-                            <h4>Promises, promises: A quick introduction to JavaScript concurrency</h4>
+                            <h4>{{item.title}}</h4>
                             <ul class="cats">
                                 <li>In News. Last update: 4 Minutes ago.</li>
                             </ul>
@@ -51,6 +29,11 @@
 <script>
     export default {
         name: 'AppArticlesSwiper',
+      computed: {
+        featured() {
+          return this.$store.state.post.featured.data
+        },
+      },
         data() {
             return {
                 articlesSwiper: {
