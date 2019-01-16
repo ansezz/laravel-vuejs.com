@@ -1,5 +1,3 @@
-// import postsQuery from './../graphql/queries/posts'
-// import gql from 'graphql-tag'
 import postsQql from '@/graphql/queries/posts.graphql';
 import postBySlugQql from '@/graphql/queries/postBySlug.graphql';
 

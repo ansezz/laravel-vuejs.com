@@ -29,6 +29,7 @@ class Post extends Model implements HasMedia
         'type',
         'excerpt',
         'status',
+        'featured',
         'comment_status',
         'user_id',
     ];
@@ -63,6 +64,11 @@ class Post extends Model implements HasMedia
     public function visiblePosts($root, array $args, $context, ResolveInfo $resolveInfo): Builder
     {
         return $this->where('status', 1)->latest();
+    }
+
+    public function featuredPosts($root, array $args, $context, ResolveInfo $resolveInfo): Builder
+    {
+        return $this->where('featured', 1)->latest();
     }
 
     /**

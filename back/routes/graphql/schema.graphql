@@ -17,5 +17,6 @@ type Query {
     postsAll: [Post!]! @all
     post(id: Int! @eq): Post @find
     postBySlug(slug: String! @eq): Post
+    featuredPosts: [Post!]! @paginate(builder: "LaravelVueJs\\Models\\Post@featuredPosts")
 }
 

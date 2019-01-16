@@ -10,5 +10,6 @@ $factory->define(\LaravelVueJs\Models\Post::class, function (Faker $faker) {
         'type'           => 1,
         'status'         => $faker->numberBetween(0, 3),
         'comment_status' => $faker->numberBetween(0, 1),
+        'featured'       => $faker->boolean,
     ];
 });

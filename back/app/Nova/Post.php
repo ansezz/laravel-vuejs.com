@@ -91,6 +91,7 @@ class Post extends Resource
 
             Categories::make('Categories'),
 
+            Boolean::make('Featured'),
         ];
     }
 
