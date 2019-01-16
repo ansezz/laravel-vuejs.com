@@ -66,13 +66,12 @@ namespace :app do
   task :build do
     on roles(:server) do
       within release_path do
-        execute "cd #{release_path}/back && composer install --prefer-dist --no-interaction --optimize-autoloader"
-        execute "cd #{release_path}/back/nova-components/nova-categories-field && composer install --prefer-dist --no-interaction --optimize-autoloader"
-        execute "cd #{release_path}/back/nova-components/WpImporter && composer install --prefer-dist --no-interaction --optimize-autoloader"
+        execute "cd #{release_path}/back && composer install --prefer-dist --no-interaction --optimize-autoloader && npm install && npm run dev"
+        execute "cd #{release_path}/back/nova-components/nova-categories-field && composer install --prefer-dist --no-interaction --optimize-autoloader && npm install && npm run dev"
+        execute "cd #{release_path}/back/nova-components/WpImporter && composer install --prefer-dist --no-interaction --optimize-autoloader && npm install && npm run dev"
         execute "chmod 777 -R #{release_path}/back/storage"
         execute "cd #{release_path}/back && php artisan migrate:fresh --seed"
         execute "cd #{release_path}/back && php artisan storage:link"
-        execute "cd #{release_path}/back && npm install && npm run dev && npm run build-category && npm run build-wp-importer"
       end
     end
   end
