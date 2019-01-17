@@ -1,6 +1,6 @@
-import postsQql from '@/graphql/queries/posts.graphql';
-import featuredPostsQql from '@/graphql/queries/featuredPosts.graphql';
-import postBySlugQql from '@/graphql/queries/postBySlug.graphql';
+import postsQql from '@/graphql/queries/post/all.graphql';
+import featuredPostsQql from '@/graphql/queries/post/featured.graphql';
+import postBySlugQql from '@/graphql/queries/post/bySlug.graphql';
 
 export const state = () => ({
   single: null,

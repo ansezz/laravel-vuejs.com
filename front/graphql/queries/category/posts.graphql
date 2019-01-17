@@ -1,0 +1,21 @@
+query postsByCategory($slug: String!, $count: Int!, $page: Int) {
+  postsByCategory(slug : $slug, count : $count, page : $page) {
+    data {
+      id
+      title
+      slug
+      excerpt
+      image_url
+    }
+    paginatorInfo {
+      count
+      currentPage
+      firstItem
+      hasMorePages
+      lastItem
+      lastPage
+      perPage
+      total
+    }
+  }
+}

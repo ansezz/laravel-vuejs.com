@@ -58,12 +58,12 @@ module.exports = {
     withCredentials: false
   },
   manifest: {
-    name: "Nuxt Demo",
-    short_name: "NuxtDemo",
-    title: "Nuxt Demo Title",
-    "og:title": "Nuxt Demo ogTitle",
-    description: "Nuxt Demo  appDescription",
-    "og:description": "Nuxt Demo  ogDescription",
+    name: "Laravel-VueJs.com",
+    short_name: "Laravel-VueJs.com",
+    title: "Laravel-VueJs.com",
+    "og:title": "Laravel-VueJs.com",
+    description: "Laravel-VueJs.com",
+    "og:description": "Laravel-VueJs.com",
     lang: "en",
     theme_color: "#42b883",
     background_color: "#35495e"
