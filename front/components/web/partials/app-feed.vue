@@ -2,12 +2,12 @@
     <section class="feed">
         <heading>Third Category</heading>
         <div class="articles-list">
-          <article-item v-for="item in posts"
-                        :title="item.title"
-                        :image="item.image_url"
-                        :description="item.excerpt"
-                        :key="item.id"
-          />
+            <article-item v-for="item in posts"
+                :title="item.title"
+                :image="item.image_url"
+                :description="item.excerpt"
+                :key="item.id"
+            />
         </div>
         <pagination />
     </section>

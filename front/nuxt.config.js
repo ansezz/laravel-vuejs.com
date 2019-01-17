@@ -100,7 +100,9 @@ module.exports = {
         href: "/favicon.ico"
       },
     ],
-    script: []
+    script: [
+        { src: "https://code.jquery.com/jquery-1.12.4.min.js"}
+    ]
   },
   /*
    ** Customize the progress bar color
@@ -162,6 +164,10 @@ module.exports = {
     {
       src: '~/plugins/vue-tags-input',
       ssr: false
+    },
+    {
+        src: '~/plugins/bootstrap.min.js',
+        ssr: false
     }
   ],
 
