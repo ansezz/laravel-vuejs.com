@@ -50,32 +50,95 @@
         <section class="job-tabs">
             <div class="container">
                 <ul class="nav nav-tabs" role="tablist">
-                    <li role="presentation" class="active"><a href="#home" aria-controls="home" role="tab" data-toggle="tab">Home1</a></li>
-                    <li role="presentation"><a href="#profile" aria-controls="profile" role="tab" data-toggle="tab">Profile</a></li>
-                    <li role="presentation"><a href="#messages" aria-controls="messages" role="tab" data-toggle="tab">Messages</a></li>
-                    <li role="presentation"><a href="#settings" aria-controls="settings" role="tab" data-toggle="tab">Settings</a></li>
+                    <li role="presentation" class="active"><a href="#all" aria-controls="all" role="tab" data-toggle="tab">All jobs</a></li>
+                    <li role="presentation"><a href="#full-time" aria-controls="full-time" role="tab" data-toggle="tab">Full-time</a></li>
+                    <li role="presentation"><a href="#part-time" aria-controls="part-time" role="tab" data-toggle="tab">Part-time</a></li>
+                    <li role="presentation"><a href="#freelance" aria-controls="freelance" role="tab" data-toggle="tab">Freelance</a></li>
+                    <li role="presentation"><a href="#temporary" aria-controls="temporary" role="tab" data-toggle="tab">Temporary</a></li>
+                    <li role="presentation"><a href="#intership" aria-controls="intership" role="tab" data-toggle="tab">Intership</a></li>
+                    <li role="presentation"><a href="#remote" aria-controls="remote" role="tab" data-toggle="tab">Remote</a></li>
                 </ul>
+                <div class="tab-content">
+                    <div role="tabpanel" class="tab-pane active" id="all">
+                        <div class="content-wrapper">
+                            <div class="col-9">
+                                <app-jobs />
+                                <pagination/>  
+                            </div>
+                            <div class="col-3">
+                                <app-latest-profiles />
+                            </div>
+                        </div>
+                    </div>
+                    <div role="tabpanel" class="tab-pane" id="full-time">
+                        <div class="content-wrapper">
+                            <div class="col-9">
+                                <app-jobs />
+                                <pagination/>  
+                            </div>
+                            <div class="col-3">
+                                <app-latest-profiles />
+                            </div>
+                        </div>
+                    </div>
+                    <div role="tabpanel" class="tab-pane" id="part-time">
+                        <div class="content-wrapper">
+                            <div class="col-9">
+                                <app-jobs />
+                                <pagination/>  
+                            </div>
+                            <div class="col-3">
+                                <app-latest-profiles />
+                            </div>
+                        </div>
+                    </div>
+                    <div role="tabpanel" class="tab-pane" id="freelance">
+                        <div class="content-wrapper">
+                            <div class="col-9">
+                                <app-jobs />
+                                <pagination/>  
+                            </div>
+                            <div class="col-3">
+                                <app-latest-profiles />
+                            </div>
+                        </div>
+                    </div>
+                    <div role="tabpanel" class="tab-pane" id="temporary">
+                        <div class="content-wrapper">
+                            <div class="col-9">
+                                <app-jobs />
+                                <pagination/>  
+                            </div>
+                            <div class="col-3">
+                                <app-latest-profiles />
+                            </div>
+                        </div>
+                    </div>
+                    <div role="tabpanel" class="tab-pane" id="intership">
+                        <div class="content-wrapper">
+                            <div class="col-9">
+                                <app-jobs />
+                                <pagination/>  
+                            </div>
+                            <div class="col-3">
+                                <app-latest-profiles />
+                            </div>
+                        </div>
+                    </div>
+                    <div role="tabpanel" class="tab-pane" id="remote">
+                        <div class="content-wrapper">
+                            <div class="col-9">
+                                <app-jobs />
+                                <pagination/>  
+                            </div>
+                            <div class="col-3">
+                                <app-latest-profiles />
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
-
-  <!-- Tab panes -->
-  <div class="tab-content">
-    <div role="tabpanel" class="tab-pane active" id="home">1...</div>
-    <div role="tabpanel" class="tab-pane" id="profile">2...</div>
-    <div role="tabpanel" class="tab-pane" id="messages">3...</div>
-    <div role="tabpanel" class="tab-pane" id="settings">4...</div>
-  </div>
-        <div class="container">
-            <div class="content-wrapper">
-                <div class="col-9">
-                    <app-jobs />
-                    <pagination/>  
-                </div>
-                <div class="col-3">
-                    <app-latest-profiles />
-                </div>
-            </div>
-        </div>
     </div>
 </template>
 
@@ -173,6 +236,39 @@
                     padding-right 0
                     padding-left 5px
                     cursor pointer
+    .job-tabs
+        margin-top 20px
+        position relative
+        &:before
+            content ""
+            height 2px
+            width 100%
+            background-color #ebeef2
+            display block
+            position absolute
+            top 38px
+    .nav-tabs
+        border-bottom 2px solid #ebeef2
+        li
+            margin-bottom -2px
+            background-color #FFF
+            a
+                font-size 14px
+                font-weight 600
+                color #384457
+                margin-right 0
+                border-radius 0
+                line-height 1
+                border 0
+                padding 12px 45px
+                &:hover,
+                &:focus
+                    background-color transparent
+            &.active
+                a
+                    color $secondary
+                    border 2px solid #ebeef2
+                    border-bottom 0
             
     .filters
         float right
