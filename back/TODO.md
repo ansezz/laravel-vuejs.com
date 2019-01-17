@@ -8,7 +8,7 @@
 > ## API 
 - [X] Single post
 - [ ] Website Setting
-- [ ] Featured posts
+- [X] Featured posts
 - [ ] Post by category
 - [ ] Post by tag
 - [ ] Post by author

@@ -13,10 +13,13 @@ scalar Date @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\Date")
 type Query {
     users: [User!]! @paginate(type: "paginator" model: "User")
     user(id: ID @eq): User @find(model: "User")
-    posts: [Post!]! @paginate(builder: "LaravelVueJs\\Models\\Post@visiblePosts")
     postsAll: [Post!]! @all
     post(id: Int! @eq): Post @find
     postBySlug(slug: String! @eq): Post
+    tagBySlug(slug: String! @eq): Tag
+    categoryBySlug(slug: String!): Category
+    posts: [Post!]! @paginate(builder: "LaravelVueJs\\Models\\Post@visiblePosts")
     featuredPosts: [Post!]! @paginate(builder: "LaravelVueJs\\Models\\Post@featuredPosts")
+    postsByTag(slug: String!): [Post!]! @paginate(builder: "LaravelVueJs\\Models\\Post@postsByTag")
+    postsByCategory(slug: String!): [Post!]! @paginate(builder: "LaravelVueJs\\Models\\Post@postsByCategory")
 }
-

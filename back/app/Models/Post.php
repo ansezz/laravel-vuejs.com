@@ -5,6 +5,7 @@ namespace LaravelVueJs\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use GraphQL\Type\Definition\ResolveInfo;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use LaravelVueJs\Traits\HasCategories;
 use Spatie\MediaLibrary\HasMedia\HasMedia;
 use Spatie\MediaLibrary\HasMedia\HasMediaTrait;
@@ -71,6 +72,28 @@ class Post extends Model implements HasMedia
         return $this->where('featured', 1)->latest();
     }
 
+    public function postsByTag($root, array $args, $context, ResolveInfo $resolveInfo): Builder
+    {
+        $tag = Tag::findFromSlug($args['slug']);
+
+        if ($tag) {
+            return $tag->posts()->getQuery();
+        }
+
+        abort(404);
+    }
+
+    public function postsByCategory($root, array $args, $context, ResolveInfo $resolveInfo): Builder
+    {
+        $category = Category::whereSlug($args['slug'])->first();
+
+        if ($category) {
+            return $category->posts()->getQuery();
+        }
+
+        abort(404);
+    }
+
     /**
      * Get the user's Image Url.
      *
@@ -89,6 +112,12 @@ class Post extends Model implements HasMedia
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+
+    public static function getTagClassName(): string
+    {
+        return Tag::class;
     }
 }
 
