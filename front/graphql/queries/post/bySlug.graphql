@@ -1,7 +1,5 @@
 query posts($slug: String!) {
-  postBySlug(
-    slug: $slug
-  ) {
+  postBySlug(slug: $slug) {
     id
     title
     content
@@ -21,10 +19,12 @@ query posts($slug: String!) {
     tags {
       id
       name
+      slug
     }
     categories {
       id
       name
+      slug
     }
   }
 }

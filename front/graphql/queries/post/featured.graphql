@@ -7,5 +7,15 @@ query featuredPosts($count: Int!) {
       excerpt
       image_url
     }
+    paginatorInfo {
+      count
+      currentPage
+      firstItem
+      hasMorePages
+      lastItem
+      lastPage
+      perPage
+      total
+    }
   }
 }

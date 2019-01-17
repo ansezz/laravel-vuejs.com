@@ -1,0 +1,21 @@
+query posts($count: Int!) {
+  posts(count : $count) {
+    data {
+      id
+      title
+      slug
+      excerpt
+      image_url
+    }
+    paginatorInfo {
+      count
+      currentPage
+      firstItem
+      hasMorePages
+      lastItem
+      lastPage
+      perPage
+      total
+    }
+  }
+}
