@@ -144,7 +144,7 @@
 
 <script>
     export default {
-        name: "SigneProfile",
+        name: "JobsArchive",
         components: {
             Breadcrumb: () => import('@/components/shared/partials/elements/breadcrumb'),
             Pagination: () => import('@/components/shared/partials/elements/pagination'),

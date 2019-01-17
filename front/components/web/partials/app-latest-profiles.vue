@@ -36,6 +36,12 @@
                 <nuxt-link to="/" class="is-absolute" />
             </li>
         </ul>
+        <div class="check-more">
+            <a href="javascript:;" class="button has-icon right-icon">
+                <span>Check the others</span>
+                <img src="@/assets/images/icons-arrow.png" alt="LV">
+            </a>
+        </div>
     </div>
 </template>
 
@@ -78,4 +84,12 @@
                     font-size 14px
                     color #616d82
                     opacity .8
+    .check-more
+        margin-top 60px
+        .button
+            width 240px
+            &.has-icon
+                &.right-icon
+                    img
+                        transform rotate(180deg)
 </style>
