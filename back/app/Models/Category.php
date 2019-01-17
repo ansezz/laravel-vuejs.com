@@ -97,4 +97,12 @@ class Category extends Model
     {
         return $this->belongsTo(self::class, 'parent_id');
     }
+
+    /**
+     * Get all of the posts that are assigned this category.
+     */
+    public function posts()
+    {
+        return $this->morphedByMany(Post::class, 'categorizable');
+    }
 }
