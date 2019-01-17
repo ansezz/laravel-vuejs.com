@@ -51,6 +51,6 @@
     .posts-grid
         display grid
         grid-template-columns repeat(4, 1fr)
-        grid-gap 10px
+        grid-gap 20px 10px
         margin-top 30px
 </style>

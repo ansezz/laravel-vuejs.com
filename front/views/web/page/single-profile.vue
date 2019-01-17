@@ -61,9 +61,9 @@
   <!-- Tab panes -->
   <div class="tab-content">
     <div role="tabpanel" class="tab-pane active" id="home">1...</div>
-    <div role="tabpanel" class="tab-pane" id="profile">...</div>
-    <div role="tabpanel" class="tab-pane" id="messages">...</div>
-    <div role="tabpanel" class="tab-pane" id="settings">...</div>
+    <div role="tabpanel" class="tab-pane" id="profile">2...</div>
+    <div role="tabpanel" class="tab-pane" id="messages">3...</div>
+    <div role="tabpanel" class="tab-pane" id="settings">4...</div>
   </div>
         <div class="container">
             <div class="content-wrapper">

@@ -4,41 +4,52 @@
             <thumbnail :src="image" :alt="title"/>
         </header>
         <main class="article-main">
-            <h3 class="article-title" v-html="title"/>
-            <p v-if="description" class="article-description" v-html="description"/>
+            <h3 class="article-title" v-html="truncate(title, 45)"/>
+            <p v-if="description" class="article-description" v-html="truncate(description, 60)"/>
         </main>
     </article>
 </template>
 
 <script>
 export default {
-  name: "ArticleItem",
-  props: {
-    horizontal: {
-        type: Boolean,
-        default: false
+    name: "ArticleItem",
+    props: {
+        horizontal: {
+            type: Boolean,
+            default: false
+        },
+        title: {
+            type: String,
+            default: null
+        },
+        description: {
+            type: String,
+            default: null
+        },
+        href: {
+            type: String,
+            default: null
+        },
+        image: {
+            type: String,
+            default: null
+        },
+        thumb: {
+            type: Boolean,
+            default: null
+        }  
     },
-    title: {
-        type: String,
-        default: null
-    },
-    description: {
-        type: String,
-        default: null
-    },
-    href: {
-        type: String,
-        default: null
-    },
-    image: {
-        type: String,
-        default: null
-    },
-    thumb: {
-        type: Boolean,
-        default: null
-    }  
-  }
+    methods: {
+        truncate: function (text, number) {
+            if(text) {
+                let textsub = text.substr(0, number),
+                helpIndex = textsub.lastIndexOf(" "),
+                exactIndex = number - helpIndex;
+                return text.substr(0, (number - exactIndex)) + '...';
+            }
+            return text;
+        }
+    }
 }
 </script>
 
