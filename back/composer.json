@@ -16,6 +16,7 @@
         "jameslkingsley/nova-stripe-theme": "^1.0",
         "laravel/framework": "5.7.*",
         "laravel/nova": "*",
+        "laravel/passport": "^7.0",
         "laravel/telescope": "^1.0",
         "laravel/tinker": "^1.0",
         "mll-lab/laravel-graphql-playground": "^0.3.3",

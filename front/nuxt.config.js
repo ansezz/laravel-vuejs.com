@@ -8,6 +8,7 @@ module.exports = {
   modules: [
     '@nuxtjs/apollo',
     "@nuxtjs/axios",
+    '@nuxtjs/auth',
     "@nuxtjs/dotenv",
     "@nuxtjs/font-awesome",
     //"@nuxtjs/google-analytics",
@@ -22,6 +23,20 @@ module.exports = {
         id: process.env.GOOGLE_TAG_MANAGER
     }]*/
   ],
+  auth: {
+    redirect: {
+      login: '/auth/login',
+      logout: '/',
+      callback: '/auth/login',
+      home: '/'
+    },
+    strategies: {
+      github: {
+        client_id: 'f9cc959e541f0fc3797d',
+        client_secret: 'd5043ead6255cad1bb87d7b1abf0488994768c70'
+      },
+    }
+  },
   // Give apollo module options
   apollo: {
     // required

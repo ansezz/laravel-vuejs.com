@@ -7,7 +7,10 @@
             <h1>Login</h1>
             <p>Welcome back, mate.</p>
         </header>
-        <form action="/">
+        <form>
+          <div class="form-group">
+            <button class="button button-green" @click.prevent="login('github')"> Github</button>
+          </div>
             <h5 class="text-center">Login to your account</h5>
             <div class="form-group">
                 <input type="email" name="email" class="form-control has-custom" placeholder="E-mail or user name" />
@@ -33,7 +36,16 @@
 <script>
 export default {
   name: "LoginApp",
-  props: {}
+  props: {},
+  methods: {
+    login(name) {
+      this.$auth.loginWith(name).then(() => {
+        console.log(this.$auth)
+      }).catch((error) => {
+        console.log(error)
+      })
+    }
+  }
 }
 </script>
 
