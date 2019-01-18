@@ -5,12 +5,8 @@
             <div class="container">
                 <ul class="left-area">
                     <li>
-                        <img src="@/assets/images/single-profile-icon.png" alt="LV">
-                        <span>Beats Electrics</span>
-                    </li>
-                    <li>
-                        <span>Morocco (+2)</span>
-                        <img src="@/assets/images/icons-extern.svg" alt="LV">
+                        <img src="@/assets/images/city.png" alt="LV">
+                        <span>Casablance, Morocco</span>
                     </li>
                 </ul>
                 <div class="filters">
@@ -66,6 +62,7 @@
                                 <pagination/>  
                             </div>
                             <div class="col-3">
+                                <app-companies-trust />
                                 <app-latest-profiles />
                             </div>
                         </div>
@@ -77,6 +74,7 @@
                                 <pagination/>  
                             </div>
                             <div class="col-3">
+                                <app-companies-trust />
                                 <app-latest-profiles />
                             </div>
                         </div>
@@ -88,6 +86,7 @@
                                 <pagination/>  
                             </div>
                             <div class="col-3">
+                                <app-companies-trust />
                                 <app-latest-profiles />
                             </div>
                         </div>
@@ -99,6 +98,7 @@
                                 <pagination/>  
                             </div>
                             <div class="col-3">
+                                <app-companies-trust />
                                 <app-latest-profiles />
                             </div>
                         </div>
@@ -110,6 +110,7 @@
                                 <pagination/>  
                             </div>
                             <div class="col-3">
+                                <app-companies-trust />
                                 <app-latest-profiles />
                             </div>
                         </div>
@@ -121,6 +122,7 @@
                                 <pagination/>  
                             </div>
                             <div class="col-3">
+                                <app-companies-trust />
                                 <app-latest-profiles />
                             </div>
                         </div>
@@ -132,6 +134,7 @@
                                 <pagination/>  
                             </div>
                             <div class="col-3">
+                                <app-companies-trust />
                                 <app-latest-profiles />
                             </div>
                         </div>
@@ -144,12 +147,13 @@
 
 <script>
     export default {
-        name: "SigneProfile",
+        name: "Companies",
         components: {
             Breadcrumb: () => import('@/components/shared/partials/elements/breadcrumb'),
             Pagination: () => import('@/components/shared/partials/elements/pagination'),
             AppLatestProfiles: () => import('@/components/web/partials/app-latest-profiles'),
-            AppJobs: () => import('@/components/web/partials/app-jobs')
+            AppJobs: () => import('@/components/web/partials/app-jobs'),
+            AppCompaniesTrust: () => import('@/components/web/partials/app-companies-trust')
         },
         data() {
             return {
@@ -158,11 +162,11 @@
                         link: "/"
                     },
                     {
-                        name: 'Companies',
+                        name: 'Regions',
                         link: "/"
                     },
                     {
-                        name: 'Beats Electronics',
+                        name: 'Casablanca, Morocco',
                         link: "/"
                     }
                 ]
@@ -222,20 +226,9 @@
             align-items center
             font-size 24px
             color #384457
-            padding-right 10px
             img
                 padding-right 10px
-            &:last-child
-                padding-right 0
                 padding-top 5px
-                span
-                    font-size 14px
-                    color #616d82
-                    opacity .8
-                img
-                    padding-right 0
-                    padding-left 5px
-                    cursor pointer
     .job-tabs
         margin-top 20px
         position relative
@@ -274,7 +267,7 @@
         float right
         display flex
         align-items center
-        height 34px
+        height 75px
 
     .filter-group
         position relative

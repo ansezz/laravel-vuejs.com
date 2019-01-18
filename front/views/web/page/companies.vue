@@ -5,12 +5,7 @@
             <div class="container">
                 <ul class="left-area">
                     <li>
-                        <img src="@/assets/images/single-profile-icon.png" alt="LV">
-                        <span>Beats Electrics</span>
-                    </li>
-                    <li>
-                        <span>Morocco (+2)</span>
-                        <img src="@/assets/images/icons-extern.svg" alt="LV">
+                        <span>Companies</span>
                     </li>
                 </ul>
                 <div class="filters">
@@ -62,7 +57,8 @@
                     <div role="tabpanel" class="tab-pane active" id="all">
                         <div class="content-wrapper">
                             <div class="col-9">
-                                <app-jobs />
+                                <app-jobs company />
+                                <app-companies-list />
                                 <pagination/>  
                             </div>
                             <div class="col-3">
@@ -144,12 +140,13 @@
 
 <script>
     export default {
-        name: "SigneProfile",
+        name: "Companies",
         components: {
             Breadcrumb: () => import('@/components/shared/partials/elements/breadcrumb'),
             Pagination: () => import('@/components/shared/partials/elements/pagination'),
             AppLatestProfiles: () => import('@/components/web/partials/app-latest-profiles'),
-            AppJobs: () => import('@/components/web/partials/app-jobs')
+            AppJobs: () => import('@/components/web/partials/app-jobs'),
+            AppCompaniesList: () => import('@/components/web/partials/app-companies-list')
         },
         data() {
             return {
@@ -159,10 +156,6 @@
                     },
                     {
                         name: 'Companies',
-                        link: "/"
-                    },
-                    {
-                        name: 'Beats Electronics',
                         link: "/"
                     }
                 ]
@@ -222,20 +215,6 @@
             align-items center
             font-size 24px
             color #384457
-            padding-right 10px
-            img
-                padding-right 10px
-            &:last-child
-                padding-right 0
-                padding-top 5px
-                span
-                    font-size 14px
-                    color #616d82
-                    opacity .8
-                img
-                    padding-right 0
-                    padding-left 5px
-                    cursor pointer
     .job-tabs
         margin-top 20px
         position relative
