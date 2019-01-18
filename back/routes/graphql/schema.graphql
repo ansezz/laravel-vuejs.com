@@ -9,11 +9,13 @@ scalar Date @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\Date")
 #import media.graphql
 #import category.graphql
 #import tag.graphql
+#import setting.graphql
 
 type Query {
     users: [User!]! @paginate(type: "paginator" model: "User")
     user(id: ID @eq): User @find(model: "User")
     postsAll: [Post!]! @all
+    settings: [Setting!]! @all
     post(id: Int! @eq): Post @find
     postBySlug(slug: String! @eq): Post
     tagBySlug(slug: String! @eq): Tag

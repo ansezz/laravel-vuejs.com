@@ -75,7 +75,7 @@ module.exports = {
    ** Headers of the page
    */
   head: {
-    title: "Nuxt Demo",
+    title: "Laravel-VueJs.com",
     meta: [
       {
         charset: "utf-8"
@@ -87,7 +87,7 @@ module.exports = {
       {
         hid: "description",
         name: "description",
-        content: "Nuxt.js project"
+        content: "Laravel-VueJs.com"
       }
     ],
     htmlAttrs: {
@@ -101,7 +101,7 @@ module.exports = {
       },
     ],
     script: [
-        { src: "https://code.jquery.com/jquery-1.12.4.min.js"}
+      {src: "https://code.jquery.com/jquery-1.12.4.min.js"}
     ]
   },
   /*
@@ -166,8 +166,8 @@ module.exports = {
       ssr: false
     },
     {
-        src: '~/plugins/bootstrap.min.js',
-        ssr: false
+      src: '~/plugins/bootstrap.min.js',
+      ssr: false
     }
   ],
 
