@@ -7,19 +7,19 @@
             <h1>Login</h1>
             <p>Welcome back, mate.</p>
         </header>
-        <form>
+        <form @submit.prevent="submitLogin">
           <div class="form-group">
-            <button class="button button-green" @click.prevent="login('github')"> Github</button>
+            <button class="button button-green" @click.prevent="socialLogin('github')"> Github</button>
           </div>
             <h5 class="text-center">Login to your account</h5>
             <div class="form-group">
-                <input type="email" name="email" class="form-control has-custom" placeholder="E-mail or user name" />
+                <input type="email" name="email" class="form-control has-custom" placeholder="E-mail or user name"  v-model="form.email"/>
             </div>
             <div class="form-group m-20">
-                <input type="password" class="form-control has-custom" placeholder="Password" />
+                <input type="password" class="form-control has-custom" placeholder="Password" v-model="form.password"/>
             </div>
             <div class="checking">
-                <input type="checkbox" id="checked" class="check">
+                <input type="checkbox" id="checked" class="check" v-model="form.remember_me">
                 <label for="checked">Remember me next time</label>
             </div>
             <div class="form-actions">
@@ -34,19 +34,36 @@
 </template>
 
 <script>
-export default {
-  name: "LoginApp",
-  props: {},
-  methods: {
-    login(name) {
-      this.$auth.loginWith(name).then(() => {
-        console.log(this.$auth)
-      }).catch((error) => {
-        console.log(error)
-      })
+  import {mapActions} from 'vuex'
+
+  export default {
+    name: "LoginApp",
+    data() {
+      return {
+        form: {
+          email: '',
+          password: '',
+          remember_me: false,
+        }
+      }
+    },
+    props: {},
+    methods: {
+      ...mapActions({
+        login: 'auth/LOGIN',
+      }),
+      submitLogin() {
+        this.login(this.form)
+      },
+      socialLogin(name) {
+        this.$auth.loginWith(name).then(() => {
+          console.log(this.$auth)
+        }).catch((error) => {
+          console.log(error)
+        })
+      }
     }
   }
-}
 </script>
 
 <style lang="stylus" scoped>

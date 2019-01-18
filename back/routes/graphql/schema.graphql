@@ -11,6 +11,11 @@ scalar Date @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\Date")
 #import tag.graphql
 #import setting.graphql
 
+type Login {
+    access_token: String
+    expires_at: String
+}
+
 type Query {
     users: [User!]! @paginate(type: "paginator" model: "User")
     user(id: ID @eq): User @find(model: "User")
@@ -28,15 +33,10 @@ type Query {
     logout: String
 }
 
-type Query @middleware(checks: ["auth:api"]) {
+extend type Query @middleware(checks: ["auth:api"]) {
     me : User
 }
 
 type Mutation {
     signup(email: String! @rules(apply: ["email","unique:users"]), password: String! @rules(apply: ["min:6"]), name: String! ): User @event(fire: "Illuminate\\Auth\\Events\\Registered")
-}
-
-type Login {
-    access_token: String
-    expires_at: String
 }

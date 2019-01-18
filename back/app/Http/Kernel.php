@@ -19,6 +19,7 @@ class Kernel extends HttpKernel
         \LaravelVueJs\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
         \LaravelVueJs\Http\Middleware\TrustProxies::class,
+        \Barryvdh\Cors\HandleCors::class,
     ];
 
     /**

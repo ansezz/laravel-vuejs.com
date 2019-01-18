@@ -16,7 +16,8 @@ class Authenticate extends Middleware
     protected function redirectTo($request)
     {
         if (!$request->expectsJson()) {
-            return route('login');
+            // @TOGO check why not working with apollo call
+           // return route('login');
         }
     }
 }
