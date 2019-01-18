@@ -22,10 +22,10 @@ class UsersTableSeeder extends Seeder
         ]);
         $admin->save();
 
-        factory(\LaravelVueJs\Models\User::class, 10)->create()->each(function (\LaravelVueJs\Models\User $user) use (
+        factory(\LaravelVueJs\Models\User::class, 5)->create()->each(function (\LaravelVueJs\Models\User $user) use (
             $faker
         ) {
-            factory(\LaravelVueJs\Models\Post::class, 2)->make()->each(function (\LaravelVueJs\Models\Post $post) use (
+            factory(\LaravelVueJs\Models\Post::class, 3)->make()->each(function (\LaravelVueJs\Models\Post $post) use (
                 $user,
                 $faker
             ) {
