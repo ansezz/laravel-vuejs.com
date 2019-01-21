@@ -174,9 +174,8 @@
         padding-top 40px
         .col-9
             width 720px
-            padding-right 20px
         .col-3
-            width calc(100% - 720px)
+            width calc(100% - 740px)
     .single-profile-header
         margin-top 40px
         margin-bottom 20px
