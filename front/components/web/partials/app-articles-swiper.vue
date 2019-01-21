@@ -4,9 +4,11 @@
             <div class="swiper-wrapper">
                 <div class="swiper-slide" v-for="item in featured" :key="item.id">
                     <div class="article-box">
-                        <thumbnail  :src="item.image_url" :alt="item.title"/>
+                        <thumbnail  :src="item.image_url" :alt="item.title" :to="{ name: 'slug', params: { slug: item.slug }}"/>
                         <div class="article-info">
+                          <nuxt-link :to="{ name: 'slug', params: { slug: item.slug }}">
                             <h4>{{item.title}}</h4>
+                          </nuxt-link>
                             <ul class="cats">
                                 <li>In News. Last update: 4 Minutes ago.</li>
                             </ul>

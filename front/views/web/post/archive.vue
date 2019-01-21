@@ -33,6 +33,7 @@
                       :image="item.image_url"
                       :description="item.excerpt"
                       :key="item.id"
+                      :to="{ name: 'slug', params: { slug: item.slug }}"
         />
       </div>
       <div class="ads has-m">900x250</div>
@@ -42,6 +43,7 @@
                       :image="item.image_url"
                       :description="item.excerpt"
                       :key="item.id"
+                      :to="{ name: 'slug', params: { slug: item.slug }}"
         />
       </div>
       <pagination/>

@@ -1,5 +1,5 @@
 <template>
-    <nuxt-link :to="routeName" class="article-image" v-lazy-container="{ selector: 'img' }">
+    <nuxt-link :to="to" class="article-image" v-lazy-container="{ selector: 'img' }">
         <img v-if="src" :data-src="src" :alt="alt">
         <span class="post-loader">
             <span class="sk-cube1 sk-cube"></span>
@@ -15,10 +15,7 @@
     export default {
         name: "Thumbnail",
         props: {
-            routeName: {
-                type: String,
-                default: "/"
-            },
+            to : [String,Object],
             paramValue: {
                 type: String,
                 default: null

@@ -7,6 +7,7 @@
                 :image="item.image_url"
                 :description="item.excerpt"
                 :key="item.id"
+                 :to="{ name: 'slug', params: { slug: item.slug }}"
             />
         </div>
         <pagination />

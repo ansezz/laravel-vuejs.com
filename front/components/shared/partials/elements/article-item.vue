@@ -1,13 +1,15 @@
 <template>
-    <article class="post" :class="{ 'is-horizontal' : horizontal }">
-        <header>
-            <thumbnail :src="image" :alt="title"/>
-        </header>
-        <main class="article-main">
-            <h3 class="article-title" v-html="truncate(title, 45)"/>
-            <p v-if="description" class="article-description" v-html="truncate(description, 60)"/>
-        </main>
-    </article>
+  <article class="post" :class="{ 'is-horizontal' : horizontal }">
+      <header>
+        <thumbnail :src="image" :alt="title" :to="to"/>
+      </header>
+    <main class="article-main">
+      <nuxt-link :to="to">
+        <h3 class="article-title" v-html="truncate(title, 45)"/>
+      </nuxt-link>
+      <p v-if="description" class="article-description" v-html="truncate(description, 60)"/>
+    </main>
+  </article>
 </template>
 
 <script>
@@ -26,9 +28,9 @@ export default {
             type: String,
             default: null
         },
-        href: {
-            type: String,
-            default: null
+        to: {
+          type: [String, Object],
+          default :'/'
         },
         image: {
             type: String,
@@ -37,7 +39,7 @@ export default {
         thumb: {
             type: Boolean,
             default: null
-        }  
+        }
     },
     methods: {
         truncate: function (text, number) {
