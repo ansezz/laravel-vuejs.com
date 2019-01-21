@@ -49,8 +49,7 @@ export const actions = {
           commit('SET_LOGGED_IN', true)
           this.$router.push('/')
         }
-      }).catch((error) => {
-        console.log(error)
+        return false
       })
   },
   async LOGOUT({commit}) {

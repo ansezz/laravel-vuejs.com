@@ -24,6 +24,9 @@
                 <input type="checkbox" id="checked" class="check" v-model="form.remember_me">
                 <label for="checked">Remember me next time</label>
             </div>
+          <div class="alert alert-danger" role="alert" v-if="message">
+            {{message}}
+          </div>
             <div class="form-actions">
                 <button class="button" type="submit" name="go">go ahead</button>
                 <nuxt-link to="/auth/signup" class="button no-background">I don’t an account yet</nuxt-link>
@@ -42,6 +45,7 @@
     name: "LoginApp",
     data() {
       return {
+        message : null,
         loading : false,
         form: {
           email: '',
@@ -57,7 +61,11 @@
       }),
       submitLogin() {
         this.loading = true;
-        this.login(this.form).finally(() => {
+        this.message = null;
+        this.login(this.form).then((data) => {
+          if (!data)
+            this.message = "Email or Password incorrect";
+        }).finally(() => {
           this.loading = false;
         })
       }
