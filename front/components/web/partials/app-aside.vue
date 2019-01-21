@@ -10,29 +10,8 @@
                         </li>
                     </ul>
                 </div>
-                <heading>Popular Posts</heading>
-                <div class="widget">
-                    <article-item horizontal title="New Blade Directives Coming to Laravel 5.6"  to="/"/>
-                    <article-item horizontal title="Laravel 5.6 adds the Collision Package for CLI Error Reporting" to="/"/>
-                    <article-item horizontal title="Laravel Manchester Meetup" to="/"/>
-                </div>
-                <div class="widget">
-                    <heading>Subsribe</heading>
-                    <app-form class="subscribe-widget">
-                       <template slot="desc">
-                            <p>Sign up for our newsletter, and we'll send you news and tutorials on web design, coding, business, and more!</p>
-                        </template>
-                        <div class="form-group">
-                            <input type="email" class="form-control" placeholder="E-mail">
-                            <div class="img">
-                                <img src="@/assets/images/icons-email.png" alt="#">
-                            </div>
-                        </div>
-                        <template slot="actions">
-                            <button class="button" type="submit">Subscribe</button>
-                        </template>
-                    </app-form>
-                </div>
+                <app-popular-posts />
+                <app-subscribe-form />
                 <div class="widget last-widget">
                     <div class="ads">300x250</div>
                 </div>
@@ -42,14 +21,15 @@
 </template>
 
 <script>
-    import ArticleItem from "@/components/shared/partials/elements/article-item"
+    import AppSubscribeForm from "@/components/web/partials/app-subscribe-form"
+    import AppPopularPosts from "@/components/web/partials/app-popular-posts"
     export default {
         name: 'AppAside',
         components: {
-            ArticleItem
+            AppSubscribeForm,
+            AppPopularPosts
         },
     }
-
 </script>
 
 <style lang="stylus" scoped>
@@ -87,15 +67,6 @@
                         color #3b5998
                 &:last-child
                     padding-right 0
-        .subscribe-widget
-            p
-                font-size 14px
-                font-weight 400
-                color $tertiary
-                margin-bottom 20px
-                opacity .8
-            .form-control
-                background-color rgba($secondary, .03)
         .ads
             width 100%
             height 250px

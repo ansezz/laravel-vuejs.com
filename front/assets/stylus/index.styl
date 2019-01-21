@@ -30,7 +30,7 @@ h1,h2,h3,h4,h5,h6
     color $secondary
     border 0
     height 40px
-    display flex
+    display inline-flex
     align-items center
     justify-content center
     padding 5px 20px 4px
@@ -73,6 +73,10 @@ h1,h2,h3,h4,h5,h6
         width 160px
     &.white-button
         background-color #FFF
+    &.inverse-button
+        background-color $secondary
+        color #FFF
+        font-weight 500
 
 .form-control
     &.has-custom
