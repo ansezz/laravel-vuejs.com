@@ -7,13 +7,15 @@
             <h1>Login</h1>
             <p>Welcome back, mate.</p>
         </header>
-        <form @submit.prevent="submitLogin">
-          <div class="form-group">
-            <button class="button button-green" @click.prevent="socialLogin('github')"> Github</button>
-          </div>
+        <form @submit.prevent="submitLogin" :class="{'is-loading' : loading}">
             <h5 class="text-center">Login to your account</h5>
             <div class="form-group">
-                <input type="email" name="email" class="form-control has-custom" placeholder="E-mail or user name"  v-model="form.email"/>
+                <input type="email"
+                       name="email"
+                       class="form-control has-custom"
+                       placeholder="E-mail or user name"
+                       v-model="form.email"
+                />
             </div>
             <div class="form-group m-20">
                 <input type="password" class="form-control has-custom" placeholder="Password" v-model="form.password"/>
@@ -40,6 +42,7 @@
     name: "LoginApp",
     data() {
       return {
+        loading : false,
         form: {
           email: '',
           password: '',
@@ -53,13 +56,9 @@
         login: 'auth/LOGIN',
       }),
       submitLogin() {
-        this.login(this.form)
-      },
-      socialLogin(name) {
-        this.$auth.loginWith(name).then(() => {
-          console.log(this.$auth)
-        }).catch((error) => {
-          console.log(error)
+        this.loading = true;
+        this.login(this.form).finally(() => {
+          this.loading = false;
         })
       }
     }

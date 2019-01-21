@@ -30,11 +30,11 @@ type Query {
     postsByTag(slug: String!): [Post!]! @paginate(builder: "LaravelVueJs\\Models\\Post@postsByTag")
     postsByCategory(slug: String!): [Post!]! @paginate(builder: "LaravelVueJs\\Models\\Post@postsByCategory")
     login(email: String!, password: String!, remember_me : Boolean): Login
-    logout: String
 }
 
 extend type Query @middleware(checks: ["auth:api"]) {
     me : User
+    logout: String
 }
 
 type Mutation {

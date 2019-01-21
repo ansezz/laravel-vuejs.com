@@ -1,13 +1,17 @@
 <!--laravelvuejs_Home_M.png-->
 <template>
-  <section>
-    <h1>SignUp Web</h1>
+  <section class="app-signup">
+    <AppSignup/>
   </section>
 </template>
 
 <script>
+  import AppSignup from "@/components/web/partials/app-signup"
+
   export default {
-    components: {},
+    components: {
+      AppSignup
+    },
     name: "SignUp"
   }
 </script>

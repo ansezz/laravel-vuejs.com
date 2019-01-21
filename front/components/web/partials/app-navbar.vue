@@ -28,7 +28,13 @@
                             <span>Newsletter</span>
                         </nuxt-link>
                     </li>
-                    <li>
+                    <li v-if="loggedIn && me">
+                        <nuxt-link to="/auth/account">
+                            <img src="@/assets/images/icons-user.png" :alt="me.name">
+                            <span>{{me.name}}</span>
+                        </nuxt-link>
+                    </li>
+                    <li v-else>
                         <nuxt-link to="/auth/signup">
                             <img src="@/assets/images/icons-user.png" alt="LV">
                             <span>Sign up/in</span>
@@ -41,12 +47,18 @@
 </template>
 
 <script>
-    import {
-        mapActions
-    } from 'vuex'
+  import {mapActions} from 'vuex'
 
     export default {
         name: 'AppNavbar',
+        computed :{
+          me () {
+            return this.$store.state.auth.me
+          },
+          loggedIn () {
+            return this.$store.state.auth.loggedIn
+          }
+        },
         methods: {
             ...mapActions(['toggleNavigationVisibility']),
         },

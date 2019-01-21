@@ -5,6 +5,7 @@ namespace LaravelVueJs\Http\GraphQL\Queries;
 use Carbon\Carbon;
 use GraphQL\Type\Definition\ResolveInfo;
 use Illuminate\Support\Facades\Auth;
+use Lcobucci\JWT\Parser;
 use Nuwave\Lighthouse\Support\Contracts\GraphQLContext;
 
 class Logout
@@ -21,8 +22,13 @@ class Logout
      */
     public function resolve($rootValue, array $args, GraphQLContext $context = null, ResolveInfo $resolveInfo)
     {
-        \auth()->user()->token()->revoke();
+        if (\auth()->check()) {
+            $value = request()->bearerToken();
+            $id = (new Parser())->parse($value)->getHeader('jti');
+            $token = request()->user()->tokens->find($id);
+            $token->revoke();
+        }
 
-        return 'Successfully logged out';
+        return 'You have been successfully logged out!';
     }
 }

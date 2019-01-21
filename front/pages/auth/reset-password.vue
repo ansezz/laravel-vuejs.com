@@ -5,6 +5,7 @@
 <script>
   export default {
     layout: ({store}) => store.state.platform,
+    middleware: ['guest'],
     components: {
       mobile: () => import(`~/views/mobile/auth/reset-password`),
       web: () => import(`~/views/web/auth/reset-password`)

@@ -5,6 +5,7 @@
 <script>
   export default {
     layout: ({store}) => store.state.platform,
+    middleware: ['guest'],
     components: {
       mobile: () => import(`~/views/mobile/auth/login`),
       web: () => import(`~/views/web/auth/login`)
