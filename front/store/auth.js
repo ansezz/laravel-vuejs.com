@@ -48,6 +48,7 @@ export const actions = {
           commit('SET_ME_TOKEN', data.login)
           commit('SET_LOGGED_IN', true)
           this.$router.push('/')
+          return true
         }
         return false
       })

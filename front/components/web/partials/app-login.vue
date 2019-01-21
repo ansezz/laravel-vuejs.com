@@ -24,8 +24,8 @@
                 <input type="checkbox" id="checked" class="check" v-model="form.remember_me">
                 <label for="checked">Remember me next time</label>
             </div>
-          <div class="alert alert-danger" role="alert" v-if="message">
-            {{message}}
+          <div class="alert" :class="'alert-'+message.type" role="alert" v-if="message.show">
+            {{message.content}}
           </div>
             <div class="form-actions">
                 <button class="button" type="submit" name="go">go ahead</button>
@@ -45,7 +45,11 @@
     name: "LoginApp",
     data() {
       return {
-        message : null,
+        message: {
+          show: false,
+          content: '',
+          type: ''
+        },
         loading : false,
         form: {
           email: '',
@@ -61,10 +65,16 @@
       }),
       submitLogin() {
         this.loading = true;
-        this.message = null;
+        this.message.show = false;
         this.login(this.form).then((data) => {
-          if (!data)
-            this.message = "Email or Password incorrect";
+          if (!data) {
+            this.message.content = "Email or Password incorrect";
+            this.message.type = 'danger'
+          } else {
+            this.message.content = "Successfully logged in";
+            this.message.type = 'success'
+          }
+          this.message.show = true
         }).finally(() => {
           this.loading = false;
         })
