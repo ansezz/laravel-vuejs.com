@@ -24,9 +24,13 @@ module.exports = {
   ],
   // Give apollo module options
   apollo: {
+    errorHandler(error) {
+      console.log(error)
+    },
     // required
     clientConfigs: {
       default: {
+        fetchPolicy: 'no-cache',
         httpEndpoint: process.env.GRAPHQL_URL,
         // wsEndpoint: process.env.GRAPHQL_WS
       }

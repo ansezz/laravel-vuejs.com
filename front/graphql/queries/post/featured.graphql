@@ -1,5 +1,5 @@
-query featuredPosts($count: Int!) {
-  featuredPosts(count : $count) {
+query featuredPosts($slug: String!, $count: Int, $page: Int, $sort_by : String) {
+  featuredPosts(slug : $slug, count : $count, page : $page, sort_by : $sort_by) {
     data {
       id
       title

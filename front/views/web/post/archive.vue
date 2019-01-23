@@ -12,17 +12,17 @@
         </div>
         <div class="filters">
           <div class="filter-group">
-            <select name="showen-posts">
-              <option value="1">show 16 posts</option>
-              <option value="1">show 16 posts</option>
-              <option value="1">show 16 posts</option>
+            <select name="showen-posts" aria-label="count" v-model="count" @change="filterChange">
+              <option value="8">show 8 posts</option>
+              <option value="16">show 16 posts</option>
+              <option value="32">show 32 posts</option>
             </select>
           </div>
           <div class="filter-group">
-            <select name="most-popular">
-              <option value="2">Most popular first</option>
-              <option value="2">Most popular first</option>
-              <option value="2">Most popular first</option>
+            <select name="most-popular" aria-label="Sort by" @change="filterChange" v-model="sort_by">
+              <option value="latest">Latest first</option>
+              <option value="oldest">Oldest first</option>
+              <option value="popular">Popular first</option>
             </select>
           </div>
         </div>
@@ -64,8 +64,21 @@
         return this.$store.state.post.posts.data
       }
     },
+    methods: {
+      filterChange() {
+        this.$router.push({name: 'posts', query: {count: this.count, sort_by: this.sort_by}})
+      }
+    },
+    mounted() {
+      this.count = this.$route.query.count
+      this.page = this.$route.query.page
+      this.sort_by = this.$route.query.sort_by
+    },
     data() {
       return {
+        sort_by: 'latest',
+        count: 8,
+        page: 1,
         breadcrumbsData: [{
           name: 'Home',
           link: "/"

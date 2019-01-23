@@ -22,13 +22,13 @@ type Query {
     postsAll: [Post!]! @all
     settings: [Setting!]! @all
     post(id: Int! @eq): Post @find
-    postBySlug(slug: String! @eq): Post
+    postBySlug(slug: String! @eq): Post @event(fire: "LaravelVueJs\\Events\\PostViewed")
     tagBySlug(slug: String! @eq): Tag
     categoryBySlug(slug: String!): Category
-    posts: [Post!]! @paginate(builder: "LaravelVueJs\\Models\\Post@visiblePosts")
-    featuredPosts: [Post!]! @paginate(builder: "LaravelVueJs\\Models\\Post@featuredPosts")
-    postsByTag(slug: String!): [Post!]! @paginate(builder: "LaravelVueJs\\Models\\Post@postsByTag")
-    postsByCategory(slug: String!): [Post!]! @paginate(builder: "LaravelVueJs\\Models\\Post@postsByCategory")
+    posts (sort_by : String) : [Post!]! @paginate(builder: "LaravelVueJs\\Models\\Post@visiblePosts", defaultCount: 8)
+    featuredPosts (sort_by : String) : [Post!]! @paginate(builder: "LaravelVueJs\\Models\\Post@featuredPosts", defaultCount: 8)
+    postsByTag(slug: String!, sort_by : String): [Post!]! @paginate(builder: "LaravelVueJs\\Models\\Post@postsByTag", defaultCount: 8)
+    postsByCategory(slug: String!, sort_by : String): [Post!]! @paginate(builder: "LaravelVueJs\\Models\\Post@postsByCategory", defaultCount: 8)
     login(email: String!, password: String!, remember_me : Boolean): Login
 }
 

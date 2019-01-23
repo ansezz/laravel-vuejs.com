@@ -34,8 +34,8 @@ export const actions = {
         console.log(error)
       })
   },
-  async LOAD_POSTS({commit}) {
-    let variables = {count: 8};
+  async LOAD_POSTS({commit}, {count, page, sort_by}) {
+    let variables = {count, page, sort_by};
     await this.app.apolloProvider.defaultClient.query({query: postsQql, variables})
       .then(({data}) => {
         commit('SET_POSTS', data.posts)
