@@ -34,8 +34,11 @@ export const actions = {
         console.log(error)
       })
   },
-  async LOAD_POSTS({commit}, {count, page, sort_by}) {
-    let variables = {count, page, sort_by};
+  LOAD_POSTS: async function ({commit}, variables) {
+    Object.keys(variables).forEach(key => variables[key] === undefined ? delete variables[key] : '');
+    if (!variables.count)
+      variables.count = 8;
+
     await this.app.apolloProvider.defaultClient.query({query: postsQql, variables})
       .then(({data}) => {
         commit('SET_POSTS', data.posts)

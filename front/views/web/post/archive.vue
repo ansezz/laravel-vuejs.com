@@ -36,17 +36,8 @@
                       :to="{ name: 'slug', params: { slug: item.slug }}"
         />
       </div>
-      <div class="ads has-m">900x250</div>
-      <div class="article-grid">
-        <article-item v-for="item in posts"
-                      :title="item.title"
-                      :image="item.image_url"
-                      :description="item.excerpt"
-                      :key="item.id"
-                      :to="{ name: 'slug', params: { slug: item.slug }}"
-        />
-      </div>
       <pagination/>
+      <div class="ads has-m">900x250</div>
     </div>
   </section>
 </template>
@@ -70,9 +61,9 @@
       }
     },
     mounted() {
-      this.count = this.$route.query.count
-      this.page = this.$route.query.page
-      this.sort_by = this.$route.query.sort_by
+      this.count = this.$route.query.count ?? 8
+      this.page = this.$route.query.page ?? 1
+      this.sort_by = this.$route.query.sort_by ?? 'latest'
     },
     data() {
       return {

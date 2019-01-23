@@ -1,4 +1,5 @@
 var webpack = require('webpack') // Do not forget to add this dependency, or else you will get an error
+// const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 require("dotenv").config()
 // const axios = require("axios")
@@ -121,6 +122,10 @@ module.exports = {
    ** Build configuration
    */
   build: {
+//    analyze: true,
+    babel: {
+      // plugins: ['"@babel/plugin-proposal-nullish-coalescing-operator"']
+    },
     plugins: [
       new webpack.LoaderOptionsPlugin({
         options: {
@@ -147,7 +152,9 @@ module.exports = {
   },
 
   //
-  plugins: [{src: "~/plugins/ui"},
+  plugins: [
+   // new BundleAnalyzerPlugin(),
+    {src: "~/plugins/ui"},
     {src: "~/plugins/http"},
     {src: "~/plugins/utils"},
     {src: "~/plugins/social-sharing"},

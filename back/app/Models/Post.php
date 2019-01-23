@@ -68,13 +68,14 @@ class Post extends Model implements HasMedia
         $query = $this->where('status', 1);
         if (isset($args['sort_by'])) {
             switch ($args['sort_by']) {
-                case 'latest':
-                    $query->latest();
-                    break;
                 case 'oldest':
                     $query->oldest();
                     break;
                 case 'popular':
+                    $query->orderBy('views', 'desc');
+                    break;
+                default:
+                    $query->latest();
                     break;
             }
         }
