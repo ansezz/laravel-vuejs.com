@@ -1,5 +1,5 @@
 <template>
-  <div class="pagination-container">
+  <div class="pagination-container" v-if="data">
     <renderless :data="data" :limit="limit"
                 v-on:pagination-change-page="onPaginationChangePage">
       <ul class="app-pagination" v-if="computed.total > computed.perPage"
