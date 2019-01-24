@@ -5,13 +5,16 @@
       <ul class="app-pagination" v-if="computed.total > computed.perPage"
           slot-scope="{ data, limit, computed }">
 
+        <li class="pagination-link">
+          <nuxt-link to="/">
+            <i class="fa fa-caret-left"></i> <i class="fa fa-caret-left"></i>
+          </nuxt-link>
+        </li>
+
         <li class="pagination-link" :class="{'disabled': computed.currentPage === 1}">
           <a href="#" @click="onPaginationChangePage(computed.currentPage-1)">
-            <i class="fa fa-caret-left"></i><i class="fa fa-caret-left"></i>
+            <i class="fa fa-caret-left"></i>
           </a>
-        </li>
-        <li class="pagination-link">
-          <nuxt-link to="/"><i class="fa fa-caret-left"></i></nuxt-link>
         </li>
 
         <li class="pagination-link" v-for="(page, key) in computed.lastPage" :key="key"
@@ -20,7 +23,7 @@
             {{ page }}
           </a>
         </li>
-        
+
         <li class="pagination-link" :class="{'disabled': !computed.hasMorePages}">
           <a href="#" @click="onPaginationChangePage(computed.currentPage+1)"> <i class="fa fa-caret-right"></i></a>
         </li>
