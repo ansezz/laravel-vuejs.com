@@ -36,7 +36,7 @@
                       :to="{ name: 'slug', params: { slug: item.slug }}"
         />
       </div>
-      <pagination/>
+      <Pagination :data="paginator" @pagination-change-page="changePage"/>
       <div class="ads has-m">900x250</div>
     </div>
   </section>
@@ -47,15 +47,22 @@
     components: {
       Breadcrumb: () => import('@/components/shared/partials/elements/breadcrumb'),
       ArticleItem: () => import('@/components/shared/partials/elements/article-item'),
-      Pagination: () => import('@/components/shared/partials/elements/pagination')
+      Pagination: () => import('@/components/shared/partials/elements/pagination/index')
     },
     name: "posts",
     computed: {
       posts() {
         return this.$store.state.post.posts.data
+      },
+      paginator() {
+        return this.$store.state.post.posts.paginatorInfo
       }
     },
     methods: {
+      changePage(page) {
+        console.log(page)
+        this.$router.push({name: 'posts', query: {count: this.count, sort_by: this.sort_by, page: page}})
+      },
       filterChange() {
         this.$router.push({name: 'posts', query: {count: this.count, sort_by: this.sort_by}})
       }
