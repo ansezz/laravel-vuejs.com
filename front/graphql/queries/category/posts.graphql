@@ -1,5 +1,5 @@
-query postsByCategory($slug: String!, $count: Int!, $page: Int) {
-  postsByCategory(slug : $slug, count : $count, page : $page) {
+query postsByCategory($slug: String!, $count: Int!, $page: Int, $sort_by : String) {
+  postsByCategory(slug : $slug, count : $count, page : $page, sort_by : $sort_by) {
     data {
       id
       title

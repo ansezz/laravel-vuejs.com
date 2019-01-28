@@ -64,7 +64,23 @@ class Post extends Model implements HasMedia
 
     public function visiblePosts($root, array $args, $context, ResolveInfo $resolveInfo): Builder
     {
-        return $this->where('status', 1)->latest();
+        /** @var Builder $query */
+        $query = $this->where('status', 1);
+        if (isset($args['sort_by'])) {
+            switch ($args['sort_by']) {
+                case 'oldest':
+                    $query->oldest();
+                    break;
+                case 'popular':
+                    $query->orderBy('views', 'desc');
+                    break;
+                default:
+                    $query->latest();
+                    break;
+            }
+        }
+
+        return $query;
     }
 
     public function featuredPosts($root, array $args, $context, ResolveInfo $resolveInfo): Builder

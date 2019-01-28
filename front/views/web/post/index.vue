@@ -1,6 +1,6 @@
 <template lang="html">
   <div>
-    <h1>{{post.title}}</h1>
+    <h1 v-if="post">{{post.title}}</h1>
     <pre>
     {{post}}
   </pre>

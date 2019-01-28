@@ -1,5 +1,5 @@
-query postsByTag($slug: String!, $count: Int!, $page: Int) {
-  postsByTag(slug : $slug, count : $count, page : $page) {
+query postsByTag($slug: String!, $count: Int!, $page: Int, $sort_by : String) {
+  postsByTag(slug : $slug, count : $count, page : $page, sort_by : $sort_by) {
     data {
       id
       title
