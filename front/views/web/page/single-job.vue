@@ -103,6 +103,12 @@
                 </div>
             </div>
         </div>
+        <div class="medium-container">
+            <app-jobs-swiper />
+        </div>
+        <div class="medium-container">
+            <div class="ads is-flex">720x90</div>
+        </div>
         <section class="has-bg">
             <div class="medium-container">
                 <heading>Featured Posts</heading>
@@ -125,6 +131,7 @@
         components: {
             Breadcrumb: () => import('@/components/shared/partials/elements/breadcrumb'),
             ArticleItem: () => import('@/components/shared/partials/elements/article-item'),
+            AppJobsSwiper: () => import('@/components/web/partials/app-jobs-swiper')
         },
         computed: {
             featured() {
@@ -307,4 +314,14 @@
                 img
                     transform rotate(180deg)
                     margin-left 10px
+    .ads
+        background-color #3abbff
+        height 90px
+        width 720px
+        margin auto auto 40px
+        font-size 24px
+        color #FFF
+        justify-content center
+    .tags-support
+        margin-top 40px
 </style>
