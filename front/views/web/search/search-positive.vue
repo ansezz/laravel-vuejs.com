@@ -4,8 +4,8 @@
         <div class="medium-container">
             <div class="search-header is-flex is-center is-column">
                 <img src="@/assets/images/icons-search.svg" alt="LV">
-                <h1 class="search-title">Search for: htyt</h1>
-                <span class="number-found">0 Results</span>
+                <h1 class="search-title">Search for: Code</h1>
+                <span class="number-found">3 Results</span>
             </div>
             <div class="search-form">
                 <form class="form">
@@ -23,11 +23,15 @@
                     <button class="button">Search</button>
                 </form>
             </div>
-            <div class="search-error text-center">
-                <p>Sorry. but we didn’t anything. Please try again with deferent keywords.</p>
-                <div class="error-img">
-                    <img src="@/assets/images/search-error.png" alt="LV">
-                </div>
+        </div>
+        <div class="container">
+            <div class="search-result">
+                <article-item v-for="item in featured"
+                    :title="item.title"
+                    :image="item.image_url"
+                    :key="item.id"
+                    :to="{ name: 'slug', params: { slug: item.slug }}"
+                />
             </div>
         </div>
         <app-featured />
@@ -37,9 +41,15 @@
 <script>
   export default {
     components: {
-        AppFeatured: () => import('@/components/web/partials/app-featured')
+        AppFeatured: () => import('@/components/web/partials/app-featured'),
+        ArticleItem: () => import("@/components/shared/partials/elements/article-item")
     },
-    name: "Search-Negative"
+    name: "Search-Positive",
+    computed: {
+        featured() {
+            return this.$store.state.post.featured.data
+        },
+    },
   }
 </script>
 
@@ -50,4 +60,8 @@
         padding 40px 0 0 !important
         &:after
             display none
+    .search-result
+        display grid
+        grid-template-columns repeat(4, 1fr)
+        grid-gap 30px 10px
 </style>
