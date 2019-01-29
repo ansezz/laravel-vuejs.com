@@ -7,6 +7,7 @@
                     <p>Treehouse brings affordable technology education to people everywhere in order to help them achieve their dreams and change the world.</p>
                 </div>
                 <div class="about-us-men">
+                    <img src="@/assets/images/about-svg.svg" alt="LV">
                 </div>
             </div>
         </div>
@@ -26,7 +27,6 @@
         .about-us-container
             display flex
             align-items center
-            padding 256px 0
             .about-caption
                 width 450px
                 h1
@@ -38,4 +38,8 @@
                     color #384457
                     font-size 24px
                     margin-bottom 0
+            .about-us-men
+                width calc(100% - 450px)
+                img
+                    width 100%
 </style>
