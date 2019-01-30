@@ -4,5 +4,6 @@ export default function (context) {
     page: context.query.page,
     sort_by: context.query.sort_by,
   })
+  context.store.dispatch("post/LOAD_POPULAR_POSTS")
   return context.store.dispatch("post/LOAD_FEATURED_POSTS")
 }

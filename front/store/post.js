@@ -5,13 +5,17 @@ import postBySlugQql from '@/graphql/queries/post/bySlug.graphql';
 export const state = () => ({
   single: null,
   posts: [],
-  featured: []
+  featured: [],
+  popular: []
 })
 
 export const mutations = {
   //Set the latest news to state
   SET_FEATURED_POSTS: (state, val) => {
     state.featured = val
+  },
+  SET_POPULAR_POSTS: (state, val) => {
+    state.popular = val
   },
 
   SET_POST: (state, val) => {
@@ -24,7 +28,6 @@ export const mutations = {
 }
 
 export const actions = {
-  //Get the latest news
   async LOAD_FEATURED_POSTS({commit}) {
     let variables = {count: 8};
     await this.app.apolloProvider.defaultClient.query({query: featuredPostsQql, variables})
@@ -42,6 +45,18 @@ export const actions = {
     await this.app.apolloProvider.defaultClient.query({query: postsQql, variables})
       .then(({data}) => {
         commit('SET_POSTS', data.posts)
+      }).catch((error) => {
+        console.log(error)
+      })
+  },
+  LOAD_POPULAR_POSTS: async function ({commit}) {
+    let variables = {
+      count: 4,
+      sort_by: 'popular',
+    }
+    await this.app.apolloProvider.defaultClient.query({query: postsQql, variables})
+      .then(({data}) => {
+        commit('SET_POPULAR_POSTS', data.posts)
       }).catch((error) => {
         console.log(error)
       })
