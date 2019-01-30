@@ -10,22 +10,7 @@
           </div>
           <h1>Tutorials</h1>
         </div>
-        <div class="filters">
-          <div class="filter-group">
-            <select name="showen-posts" aria-label="count" v-model="count" @change="filterChange">
-              <option value="8">show 8 posts</option>
-              <option value="16">show 16 posts</option>
-              <option value="32">show 32 posts</option>
-            </select>
-          </div>
-          <div class="filter-group">
-            <select name="most-popular" aria-label="Sort by" @change="filterChange" v-model="sort_by">
-              <option value="latest">Latest first</option>
-              <option value="oldest">Oldest first</option>
-              <option value="popular">Popular first</option>
-            </select>
-          </div>
-        </div>
+        <filters :filter.sync="filter" :action.sync="filterChange"></filters>
       </div>
       <div class="article-grid">
         <article-item v-for="item in posts"
@@ -45,6 +30,7 @@
 <script>
   export default {
     components: {
+      filters: () => import('@/components/shared/partials/elements/filters'),
       Breadcrumb: () => import('@/components/shared/partials/elements/breadcrumb'),
       ArticleItem: () => import('@/components/shared/partials/elements/article-item'),
       Pagination: () => import('@/components/shared/partials/elements/pagination/index')
@@ -60,22 +46,23 @@
     },
     methods: {
       changePage(page) {
-        console.log(page)
-        this.$router.push({name: 'posts', query: {count: this.count, sort_by: this.sort_by, page: page}})
+        this.$router.push({name: 'posts', query: {count: this.filter.count, sort_by: this.filter.sort_by, page: page}})
       },
       filterChange() {
-        this.$router.push({name: 'posts', query: {count: this.count, sort_by: this.sort_by}})
+        this.$router.push({name: 'posts', query: {count: this.filter.count, sort_by: this.filter.sort_by}})
       }
     },
     mounted() {
-      this.count = this.$route.query.count ?? 8
+      this.filter.count = this.$route.query.count ?? 8
+      this.filter.sort_by = this.$route.query.sort_by ?? 'latest'
       this.page = this.$route.query.page ?? 1
-      this.sort_by = this.$route.query.sort_by ?? 'latest'
     },
     data() {
       return {
-        sort_by: 'latest',
-        count: 8,
+        filter: {
+          sort_by: 'latest',
+          count: 8,
+        },
         page: 1,
         breadcrumbsData: [{
           name: 'Home',
@@ -121,36 +108,6 @@
       color $tertiary
       margin-top 10px
       line-height 1
-
-  .filters
-    display flex
-    align-items center
-
-    .filter-group
-      position relative
-      margin-right 45px
-
-      &:after
-        content "\f0d7"
-        font-family "FontAwesome"
-        color $secondary
-        padding-left 15px
-
-      &:last-child
-        margin-right 0
-
-      select
-        font-size 12px
-        font-weight 600
-        letter-spacing 2px
-        color $secondary
-        text-transform uppercase
-        border 0
-        background-color transparent
-        outline none
-        -webkit-appearance none
-        -moz-appearance none
-        appearance none
 
   .article-grid
     display grid
