@@ -23,6 +23,7 @@
         "mll-lab/laravel-graphql-playground": "^0.3.3",
         "nuwave/lighthouse": "^2.6",
         "spatie/eloquent-sortable": "^3.4",
+        "spatie/laravel-newsletter": "^4.2",
         "spatie/laravel-sluggable": "^2.1",
         "spatie/nova-tags-field": "^1.1",
         "spatie/nova-translatable": "^1.0"
