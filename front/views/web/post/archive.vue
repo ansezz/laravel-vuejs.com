@@ -53,9 +53,6 @@
       }
     },
     mounted() {
-      this.filter.count = this.$route.query.count ?? 8
-      this.filter.sort_by = this.$route.query.sort_by ?? 'latest'
-      this.page = this.$route.query.page ?? 1
     },
     data() {
       return {
