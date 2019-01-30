@@ -36,6 +36,14 @@
                 </li>
             </ul>
         </div>
+        <div v-if="opened" class="pop-up">
+            <h5>Are you sure?</h5>
+            <span>Relax, it’s just a pop-up.</span>
+            <div class="actions">
+                <button @click="closePopUp" class="button cancel">Just Cancel</button>
+                <button class="button">Yes I'm</button>
+            </div>
+        </div>
     </section>
 </template>
 
@@ -47,6 +55,7 @@
         },
         data() {
             return {
+                opened: true,
                 breadcrumbsData: [{
                         name: 'Home',
                         link: "/"
@@ -60,6 +69,17 @@
                         link: '/'
                     }
                 ]
+            }
+        },
+        mounted() {
+            let body = document.getElementsByTagName('body')[0]
+            body.classList.add('popup-opened')
+        },
+        methods: {
+            closePopUp() {
+                let body = document.getElementsByTagName('body')[0]
+                body.classList.remove('popup-opened')
+                this.opened = false
             }
         }
     }
@@ -111,4 +131,44 @@
                 padding-right 5px
             &:last-child
                 padding-right 0
+    .pop-up
+        position fixed
+        top 50%
+        left 50%
+        transform translate(-50%, -50%)
+        display flex
+        align-items center
+        justify-content center
+        flex-direction column
+        width 500px
+        background-color #FFF
+        height 196px
+        h5
+            font-size 20px
+            color #384457
+            font-weight 500
+        span
+            display block
+            font-size 14px
+            color #616d82
+            opacity .8
+            margin 10px 0 20px
+        .button
+            font-weight 500
+            &.cancel
+                background-color #384457
+                color #FFF
+                margin-right 17px
+    .popup-opened
+        .terms-container
+            position relative
+            &:after
+                content ""
+                position absolute
+                top -20px
+                left 0
+                right 0
+                bottom 0
+                background-color rgba(#384457, .2)
+                z-index -1
 </style>
