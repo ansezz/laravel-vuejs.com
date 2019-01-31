@@ -39,4 +39,5 @@ extend type Query @middleware(checks: ["auth:api"]) {
 
 type Mutation {
     signup(email: String! @rules(apply: ["email","unique:users"]), password: String! @rules(apply: ["min:6"]), name: String! ): User @event(fire: "Illuminate\\Auth\\Events\\Registered")
+    subscribe(email: String! @rules(apply: ["email"])) : String
 }
