@@ -12,6 +12,7 @@ module.exports = {
     "@nuxtjs/dotenv",
     "@nuxtjs/font-awesome",
     //"@nuxtjs/google-analytics",
+    '@nuxtjs/google-adsense',
     "@nuxtjs/sitemap",
     "@nuxtjs/pwa",
     "@nuxtjs/moment",
@@ -23,6 +24,9 @@ module.exports = {
         id: process.env.GOOGLE_TAG_MANAGER
     }]*/
   ],
+  'google-adsense': {
+    id: process.env.GOOGLE_ADSENSE
+  },
   // Give apollo module options
   apollo: {
     errorHandler(error) {

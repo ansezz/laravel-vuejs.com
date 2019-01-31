@@ -2,6 +2,9 @@
     <section class="sidebar">
         <aside class="aside">
             <div class="aside-block">
+              <div class="widget">
+                <adsbygoogle />
+              </div>
                 <heading>Follow us</heading>
                 <div class="widget">
                     <ul class="social-media">
@@ -12,9 +15,12 @@
                 </div>
                 <app-popular-posts />
                 <app-subscribe-form />
-                <div class="widget last-widget">
-                    <div class="ads">300x250</div>
-                </div>
+              <div class="widget last-widget">
+                      <adsbygoogle />
+              </div>
+              <div class="widget last-widget">
+                <div class="ads">300x250</div>
+              </div>
             </div>
         </aside>
     </section>

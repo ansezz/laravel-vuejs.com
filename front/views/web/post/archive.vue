@@ -13,14 +13,16 @@
         <filters :filter.sync="filter" :action.sync="filterChange"></filters>
       </div>
       <div class="article-grid">
-        <article-item v-for="item in posts"
-                      :title="item.title"
-                      :image="item.image_url"
-                      :description="item.excerpt"
-                      :key="item.id"
-                      :to="{ name: 'slug', params: { slug: item.slug }}"
-        />
+        <template v-for="(item) in posts">
+          <article-item :title="item.title"
+                        :image="item.image_url"
+                        :description="item.excerpt"
+                        :key="item.id"
+                        :to="{ name: 'slug', params: { slug: item.slug }}"
+          />
+        </template>
       </div>
+      <adsbygoogle/>
       <Pagination :data="paginator" @pagination-change-page="changePage"/>
       <div class="ads has-m">900x250</div>
     </div>
