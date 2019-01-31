@@ -17,15 +17,16 @@ const seo = {
   methods: {
     // Add meta tags to head
     tags() {
-      if (!this.seo.tags)
-        return {}
       let tags = [];
-      this.seo.tags.forEach((tag) => {
-        tags.push({
-          name: 'article:tag',
-          content: tag.name
+
+      if (this.seo.tags)
+        this.seo.tags.forEach((tag) => {
+          tags.push({
+            name: 'article:tag',
+            content: tag.name
+          })
         })
-      })
+
       return tags;
     }
   },
