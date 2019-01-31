@@ -2,8 +2,13 @@
 <template>
   <section>
     <app-header/>
+    <div class="container">
+      <adsbygoogle/>
+    </div>
     <app-featured/>
-    <adsbygoogle/>
+    <div class="container">
+      <adsbygoogle/>
+    </div>
     <div class="main-posts">
       <div class="container">
         <div class="posts-wrapper">

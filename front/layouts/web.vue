@@ -5,6 +5,9 @@
         <app-main>
             <nuxt />
         </app-main>
+        <div class="container">
+          <adsbygoogle/>
+        </div>
         <app-subscribe />
         <footer class="footer">
             <div class="container">
