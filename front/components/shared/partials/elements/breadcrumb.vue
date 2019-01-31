@@ -1,8 +1,9 @@
 <template>
     <nav class="breadcrumbs">
         <ul class="breadcrumb-list">
-           <li :class="{'is-active' : pages.length==index+1}" v-for="(page,index) in pages" class="breadcrumb-item">
-                <nuxt-link :to="page.link" class="breadcrumb-anchor">{{page.name}}</nuxt-link>
+           <li :class="{'is-active' : pages.length === index + 1}" v-for="(page,index) in pages" class="breadcrumb-item">
+                <nuxt-link v-if="page.link" :to="page.link" class="breadcrumb-anchor">{{page.name}}</nuxt-link>
+                <a v-else class="breadcrumb-anchor">{{ page.name }}</a>
             </li>
         </ul>
     </nav>
@@ -18,12 +19,12 @@ export default {
 <style lang="stylus" scoped>
     .breadcrumbs
         margin 20px 0 0
-        
+
     .breadcrumb-list
         display flex
         align-items center
         justify-content center
-        
+
     .breadcrumb-item
         display flex
         align-items center

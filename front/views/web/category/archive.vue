@@ -1,7 +1,7 @@
 <!--waiting designer-->
 <template>
   <section class="posts-container">
-    <breadcrumb :pages="breadcrumbsData"/>
+    <breadcrumb :pages="breadcrumbsData()"/>
     <div class="container">
       <div class="post-heading-filters">
         <div class="post-heading">
@@ -22,7 +22,7 @@
         />
       </div>
       <div class="ads has-m">900x250</div>
-      <pagination/>
+      <Pagination :data="paginator" @pagination-change-page="changePage"/>
     </div>
   </section>
 </template>
@@ -42,6 +42,9 @@
       },
       category() {
         return this.$store.state.category.category
+      },
+      paginator() {
+        return this.$store.state.category.posts.paginatorInfo
       }
     },
     methods: {
@@ -49,14 +52,14 @@
         this.$router.push({
           name: 'category-slug',
           query: {count: this.filter.count, sort_by: this.filter.sort_by, page: page},
-          params: {slug: this.$route.slug}
+          params: {slug: this.$route.params.slug}
         })
       },
       filterChange() {
         this.$router.push({
           name: 'category-slug',
           query: {count: this.filter.count, sort_by: this.filter.sort_by},
-          params: {slug: this.$route.slug}
+          params: {slug: this.$route.params.slug}
         })
       }
     },
@@ -66,17 +69,16 @@
           sort_by: 'latest',
           count: 8,
         },
-        breadcrumbsData: [{
-          name: 'Home',
-          link: "/"
-        },
+        breadcrumbsData: () => [
           {
-            name: 'Categories',
+            name: 'Home',
             link: "/"
           },
           {
-            name: 'Tutorials',
-            link: "/post/archive"
+            name: 'Category'
+          },
+          {
+            name: this.category.name
           }
         ]
       }

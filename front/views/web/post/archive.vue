@@ -61,17 +61,14 @@
           count: 8,
         },
         page: 1,
-        breadcrumbsData: [{
-          name: 'Home',
-          link: "/"
-        },
+        breadcrumbsData: [
           {
-            name: 'Categories',
+            name: 'Home',
             link: "/"
           },
           {
-            name: 'Tutorials',
-            link: "/post/archive"
+            name: 'Posts',
+            link: "/posts"
           }
         ]
       }
