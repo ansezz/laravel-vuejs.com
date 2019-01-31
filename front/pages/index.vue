@@ -3,16 +3,22 @@
 </template>
 
 <script>
+  import seo from '@/mixins/seo'
+
   export default {
+    mixins: [seo],
     layout: ({store}) => store.state.platform,
-
     middleware: ["home"],
-
-    head: {
-      title: '🚀🚀 Home page🚀',
-      meta: [
-        {hid: 'description', name: 'description', content: 'Home page Larvel VueJs'}
-      ]
+    computed: {
+      seo() {
+        return {
+          title: '🚀 Home ',
+          description: 'Home page',
+          image: '',
+          url: 'https://laravel-vuejs.com',
+          type: 'website',
+        }
+      },
     },
     components: {
       mobile: () => import(`~/views/mobile`),

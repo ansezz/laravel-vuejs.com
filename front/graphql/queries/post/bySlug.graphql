@@ -5,6 +5,7 @@ query posts($slug: String!) {
     content
     excerpt
     image_url
+    url
     type
     status
     comment_status
