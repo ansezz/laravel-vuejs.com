@@ -2,9 +2,6 @@
     <section class="sidebar">
         <aside class="aside">
             <div class="aside-block">
-              <div class="widget">
-                <adsbygoogle />
-              </div>
                 <heading>Follow us</heading>
                 <div class="widget">
                     <ul class="social-media">
