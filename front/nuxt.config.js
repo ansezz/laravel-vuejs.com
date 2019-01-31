@@ -11,6 +11,7 @@ module.exports = {
     "@nuxtjs/axios",
     "@nuxtjs/dotenv",
     "@nuxtjs/font-awesome",
+    "@nuxtjs/toast",
     //"@nuxtjs/google-analytics",
     '@nuxtjs/google-adsense',
     "@nuxtjs/sitemap",
@@ -24,6 +25,10 @@ module.exports = {
         id: process.env.GOOGLE_TAG_MANAGER
     }]*/
   ],
+  toast: {
+    position: 'top-center',
+    duration: 4000
+  },
   'google-adsense': {
     id: process.env.GOOGLE_ADSENSE
   },

@@ -30,6 +30,7 @@
     "@nuxtjs/moment": "^1.1.0",
     "@nuxtjs/pwa": "^2.6.0",
     "@nuxtjs/sitemap": "^0.2.0",
+    "@nuxtjs/toast": "^3.0.2",
     "@nuxtjs/webpackmonitor": "^0.1.0",
     "apollo-boost": "^0.1.27",
     "apollo-cache-inmemory": "^1.4.2",
