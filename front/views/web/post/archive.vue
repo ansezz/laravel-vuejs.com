@@ -8,7 +8,7 @@
           <div class="user-avatar">
             <img src="@/assets/images/icons-category.svg" alt="LV">
           </div>
-          <h1>Tutorials</h1>
+          <h1>Posts</h1>
         </div>
         <filters :filter.sync="filter" :action.sync="filterChange"></filters>
       </div>
