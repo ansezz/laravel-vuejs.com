@@ -19,6 +19,7 @@
           description: this.post.excerpt,
           image: this.post.image_url,
           url: this.post.url,
+          tags: this.post.tags,
           type: 'article',
         }
       }
