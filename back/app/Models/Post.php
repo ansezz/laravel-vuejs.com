@@ -111,7 +111,7 @@ class Post extends Model implements HasMedia
     }
 
     /**
-     * Get the user's Image Url.
+     * Get the Post Image Url.
      *
      * @return string
      */
@@ -120,6 +120,16 @@ class Post extends Model implements HasMedia
         $media = $this->getFirstMedia(self::MEDIA_COLLECTION);
 
         return $media ? $media->getFullUrl() : '';
+    }
+
+    /**
+     * Get the Post Url.
+     *
+     * @return string
+     */
+    public function getUrlAttribute(): string
+    {
+        return url($this->slug);
     }
 
     /**
