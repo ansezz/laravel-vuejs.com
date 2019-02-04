@@ -89,11 +89,7 @@ module.exports = {
    ** Headers of the page
    */
   head: {
-<<<<<<< HEAD
-    titleTemplate: '%s - Laravel-VueJs.com',
-=======
     titleTemplate: '%s  ←  Laravel-VueJs.com',
->>>>>>> 5fd3f421f8cdf5c37ecc93b28ea5b74018adceb6
     title: "Laravel-VueJs.com",
     meta: [
       {charset: "utf-8"}, {name: "viewport", content: "width=device-width, initial-scale=1"}
