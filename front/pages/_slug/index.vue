@@ -3,21 +3,25 @@
 </template>
 
 <script>
-  export default {
-    layout: ({store}) => store.state.platform,
+  import seo from '@/mixins/seo'
 
+  export default {
+    mixins: [seo],
+    layout: ({store}) => store.state.platform,
     middleware: ["post"],
     computed: {
       post() {
         return this.$store.state.post.single
-      }
-    },
-    head() {
-      return {
-        title: this.post.title,
-        meta: [
-          {hid: 'description', name: 'description', content: this.post.excerpt}
-        ]
+      },
+      seo() {
+        return {
+          title: this.post.title,
+          description: this.post.excerpt,
+          image: this.post.image_url,
+          url: this.post.url,
+          tags: this.post.tags,
+          type: 'article',
+        }
       }
     },
     components: {

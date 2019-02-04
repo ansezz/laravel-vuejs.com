@@ -1,45 +1,46 @@
 <!--laravelvuejs_Home_M.png-->
 <template>
-    <section>
-        <app-header />
-        <app-featured />
-        <div class="main-posts">
-            <div class="container">
-                <div class="posts-wrapper">
-                    <app-feed />
-                    <app-aside />
-                </div>
-            </div>
+  <section>
+    <app-header/>
+    <div class="container">
+      <adsbygoogle/>
+    </div>
+    <app-featured/>
+    <div class="container">
+      <adsbygoogle/>
+    </div>
+    <div class="main-posts">
+      <div class="container">
+        <div class="posts-wrapper">
+          <app-feed/>
+          <app-aside/>
         </div>
-    </section>
+      </div>
+    </div>
+  </section>
 </template>
 
 <script>
-    export default {
-        name: 'index',
-        components: {
-            AppHeader: () => import('@/components/web/partials/app-header'),
-            AppFeatured: () => import('@/components/web/partials/app-featured'),
-            AppFeed: () => import('@/components/web/partials/app-feed'),
-            AppAside: () => import('@/components/web/partials/app-aside'),
-        },
-        data() {
-            return {
-                articles: [
-                    { title: 'Foo', description: 'Bar', href: '/', image: 'test' },
-                    { title: 'Bar', href: '/', image: 'test' },
-                    { title: 'Bar', href: '/', image: 'test' }
-                ]
-            }
-        }
+  export default {
+    name: 'index',
+    components: {
+      AppHeader: () => import('@/components/web/partials/app-header'),
+      AppFeatured: () => import('@/components/web/partials/app-featured'),
+      AppFeed: () => import('@/components/web/partials/app-feed'),
+      AppAside: () => import('@/components/web/partials/app-aside'),
+    },
+    data() {
+      return {}
     }
+  }
 
 </script>
 
 <style lang="stylus" scoped>
-    .main-posts
-        padding 60px 0 120px
-    .posts-wrapper
-        display flex
-        justify-content space-between
+  .main-posts
+    padding 60px 0 120px
+
+  .posts-wrapper
+    display flex
+    justify-content space-between
 </style>

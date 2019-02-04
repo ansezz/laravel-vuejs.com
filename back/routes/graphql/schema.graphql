@@ -10,6 +10,8 @@ scalar Date @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\Date")
 #import category.graphql
 #import tag.graphql
 #import setting.graphql
+#import menu.graphql
+#import menuItem.graphql
 
 type Login {
     access_token: String
@@ -30,6 +32,7 @@ type Query {
     postsByTag(slug: String!, sort_by : String): [Post!]! @paginate(builder: "LaravelVueJs\\Models\\Post@postsByTag")
     postsByCategory(slug: String!, sort_by : String): [Post!]! @paginate(builder: "LaravelVueJs\\Models\\Post@postsByCategory")
     login(email: String!, password: String!, remember_me : Boolean): Login
+    menu(id: ID @eq): Menu @find(model: "Menu")
 }
 
 extend type Query @middleware(checks: ["auth:api"]) {

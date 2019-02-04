@@ -11,7 +11,9 @@ module.exports = {
     "@nuxtjs/axios",
     "@nuxtjs/dotenv",
     "@nuxtjs/font-awesome",
+    "@nuxtjs/toast",
     //"@nuxtjs/google-analytics",
+    '@nuxtjs/google-adsense',
     "@nuxtjs/sitemap",
     "@nuxtjs/pwa",
     "@nuxtjs/moment",
@@ -23,6 +25,13 @@ module.exports = {
         id: process.env.GOOGLE_TAG_MANAGER
     }]*/
   ],
+  toast: {
+    position: 'top-center',
+    duration: 4000
+  },
+  'google-adsense': {
+    id: process.env.GOOGLE_ADSENSE
+  },
   // Give apollo module options
   apollo: {
     errorHandler(error) {
@@ -80,7 +89,11 @@ module.exports = {
    ** Headers of the page
    */
   head: {
+<<<<<<< HEAD
     titleTemplate: '%s - Laravel-VueJs.com',
+=======
+    titleTemplate: '%s  ←  Laravel-VueJs.com',
+>>>>>>> 5fd3f421f8cdf5c37ecc93b28ea5b74018adceb6
     title: "Laravel-VueJs.com",
     meta: [
       {charset: "utf-8"}, {name: "viewport", content: "width=device-width, initial-scale=1"}

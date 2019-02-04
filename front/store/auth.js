@@ -58,6 +58,7 @@ export const actions = {
       .then(async ({data}) => {
         commit('SET_LOGGED_IN', false)
         await this.app.$apolloHelpers.onLogout()
+        this.$toast.success(data.logout)
         this.$router.push('/')
       }).catch((error) => {
         console.log(error)

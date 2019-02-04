@@ -5,6 +5,7 @@ type Post {
     slug: String!
     excerpt: String
     image_url: String
+    url: String
     type: Int!
     views: Int!
     status: Int!
