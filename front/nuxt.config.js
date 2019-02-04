@@ -80,30 +80,14 @@ module.exports = {
    ** Headers of the page
    */
   head: {
+    titleTemplate: '%s - Laravel-VueJs.com',
     title: "Laravel-VueJs.com",
     meta: [
-      {
-        charset: "utf-8"
-      },
-      {
-        name: "viewport",
-        content: "width=device-width, initial-scale=1"
-      },
-      {
-        hid: "description",
-        name: "description",
-        content: "Laravel-VueJs.com"
-      }
+      {charset: "utf-8"}, {name: "viewport", content: "width=device-width, initial-scale=1"}
     ],
-    htmlAttrs: {
-      dir: "ltr"
-    },
+    htmlAttrs: {dir: "ltr"},
     link: [
-      {
-        rel: "icon",
-        type: "image/x-icon",
-        href: "/favicon.ico"
-      },
+      {rel: "icon", type: "image/x-icon", href: "/favicon.ico"}
     ],
     script: [
       {src: "https://code.jquery.com/jquery-1.12.4.min.js"}
@@ -153,7 +137,7 @@ module.exports = {
 
   //
   plugins: [
-   // new BundleAnalyzerPlugin(),
+    // new BundleAnalyzerPlugin(),
     {src: "~/plugins/ui"},
     {src: "~/plugins/http"},
     {src: "~/plugins/utils"},

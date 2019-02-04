@@ -1,7 +1,7 @@
 <!--waiting designer-->
 <template>
   <section class="posts-container">
-    <breadcrumb :pages="breadcrumbsData"/>
+    <breadcrumb :pages="breadcrumbsData()"/>
     <div class="container">
       <div class="post-heading-filters">
         <div class="post-heading">
@@ -10,22 +10,7 @@
           </div>
           <h1 v-if="category">{{category.name}}</h1>
         </div>
-        <div class="filters">
-          <div class="filter-group">
-            <select name="showen-posts">
-              <option value="1">show 16 posts</option>
-              <option value="1">show 16 posts</option>
-              <option value="1">show 16 posts</option>
-            </select>
-          </div>
-          <div class="filter-group">
-            <select name="most-popular">
-              <option value="2">Most popular first</option>
-              <option value="2">Most popular first</option>
-              <option value="2">Most popular first</option>
-            </select>
-          </div>
-        </div>
+        <filters :filter.sync="filter" :action.sync="filterChange"></filters>
       </div>
       <div class="article-grid">
         <article-item v-for="item in posts"
@@ -37,16 +22,7 @@
         />
       </div>
       <div class="ads has-m">900x250</div>
-      <div class="article-grid">
-        <article-item v-for="item in posts"
-                      :title="item.title"
-                      :image="item.image_url"
-                      :description="item.excerpt"
-                      :key="item.id"
-                      :to="{ name: 'slug', params: { slug: item.slug }}"
-        />
-      </div>
-      <pagination/>
+      <Pagination :data="paginator" @pagination-change-page="changePage"/>
     </div>
   </section>
 </template>
@@ -54,6 +30,7 @@
 <script>
   export default {
     components: {
+      filters: () => import('@/components/shared/partials/elements/filters'),
       Breadcrumb: () => import('@/components/shared/partials/elements/breadcrumb'),
       ArticleItem: () => import('@/components/shared/partials/elements/article-item'),
       Pagination: () => import('@/components/shared/partials/elements/pagination')
@@ -65,21 +42,43 @@
       },
       category() {
         return this.$store.state.category.category
+      },
+      paginator() {
+        return this.$store.state.category.posts.paginatorInfo
+      }
+    },
+    methods: {
+      changePage(page) {
+        this.$router.push({
+          name: 'category-slug',
+          query: {count: this.filter.count, sort_by: this.filter.sort_by, page: page},
+          params: {slug: this.$route.params.slug}
+        })
+      },
+      filterChange() {
+        this.$router.push({
+          name: 'category-slug',
+          query: {count: this.filter.count, sort_by: this.filter.sort_by},
+          params: {slug: this.$route.params.slug}
+        })
       }
     },
     data() {
       return {
-        breadcrumbsData: [{
-          name: 'Home',
-          link: "/"
+        filter: {
+          sort_by: 'latest',
+          count: 8,
         },
+        breadcrumbsData: () => [
           {
-            name: 'Categories',
+            name: 'Home',
             link: "/"
           },
           {
-            name: 'Tutorials',
-            link: "/post/archive"
+            name: 'Category'
+          },
+          {
+            name: this.category.name
           }
         ]
       }
@@ -113,36 +112,6 @@
       color $tertiary
       margin-top 10px
       line-height 1
-
-  .filters
-    display flex
-    align-items center
-
-    .filter-group
-      position relative
-      margin-right 45px
-
-      &:after
-        content "\f0d7"
-        font-family "FontAwesome"
-        color $secondary
-        padding-left 15px
-
-      &:last-child
-        margin-right 0
-
-      select
-        font-size 12px
-        font-weight 600
-        letter-spacing 2px
-        color $secondary
-        text-transform uppercase
-        border 0
-        background-color transparent
-        outline none
-        -webkit-appearance none
-        -moz-appearance none
-        appearance none
 
   .article-grid
     display grid

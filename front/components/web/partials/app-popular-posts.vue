@@ -2,9 +2,13 @@
     <div>
         <heading>Popular Posts</heading>
         <div class="widget">
-            <article-item horizontal title="New Blade Directives Coming to Laravel 5.6" to="/"/>
-            <article-item horizontal title="Laravel 5.6 adds the Collision Package for CLI Error Reporting" to="/" />
-            <article-item horizontal title="Laravel Manchester Meetup" to="/" />
+          <article-item v-for="item in popular"
+                        :title="item.title"
+                        :image="item.image_url"
+                        :description="item.excerpt"
+                        :key="item.id"
+                        :to="{ name: 'slug', params: { slug: item.slug }}"
+          />
         </div>
     </div>
 </template>
@@ -15,7 +19,12 @@
         name: 'AppPopularPosts',
         components: {
             ArticleItem
-        }
+        },
+      computed: {
+        popular() {
+          return this.$store.state.post.popular.data
+        },
+      },
     }
 </script>
 
