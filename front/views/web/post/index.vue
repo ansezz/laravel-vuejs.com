@@ -26,9 +26,36 @@
         <!--<p>{{ post.excerpt }}</p>-->
         <p>Ah, those warm summer months are the best, aren’t they? And not just because they’re synonymous with lounging poolside or trekking down to the river with family and friends. There’s just something about this time of year that makes it perfect for setting and accomplishing goals, or tackling that special project that’s been at the back of your mind.</p>
         <p>I don’t know if it’s the heat, or the long days, or maybe just that extra touch of playfulness that seems to tickle folks between Spring and Fall. But there’s just something about the summertime that is perfect for finally cleaning out the garage, or taking a class, or picking up a new hobby.</p>
-        <div class="thumbnail-area">
-          <thumbnail  :src="post.image_url" :alt="post.title" :to="post.url"/>
-          <span class="copyright">&copy; 2018. Copyrights</span>
+        <div class="image-container">
+          <ul class="share-links">
+                <li>
+                    <a href="#">
+                        <img src="@/assets/images/icons-facebook-light.svg" alt="LV">
+                        <span>Facebook</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <img src="@/assets/images/icons-twitter-light.svg" alt="LV">
+                        <span>Twitter</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <img src="@/assets/images/icons-whats-app.svg" alt="LV">
+                        <span>Whats App</span>
+                    </a>
+                </li>
+            </ul>
+            <div class="thumbnail-area">
+              <thumbnail  :src="post.image_url" :alt="post.title" :to="post.url"/>
+              <span class="copyright">&copy; 2018. Copyrights</span>
+            </div>
+            <ul class="actions-list">
+                <li><a href="#"><img src="@/assets/images/zoom-in-colored.svg" alt="LV"></a></li>
+                <li class="m-b-40"><a href="#"><img src="@/assets/images/zoom-out.svg" alt="LV"></a></li>
+                <li><a href="#"><img src="@/assets/images/icons-star-2.svg" alt="LV"></a></li>
+            </ul>
         </div>
         <p>It’s an ideal time for learning some new code skills or building on the ones you already have. Think about it: If you set your mind to it, I mean really committed yourself to doing something awesome, how much could you learn in a single summer? What sorts of cool projects could you build in that time?</p>
         <div class="grid-container">
@@ -129,6 +156,48 @@
   .single-post-container
     width 800px
     margin auto
+  .image-container
+    position relative
+    display flex
+    align-items flex-start
+    width 870px
+    .share-links
+      transform rotate(90deg)
+      position absolute
+      left -255px
+      top 210px
+      display grid
+      grid-template-columns repeat(3, 1fr)
+      li
+          margin-right 30px
+          a
+              display flex
+              align-items center
+              color $secondary
+              font-size 12px
+              font-weight 600
+              letter-spacing 2px
+              text-transform uppercase
+              img
+                  margin-right 10px
+    .actions-list
+      display flex
+      flex-direction column
+      margin-left 30px
+      li
+          margin-bottom 10px
+          a
+              display flex
+              align-items center
+              justify-content center
+              width 40px
+              height 40px
+              border-radius 50%
+              background-color rgba($secondary, .05)
+          &.m-b-40
+              margin-bottom 40px
+          &:last-child
+              margin-bottom 0
   .grid-container
     width calc(100% - 180px)
     margin auto
@@ -184,6 +253,7 @@
       margin-bottom 20px
     .thumbnail-area
       margin-bottom 20px
+      width 800px
       .article-image
         height 430px
         margin-bottom 10px
