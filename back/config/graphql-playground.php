@@ -6,7 +6,7 @@ return [
 
     // Which middleware to apply, if any
     'middleware' => [
-        // 'web',
+        'web',
     ],
 
     // Route for the GraphQL endpoint

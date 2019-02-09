@@ -10,6 +10,7 @@
   },
   "scripts": {
     "dev": "nuxt",
+    "dev-debug": "node --inspect node_modules/.bin/nuxt",
     "build": "nuxt build",
     "start": "nuxt start",
     "post-update": "yarn upgrade --latest",
