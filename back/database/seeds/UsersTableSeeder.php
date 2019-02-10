@@ -17,6 +17,7 @@ class UsersTableSeeder extends Seeder
 
         $admin = new \LaravelVueJs\Models\User([
             'name'     => 'admin',
+            'nickname' => 'admin',
             'email'    => 'admin@laravel-vuejs.com',
             'password' => bcrypt('secret'),
         ]);
