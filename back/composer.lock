@@ -12,8 +12,7 @@
             "dist": {
                 "type": "path",
                 "url": "./nova-components/nova-categories-field",
-                "reference": "747b8bb6263314a7c505ee8d2e7c936bc614a98c",
-                "shasum": null
+                "reference": "747b8bb6263314a7c505ee8d2e7c936bc614a98c"
             },
             "require": {
                 "php": ">=7.1.0"
@@ -46,8 +45,7 @@
             "dist": {
                 "type": "path",
                 "url": "./nova-components/WpImporter",
-                "reference": "9018f3913ac99217aea1a2c2a58ace7e5c6732a3",
-                "shasum": null
+                "reference": "9018f3913ac99217aea1a2c2a58ace7e5c6732a3"
             },
             "require": {
                 "php": ">=7.1.0"
@@ -190,16 +188,16 @@
         },
         {
             "name": "cakephp/chronos",
-            "version": "1.2.3",
+            "version": "1.2.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/cakephp/chronos.git",
-                "reference": "395110125ff577f080fa064dca5c5608a4e77ee1"
+                "reference": "ebda7326d4a65e53bc5bb915ebbbeee98f1926b0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/cakephp/chronos/zipball/395110125ff577f080fa064dca5c5608a4e77ee1",
-                "reference": "395110125ff577f080fa064dca5c5608a4e77ee1",
+                "url": "https://api.github.com/repos/cakephp/chronos/zipball/ebda7326d4a65e53bc5bb915ebbbeee98f1926b0",
+                "reference": "ebda7326d4a65e53bc5bb915ebbbeee98f1926b0",
                 "shasum": ""
             },
             "require": {
@@ -243,7 +241,7 @@
                 "datetime",
                 "time"
             ],
-            "time": "2018-10-18T22:02:21+00:00"
+            "time": "2019-02-11T02:08:31+00:00"
         },
         {
             "name": "defuse/php-encryption",
@@ -1184,16 +1182,16 @@
         },
         {
             "name": "laravel/framework",
-            "version": "v5.7.25",
+            "version": "v5.7.27",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/framework.git",
-                "reference": "f8fb354878064b94a3ff09a6ffd48ee9a8d712cf"
+                "reference": "688fbfa889d43f392825b381ad3981847120fdfa"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/framework/zipball/f8fb354878064b94a3ff09a6ffd48ee9a8d712cf",
-                "reference": "f8fb354878064b94a3ff09a6ffd48ee9a8d712cf",
+                "url": "https://api.github.com/repos/laravel/framework/zipball/688fbfa889d43f392825b381ad3981847120fdfa",
+                "reference": "688fbfa889d43f392825b381ad3981847120fdfa",
                 "shasum": ""
             },
             "require": {
@@ -1326,7 +1324,7 @@
                 "framework",
                 "laravel"
             ],
-            "time": "2019-02-05T14:28:43+00:00"
+            "time": "2019-02-19T14:37:47+00:00"
         },
         {
             "name": "laravel/nexmo-notification-channel",
@@ -1391,8 +1389,7 @@
             "dist": {
                 "type": "path",
                 "url": "./nova",
-                "reference": "6b34fd3882e3cff2dc99d288393e92025bc93094",
-                "shasum": null
+                "reference": "6b34fd3882e3cff2dc99d288393e92025bc93094"
             },
             "require": {
                 "cakephp/chronos": "~1.0",
@@ -1450,30 +1447,30 @@
         },
         {
             "name": "laravel/passport",
-            "version": "v7.1.0",
+            "version": "v7.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/passport.git",
-                "reference": "b0c0dcbb8d7d61ba814b1e2cb404dbb4e1d8a852"
+                "reference": "56330509283d465acaaff842637e539d03bcf9ca"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/passport/zipball/b0c0dcbb8d7d61ba814b1e2cb404dbb4e1d8a852",
-                "reference": "b0c0dcbb8d7d61ba814b1e2cb404dbb4e1d8a852",
+                "url": "https://api.github.com/repos/laravel/passport/zipball/56330509283d465acaaff842637e539d03bcf9ca",
+                "reference": "56330509283d465acaaff842637e539d03bcf9ca",
                 "shasum": ""
             },
             "require": {
                 "ext-json": "*",
                 "firebase/php-jwt": "~3.0|~4.0|~5.0",
                 "guzzlehttp/guzzle": "~6.0",
-                "illuminate/auth": "~5.6",
-                "illuminate/console": "~5.6",
-                "illuminate/container": "~5.6",
-                "illuminate/contracts": "~5.6",
-                "illuminate/database": "~5.6",
-                "illuminate/encryption": "~5.6",
-                "illuminate/http": "~5.6",
-                "illuminate/support": "~5.6",
+                "illuminate/auth": "~5.6.0|~5.7.0|~5.8.0",
+                "illuminate/console": "~5.6.0|~5.7.0|~5.8.0",
+                "illuminate/container": "~5.6.0|~5.7.0|~5.8.0",
+                "illuminate/contracts": "~5.6.0|~5.7.0|~5.8.0",
+                "illuminate/database": "~5.6.0|~5.7.0|~5.8.0",
+                "illuminate/encryption": "~5.6.0|~5.7.0|~5.8.0",
+                "illuminate/http": "~5.6.0|~5.7.0|~5.8.0",
+                "illuminate/support": "~5.6.0|~5.7.0|~5.8.0",
                 "league/oauth2-server": "^7.0",
                 "php": ">=7.1",
                 "phpseclib/phpseclib": "^2.0",
@@ -1516,7 +1513,7 @@
                 "oauth",
                 "passport"
             ],
-            "time": "2019-01-22T14:41:41+00:00"
+            "time": "2019-02-14T16:29:26+00:00"
         },
         {
             "name": "laravel/slack-notification-channel",
@@ -1577,24 +1574,24 @@
         },
         {
             "name": "laravel/socialite",
-            "version": "v4.0.3",
+            "version": "v4.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/socialite.git",
-                "reference": "25eea36010c4e714c58a4792ef52b0a8e8a9c21c"
+                "reference": "7581c57a60742f423a68362c79d507028f989bd7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/socialite/zipball/25eea36010c4e714c58a4792ef52b0a8e8a9c21c",
-                "reference": "25eea36010c4e714c58a4792ef52b0a8e8a9c21c",
+                "url": "https://api.github.com/repos/laravel/socialite/zipball/7581c57a60742f423a68362c79d507028f989bd7",
+                "reference": "7581c57a60742f423a68362c79d507028f989bd7",
                 "shasum": ""
             },
             "require": {
                 "ext-json": "*",
                 "guzzlehttp/guzzle": "~6.0",
-                "illuminate/contracts": "~5.7",
-                "illuminate/http": "~5.7",
-                "illuminate/support": "~5.7",
+                "illuminate/contracts": "~5.7.0|~5.8.0",
+                "illuminate/http": "~5.7.0|~5.8.0",
+                "illuminate/support": "~5.7.0|~5.8.0",
                 "league/oauth1-client": "~1.0",
                 "php": "^7.1.3"
             },
@@ -1637,7 +1634,7 @@
                 "laravel",
                 "oauth"
             ],
-            "time": "2019-01-21T12:35:13+00:00"
+            "time": "2019-02-14T16:57:39+00:00"
         },
         {
             "name": "laravel/telescope",
@@ -2497,16 +2494,16 @@
         },
         {
             "name": "nikic/php-parser",
-            "version": "v4.2.0",
+            "version": "v4.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/nikic/PHP-Parser.git",
-                "reference": "594bcae1fc0bccd3993d2f0d61a018e26ac2865a"
+                "reference": "5221f49a608808c1e4d436df32884cbc1b821ac0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/nikic/PHP-Parser/zipball/594bcae1fc0bccd3993d2f0d61a018e26ac2865a",
-                "reference": "594bcae1fc0bccd3993d2f0d61a018e26ac2865a",
+                "url": "https://api.github.com/repos/nikic/PHP-Parser/zipball/5221f49a608808c1e4d436df32884cbc1b821ac0",
+                "reference": "5221f49a608808c1e4d436df32884cbc1b821ac0",
                 "shasum": ""
             },
             "require": {
@@ -2544,7 +2541,7 @@
                 "parser",
                 "php"
             ],
-            "time": "2019-01-12T16:31:37+00:00"
+            "time": "2019-02-16T20:54:15+00:00"
         },
         {
             "name": "nuwave/lighthouse",
@@ -3479,26 +3476,26 @@
         },
         {
             "name": "spatie/image-optimizer",
-            "version": "1.1.4",
+            "version": "1.1.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/spatie/image-optimizer.git",
-                "reference": "11f0b270669a55f90093d63ddb5214e0f7c279da"
+                "reference": "e62f8b459bee0a880c8976c316e82638a74510b5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/spatie/image-optimizer/zipball/11f0b270669a55f90093d63ddb5214e0f7c279da",
-                "reference": "11f0b270669a55f90093d63ddb5214e0f7c279da",
+                "url": "https://api.github.com/repos/spatie/image-optimizer/zipball/e62f8b459bee0a880c8976c316e82638a74510b5",
+                "reference": "e62f8b459bee0a880c8976c316e82638a74510b5",
                 "shasum": ""
             },
             "require": {
                 "ext-fileinfo": "*",
-                "php": "^7.0",
+                "php": "^7.2",
                 "psr/log": "^1.0",
                 "symfony/process": "^4.2"
             },
             "require-dev": {
-                "phpunit/phpunit": "^7.5",
+                "phpunit/phpunit": "^8.0",
                 "symfony/var-dumper": "^4.2"
             },
             "type": "library",
@@ -3525,7 +3522,7 @@
                 "image-optimizer",
                 "spatie"
             ],
-            "time": "2019-01-14T09:15:47+00:00"
+            "time": "2019-02-15T12:11:38+00:00"
         },
         {
             "name": "spatie/laravel-medialibrary",
@@ -3672,16 +3669,16 @@
         },
         {
             "name": "spatie/laravel-sluggable",
-            "version": "2.1.5",
+            "version": "2.1.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/spatie/laravel-sluggable.git",
-                "reference": "77b67b701ec0cbf9d5ec7f91da25f69db119b2a5"
+                "reference": "031a5f1c7cee4128849a288625ce67d29be57aee"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/spatie/laravel-sluggable/zipball/77b67b701ec0cbf9d5ec7f91da25f69db119b2a5",
-                "reference": "77b67b701ec0cbf9d5ec7f91da25f69db119b2a5",
+                "url": "https://api.github.com/repos/spatie/laravel-sluggable/zipball/031a5f1c7cee4128849a288625ce67d29be57aee",
+                "reference": "031a5f1c7cee4128849a288625ce67d29be57aee",
                 "shasum": ""
             },
             "require": {
@@ -3717,7 +3714,7 @@
                 "laravel-sluggable",
                 "spatie"
             ],
-            "time": "2019-01-10T08:17:22+00:00"
+            "time": "2019-02-14T13:23:51+00:00"
         },
         {
             "name": "spatie/laravel-tags",
@@ -3850,22 +3847,22 @@
         },
         {
             "name": "spatie/nova-tags-field",
-            "version": "1.1.2",
+            "version": "1.1.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/spatie/nova-tags-field.git",
-                "reference": "cac37702d1dec140a20c3a774481b144a747df70"
+                "reference": "9382d23a6bc401c0a22e769da0742f5013cbd393"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/spatie/nova-tags-field/zipball/cac37702d1dec140a20c3a774481b144a747df70",
-                "reference": "cac37702d1dec140a20c3a774481b144a747df70",
+                "url": "https://api.github.com/repos/spatie/nova-tags-field/zipball/9382d23a6bc401c0a22e769da0742f5013cbd393",
+                "reference": "9382d23a6bc401c0a22e769da0742f5013cbd393",
                 "shasum": ""
             },
             "require": {
                 "laravel/nova": "*",
                 "php": ">=7.1.0",
-                "spatie/laravel-tags": "^2.1"
+                "spatie/laravel-tags": "^2.2"
             },
             "require-dev": {
                 "mockery/mockery": "^1.1",
@@ -3902,7 +3899,7 @@
                 "laravel",
                 "nova"
             ],
-            "time": "2018-12-20T17:08:59+00:00"
+            "time": "2019-02-11T07:39:11+00:00"
         },
         {
             "name": "spatie/nova-translatable",
@@ -5659,16 +5656,16 @@
         },
         {
             "name": "mockery/mockery",
-            "version": "1.2.1",
+            "version": "1.2.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/mockery/mockery.git",
-                "reference": "dc4f10b6b1148744facb784015e4b339d7feec23"
+                "reference": "0eb0b48c3f07b3b89f5169ce005b7d05b18cf1d2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mockery/mockery/zipball/dc4f10b6b1148744facb784015e4b339d7feec23",
-                "reference": "dc4f10b6b1148744facb784015e4b339d7feec23",
+                "url": "https://api.github.com/repos/mockery/mockery/zipball/0eb0b48c3f07b3b89f5169ce005b7d05b18cf1d2",
+                "reference": "0eb0b48c3f07b3b89f5169ce005b7d05b18cf1d2",
                 "shasum": ""
             },
             "require": {
@@ -5720,7 +5717,7 @@
                 "test double",
                 "testing"
             ],
-            "time": "2019-02-08T14:43:54+00:00"
+            "time": "2019-02-13T09:37:52+00:00"
         },
         {
             "name": "myclabs/deep-copy",
@@ -6405,16 +6402,16 @@
         },
         {
             "name": "phpunit/phpunit",
-            "version": "7.5.4",
+            "version": "7.5.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "2896657da5fb237bc316bdfc18c2650efeee0dc0"
+                "reference": "09c85e14994df92e5ff1f5ec0b481bdb7d3d3df9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/2896657da5fb237bc316bdfc18c2650efeee0dc0",
-                "reference": "2896657da5fb237bc316bdfc18c2650efeee0dc0",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/09c85e14994df92e5ff1f5ec0b481bdb7d3d3df9",
+                "reference": "09c85e14994df92e5ff1f5ec0b481bdb7d3d3df9",
                 "shasum": ""
             },
             "require": {
@@ -6485,7 +6482,7 @@
                 "testing",
                 "xunit"
             ],
-            "time": "2019-02-07T14:15:04+00:00"
+            "time": "2019-02-18T09:24:50+00:00"
         },
         {
             "name": "sebastian/code-unit-reverse-lookup",
