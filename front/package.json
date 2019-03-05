@@ -61,6 +61,7 @@
     "stylus": "^0.54.5",
     "stylus-loader": "^3.0.2",
     "vue-lazyload": "^1.2.6",
+    "vue-template-compiler": "^2.4.1",
     "webpack-bundle-analyzer": "^3.0.3"
   }
 }
