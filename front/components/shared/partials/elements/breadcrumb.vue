@@ -29,12 +29,19 @@ export default {
         display flex
         align-items center
         &:not(:last-child):after
-            display block
-            margin 0 5px
-            width 20px
-            height 20px
-            content ""
-            background-image url('../../../../assets/images/icons-next.svg')
+          display block
+          margin 0 5px
+          width 20px
+          height 20px
+          content ""
+          background-image url('../../../../assets/images/icons-next.svg')
+          @media (max-width: 768px)
+            content "\f105"
+            font-family "FontAwesome"
+            background-image none
+            width auto
+            margin 0 10px
+            color $secondary
 
     &.is-active .breadcrumb-anchor
         font-weight bold

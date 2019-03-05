@@ -15,8 +15,6 @@ dist
 
 sw.*
 
-package-lock.json
-
 .monitor
 
-yarn-error.log
+.idea/

@@ -41,8 +41,8 @@ return [
     |
     */
     'route'            => [
-        'prefix' => '',
-        // 'middleware' => ['loghttp']
+        'prefix'     => '',
+        'middleware' => ['web'],
     ],
 
     /*

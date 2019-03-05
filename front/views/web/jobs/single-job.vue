@@ -146,7 +146,7 @@
                     },
                     {
                         name: 'Jobs',
-                        link: "/"          
+                        link: "/"
                     },
                     {
                         name: 'Lightroom Artist for Instagram Pictures',

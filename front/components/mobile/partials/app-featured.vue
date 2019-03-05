@@ -1,6 +1,6 @@
 <template>
     <section class="featured-articles">
-        <div class="container">
+        <div class="mobile-container">
             <heading>Featured Posts</heading>
             <div class="posts-grid">
               <article-item v-for="item in featured"
@@ -38,20 +38,11 @@
 <style lang="stylus" scoped>
     .featured-articles
         position relative
-        padding 60px 0
-        &:after
-            content ""
-            height 1px
-            width 1040px
-            background-color $gray
-            position absolute
-            bottom 0
-            left 50%
-            transform translateX(-50%)
+        padding 35px 0
 
     .posts-grid
         display grid
-        grid-template-columns repeat(4, 1fr)
+        grid-template-columns repeat(1, 1fr)
         grid-gap 20px 10px
         margin-top 30px
 </style>

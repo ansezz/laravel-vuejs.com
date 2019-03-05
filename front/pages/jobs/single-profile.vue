@@ -8,8 +8,8 @@
             store
         }) => store.state.platform,
         components: {
-            mobile: () => import(`~/views/mobile/page/companies`),
-            web: () => import(`~/views/web/page/companies`)
+            mobile: () => import(`~/views/mobile/jobs/single-profile`),
+            web: () => import(`~/views/web/jobs/single-profile`)
         }
     }
 

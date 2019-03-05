@@ -29,9 +29,19 @@ export const mutations = {
 
 export const actions = {
   //Get the latest news
+  async SET_TOKEN({commit, dispatch}, token) {
+    commit('SET_ME_TOKEN', {access_token: token})
+    commit('SET_LOGGED_IN', true)
+    await this.app.$apolloHelpers.onLogin(token)
+    await dispatch('LOAD_ME')
+    console.log('SET_TOKEN')
+    this.$router.push('/')
+    return true;
+  },
   async LOAD_ME({commit}) {
     await this.app.apolloProvider.defaultClient.query({query: meQql})
       .then(({data}) => {
+        console.log(data)
         if (data.me) {
           commit('SET_ME', data.me)
           commit('SET_LOGGED_IN', true)

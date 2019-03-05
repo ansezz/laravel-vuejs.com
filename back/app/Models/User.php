@@ -18,8 +18,10 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     protected $fillable = [
         'name',
+        'nickname',
         'email',
         'password',
+        'avatar',
     ];
 
     /**
@@ -39,5 +41,13 @@ class User extends Authenticatable implements MustVerifyEmail
     public function posts()
     {
         return $this->hasMany(Post::class);
+    }
+
+    /** Get all linked social accounts
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function linkedSocialAccounts(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(LinkedSocialAccount::class);
     }
 }

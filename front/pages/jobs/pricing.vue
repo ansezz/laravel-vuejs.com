@@ -6,8 +6,8 @@
   export default {
     layout: ({store}) => store.state.platform,
     components: {
-      mobile: () => import(`~/views/mobile/page/single-job`),
-      web: () => import(`~/views/web/page/single-job`)
+      mobile: () => import(`~/views/mobile/jobs/pricing`),
+      web: () => import(`~/views/web/jobs/pricing`)
     }
   }
 </script>
