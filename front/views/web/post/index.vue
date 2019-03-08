@@ -25,26 +25,30 @@
                 <h1 class="text-center">{{ post.title.substring(0, 45) }}</h1>
                 <p v-html="post.excerpt"></p>
                 <div class="image-container">
-                    <ul class="share-links">
-                        <li>
-                            <a href="#">
+                    <social-sharing :url="seo.url"
+                                    :title="seo.title"
+                                    :description="seo.description"
+                                    :media="seo.image"
+                                    :hashtags="hashTags"
+                                    twitter-user="laravelvuejs"
+                                    network-tag="li"
+                                    inline-template>
+                        <ul class="share-links">
+                            <network network="facebook">
                                 <img src="@/assets/images/icons-facebook-light.svg" alt="LV">
                                 <span>Facebook</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#">
+                            </network>
+                            <network network="whatsapp">
+                                <img src="@/assets/images/icons-whats-app.svg" alt="LV">
+                                <span>WhatsApp</span>
+                            </network>
+                            <network network="twitter">
                                 <img src="@/assets/images/icons-twitter-light.svg" alt="LV">
                                 <span>Twitter</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#">
-                                <img src="@/assets/images/icons-whats-app.svg" alt="LV">
-                                <span>Whats App</span>
-                            </a>
-                        </li>
-                    </ul>
+                            </network>
+                        </ul>
+                    </social-sharing>
+
                     <div class="thumbnail-area">
                         <thumbnail :src="post.image_url" :alt="post.title" :to="post.url"/>
                         <span class="copyright">&copy; 2018. Copyrights</span>
@@ -85,6 +89,64 @@
                     </ul>
                     <app-jobs-swiper/>
                 </div>
+                <div class="container">
+                    <!-- @TODO : style social share media -->
+                    <social-sharing :url="seo.url"
+                                    :title="seo.title"
+                                    :description="seo.description"
+                                    :media="seo.image"
+                                    :hashtags="hashTags"
+                                    twitter-user="laravelvuejs"
+                                    inline-template>
+                        <div class="share-links">
+                            <network network="email">
+                                <i class="fa fa-envelope"></i>
+                            </network>
+                            <network network="facebook">
+                                <i class="fa fa-facebook"></i>
+                            </network>
+                            <network network="googleplus">
+                                <i class="fa fa-google-plus"></i>
+                            </network>
+                            <network network="line">
+                                <i class="fa fa-line"></i>
+                            </network>
+                            <network network="linkedin">
+                                <i class="fa fa-linkedin"></i>
+                            </network>
+                            <network network="odnoklassniki">
+                                <i class="fa fa-odnoklassniki"></i>
+                            </network>
+                            <network network="pinterest">
+                                <i class="fa fa-pinterest"></i>
+                            </network>
+                            <network network="reddit">
+                                <i class="fa fa-reddit"></i>
+                            </network>
+                            <network network="skype">
+                                <i class="fa fa-skype"></i>
+                            </network>
+                            <network network="sms">
+                                <i class="fa fa-commenting-o"></i>
+                            </network>
+                            <network network="telegram">
+                                <i class="fa fa-telegram"></i>
+                            </network>
+                            <network network="twitter">
+                                <i class="fa fa-twitter"></i>
+                            </network>
+                            <network network="vk">
+                                <i class="fa fa-vk"></i>
+                            </network>
+                            <network network="weibo">
+                                <i class="fa fa-weibo"></i>
+                            </network>
+                            <network network="whatsapp">
+                                <i class="fa fa-whatsapp"></i>
+                            </network>
+                        </div>
+                    </social-sharing>
+                </div>
                 <div class="ads">720x90px</div>
             </div>
         </div>
@@ -94,13 +156,20 @@
             </div>
         </div>
         <div class="single-post-container has-p-45-120">
-            <app-comment-area/>
+            <!--<app-comment-area/>-->
+            <div class="comment-container">
+                <vue-disqus shortname="laravel-vuejs-com" identifier="laravel-vuejs-com"
+                            :url="this.post.url"></vue-disqus>
+            </div>
         </div>
     </section>
 </template>
 
 <script>
+    import seo from '@/mixins/seo'
+
     export default {
+        mixins: [seo],
         components: {
             Breadcrumb: () => import('@/components/shared/partials/elements/breadcrumb'),
             ArticleItem: () => import("@/components/shared/partials/elements/article-item"),
@@ -112,7 +181,24 @@
         computed: {
             post() {
                 return this.$store.state.post.single
-            }
+            },
+            hashTags() {
+                let tags = [];
+                this.post.tags.forEach((tag) => {
+                    tags.push(tag.name)
+                })
+                return tags.join(',')
+            },
+            seo() {
+                return {
+                    title: this.post.title,
+                    description: this.post.excerpt,
+                    image: this.post.image_url,
+                    url: this.post.url,
+                    tags: this.post.tags,
+                    type: 'article',
+                }
+            },
         },
         data() {
             return {
@@ -123,7 +209,7 @@
                     },
                     {
                         name: this.post.categories[0] ? this.post.categories[0].name : '',
-                        link: '/'
+                        link: '/category/' + this.post.categories[0] ? this.post.categories[0].slug : ''
                     },
                     {
                         name: this.post.title.substring(0, 45)
