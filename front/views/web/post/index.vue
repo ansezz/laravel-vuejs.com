@@ -215,7 +215,7 @@
                     },
                     {
                         name: this.post.categories[0] ? this.post.categories[0].name : '',
-                        link: '/category/' + this.post.categories[0] ? this.post.categories[0].slug : ''
+                        link: '/category/' + (this.post.categories[0] ? this.post.categories[0].slug : '')
                     },
                     {
                         name: this.post.title.substring(0, 45)
