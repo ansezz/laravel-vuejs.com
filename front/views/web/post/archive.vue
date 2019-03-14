@@ -22,7 +22,9 @@
           />
         </template>
       </div>
-      <adsbygoogle/>
+      <div class="ads has-m">
+        <adsbygoogle/>
+      </div>
       <Pagination :data="paginator" @pagination-change-page="changePage"/>
       <div class="ads has-m">900x250</div>
     </div>
@@ -116,7 +118,7 @@
     display flex
     align-items center
     justify-content center
-    background-color #3abbff
+    background-color transparent
     font-size 24px
     color $white
     margin 60px auto

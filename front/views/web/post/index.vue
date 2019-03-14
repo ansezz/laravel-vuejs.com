@@ -35,16 +35,22 @@
                                     inline-template>
                         <ul class="share-links">
                             <network network="facebook">
-                                <img src="@/assets/images/icons-facebook-light.svg" alt="LV">
-                                <span>Facebook</span>
+                                <a href="#">
+                                  <img src="@/assets/images/icons-facebook-light.svg" alt="LV">
+                                  <span>Facebook</span>
+                                </a>
                             </network>
                             <network network="whatsapp">
-                                <img src="@/assets/images/icons-whats-app.svg" alt="LV">
-                                <span>WhatsApp</span>
+                                <a href="#">
+                                  <img src="@/assets/images/icons-whats-app.svg" alt="LV">
+                                  <span>WhatsApp</span>
+                                </a>
                             </network>
                             <network network="twitter">
-                                <img src="@/assets/images/icons-twitter-light.svg" alt="LV">
-                                <span>Twitter</span>
+                                <a href="#">
+                                  <img src="@/assets/images/icons-twitter-light.svg" alt="LV">
+                                  <span>Twitter</span>
+                                </a>
                             </network>
                         </ul>
                     </social-sharing>
@@ -89,7 +95,7 @@
                     </ul>
                     <app-jobs-swiper/>
                 </div>
-                <div class="container">
+                <div>
                     <!-- @TODO : style social share media -->
                     <social-sharing :url="seo.url"
                                     :title="seo.title"
@@ -98,7 +104,7 @@
                                     :hashtags="hashTags"
                                     twitter-user="laravelvuejs"
                                     inline-template>
-                        <div class="share-links">
+                        <div class="share-links is-flex">
                             <network network="email">
                                 <i class="fa fa-envelope"></i>
                             </network>
@@ -222,7 +228,26 @@
 </script>
 
 <style lang="stylus" scoped>
-
+    .share-links
+      &.is-flex
+        justify-content center
+        margin-bottom 40px
+        & >>>
+          span
+            cursor pointer
+            margin-right 10px
+            width 35px
+            height 35px
+            display flex
+            align-items center
+            justify-content center
+            border 1px solid $secondary
+            color #FFF
+            border-radius 50%
+            font-size 15px
+            background-color $secondary
+            &:last-child
+              margin-right 0
     a.cs-btn
         padding 10px
         margin 10px
@@ -239,27 +264,25 @@
         width 870px
 
         .share-links
-            transform rotate(90deg)
-            position absolute
-            left -255px
-            top 210px
-            display grid
-            grid-template-columns repeat(3, 1fr)
-
+          transform rotate(90deg)
+          position absolute
+          left -255px
+          top 210px
+          display grid
+          grid-template-columns repeat(3, 1fr)
+          & >>>
             li
-                margin-right 30px
-
-                a
-                    display flex
-                    align-items center
-                    color $secondary
-                    font-size 12px
-                    font-weight 600
-                    letter-spacing 2px
-                    text-transform uppercase
-
-                    img
-                        margin-right 10px
+              margin-right 30px
+              a
+                display flex
+                align-items center
+                color $secondary
+                font-size 12px
+                font-weight 600
+                letter-spacing 2px
+                text-transform uppercase
+                img
+                    margin-right 10px
 
         .actions-list
             display flex
@@ -403,6 +426,9 @@
                     padding-bottom 10px
                     display flex
                     align-items center
+                    & >>>
+                      a
+                        color #616d82
 
                     &:before
                         content ""
