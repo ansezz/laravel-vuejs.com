@@ -8,7 +8,7 @@
     <div class="container">
       <adsbygoogle />
     </div>
-    <app-subscribe v-if="!loggedIn" />
+    <app-subscribe/>
     <footer class="footer">
       <div class="container">
         <div class="row">
@@ -95,7 +95,6 @@
     },
     data() {
       return {
-        loggedIn: this.$store.state.auth.loggedIn
       }
     },
     created() {

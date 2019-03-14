@@ -1,5 +1,5 @@
 <template>
-  <section class="mobile-subscribe">
+  <section class="mobile-subscribe" v-if="!loggedIn">
     <div class="mobile-container">
       <div class="subscribe-info">
         <h3>Stay in Touch</h3>
@@ -30,12 +30,16 @@
 
   export default {
     name: "AppSubscribe",
-
     props: {},
     data() {
       return {
         email: '',
         message: null
+      }
+    },
+    computed :{
+      loggedIn() {
+        return this.$store.state.auth.loggedIn;
       }
     },
     methods: {

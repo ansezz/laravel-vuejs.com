@@ -1,5 +1,5 @@
 <template>
-  <section class="subscribe">
+  <section class="subscribe" v-if="!loggedIn">
     <div class="container">
       <div class="row">
         <div class="col-sm-6">
@@ -38,6 +38,11 @@
     name: "AppSubscribe",
 
     props: {},
+    computed :{
+      loggedIn() {
+        return this.$store.state.auth.loggedIn;
+      }
+    },
     data() {
       return {
         email: '',

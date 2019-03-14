@@ -30,8 +30,12 @@
     data() {
       return {
         email: null,
-        message: null,
-        loggedIn: this.$store.state.auth.loggedIn
+        message: null
+      }
+    },
+    computed :{
+      loggedIn() {
+        return this.$store.state.auth.loggedIn;
       }
     },
     methods: {
