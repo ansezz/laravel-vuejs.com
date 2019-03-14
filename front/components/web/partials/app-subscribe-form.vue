@@ -1,5 +1,5 @@
 <template>
-  <div class="widget">
+  <div v-if="!loggedIn" class="widget">
     <heading>Subsribe</heading>
     <app-form class="subscribe-widget">
       <template slot="desc">
@@ -30,7 +30,8 @@
     data() {
       return {
         email: null,
-        message: null
+        message: null,
+        loggedIn: this.$store.state.auth.loggedIn
       }
     },
     methods: {

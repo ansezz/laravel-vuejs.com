@@ -6,9 +6,9 @@
       <nuxt/>
     </app-main>
     <div class="container">
-      <adsbygoogle/>
+      <adsbygoogle />
     </div>
-    <app-subscribe/>
+    <app-subscribe v-if="!loggedIn" />
     <footer class="footer">
       <div class="container">
         <div class="row">
@@ -94,7 +94,9 @@
       }),
     },
     data() {
-      return {}
+      return {
+        loggedIn: this.$store.state.auth.loggedIn
+      }
     },
     created() {
       if (this.$route.query.token) {
@@ -112,6 +114,7 @@
 
   .footer
     padding 60px 0
+    border-top 1px solid #EEE
 
     .footer-box
       width 200px
