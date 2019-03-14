@@ -50,4 +50,14 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(LinkedSocialAccount::class);
     }
+
+
+    public static function boot()
+    {
+        parent::boot();
+
+        self::creating(function ($model) {
+            $model->nickname = str_slug($model->name) . rand(0, 4);
+        });
+    }
 }
