@@ -56,10 +56,10 @@
     &:nth-child(1)
       width calc(100% + 97px)
       grid-row span 2
+      & >>>
+        .article-image
+          height 240px
 
-      >>>
-      .article-image
-        height 240px
 
     &:nth-child(2)
     &:nth-child(3)
