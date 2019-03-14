@@ -1,4 +1,8 @@
 @import 'variables'
+html.no-scroll
+  overflow hidden
+  .main
+    filter grayscale(100)
 body
   font-family $family-sans-serif
 ul,
@@ -107,6 +111,8 @@ h1,h2,h3,h4,h5,h6
 textarea
     &.no-resize
         resize none
+.is-relative
+  position relative
 .is-absolute
     position absolute
     top 0

@@ -1,16 +1,22 @@
 <!--laravelvuejs_Home_M.png-->
 <template>
-  <section>
-    <h1>Home Mobile</h1>
+  <section class="home-page-mobile">
+    <app-feed />
+    <app-featured />
   </section>
 </template>
 
 <script>
   export default {
-    components: {},
+     components: {
+      AppFeatured: () => import('@/components/mobile/partials/app-featured'),
+      AppFeed: () => import('@/components/mobile/partials/app-feed'),
+    },
     name: "index"
   }
 </script>
 
 <style lang="stylus" scoped>
+  .home-page-mobile
+    padding-top 30px
 </style>
