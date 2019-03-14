@@ -5,9 +5,9 @@
       </header>
     <main class="article-main">
       <nuxt-link :to="to">
-        <h3 class="article-title" v-html="truncate(title, 45)"/>
+        <h3 class="article-title" v-html="truncate(title, 55)"/>
       </nuxt-link>
-      <p v-if="description" class="article-description" v-html="truncate(description, 60)"/>
+      <!-- <p v-if="description" class="article-description" v-html="truncate(description, 60)"/> -->
     </main>
   </article>
 </template>
@@ -62,8 +62,10 @@ export default {
             padding 10px 10px 0
             .article-title
                 color $tertiary
-                font-size 20px
+                font-size 17px
                 line-height 1.4
+                height 50px
+                overflow hidden
             .article-description
                 color rgba($tertiary, .6)
                 font-size 18px
@@ -83,7 +85,11 @@ export default {
             .article-main
                 padding 0 0 0 10px
                 width 140px
+                height 81px
+                display flex
+                align-items center
                 .article-title
                     font-size 14px
                     font-weight 500
+                    height 60px
 </style>
