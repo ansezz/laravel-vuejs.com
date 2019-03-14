@@ -34,12 +34,19 @@ class WpImporter implements ShouldQueue
      */
     public function handle()
     {
+        ini_set('memory_limit', '-1');
+
+        echo 'start  ';
+
         /** @var string $path */
         $path = storage_path('app' . DIRECTORY_SEPARATOR . 'wp-importer' . DIRECTORY_SEPARATOR . 'in-progress' . DIRECTORY_SEPARATOR . $this->file_name);
 
         if (file_exists($path)) {
+            echo $path . '  ';
             $xml = simplexml_load_file($path);
+
             foreach ($xml->channel->item as $item) {
+                echo (string)$item->title . ' ';
                 $categories = [];
                 $tags = [];
                 foreach ($item->category as $cat) {
@@ -58,13 +65,13 @@ class WpImporter implements ShouldQueue
 
                 /** @var Post $post */
                 $post = Post::create([
-                    'user_id'        => 1,
-                    'title'          => (string)$item->title,
-                    'slug'           => (string)$wp->post_name,
-                    'excerpt'        => (string)$e_excerpt->encoded,
-                    'content'        => (string)$e_content->encoded,
-                    'type'           => 1,
-                    'status'         => 1,
+                    'user_id' => 1,
+                    'title' => (string)$item->title,
+                    'slug' => (string)$wp->post_name,
+                    'excerpt' => (string)$e_excerpt->encoded,
+                    'content' => (string)$e_content->encoded,
+                    'type' => 1,
+                    'status' => 1,
                     'comment_status' => 1,
                 ]);
 
