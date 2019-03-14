@@ -1,8 +1,8 @@
 <!--laravelvuejs_Home_M.png-->
 <template>
   <section class="home-page-mobile">
-    <app-feed />
     <app-featured />
+    <app-feed />
   </section>
 </template>
 
