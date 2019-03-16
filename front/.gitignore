@@ -18,3 +18,5 @@ sw.*
 .monitor
 
 .idea/
+
+.env
