@@ -54,61 +54,61 @@ export const social_media = [
     {
         title: "Google+",
         href: "https://plus.google.com/+LaravelVueJS",
-        class: "fa fa-google-plus",
+        class: "google-plus",
     },
     {
         title: "Facebook",
         href: "https://www.facebook.com/LaravelVueJs",
-        class: "fa fa-facebook"
+        class: "facebook"
     },
     {
         title: "Twitter",
         href: "https://twitter.com/LaravelVueJs",
-        class: "fa fa-twitter"
+        class: "twitter"
     },
     {
         title: "Pinterest",
         href: "https://www.pinterest.com/laravelvuejs/",
-        class: "fa fa-pinterest"
+        class: "pinterest"
     },
     {
         title: "Flickr",
         href: "https://www.flickr.com/photos/laravelvuejs/",
-        class: "fa fa-flickr"
+        class: "flickr"
     },
     {
         title: "Reddit",
         href: "https://www.reddit.com/user/laravelvuejs",
-        class: "fa fa-reddit"
+        class: "reddit"
     },
     {
         title: "StumbleUpon",
         href: "https://www.stumbleupon.com/stumbler/laravelvuejs",
-        class: "fa fa-stumbleupon"
+        class: "stumbleupon"
     },
     {
         title: "Tumblr",
         href: "https://laravelvuejs.tumblr.com",
-        class: "fa fa-tumblr"
+        class: "tumblr"
     },
     {
         title: "Instagram",
         href: "https://www.instagram.com/laravelvuejs/",
-        class: "fa fa-instagram"
+        class: "instagram"
     },
     {
         title: "vk.,com",
         href: "https://vk.com/laravelvuejs",
-        class: "fa fa-vk"
+        class: "vk"
     },
     {
         title: "Telegram",
         href: "http://t.me/LaravelVueJs",
-        class: "fa fa-paper-plane"
+        class: "paper-plane"
     },
     {
         title: "Rss",
         href: "https://www.laravel-vuejs.com/feed/",
-        class: "fa fa-rss"
+        class: "rss"
     },
 ]
