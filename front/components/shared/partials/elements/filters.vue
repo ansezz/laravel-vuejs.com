@@ -2,9 +2,9 @@
   <div class="filters">
     <div class="filter-group">
       <select name="showen-posts" aria-label="count" @change="action" v-model="filter.count">
-        <option value="8">show 8 posts</option>
-        <option value="16">show 16 posts</option>
-        <option value="32">show 32 posts</option>
+        <option value="12">show 12 posts</option>
+        <option value="24">show 24 posts</option>
+        <option value="48">show 48 posts</option>
       </select>
     </div>
     <div class="filter-group">
@@ -28,7 +28,7 @@
       action: Function
     },
     mounted() {
-      this.filter.count = this.$route.query.count ?? 8
+      this.filter.count = this.$route.query.count ?? 12
       this.filter.sort_by = this.$route.query.sort_by ?? 'latest'
       this.page = this.$route.query.page ?? 1
     },
