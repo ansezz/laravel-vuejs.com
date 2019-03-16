@@ -6,9 +6,9 @@
                 <div class="widget">
                     <ul class="social-media">
                         <li v-for="(item, index) in social_media" :key="index"
-                            :class="item.name">
+                            :class="item.class">
                             <a :href="item.href" target="_blank">
-                                <i class="fa" :class="item.class"/>
+                                <i class="fa" :class="'fa-' + item.class"/>
                             </a>
                         </li>
                     </ul>
