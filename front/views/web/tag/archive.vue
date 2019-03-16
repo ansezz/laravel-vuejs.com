@@ -1,160 +1,215 @@
 <!--waiting designer-->
 <template>
-  <section class="posts-container">
-    <breadcrumb :pages="breadcrumbsData()"/>
-    <div class="container">
-      <div class="post-heading-filters">
-        <div class="post-heading">
-          <div class="user-avatar">
-            <img src="@/assets/images/icons-category.svg" alt="LV">
-          </div>
-          <h1 v-if="tag">{{tag.name}}</h1>
+    <section class="posts-container">
+        <breadcrumb :pages="breadcrumbsData()"/>
+        <div class="container">
+            <div class="post-heading-filters">
+                <div class="post-heading">
+                    <div class="user-avatar">
+                        <img src="@/assets/images/icons-category.svg" alt="LV">
+                    </div>
+                    <h1 v-if="tag">{{tag.name}}</h1>
+                </div>
+                <filters :filter.sync="filter" :action.sync="filterChange"></filters>
+            </div>
+            <div class="article-grid">
+                <article-item v-for="item in postsByTag.data"
+                              :title="item.title"
+                              :image="item.image_url"
+                              :description="item.excerpt"
+                              :key="item.id"
+                              :to="{ name: 'slug', params: { slug: item.slug }}"
+                />
+            </div>
+            <div class="adsbygoogle">
+                <adsbygoogle/>
+            </div>
+
+            <button @click="showMore()"
+                    v-if="hasMorePages && !show_more">
+                {{ $apollo.queries.postsByTag.loading ? 'Loading ...' : 'Show more'}}
+            </button>
+
+            <no-ssr>
+                <infinite-loading
+                        @infinite="showMore"
+                        v-if="show_more"></infinite-loading>
+            </no-ssr>
         </div>
-        <filters :filter.sync="filter" :action.sync="filterChange"></filters>
-      </div>
-      <div class="article-grid">
-        <article-item v-for="item in posts"
-                      :title="item.title"
-                      :image="item.image_url"
-                      :description="item.excerpt"
-                      :key="item.id"
-                      :to="{ name: 'slug', params: { slug: item.slug }}"
-        />
-      </div>
-      <div class="ads has-m">900x250</div>
-      <Pagination :data="paginator" @pagination-change-page="changePage"/>
-    </div>
-  </section>
+    </section>
 </template>
 
 <script>
-  export default {
-    components: {
-      filters: () => import('@/components/shared/partials/elements/filters'),
-      Breadcrumb: () => import('@/components/shared/partials/elements/breadcrumb'),
-      ArticleItem: () => import('@/components/shared/partials/elements/article-item'),
-      Pagination: () => import('@/components/shared/partials/elements/pagination')
-    },
-    name: "tag-posts",
-    computed: {
-      posts() {
-        return this.$store.state.tag.posts.data
-      },
-      tag() {
-        return this.$store.state.tag.tag
-      },
-      paginator() {
-        return this.$store.state.tag.posts.paginatorInfo
-      }
-    },
-    methods: {
-      changePage(page) {
-        this.$router.push({
-          name: 'tag-slug',
-          query: {count: this.filter.count, sort_by: this.filter.sort_by, page: page},
-          params: {slug: this.$route.params.slug}
-        })
-      },
-      filterChange() {
-        this.$router.push({
-          name: 'tag-slug',
-          query: {count: this.filter.count, sort_by: this.filter.sort_by},
-          params: {slug: this.$route.params.slug}
-        })
-      }
-    },
-    data() {
-      return {
-        filter: {
-          sort_by: 'latest',
-          count: 8,
+    import postsQql from '@/graphql/queries/tag/posts.graphql';
+    import InfiniteLoading from 'vue-infinite-loading';
+
+    export default {
+        components: {
+            filters: () => import('@/components/shared/partials/elements/filters'),
+            Breadcrumb: () => import('@/components/shared/partials/elements/breadcrumb'),
+            ArticleItem: () => import('@/components/shared/partials/elements/article-item'),
+            InfiniteLoading
         },
-        breadcrumbsData: () => [{
-          name: 'Home',
-          link: "/"
+        name: "tag-posts",
+        apollo: {
+            postsByTag: {
+                query: postsQql,
+                variables() {
+                    // Initial variables
+                    return {
+                        count: 12,
+                        page: 1,
+                        sort_by: 'latest',
+                        slug: this.$route.params.slug,
+                    }
+                }
+            },
         },
-          {
-            name: 'Tag'
-          },
-          {
-            name: this.tag.name
-          }
-        ]
-      }
+        computed: {
+            tag() {
+                return this.$store.state.tag.tag
+            },
+            hasMorePages() {
+                return this.postsByTag && this.postsByTag.paginatorInfo && this.postsByTag.paginatorInfo.hasMorePages;
+            }
+        },
+        methods: {
+            showMore($state) {
+                if (!this.hasMorePages || this.$apollo.queries.postsByTag.loading) {
+                    return true
+                }
+
+                this.filter.page++
+
+                this.$apollo.queries.postsByTag.fetchMore({
+                    // New variables
+                    variables: {
+                        count: this.filter.count,
+                        page: this.filter.page,
+                        sort_by: this.filter.sort_by,
+                        slug: this.$route.params.slug
+                    },
+                    // Transform the previous result with new data
+                    updateQuery: (previousResult, {fetchMoreResult}) => {
+                        if (!fetchMoreResult)
+                            return previousResult;
+
+                        if ($state) {
+                            if (fetchMoreResult.postsByTag.paginatorInfo.hasMorePages)
+                                $state.loaded();
+                            else
+                                $state.complete();
+                        }
+
+                        this.show_more = true;
+                        fetchMoreResult.postsByTag.data = [...previousResult.postsByTag.data, ...fetchMoreResult.postsByTag.data];
+                        return fetchMoreResult;
+                    },
+                })
+            },
+            filterChange() {
+                this.$router.push({
+                    name: 'tag-slug',
+                    query: {count: this.filter.count, sort_by: this.filter.sort_by},
+                    params: {slug: this.$route.params.slug}
+                })
+            }
+        },
+        data() {
+            return {
+                postsByTag: {},
+                show_more: false,
+                filter: {
+                    page: 1,
+                    sort_by: 'latest',
+                    count: 12,
+                },
+                breadcrumbsData: () => [{
+                    name: 'Home',
+                    link: "/"
+                },
+                    {
+                        name: 'Tag'
+                    },
+                    {
+                        name: this.tag.name
+                    }
+                ]
+            }
+        }
     }
-  }
 
 </script>
 
 <style lang="stylus" scoped>
-  .posts-container
-    padding-bottom 120px
+    .posts-container
+        padding-bottom 120px
 
-  .post-heading-filters
-    position relative
-    height 60px
-    overflow hidden
-    display flex
-    align-items flex-end
-    justify-content flex-end
-    margin 60px 0 40px
+    .post-heading-filters
+        position relative
+        height 60px
+        overflow hidden
+        display flex
+        align-items flex-end
+        justify-content flex-end
+        margin 60px 0 40px
 
-  .post-heading
-    position absolute
-    left 50%
-    transform translateX(-50%)
-    text-align center
+    .post-heading
+        position absolute
+        left 50%
+        transform translateX(-50%)
+        text-align center
 
-    h1
-      font-size 28px
-      font-weight 600
-      color $tertiary
-      margin-top 10px
-      line-height 1
+        h1
+            font-size 28px
+            font-weight 600
+            color $tertiary
+            margin-top 10px
+            line-height 1
 
-  .filters
-    display flex
-    align-items center
+    .filters
+        display flex
+        align-items center
 
-    .filter-group
-      position relative
-      margin-right 45px
+        .filter-group
+            position relative
+            margin-right 45px
 
-      &:after
-        content "\f0d7"
-        font-family "FontAwesome"
-        color $secondary
-        padding-left 15px
+            &:after
+                content "\f0d7"
+                font-family "FontAwesome"
+                color $secondary
+                padding-left 15px
 
-      &:last-child
-        margin-right 0
+            &:last-child
+                margin-right 0
 
-      select
-        font-size 12px
-        font-weight 600
-        letter-spacing 2px
-        color $secondary
-        text-transform uppercase
-        border 0
-        background-color transparent
-        outline none
-        -webkit-appearance none
-        -moz-appearance none
-        appearance none
+            select
+                font-size 12px
+                font-weight 600
+                letter-spacing 2px
+                color $secondary
+                text-transform uppercase
+                border 0
+                background-color transparent
+                outline none
+                -webkit-appearance none
+                -moz-appearance none
+                appearance none
 
-  .article-grid
-    display grid
-    grid-template-columns repeat(4, 1fr)
-    grid-gap 40px 10px
+    .article-grid
+        display grid
+        grid-template-columns repeat(4, 1fr)
+        grid-gap 40px 10px
 
-  .ads
-    width 900px
-    height 250px
-    display flex
-    align-items center
-    justify-content center
-    background-color #3abbff
-    font-size 24px
-    color $white
-    margin 60px auto
+    .ads
+        width 900px
+        height 250px
+        display flex
+        align-items center
+        justify-content center
+        background-color #3abbff
+        font-size 24px
+        color $white
+        margin 60px auto
 </style>
