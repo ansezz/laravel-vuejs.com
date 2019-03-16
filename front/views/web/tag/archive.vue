@@ -21,9 +21,6 @@
                               :to="{ name: 'slug', params: { slug: item.slug }}"
                 />
             </div>
-            <div class="adsbygoogle">
-                <adsbygoogle/>
-            </div>
 
             <button @click="showMore()"
                     v-if="hasMorePages && !show_more">

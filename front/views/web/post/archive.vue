@@ -22,10 +22,6 @@
                 </template>
             </div>
 
-            <div class="adsbygoogle">
-                <adsbygoogle/>
-            </div>
-
             <button @click="showMore()"
                     v-if="hasMorePages && !show_more">
                 {{ $apollo.queries.posts.loading ? 'Loading ...' : 'Show more'}}
