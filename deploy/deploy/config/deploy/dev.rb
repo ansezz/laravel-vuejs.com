@@ -5,7 +5,7 @@ set :user, "laravel-vuejs"
 
 set :username, "laravel-vuejs"
 
-set :branch, "master"
+set :branch, "blog"
 
 set :domain, "newdev.laravel-vuejs.com"
 
