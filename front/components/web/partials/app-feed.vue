@@ -10,7 +10,9 @@
                     :to="{ name: 'slug', params: { slug: item.slug }}"
       />
     </div>
-    <Pagination :data="paginator" @pagination-change-page="changePage"/>
+
+    <nuxt-link :to="{name : 'posts', query : {page : 1}}" >Show more Posts</nuxt-link>
+
   </section>
 </template>
 
