@@ -10,6 +10,7 @@ type Post {
     views: Int!
     status: Int!
     comment_status: Int!
+    time_ago: String!
     user: User! @belongsTo
     media: [Media] @hasOne
     tags: [Tag] @hasMany

@@ -71,18 +71,17 @@ class Post extends Model implements HasMedia
     {
         /** @var Builder $query */
         $query = $this->visible();
-        if (isset($args['sort_by'])) {
-            switch ($args['sort_by']) {
-                case 'oldest':
-                    $query->oldest();
-                    break;
-                case 'popular':
-                    $query->orderBy('views', 'desc');
-                    break;
-                default:
-                    $query->latest();
-                    break;
-            }
+        $sort_by = $args['sort_by'] ?? 'latest';
+        switch ($sort_by) {
+            case 'oldest':
+                $query->oldest();
+                break;
+            case 'popular':
+                $query->orderBy('views', 'desc');
+                break;
+            default:
+                $query->latest();
+                break;
         }
 
         if (isset($args['s'])) {
@@ -140,6 +139,17 @@ class Post extends Model implements HasMedia
     public function getUrlAttribute(): string
     {
         return url($this->slug);
+    }
+
+
+    /**
+     * Get the Post Url.
+     *
+     * @return string
+     */
+    public function getTimeAgoAttribute(): string
+    {
+        return $this->created_at->diffForHumans();
     }
 
     /**
