@@ -95,37 +95,20 @@
                 display block
 
             .social-media
-                display flex
-                align-items center
-                justify-content space-between
-                padding 40px 0 60px
+              display flex
+              align-items center
+              flex-wrap wrap
+              padding 40px 0 55px
 
-                li
-                    a
-                        display block
-                        width 16px
-                        height 16px
-                        font-size 16px
-
-                    &.rss
-                        a
-                            color #ff6f00
-
-                    &.youtube
-                        a
-                            color #e54c4b
-
-                    &.instagram
-                        a
-                            color #3897f0
-
-                    &.twitter
-                        a
-                            color #1da1f2
-
-                    &.facebook
-                        a
-                            color #3b5998
+              li
+                padding-right 10px
+                padding-bottom 5px
+                a
+                  display block
+                  width 16px
+                  height 16px
+                  font-size 16px
+                  color #311d5a
 
             .copyright
                 color #616d82
