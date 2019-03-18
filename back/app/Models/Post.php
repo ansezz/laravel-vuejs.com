@@ -62,10 +62,15 @@ class Post extends Model implements HasMedia
     }
 
 
+    public function visible()
+    {
+        return $this->where('status', 1);
+    }
+
     public function visiblePosts($root, array $args, $context, ResolveInfo $resolveInfo): Builder
     {
         /** @var Builder $query */
-        $query = $this->where('status', 1);
+        $query = $this->visible();
         if (isset($args['sort_by'])) {
             switch ($args['sort_by']) {
                 case 'oldest':
@@ -80,12 +85,17 @@ class Post extends Model implements HasMedia
             }
         }
 
+        if (isset($args['s'])) {
+            $query->where('title', 'LIKE', '%' . $args['s'] . '%')
+                ->orWhere('content', 'LIKE', '%' . $args['s'] . '%');
+        }
+
         return $query;
     }
 
     public function featuredPosts($root, array $args, $context, ResolveInfo $resolveInfo): Builder
     {
-        return $this->where('featured', 1)->latest();
+        return $this->visible()->where('featured', 1)->latest();
     }
 
     public function postsByTag($root, array $args, $context, ResolveInfo $resolveInfo): Builder
@@ -93,7 +103,7 @@ class Post extends Model implements HasMedia
         $tag = Tag::findFromSlug($args['slug']);
 
         if ($tag) {
-            return $tag->posts()->getQuery();
+            return $tag->posts()->where('status', 1)->getQuery();
         }
 
         abort(404);
@@ -104,7 +114,7 @@ class Post extends Model implements HasMedia
         $category = Category::whereSlug($args['slug'])->first();
 
         if ($category) {
-            return $category->posts()->getQuery();
+            return $category->posts()->where('status', 1)->getQuery();
         }
 
         abort(404);
