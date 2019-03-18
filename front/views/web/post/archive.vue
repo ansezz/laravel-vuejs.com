@@ -56,7 +56,8 @@
                     return {
                         count: 12,
                         page: 1,
-                        sort_by: 'latest'
+                        sort_by: 'latest',
+                        s: this.filter.s,
                     }
                 }
             },
@@ -79,7 +80,8 @@
                     variables: {
                         count: this.filter.count,
                         page: this.filter.page,
-                        sort_by: this.filter.sort_by
+                        sort_by: this.filter.sort_by,
+                        s: this.filter.s
                     },
                     // Transform the previous result with new data
                     updateQuery: (previousResult, {fetchMoreResult}) => {
@@ -116,6 +118,7 @@
                     page: 1,
                     sort_by: 'latest',
                     count: 12,
+                    s: '',
                 },
                 breadcrumbsData: [
                     {

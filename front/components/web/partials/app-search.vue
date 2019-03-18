@@ -1,28 +1,29 @@
 <template>
     <div class="search-container" :class="{ 'open-search' : search.visibility }">
         <div class="container">
-            <form class="search-form">
+            <form class="search-form" @submit.prevent="">
                 <div class="form-group">
-                    <input type="text" name="s" class="form-control" placeholder="Search" @keyup="searching = true">
-                    <i class="fa" :class="searching ? 'fa-spin fa-spinner' : 'fa-search' "/>
+                    <input type="text" name="s" class="form-control" placeholder="Search" v-model="searchText">
+                    <i class="fa" :class="$apollo.queries.posts.loading ? 'fa-spin fa-spinner' : 'fa-search' "/>
                 </div>
                 <ul class="search-result">
-                    <li class="is-relative">
+                    <li class="is-relative" v-for="(item , key) in posts.data" :key="key">
                         <div class="search-thumb">
-                            <img src="@/assets/images/preview.png" alt="LV"/>
+                            <img :src="item.image_url" :alt="item.title"/>
                         </div>
                         <div class="search-info">
-                            <h3>Firebase Realtime Admin Dashboard – Vue.js</h3>
-                            <span>
-                      <i class="fa fa-clock-o"></i>
-                      1 week ago
-                    </span>
+                            <h3>{{item.title}}</h3>
+                            <span> <i class="fa fa-clock-o"></i> {{item.time_ago}} </span>
                         </div>
-                        <nuxt-link to="/" class="is-absolute"/>
+                        <nuxt-link :to="{ name: 'slug', params: { slug: item.slug }}" class="is-absolute"/>
                     </li>
                 </ul>
+                <nuxt-link :to="{name : 'posts', query : {s :searchText }}" class="btn btn-primary">
+                    Show all result
+                </nuxt-link>
             </form>
-            <div @click.prevent="toggleSearchVisibility" class="close-search">
+            <div @click.prevent="toggleSearchVisibility" class="close-search"
+                 v-if="posts.data && posts.data.length > 0">
                 <img src="@/assets/images/close-button.png" alt="LV">
             </div>
         </div>
@@ -30,14 +31,34 @@
 </template>
 
 <script>
+    import postsQql from '@/graphql/queries/post/all.graphql';
+
     import {mapActions} from 'vuex';
 
     export default {
         name: 'AppSearch',
         data() {
             return {
+                posts: {},
+                searchText: '',
+                count: 5,
                 searching: false
             }
+        },
+        apollo: {
+            posts: {
+                query: postsQql,
+                deep: true,
+                variables() {
+                    return {
+                        count: this.count,
+                        s: this.searchText
+                    }
+                },
+                skip() {
+                    return (this.searchText.length < 3)
+                }
+            },
         },
         watch: {},
         computed: {

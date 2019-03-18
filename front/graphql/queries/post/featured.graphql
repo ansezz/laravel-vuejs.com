@@ -1,21 +1,22 @@
 query featuredPosts($count: Int!, $page: Int, $sort_by : String) {
-  featuredPosts(count : $count, page : $page, sort_by : $sort_by) {
-    data {
-      id
-      title
-      slug
-      excerpt
-      image_url
+    featuredPosts(count : $count, page : $page, sort_by : $sort_by) {
+        data {
+            id
+            title
+            slug
+            excerpt
+            image_url
+            time_ago
+        }
+        paginatorInfo {
+            count
+            currentPage
+            firstItem
+            hasMorePages
+            lastItem
+            lastPage
+            perPage
+            total
+        }
     }
-    paginatorInfo {
-      count
-      currentPage
-      firstItem
-      hasMorePages
-      lastItem
-      lastPage
-      perPage
-      total
-    }
-  }
 }

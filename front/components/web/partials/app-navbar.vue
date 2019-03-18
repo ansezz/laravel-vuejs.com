@@ -48,8 +48,7 @@
 </template>
 
 <script>
-    import {mapActions} from 'vuex'
-    import {log} from 'util';
+    import {mapActions, mapMutations} from 'vuex'
     import AppSearch from '@/components/web/partials/app-search';
 
     export default {
@@ -60,7 +59,12 @@
         data() {
             return {}
         },
-        watch: {},
+        watch: {
+            $route: function () {
+                this.setNavigationVisibility(false)
+                this.setSearchVisibility(false)
+            }
+        },
         computed: {
             me() {
                 return this.$store.state.auth.me
@@ -70,7 +74,11 @@
             }
         },
         methods: {
-            ...mapActions(['toggleNavigationVisibility','toggleSearchVisibility']),
+            ...mapMutations({
+                setNavigationVisibility: 'SET_NAVIGATION_VISIBILITY',
+                setSearchVisibility: 'SET_SEARCH_VISIBILITY'
+            }),
+            ...mapActions(['toggleNavigationVisibility', 'toggleSearchVisibility']),
         },
     }
 
