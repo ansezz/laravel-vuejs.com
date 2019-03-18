@@ -30,23 +30,23 @@ export const second_menu = [
     },
     {
         name: 'DMCA Policy',
-        url: '/dmca-policy',
+        url: '/page/dmca-policy',
     },
     {
         name: 'Privacy Policy',
-        url: '/privacy-policy',
+        url: '/page/privacy-policy',
     },
     {
         name: 'Terms and Conditions',
-        url: '/terms-and-conditions',
+        url: '/page/terms-and-conditions',
     },
     {
         name: 'Contact us',
-        url: '/contact-us',
+        url: '/page/contact-us',
     },
     {
         name: 'About us',
-        url: '/about-us',
+        url: '/page/about-us',
     }
 ]
 
