@@ -11,7 +11,9 @@
       />
     </div>
 
-    <nuxt-link :to="{name : 'posts', query : {page : 1}}" >Show more Posts</nuxt-link>
+    <div class="text-center show-more">
+      <nuxt-link :to="{name : 'posts', query : {page : 1}}" class="button">Show more Posts</nuxt-link>
+    </div>
 
   </section>
 </template>
@@ -44,6 +46,8 @@
 </script>
 
 <style lang="stylus" scoped>
+  .show-more
+    padding-top 30px
   .feed
     width calc(100% - 300px)
     padding-right 20px
