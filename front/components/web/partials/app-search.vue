@@ -133,7 +133,7 @@
 
         .search-result
             background-color #3e383e
-            height 200px
+            height 400px
             overflow-y scroll
 
             li
