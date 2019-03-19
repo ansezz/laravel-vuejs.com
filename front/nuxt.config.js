@@ -156,7 +156,8 @@ module.exports = {
         {src: "~/plugins/vee-validate", ssr: false},
         {src: "~/plugins/lazyload", ssr: false},
         {src: '~/plugins/vue-tags-input', ssr: false},
-        {src: '~/plugins/bootstrap.min.js', ssr: false}
+        {src: '~/plugins/bootstrap.min.js', ssr: false},
+        {src: '~/plugins/infinite-loading', ssr: false}
     ],
 
     css: [

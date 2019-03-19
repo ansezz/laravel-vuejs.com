@@ -13,10 +13,10 @@
             </div>
 
             <div class="text-center">
-              <button @click="showMore()"
-                      v-if="hasMorePages && !show_more" class="button">
-                  {{ $apollo.queries.posts.loading ? 'Loading ...' : 'Show more'}}
-              </button>
+                <button @click="showMore()"
+                        v-if="hasMorePages && !show_more" class="button">
+                    {{ $apollo.queries.posts.loading ? 'Loading ...' : 'Show more'}}
+                </button>
             </div>
 
             <no-ssr>
@@ -31,22 +31,19 @@
 
 <script>
     import postsQql from '@/graphql/queries/post/all.graphql';
-    import InfiniteLoading from 'vue-infinite-loading';
 
     export default {
         name: 'AppFeed',
-        components: {
-            InfiniteLoading
-        },
+        components: {},
         apollo: {
             posts: {
                 query: postsQql,
                 variables() {
                     // Initial variables
                     return {
-                        count: 12,
-                        page: 1,
-                        sort_by: 'latest'
+                        count: this.$route.query.count ?? 12,
+                        sort_by: this.$route.query.sort_by ?? 'latest',
+                        s: this.$route.query.s
                     }
                 }
             },
@@ -55,11 +52,7 @@
             return {
                 posts: {},
                 show_more: false,
-                filter: {
-                    page: 1,
-                    sort_by: 'latest',
-                    count: 12,
-                },
+                page: 1
             }
         },
         methods: {
@@ -68,14 +61,15 @@
                     return true
                 }
 
-                this.filter.page++
+                this.page++
 
                 this.$apollo.queries.posts.fetchMore({
                     // New variables
                     variables: {
-                        count: this.filter.count,
-                        page: this.filter.page,
-                        sort_by: this.filter.sort_by
+                        count: this.$route.query.count ?? 12,
+                        sort_by: this.$route.query.sort_by ?? 'latest',
+                        s: this.$route.query.s,
+                        page: this.page
                     },
                     // Transform the previous result with new data
                     updateQuery: (previousResult, {fetchMoreResult}) => {
@@ -95,12 +89,6 @@
                     },
                 })
             },
-            filterChange() {
-                this.$router.push({
-                    name: 'posts',
-                    query: {count: this.filter.count, sort_by: this.filter.sort_by, page: 1}
-                })
-            }
         },
         computed: {
             hasMorePages() {
@@ -119,6 +107,7 @@
         grid-template-columns repeat(1, 1fr)
         grid-gap 20px
         margin-top 30px
+
     .text-center
-      padding-top 20px
+        padding-top 20px
 </style>

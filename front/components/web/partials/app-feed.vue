@@ -12,16 +12,7 @@
     </div>
 
     <div class="text-center show-more">
-      <nuxt-link :to="{name : 'posts', query : {page : 1}}" class="button">Show more Posts</nuxt-link>
-    </div>
-
-    <div class="is-loader">
-      <span class="post-loader">
-            <span class="sk-cube1 sk-cube"></span>
-            <span class="sk-cube2 sk-cube"></span>
-            <span class="sk-cube4 sk-cube"></span>
-            <span class="sk-cube3 sk-cube"></span>
-        </span>
+      <nuxt-link :to="{name : 'posts'}" class="button">Show more Posts</nuxt-link>
     </div>
 
   </section>
@@ -31,7 +22,6 @@
   export default {
     name: 'AppFeed',
     components: {
-      Pagination: () => import('@/components/shared/partials/elements/pagination/index')
     },
     data() {
       return {}

@@ -37,14 +37,12 @@
 
 <script>
     import postsQql from '@/graphql/queries/tag/posts.graphql';
-    import InfiniteLoading from 'vue-infinite-loading';
 
     export default {
         components: {
             filters: () => import('@/components/shared/partials/elements/filters'),
             Breadcrumb: () => import('@/components/shared/partials/elements/breadcrumb'),
-            ArticleItem: () => import('@/components/shared/partials/elements/article-item'),
-            InfiniteLoading
+            ArticleItem: () => import('@/components/shared/partials/elements/article-item')
         },
         name: "tag-posts",
         apollo: {
