@@ -115,6 +115,7 @@ class Post extends Model implements HasMedia
             });
         }
 
+        return $query;
     }
 
     public function postsByCategory($root, array $args, $context, ResolveInfo $resolveInfo): Builder
