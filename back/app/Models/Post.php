@@ -85,8 +85,10 @@ class Post extends Model implements HasMedia
         }
 
         if (isset($args['s'])) {
-            $query->where('title', 'LIKE', '%' . $args['s'] . '%')
-                ->orWhere('content', 'LIKE', '%' . $args['s'] . '%');
+            $query->where(function ($query) use ($args) {
+                return $query->where('title', 'LIKE', '%' . $args['s'] . '%')
+                    ->orWhere('content', 'LIKE', '%' . $args['s'] . '%');
+            });
         }
 
         return $query;
