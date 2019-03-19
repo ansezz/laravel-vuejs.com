@@ -103,22 +103,38 @@ class Post extends Model implements HasMedia
     {
         $tag = Tag::findFromSlug($args['slug']);
 
-        if ($tag) {
-            return $tag->posts()->where('status', 1)->getQuery();
+        if (!$tag)
+            abort(404);
+
+        $query = $tag->posts()->where('status', 1)->getQuery();
+
+        if (isset($args['s'])) {
+            $query->where(function ($query) use ($args) {
+                return $query->where('title', 'LIKE', '%' . $args['s'] . '%')
+                    ->orWhere('content', 'LIKE', '%' . $args['s'] . '%');
+            });
         }
 
-        abort(404);
     }
 
     public function postsByCategory($root, array $args, $context, ResolveInfo $resolveInfo): Builder
     {
         $category = Category::whereSlug($args['slug'])->first();
 
-        if ($category) {
-            return $category->posts()->where('status', 1)->getQuery();
+        if (!$category)
+            abort(404);
+
+
+        $query = $category->posts()->where('status', 1)->getQuery();
+
+        if (isset($args['s'])) {
+            $query->where(function ($query) use ($args) {
+                return $query->where('title', 'LIKE', '%' . $args['s'] . '%')
+                    ->orWhere('content', 'LIKE', '%' . $args['s'] . '%');
+            });
         }
 
-        abort(404);
+        return $query;
     }
 
     /**

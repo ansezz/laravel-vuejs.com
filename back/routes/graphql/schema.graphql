@@ -29,8 +29,8 @@ type Query {
     categoryBySlug(slug: String!): Category
     posts (sort_by : String, s : String) : [Post!]! @paginate(builder: "LaravelVueJs\\Models\\Post@visiblePosts")
     featuredPosts (sort_by : String) : [Post!]! @paginate(builder: "LaravelVueJs\\Models\\Post@featuredPosts")
-    postsByTag(slug: String!, sort_by : String): [Post!]! @paginate(builder: "LaravelVueJs\\Models\\Post@postsByTag")
-    postsByCategory(slug: String!, sort_by : String): [Post!]! @paginate(builder: "LaravelVueJs\\Models\\Post@postsByCategory")
+    postsByTag(slug: String!, sort_by : String, s : String): [Post!]! @paginate(builder: "LaravelVueJs\\Models\\Post@postsByTag")
+    postsByCategory(slug: String!, sort_by : String, s : String): [Post!]! @paginate(builder: "LaravelVueJs\\Models\\Post@postsByCategory")
     login(email: String!, password: String!, remember_me : Boolean): Login
     menu(id: ID @eq): Menu @find(model: "Menu")
 }
