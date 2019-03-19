@@ -15,6 +15,15 @@
       <nuxt-link :to="{name : 'posts', query : {page : 1}}" class="button">Show more Posts</nuxt-link>
     </div>
 
+    <div class="is-loader">
+      <span class="post-loader">
+            <span class="sk-cube1 sk-cube"></span>
+            <span class="sk-cube2 sk-cube"></span>
+            <span class="sk-cube4 sk-cube"></span>
+            <span class="sk-cube3 sk-cube"></span>
+        </span>
+    </div>
+
   </section>
 </template>
 

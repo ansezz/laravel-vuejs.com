@@ -12,10 +12,12 @@
                 />
             </div>
 
-            <button @click="showMore()"
-                    v-if="hasMorePages && !show_more">
-                {{ $apollo.queries.posts.loading ? 'Loading ...' : 'Show more'}}
-            </button>
+            <div class="text-center">
+              <button @click="showMore()"
+                      v-if="hasMorePages && !show_more" class="button">
+                  {{ $apollo.queries.posts.loading ? 'Loading ...' : 'Show more'}}
+              </button>
+            </div>
 
             <no-ssr>
                 <infinite-loading
@@ -117,4 +119,6 @@
         grid-template-columns repeat(1, 1fr)
         grid-gap 20px
         margin-top 30px
+    .text-center
+      padding-top 20px
 </style>

@@ -129,10 +129,12 @@
             display flex
             align-items center
             justify-content center
-            padding 30px 0
+            flex-wrap wrap
+            padding 30px 0 25px
 
             li
                 padding-right 20px
+                padding-bottom 5px
 
                 &:last-child
                     padding-right 0
@@ -142,27 +144,7 @@
                     width 16px
                     height 16px
                     font-size 16px
-
-                &.rss
-                    a
-                        color #ff6f00
-
-                &.youtube
-                    a
-                        color #e54c4b
-
-                &.instagram
-                    a
-                        color #3897f0
-
-                &.twitter
-                    a
-                        color #1da1f2
-
-                &.facebook
-                    a
-                        color #3b5998
-
+                    color #311d5a
     .copyright
         color #616d82
         font-size 14px
