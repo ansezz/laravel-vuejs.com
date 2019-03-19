@@ -18,7 +18,7 @@
                         <nuxt-link :to="{ name: 'slug', params: { slug: item.slug }}" class="is-absolute"/>
                     </li>
                 </ul>
-                <nuxt-link :to="{name : 'posts', query : {s :searchText }}" class="btn btn-primary">
+                <nuxt-link :to="{name : 'posts', query : {s :searchText }}" class="button">
                     Show all result
                 </nuxt-link>
             </form>
@@ -128,19 +128,24 @@
             img
                 width 25px
                 height 25px
+        .button
+          width 100%
 
         .search-result
             background-color #3e383e
-            padding 0 20px 20px
-
-            &:hover
-                .search-info
-                    h3
-                        color $primary
+            height 200px
+            overflow-y scroll
 
             li
                 display flex
                 align-items center
+                padding 20px 20px 0
+                &:last-child
+                  padding-bottom 20px
+                &:hover
+                  .search-info
+                      h3
+                        color $primary
 
             .search-thumb
                 width 110px

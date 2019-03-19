@@ -11,7 +11,18 @@
       />
     </div>
 
-    <nuxt-link :to="{name : 'posts', query : {page : 1}}" >Show more Posts</nuxt-link>
+    <div class="text-center show-more">
+      <nuxt-link :to="{name : 'posts', query : {page : 1}}" class="button">Show more Posts</nuxt-link>
+    </div>
+
+    <div class="is-loader">
+      <span class="post-loader">
+            <span class="sk-cube1 sk-cube"></span>
+            <span class="sk-cube2 sk-cube"></span>
+            <span class="sk-cube4 sk-cube"></span>
+            <span class="sk-cube3 sk-cube"></span>
+        </span>
+    </div>
 
   </section>
 </template>
@@ -44,6 +55,8 @@
 </script>
 
 <style lang="stylus" scoped>
+  .show-more
+    padding-top 30px
   .feed
     width calc(100% - 300px)
     padding-right 20px
