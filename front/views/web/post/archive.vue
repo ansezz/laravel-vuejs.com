@@ -9,7 +9,7 @@
                     </div>
                     <h1>Posts</h1>
                 </div>
-                <filters :filter.sync="filter" :action.sync="filterChange"></filters>
+                <filters route-name="posts"></filters>
             </div>
             <div class="article-grid">
                 <template v-for="(item, key) in posts.data">
@@ -28,9 +28,8 @@
             </button>
 
             <no-ssr>
-                <infinite-loading
-                        @infinite="showMore"
-                        v-if="show_more"></infinite-loading>
+                <infinite-loading @infinite="showMore"
+                                  v-if="show_more"></infinite-loading>
             </no-ssr>
         </div>
     </section>
@@ -54,10 +53,9 @@
                 variables() {
                     // Initial variables
                     return {
-                        count: 12,
-                        page: 1,
-                        sort_by: 'latest',
-                        s: this.filter.s,
+                        count: this.$route.query.count ?? 12,
+                        sort_by: this.$route.query.sort_by ?? 'latest',
+                        s: this.$route.query.s
                     }
                 }
             },
@@ -73,15 +71,15 @@
                     return true
                 }
 
-                this.filter.page++
+                this.page++;
 
                 this.$apollo.queries.posts.fetchMore({
                     // New variables
                     variables: {
-                        count: this.filter.count,
-                        page: this.filter.page,
-                        sort_by: this.filter.sort_by,
-                        s: this.filter.s
+                        count: this.$route.query.count ?? 12,
+                        sort_by: this.$route.query.sort_by ?? 'latest',
+                        s: this.$route.query.s,
+                        page: this.page
                     },
                     // Transform the previous result with new data
                     updateQuery: (previousResult, {fetchMoreResult}) => {
@@ -101,12 +99,6 @@
                     },
                 })
             },
-            filterChange() {
-                this.$router.push({
-                    name: 'posts',
-                    query: {count: this.filter.count, sort_by: this.filter.sort_by, page: 1}
-                })
-            }
         },
         mounted() {
         },
@@ -114,12 +106,7 @@
             return {
                 posts: {},
                 show_more: false,
-                filter: {
-                    page: 1,
-                    sort_by: 'latest',
-                    count: 12,
-                    s: '',
-                },
+                page: 1,
                 breadcrumbsData: [
                     {
                         name: 'Home',

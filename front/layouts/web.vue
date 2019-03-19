@@ -3,7 +3,7 @@
         <app-navbar/>
         <app-navigation/>
         <app-main>
-            <nuxt/>
+            <nuxt :nuxt-child-key="$route.fullPath"/>
         </app-main>
         <div class="container">
             <adsbygoogle/>

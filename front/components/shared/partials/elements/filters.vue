@@ -1,15 +1,22 @@
 <template>
     <div class="filters">
         <div class="filter-group">
-            <input type="text" v-model="filter.s" name="search" placeholder="Search ... " aria-label="Search">
-            <select name="showen-posts" aria-label="count" @change="action" v-model="filter.count">
+            <input type="text"
+                   v-model="filter.s"
+                   name="search"
+                   placeholder="Search ... "
+                   aria-label="Search"
+                   @keyup.enter="filterChange"
+            >
+            <i class="fa fa-search" @click="filterChange"></i>
+            <select name="showen-posts" aria-label="count" @change="filterChange" v-model="filter.count">
                 <option value="12">show 12 posts</option>
                 <option value="24">show 24 posts</option>
                 <option value="48">show 48 posts</option>
             </select>
         </div>
         <div class="filter-group">
-            <select name="most-popular" aria-label="Sort by" @change="action" v-model="filter.sort_by">
+            <select name="most-popular" aria-label="Sort by" @change="filterChange" v-model="filter.sort_by">
                 <option value="latest">Latest first</option>
                 <option value="oldest">Oldest first</option>
                 <option value="popular">Popular first</option>
@@ -23,19 +30,39 @@
         components: {},
         name: "filters",
         computed: {},
-        methods: {},
-        props: {
-            filter: Object,
-            action: Function
+        methods: {
+            filterChange() {
+                let params = {};
+                if (this.$route.params.slug)
+                    params.slug = this.$route.params.slug
+
+                this.$router.push({
+                    name: this.routeName,
+                    query: {
+                        count: this.filter.count,
+                        s: this.filter.s,
+                        sort_by: this.filter.sort_by
+                    },
+                    params,
+                })
+            }
         },
-        mounted() {
+        props: {
+            routeName: String
+        },
+        created() {
             this.filter.count = this.$route.query.count ?? 12
             this.filter.sort_by = this.$route.query.sort_by ?? 'latest'
             this.filter.s = this.$route.query.s
-            this.page = this.$route.query.page ?? 1
         },
         data() {
-            return {}
+            return {
+                filter: {
+                    sort_by: 'latest',
+                    count: 12,
+                    s: '',
+                },
+            }
         }
     }
 

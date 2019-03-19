@@ -10,7 +10,7 @@
                     </div>
                     <h1 v-if="category">{{category.name}}</h1>
                 </div>
-                <filters :filter.sync="filter" :action.sync="filterChange"></filters>
+                <filters route-name="category-slug"></filters>
             </div>
             <div class="article-grid">
                 <article-item v-for="item in postsByCategory.data"
@@ -55,10 +55,10 @@
                 variables() {
                     // Initial variables
                     return {
-                        count: 12,
-                        page: 1,
-                        sort_by: 'latest',
-                        slug: this.$route.params.slug,
+                        count: this.$route.query.count ?? 12,
+                        sort_by: this.$route.query.sort_by ?? 'latest',
+                        s: this.$route.query.s,
+                        slug: this.$route.params.slug
                     }
                 }
             },
@@ -77,14 +77,15 @@
                     return true
                 }
 
-                this.filter.page++
+                this.page++
 
                 this.$apollo.queries.postsByCategory.fetchMore({
                     // New variables
                     variables: {
-                        count: this.filter.count,
-                        page: this.filter.page,
-                        sort_by: this.filter.sort_by,
+                        count: this.$route.query.count ?? 12,
+                        sort_by: this.$route.query.sort_by ?? 'latest',
+                        s: this.$route.query.s,
+                        page: this.page,
                         slug: this.$route.params.slug
                     },
                     // Transform the previous result with new data
@@ -104,24 +105,13 @@
                         return fetchMoreResult;
                     },
                 })
-            },
-            filterChange() {
-                this.$router.push({
-                    name: 'category-slug',
-                    query: {count: this.filter.count, sort_by: this.filter.sort_by},
-                    params: {slug: this.$route.params.slug}
-                })
             }
         },
         data() {
             return {
                 postsByCategory: {},
                 show_more: false,
-                filter: {
-                    page: 1,
-                    sort_by: 'latest',
-                    count: 12,
-                },
+                page: 1,
                 breadcrumbsData: () => [
                     {
                         name: 'Home',

@@ -10,7 +10,7 @@
                     </div>
                     <h1 v-if="tag">{{tag.name}}</h1>
                 </div>
-                <filters :filter.sync="filter" :action.sync="filterChange"></filters>
+                <filters route-name="tag-slug"></filters>
             </div>
             <div class="article-grid">
                 <article-item v-for="item in postsByTag.data"
@@ -28,9 +28,8 @@
             </button>
 
             <no-ssr>
-                <infinite-loading
-                        @infinite="showMore"
-                        v-if="show_more"></infinite-loading>
+                <infinite-loading @infinite="showMore"
+                                  v-if="show_more"></infinite-loading>
             </no-ssr>
         </div>
     </section>
@@ -54,10 +53,10 @@
                 variables() {
                     // Initial variables
                     return {
-                        count: 12,
-                        page: 1,
-                        sort_by: 'latest',
-                        slug: this.$route.params.slug,
+                        count: this.$route.query.count ?? 12,
+                        sort_by: this.$route.query.sort_by ?? 'latest',
+                        s: this.$route.query.s,
+                        slug: this.$route.params.slug
                     }
                 }
             },
@@ -76,14 +75,15 @@
                     return true
                 }
 
-                this.filter.page++
+                this.page++
 
                 this.$apollo.queries.postsByTag.fetchMore({
                     // New variables
                     variables: {
-                        count: this.filter.count,
-                        page: this.filter.page,
-                        sort_by: this.filter.sort_by,
+                        count: this.$route.query.count ?? 12,
+                        sort_by: this.$route.query.sort_by ?? 'latest',
+                        s: this.$route.query.s,
+                        page: this.page,
                         slug: this.$route.params.slug
                     },
                     // Transform the previous result with new data
@@ -103,24 +103,13 @@
                         return fetchMoreResult;
                     },
                 })
-            },
-            filterChange() {
-                this.$router.push({
-                    name: 'tag-slug',
-                    query: {count: this.filter.count, sort_by: this.filter.sort_by},
-                    params: {slug: this.$route.params.slug}
-                })
             }
         },
         data() {
             return {
                 postsByTag: {},
                 show_more: false,
-                filter: {
-                    page: 1,
-                    sort_by: 'latest',
-                    count: 12,
-                },
+                page: 1,
                 breadcrumbsData: () => [{
                     name: 'Home',
                     link: "/"
