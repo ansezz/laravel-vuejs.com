@@ -1,21 +1,24 @@
 <template>
     <div class="filters">
-        <div class="filter-group">
-            <input type="text"
+        <div class="filter-group is-flex">
+            <div class="is-relative">
+              <input type="text"
                    v-model="filter.s"
                    name="search"
                    placeholder="Search ... "
                    aria-label="Search"
                    @keyup.enter="filterChange"
+                   class="form-control has-custom"
             >
             <i class="fa fa-search" @click="filterChange"></i>
+            </div>
             <select name="showen-posts" aria-label="count" @change="filterChange" v-model="filter.count">
                 <option value="12">show 12 posts</option>
                 <option value="24">show 24 posts</option>
                 <option value="48">show 48 posts</option>
             </select>
         </div>
-        <div class="filter-group">
+        <div class="filter-group is-flex">
             <select name="most-popular" aria-label="Sort by" @change="filterChange" v-model="filter.sort_by">
                 <option value="latest">Latest first</option>
                 <option value="oldest">Oldest first</option>
@@ -69,6 +72,16 @@
 </script>
 
 <style lang="stylus" scoped>
+    .is-relative
+      margin-right 35px
+      .form-control
+        width 400px
+      .fa
+        position absolute
+        top 50%
+        right 20px
+        transform translateY(-50%)
+        color $secondary
     .filters
         display flex
         align-items center

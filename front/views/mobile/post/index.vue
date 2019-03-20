@@ -29,7 +29,7 @@
               <li><a href="#"><img src="@/assets/images/zoom-in-colored.svg" alt="LV"></a></li>
               <li><a href="#"><img src="@/assets/images/zoom-out.svg" alt="LV"></a></li>
             </div>
-            <li><a href="#"><img src="@/assets/images/icons-star-2.svg" alt="LV"></a></li>
+            <!-- <li><a href="#"><img src="@/assets/images/icons-star-2.svg" alt="LV"></a></li> -->
           </ul>
         <h1 class="text-center">{{ post.title.substring(0, 45) }}</h1>
         <!--<p>{{ post.excerpt }}</p>-->
@@ -98,14 +98,14 @@
               </a>
           </li>
         </ul>
-        <div class="swiper-area">
+        <!-- <div class="swiper-area">
           <heading>Source</heading>
           <ul>
             <li>Treehouse Team</li>
             <li>Laravel.com</li>
           </ul>
           <app-jobs-swiper />
-        </div>
+        </div> -->
         <div class="ads">720x90px</div>
       </div>
     </div>
@@ -125,7 +125,7 @@
     components: {
       Breadcrumb: () => import('@/components/shared/partials/elements/breadcrumb'),
       ArticleItem: () =>  import("@/components/shared/partials/elements/article-item"),
-      AppJobsSwiper: () =>  import("@/components/mobile/partials/app-jobs-swiper"),
+      // AppJobsSwiper: () =>  import("@/components/mobile/partials/app-jobs-swiper"),
       AppFeatured: () =>  import("@/components/mobile/partials/app-featured"),
       AppCommentArea: () =>  import("@/components/mobile/partials/app-comment-area")
     },
@@ -282,7 +282,7 @@
  .share-links
     display grid
     grid-template-columns repeat(3, 1fr)
-    margin 0 -30px
+    margin 0 -30px 40px
     li
         a
             display flex

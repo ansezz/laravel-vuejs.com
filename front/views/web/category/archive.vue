@@ -22,14 +22,16 @@
                 />
             </div>
 
-            <button @click="showMore()"
+            <div class="text-center">
+              <button @click="showMore()" class="button"
                     v-if="hasMorePages && !show_more">
                 {{ $apollo.queries.postsByCategory.loading ? 'Loading ...' : 'Show more'}}
             </button>
+            </div>
 
             <no-ssr>
                 <infinite-loading @infinite="showMore"
-                                  v-if="show_more"></infinite-loading>
+                                  v-if="show_more" class="show-more"></infinite-loading>
             </no-ssr>
         </div>
     </section>
@@ -127,6 +129,10 @@
 </script>
 
 <style lang="stylus" scoped>
+    .text-center,
+    .show-more
+      padding-top 40px
+
     .posts-container
         padding-bottom 120px
 
@@ -136,20 +142,19 @@
         overflow hidden
         display flex
         align-items flex-end
-        justify-content flex-end
+        justify-content space-between
         margin 60px 0 40px
 
     .post-heading
-        position absolute
-        left 50%
-        transform translateX(-50%)
         text-align center
+        display flex
+        align-items center
 
         h1
             font-size 28px
             font-weight 600
             color $tertiary
-            margin-top 10px
+            margin-left 10px
             line-height 1
 
     .article-grid
