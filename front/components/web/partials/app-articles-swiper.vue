@@ -59,7 +59,7 @@
 
 <style lang="stylus" scoped>
     .articles-swiper
-        width 540px
+        width calc(100% - 490px)
         overflow hidden
         .article-image
             height 270px
@@ -70,7 +70,7 @@
     .swiper-container
         height 410px
         .swiper-wrapper
-            width 500px
+            width calc(100% - 40px)
             .swiper-slide
                 height 410px !important
         .article-info
