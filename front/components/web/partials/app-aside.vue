@@ -72,7 +72,7 @@
                 a
                     display block
                     width 16px
-                    font-size 16px
+                    font-size 17px
                     color #311d5a
 
                 &:last-child

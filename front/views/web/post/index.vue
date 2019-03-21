@@ -16,7 +16,7 @@
                 </div>
                 <div class="date-time">
                     <img src="@/assets/images/icons-clock.svg" alt="LV">
-                    <span>{{post.created_at}}</span>
+                    <span>{{post.time_ago}}</span>
                 </div>
             </div>
         </div>
@@ -62,7 +62,7 @@
                     <ul class="actions-list">
                         <li><a href="#"><img src="@/assets/images/zoom-in-colored.svg" alt="LV"></a></li>
                         <li class="m-b-40"><a href="#"><img src="@/assets/images/zoom-out.svg" alt="LV"></a></li>
-                        <li><a href="#"><img src="@/assets/images/icons-star-2.svg" alt="LV"></a></li>
+                        <!-- <li><a href="#"><img src="@/assets/images/icons-star-2.svg" alt="LV"></a></li> -->
                     </ul>
                 </div>
                 <p v-html="post.content"></p>
@@ -87,14 +87,14 @@
                     obligatory summertime distractions.</p>
 
 
-                <div class="swiper-area">
+                <!-- <div class="swiper-area">
                     <heading>Source</heading>
                     <ul>
                         <li>Treehouse Team</li>
                         <li>Laravel.com</li>
                     </ul>
-                    <app-jobs-swiper/>
-                </div>
+                    <!-- <app-jobs-swiper/>
+                </div> -->
                 <div>
                     <!-- @TODO : style social share media -->
                     <social-sharing :url="seo.url"
@@ -179,7 +179,7 @@
         components: {
             Breadcrumb: () => import('@/components/shared/partials/elements/breadcrumb'),
             ArticleItem: () => import("@/components/shared/partials/elements/article-item"),
-            AppJobsSwiper: () => import("@/components/web/partials/app-jobs-swiper"),
+            // AppJobsSwiper: () => import("@/components/web/partials/app-jobs-swiper"),
             AppFeatured: () => import("@/components/web/partials/app-featured"),
             AppCommentArea: () => import("@/components/web/partials/app-comment-area"),
         },
@@ -232,6 +232,7 @@
       &.is-flex
         justify-content center
         margin-bottom 40px
+        margin-top 40px
         & >>>
           span
             cursor pointer
@@ -453,17 +454,16 @@
         font-size 24px
 
     .has-bg
-        background-color rgba(#6936d3, .03)
+      background-color rgba(#6936d3, .03)
 
-        .featured-articles
-            &:after
-                display none
+      .featured-articles
+        &:after
+          display none
 
         & /deep/
-        .container
+          .container
             width 100%
-
-        .posts-grid
+          .posts-grid
             grid-template-columns repeat(3, 1fr)
 
     .has-p-45-120

@@ -24,6 +24,16 @@
             <img src="@/assets/images/cancel.png" alt="LV">
           </div>
         </div>
+        <div class="menu-body">
+          <ul>
+            <li v-for="(item ,key) in main_menu" :key="key">
+              <nuxt-link :to="item.url">{{item.name}}</nuxt-link>
+            </li>
+            <li v-for="(item ,key) in second_menu" :key="key">
+              <nuxt-link :to="item.url">{{item.name}}</nuxt-link>
+            </li>
+        </ul>
+        </div>
       </div>
     </header>
 </template>
@@ -32,6 +42,14 @@
     export default {
         name: 'AppNavbar',
         components: {
+        },
+        computed: {
+            main_menu() {
+                return this.$store.state.main_menu;
+            },
+            second_menu() {
+                return this.$store.state.second_menu;
+            }
         },
         data() {
             return {
@@ -63,4 +81,21 @@
     .close-menu
       img
         width 15px
+  .menu-body
+    height 90%
+    overflow-y scroll
+    ul
+      padding 15px 30px
+      li
+        padding-bottom 10px
+        border-bottom 1px solid #EEE
+        margin-bottom 10px
+        &:last-child
+          margin-bottom 0
+          border-bottom 0
+        a
+          color #616d82
+          font-size 16px
+          line-height 30px
+          display block
 </style>

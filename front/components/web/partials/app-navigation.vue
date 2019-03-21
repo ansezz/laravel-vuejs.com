@@ -169,7 +169,7 @@
                             display block
                             width 16px
                             height 16px
-                            font-size 16px
+                            font-size 17px
 
                         &.rss
                             a
