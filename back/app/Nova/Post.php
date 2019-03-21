@@ -79,8 +79,8 @@ class Post extends Resource
             Textarea::make('Excerpt'),
 
             Select::make('Status')->options([
-                0 => 'Publish',
-                1 => 'Draft',
+                1 => 'Publish',
+                2 => 'Draft',
                 3 => 'Trash',
                 4 => 'Future',
             ]),
