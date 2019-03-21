@@ -3,9 +3,9 @@
     {
       "name": "laravel-vuejs-dev",
       "script": "./node_modules/nuxt/bin/nuxt-start",
-      "cwd": "/var/www/laravel-vuejs/domains/dev.laravel-vuejs.com/public_html/current/htdocs/content/themes/laravel-vuejs/front",
-      "error_file": "/var/www/laravel-vuejs/logs/app.err.log",
-      "out_file": "/var/www/laravel-vuejs/logs/app.out.log",
+      "cwd": "/var/www/laravel-vuejs/domains/newdev.laravel-vuejs.com/public_html/current/front",
+      "error_file": "/var/www/laravel-vuejs/domains/newdev.laravel-vuejs.com/logs/app.err.log",
+      "out_file": "/var/www/laravel-vuejs/domains/newdev.laravel-vuejs.com/logs/app.out.log",
       "exec_mode": "fork_mode"
     }
   ]
