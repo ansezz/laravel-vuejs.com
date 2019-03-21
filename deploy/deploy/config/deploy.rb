@@ -78,9 +78,10 @@ namespace :app do
   task :symlink do
       on roles(:server) do
         within release_path do
-          #execute "ln -nfs /home/#{fetch(:username)}/domains/#{fetch(:domain)}/public_html/static/storage #{release_path}/back"
-          execute "chmod 777 -R /home/#{fetch(:username)}/domains/#{fetch(:domain)}/public_html/static/storage"
-          execute "chmod 777 -R #{release_path}/back/storage"
+          execute "ln -nfs /home/#{fetch(:username)}/domains/#{fetch(:domain)}/public_html/static/storage/app/public #{release_path}/back/storage/app"
+          execute "ln -nfs /home/#{fetch(:username)}/domains/#{fetch(:domain)}/public_html/static/storage/app/wp-importer #{release_path}/back/storage/app"
+          #execute "chmod 777 -R /home/#{fetch(:username)}/domains/#{fetch(:domain)}/public_html/static/storage"
+          #execute "chmod 777 -R #{release_path}/back/storage"
         end
       end
   end
@@ -94,12 +95,12 @@ end
 namespace :npm do
   task :install do
     on roles(:server) do
-        #execute "cd #{release_path}/front && npm install"
+        execute "cd #{release_path}/front && npm install"
     end
   end
   task :build do
     on roles(:server) do
-        #execute "cd #{release_path}/front && npm run generate"
+        execute "cd #{release_path}/front && npm run build"
     end
   end
 end
@@ -107,7 +108,7 @@ end
 namespace :pm2 do
   task :conf do
     on roles(:server) do
-        upload! "../ops/pm2/dev-ecosystem.json" , "#{release_path}/htdocs/content/themes/laravel-vuejs/front/dev-ecosystem.json"
+        upload! "../ops/pm2/dev-ecosystem.json" , "#{release_path}/front/dev-ecosystem.json"
     end
   end
   task :list do
@@ -122,7 +123,7 @@ namespace :pm2 do
   end
   task :start do
     on roles(:server) do
-      execute "cd #{release_path}/htdocs/content/themes/laravel-vuejs/front && pm2 start npm dev-ecosystem.json --name laravel-vuejs-dev -- start"
+      execute "cd #{release_path}/front && pm2 start npm dev-ecosystem.json --name laravel-vuejs-dev -- start"
     end
   end
   task :delete do
