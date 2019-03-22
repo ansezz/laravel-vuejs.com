@@ -83,14 +83,15 @@
                     </div>
                 </div>
 
-                <!-- <div class="swiper-area">
+                 <!--<div class="swiper-area">
                     <heading>Source</heading>
                     <ul>
                         <li>Treehouse Team</li>
                         <li>Laravel.com</li>
                     </ul>
-                    <!-- <app-jobs-swiper/>
-                </div> -->
+                    <app-jobs-swiper/>
+                </div>-->
+
                 <div>
                     <!-- @TODO : style social share media -->
                     <social-sharing :url="seo.url"
