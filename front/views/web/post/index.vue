@@ -216,8 +216,8 @@
                         link: "/"
                     },
                     {
-                        name: this.post.categories[0] ? this.post.categories[0].name : '',
-                        link: '/category/' + (this.post.categories[0] ? this.post.categories[0].slug : '')
+                        name: this.post.categories[0] ? this.post.categories[0].name : 'Category',
+                        link: this.post.categories[0] ? {name: 'category-slug', params : {slug : this.post.categories[0].slug}} : null
                     },
                     {
                         name: this.post.title.substring(0, 45)
