@@ -153,7 +153,9 @@
                         </div>
                     </social-sharing>
                 </div>
-                <div class="ads">720x90px</div>
+
+                <adsbygoogle/>
+
             </div>
         </div>
         <div class="has-bg">
