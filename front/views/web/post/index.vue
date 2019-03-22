@@ -82,10 +82,6 @@
                         />
                     </div>
                 </div>
-                <p>If you have your sights set on learning some code and upping your web dev game, here are some great
-                    tips and tricks to help you on your way and keep you focused amid those many tantalizing and/or
-                    obligatory summertime distractions.</p>
-
 
                 <!-- <div class="swiper-area">
                     <heading>Source</heading>
