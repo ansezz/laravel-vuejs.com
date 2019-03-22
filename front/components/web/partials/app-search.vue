@@ -6,7 +6,7 @@
                     <input type="text" name="s" class="form-control" placeholder="Search" v-model="searchText">
                     <i class="fa" :class="$apollo.queries.posts.loading ? 'fa-spin fa-spinner' : 'fa-search' "/>
                 </div>
-                <ul class="search-result">
+                <ul class="search-result" v-if="posts.data && posts.data.length  > 0 ">
                     <li class="is-relative" v-for="(item , key) in posts.data" :key="key">
                         <div class="search-thumb">
                             <img :src="item.image_url" :alt="item.title"/>
@@ -18,7 +18,15 @@
                         <nuxt-link :to="{ name: 'slug', params: { slug: item.slug }}" class="is-absolute"/>
                     </li>
                 </ul>
-                <nuxt-link :to="{name : 'posts', query : {s :searchText }}" class="button">
+                <ul class="search-result" v-if="posts.data && posts.data.length === 0">
+                    <li>
+                        <div class="search-info">
+                            <h3>Sorry :( No posts found, please try another keyword ...</h3>
+                        </div>
+                    </li>
+                </ul>
+                <nuxt-link :to="{name : 'posts', query : {s :searchText }}" class="button"
+                           v-if="posts.data && posts.data.length > 0">
                     Show all result
                 </nuxt-link>
             </form>
@@ -41,7 +49,7 @@
             return {
                 posts: {},
                 searchText: '',
-                count: 5,
+                count: 12,
                 searching: false
             }
         },
@@ -128,8 +136,9 @@
             img
                 width 25px
                 height 25px
+
         .button
-          width 100%
+            width 100%
 
         .search-result
             background-color #3e383e
@@ -140,12 +149,14 @@
                 display flex
                 align-items center
                 padding 20px 20px 0
+
                 &:last-child
-                  padding-bottom 20px
+                    padding-bottom 20px
+
                 &:hover
-                  .search-info
-                      h3
-                        color $primary
+                    .search-info
+                        h3
+                            color $primary
 
             .search-thumb
                 width 110px
