@@ -10,7 +10,14 @@
                             <h4>{{item.title}}</h4>
                           </nuxt-link>
                             <ul class="cats">
-                                <li>In News. Last update: 4 Minutes ago.</li>
+                                <li><span v-if="item.categories[0]">In
+                                    <strong>
+                                        <nuxt-link
+                                                :to="{name: 'category-slug', params : {slug : item.categories[0].slug}}">
+                                            {{item.categories[0].name}}
+                                        </nuxt-link>
+                                    </strong>.</span> Last update: {{item.time_ago}}.
+                                </li>
                             </ul>
                         </div>
                     </div>

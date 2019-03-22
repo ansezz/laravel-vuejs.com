@@ -7,6 +7,11 @@ query featuredPosts($count: Int!, $page: Int, $sort_by : String) {
             excerpt
             image_url
             time_ago
+            categories {
+                id
+                name
+                slug
+            }
         }
         paginatorInfo {
             count
