@@ -20,10 +20,7 @@
                 <app-subscribe-form/>
                 <div class="widget last-widget">
                     <adsbygoogle/>
-                </div>
-                <div class="widget last-widget">
                     <div class="ads">300x250</div>
-                    <adsbygoogle/>
                 </div>
             </div>
         </aside>
