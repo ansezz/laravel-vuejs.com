@@ -65,7 +65,7 @@
                         <!-- <li><a href="#"><img src="@/assets/images/icons-star-2.svg" alt="LV"></a></li> -->
                     </ul>
                 </div>
-                <p v-html="post.content"></p>
+                <p v-html="post.content" id="content"></p>
                 <div class="grid-container">
                     <div class="grid-articles">
                         <article-item
@@ -110,9 +110,6 @@
                             </network>
                             <network network="googleplus">
                                 <i class="fa fa-google-plus"></i>
-                            </network>
-                            <network network="line">
-                                <i class="fa fa-line"></i>
                             </network>
                             <network network="linkedin">
                                 <i class="fa fa-linkedin"></i>
@@ -467,5 +464,13 @@
 
     .has-p-45-120
         padding 45px 0 120px
+
+
+    #content
+        & /deep/
+            a.cs-btn.cs-btn-default
+            a.cs-btn.cs-btn-Default
+                padding 10px
+                margin 2px
 
 </style>

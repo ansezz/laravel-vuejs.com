@@ -6,6 +6,7 @@ type Post {
     excerpt: String
     image_url: String
     url: String
+    source: String
     type: Int!
     views: Int!
     status: Int!

@@ -85,6 +85,7 @@ class Post extends Resource
                 4 => 'Future',
             ]),
 
+
             Tags::make('Tags'),
 
             Boolean::make('Comment Status'),
@@ -92,6 +93,10 @@ class Post extends Resource
             Categories::make('Categories'),
 
             Boolean::make('Featured'),
+
+            Text::make('Source')->hideFromIndex(),
+
+
         ];
     }
 

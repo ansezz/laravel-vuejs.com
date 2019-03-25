@@ -24,6 +24,7 @@ class CreatePostsTable extends Migration
             $table->unsignedTinyInteger('comment_status')->default(1);
             $table->boolean('featured')->default(false);
             $table->unsignedBigInteger('views')->default(0);
+            $table->string('source')->nullable();
             $table->unsignedInteger('user_id');
             $table->timestamps();
         });

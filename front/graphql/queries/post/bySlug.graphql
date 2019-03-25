@@ -6,6 +6,8 @@ query posts($slug: String!) {
         excerpt
         image_url
         url
+        source
+        views
         type
         status
         comment_status
