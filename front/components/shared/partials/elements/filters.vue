@@ -2,15 +2,15 @@
     <div class="filters">
         <div class="filter-group is-flex">
             <div class="is-relative">
-              <input type="text"
-                   v-model="filter.s"
-                   name="search"
-                   placeholder="Search ... "
-                   aria-label="Search"
-                   @keyup.enter="filterChange"
-                   class="form-control has-custom"
-            >
-            <i class="fa fa-search" @click="filterChange"></i>
+                <input type="text"
+                       v-model="filter.s"
+                       name="search"
+                       placeholder="Search ... "
+                       aria-label="Search"
+                       @keyup.enter="filterChange"
+                       class="form-control has-custom"
+                >
+                <i class="fa fa-search" @click="filterChange"></i>
             </div>
             <select name="showen-posts" aria-label="count" @change="filterChange" v-model="filter.count">
                 <option value="12">show 12 posts</option>
@@ -53,7 +53,7 @@
         props: {
             routeName: String
         },
-        created() {
+        beforeMount() {
             this.filter.count = this.$route.query.count ?? 12
             this.filter.sort_by = this.$route.query.sort_by ?? 'latest'
             this.filter.s = this.$route.query.s
@@ -73,15 +73,18 @@
 
 <style lang="stylus" scoped>
     .is-relative
-      margin-right 35px
-      .form-control
-        width 400px
-      .fa
-        position absolute
-        top 50%
-        right 20px
-        transform translateY(-50%)
-        color $secondary
+        margin-right 35px
+
+        .form-control
+            width 400px
+
+        .fa
+            position absolute
+            top 50%
+            right 20px
+            transform translateY(-50%)
+            color $secondary
+
     .filters
         display flex
         align-items center
