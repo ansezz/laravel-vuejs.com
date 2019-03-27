@@ -27,6 +27,7 @@ class PostViewsIncrement
      */
     public function handle(PostViewed $event)
     {
-        $event->post->increment('views');
+        if ($event->post)
+            $event->post->increment('views');
     }
 }
