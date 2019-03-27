@@ -29,15 +29,15 @@
                 default: 'Featured Posts'
             },
             items: {
-                type: Object
+                type: [Object, Array]
             }
         },
         computed: {
             posts() {
-                if (!this.items)
-                    return this.$store.state.post.featured.data
+                if (this.items && this.items.length > 0)
+                    return this.items
 
-                return this.items
+                return this.$store.state.post.featured.data
             },
         },
         data() {
