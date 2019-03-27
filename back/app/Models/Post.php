@@ -181,12 +181,14 @@ class Post extends Model implements HasMedia
     public function getRelatedPostsAttribute()
     {
         $keywords = $this->categories->merge($this->tags)->pluck('name');
-        return $this->where('id', '!=', $this->id)->where(function ($query) use ($keywords) {
+        $keywords = $keywords->merge(collect(explode('-', $this->slug)));
+
+        return $this->where('status', 1)->where('id', '!=', $this->id)->where(function ($query) use ($keywords) {
             foreach ($keywords as $keyword) {
                 $query->orWhere('title', 'like', '%' . $keyword . '%')
                     ->orWhere('content', 'like', '%' . $keyword . '%');
             }
-        })->orderBy('views', 'desc')->limit(10)->get();
+        })->orderBy('views', 'desc')->limit(10)->get()->all();
     }
 
     /**
