@@ -157,10 +157,12 @@
                 .social-media
                     display flex
                     align-items center
-                    padding 0 32px 198px
+                    flex-wrap wrap
+                    padding 0 32px 30px
 
                     li
-                        padding-right 20px
+                        padding-right 15px
+                        margin-bottom 5px
 
                         &:last-child
                             padding-right 0
@@ -170,24 +172,5 @@
                             width 16px
                             height 16px
                             font-size 17px
-
-                        &.rss
-                            a
-                                color #ff6f00
-
-                        &.youtube
-                            a
-                                color #e54c4b
-
-                        &.instagram
-                            a
-                                color #3897f0
-
-                        &.twitter
-                            a
-                                color #1da1f2
-
-                        &.facebook
-                            a
-                                color #3b5998
+                            color #311d5a
 </style>

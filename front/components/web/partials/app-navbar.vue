@@ -49,7 +49,7 @@
 
 <script>
     import {mapActions, mapMutations} from 'vuex'
-    import AppSearch from '@/components/web/partials/app-search';
+    import AppSearch from '@/components/web/partials/app-search'
 
     export default {
         name: 'AppNavbar',

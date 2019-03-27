@@ -1,6 +1,6 @@
 <template>
     <div class="search-container" :class="{ 'open-search' : search.visibility }">
-        <div class="container">
+        <div class="contain">
             <form class="search-form" @submit.prevent="">
                 <div class="form-group">
                     <input type="text" name="s" class="form-control" placeholder="Search" v-model="searchText">
@@ -93,6 +93,7 @@
         display none
         align-items center
         justify-content center
+        padding 0 15px
 
         &.open-search
             display flex
@@ -140,6 +141,9 @@
         .button
             width 100%
 
+        .search-info
+          width calc(100% - 110px)
+
         .search-result
             background-color #3e383e
             height 400px
@@ -166,11 +170,12 @@
                     width 100%
 
             h3
-                font-size 18px
+                font-size 13px
                 color #FFF
                 font-weight 600
                 margin-bottom 10px
                 transition all .35s ease-in-out
+                line-height 20px
 
             span
                 color #b3a7a7
