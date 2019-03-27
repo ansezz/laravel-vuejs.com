@@ -65,21 +65,29 @@
                         <!-- <li><a href="#"><img src="@/assets/images/icons-star-2.svg" alt="LV"></a></li> -->
                     </ul>
                 </div>
+                <div class="grid-container">
+                    <div class="grid-articles">
+                        <template v-for="(item, key) in related.first">
+                            <article-item :title="item.title"
+                                          :image="item.image_url"
+                                          :key="key"
+                                          :to="{ name: 'slug', params: { slug: item.slug }}"
+                                          horizontal
+                            />
+                        </template>
+                    </div>
+                </div>
                 <p v-html="post.content" id="content"></p>
                 <div class="grid-container">
                     <div class="grid-articles">
-                        <article-item
-                                title="New Blade Directives Coming to Laravel 5.6"
-                                image=""
-                                to="/"
-                                horizontal
-                        />
-                        <article-item
-                                title="Displaying the Weather With Serverless and Colors"
-                                image=""
-                                to="/"
-                                horizontal
-                        />
+                        <template v-for="(item, key) in related.second">
+                            <article-item :title="item.title"
+                                          :image="item.image_url"
+                                          :key="key"
+                                          :to="{ name: 'slug', params: { slug: item.slug }}"
+                                          horizontal
+                            />
+                        </template>
                     </div>
                 </div>
 
@@ -93,7 +101,6 @@
                 </div>-->
 
                 <div>
-                    <!-- @TODO : style social share media -->
                     <social-sharing :url="seo.url"
                                     :title="seo.title"
                                     :description="seo.description"
@@ -154,7 +161,7 @@
         </div>
         <div class="has-bg">
             <div class="single-post-container">
-                <app-featured/>
+                <app-featured title="Related Posts" :items="related.last"/>
             </div>
         </div>
         <div class="single-post-container has-p-45-120">
@@ -177,12 +184,19 @@
             ArticleItem: () => import("@/components/shared/partials/elements/article-item"),
             // AppJobsSwiper: () => import("@/components/web/partials/app-jobs-swiper"),
             AppFeatured: () => import("@/components/web/partials/app-featured"),
-            AppCommentArea: () => import("@/components/web/partials/app-comment-area"),
+            // AppCommentArea: () => import("@/components/web/partials/app-comment-area"),
         },
         name: 'post',
         computed: {
             post() {
                 return this.$store.state.post.single
+            },
+            related() {
+                return {
+                    first: this.$store.state.post.single.related_posts.slice(0, 2),
+                    second: this.$store.state.post.single.related_posts.slice(2, 4),
+                    last: this.$store.state.post.single.related_posts.slice(4),
+                }
             },
             hashTags() {
                 let tags = [];

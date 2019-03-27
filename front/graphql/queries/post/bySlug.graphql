@@ -12,6 +12,12 @@ query posts($slug: String!) {
         status
         comment_status
         time_ago
+        related_posts {
+            id
+            title
+            slug
+            image_url
+        }
         user {
             id
             name
