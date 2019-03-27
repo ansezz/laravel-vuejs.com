@@ -376,10 +376,13 @@
             margin-bottom 40px
 
         p
-            font-size 18px
-            line-height 28px
-            color #616d82
-            margin-bottom 20px
+          font-size 18px
+          line-height 28px
+          color #616d82
+          margin-bottom 20px
+        & >>>
+          img
+            max-width 100%
 
         .thumbnail-area
             margin-bottom 20px
