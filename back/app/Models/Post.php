@@ -175,6 +175,20 @@ class Post extends Model implements HasMedia
     }
 
     /**
+     * Get the Post Url.
+     *
+     */
+    public function getRelatedPostsAttribute()
+    {
+        $keywords = explode(' ', $this->title);
+        return $this->where('id', '!=', $this->id)->where(function ($query) use ($keywords) {
+            foreach ($keywords as $keyword) {
+                $query->orWhere('title', 'like', '%' . $keyword . '%');
+            }
+        })->orderBy('views', 'desc')->limit(4)->get();
+    }
+
+    /**
      * Get all of the posts for the user.
      */
     public function user()
