@@ -92,7 +92,7 @@ export const social_media = [
         class: "instagram"
     },
     {
-        title: "vk.,com",
+        title: "vk.com",
         href: "https://vk.com/laravelvuejs",
         class: "vk"
     },
