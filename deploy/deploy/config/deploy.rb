@@ -137,8 +137,8 @@ end
 after "deploy:updating", "app:build"
 after "app:build", "app:symlink"
 
-after "deploy:updating", "npm:install"
-after "npm:install", "npm:build"
+#after "deploy:updating", "npm:install"
+#after "npm:install", "npm:build"
 
 #after "npm:build", "pm2:conf"
 
