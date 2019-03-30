@@ -52,11 +52,6 @@ export const second_menu = [
 
 export const social_media = [
     {
-        title: "Google+",
-        href: "https://plus.google.com/+LaravelVueJS",
-        class: "google-plus",
-    },
-    {
         title: "Facebook",
         href: "https://www.facebook.com/LaravelVueJs",
         class: "facebook"

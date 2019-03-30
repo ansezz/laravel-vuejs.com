@@ -106,9 +106,6 @@
                             <network network="facebook">
                                 <i class="fa fa-facebook"></i>
                             </network>
-                            <network network="googleplus">
-                                <i class="fa fa-google-plus"></i>
-                            </network>
                             <network network="linkedin">
                                 <i class="fa fa-linkedin"></i>
                             </network>
