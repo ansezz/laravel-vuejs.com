@@ -21,7 +21,7 @@
             </ul>
             <div class="sign-up">
                 <nuxt-link to="/" class="button has-icon">
-                    <img src="@/assets/images/icons-user.png" alt="LV">
+                    <i class="fa fa-user"></i>
                     <span>Sign up/in</span>
                 </nuxt-link>
             </div>

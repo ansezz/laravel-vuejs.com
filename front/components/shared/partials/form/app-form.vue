@@ -47,6 +47,9 @@ export default {
                 display flex
                 align-items center
                 justify-content center
+                .fa
+                  font-size 15px
+                  color $secondary
 
   .form-actions
     display flex

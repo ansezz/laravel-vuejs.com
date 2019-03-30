@@ -12,7 +12,7 @@
       <div class="form-group">
         <input type="email" class="form-control" placeholder="E-mail" v-model="email">
         <div class="img">
-          <img src="@/assets/images/icons-email.png" alt="#">
+          <i class="fa fa-envelope"></i>
         </div>
       </div>
       <template slot="actions">
