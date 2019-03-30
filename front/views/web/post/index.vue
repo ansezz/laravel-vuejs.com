@@ -25,31 +25,31 @@
                 <h1 class="text-center">{{ post.title.substring(0, 45) }}</h1>
                 <p v-html="post.excerpt"></p>
                 <div class="image-container">
-                    <social-sharing :url="seo.url"
-                                    :title="seo.title"
-                                    :description="seo.description"
-                                    :media="seo.image"
-                                    :hashtags="hashTags"
+                    <social-sharing :url="$parent.seo.url"
+                                    :title="$parent.seo.title"
+                                    :description="$parent.seo.description"
+                                    :media="$parent.seo.image"
+                                    :hashtags="$parent.hashTags"
                                     twitter-user="laravelvuejs"
                                     network-tag="li"
                                     inline-template>
                         <ul class="share-links">
                             <network network="facebook">
                                 <a href="#">
-                                  <img src="@/assets/images/icons-facebook-light.svg" alt="LV">
-                                  <span>Facebook</span>
+                                    <img src="@/assets/images/icons-facebook-light.svg" alt="LV">
+                                    <span>Facebook</span>
                                 </a>
                             </network>
                             <network network="whatsapp">
                                 <a href="#">
-                                  <img src="@/assets/images/icons-whats-app.svg" alt="LV">
-                                  <span>WhatsApp</span>
+                                    <img src="@/assets/images/icons-whats-app.svg" alt="LV">
+                                    <span>WhatsApp</span>
                                 </a>
                             </network>
                             <network network="twitter">
                                 <a href="#">
-                                  <img src="@/assets/images/icons-twitter-light.svg" alt="LV">
-                                  <span>Twitter</span>
+                                    <img src="@/assets/images/icons-twitter-light.svg" alt="LV">
+                                    <span>Twitter</span>
                                 </a>
                             </network>
                         </ul>
@@ -91,21 +91,12 @@
                     </div>
                 </div>
 
-                 <!--<div class="swiper-area">
-                    <heading>Source</heading>
-                    <ul>
-                        <li>Treehouse Team</li>
-                        <li>Laravel.com</li>
-                    </ul>
-                    <app-jobs-swiper/>
-                </div>-->
-
                 <div>
-                    <social-sharing :url="seo.url"
-                                    :title="seo.title"
-                                    :description="seo.description"
-                                    :media="seo.image"
-                                    :hashtags="hashTags"
+                    <social-sharing :url="$parent.seo.url"
+                                    :title="$parent.seo.title"
+                                    :description="$parent.seo.description"
+                                    :media="$parent.seo.image"
+                                    :hashtags="$parent.hashTags"
                                     twitter-user="laravelvuejs"
                                     inline-template>
                         <div class="share-links is-flex">
@@ -165,7 +156,6 @@
             </div>
         </div>
         <div class="single-post-container has-p-45-120">
-            <!--<app-comment-area/>-->
             <div class="comment-container">
                 <vue-disqus shortname="laravel-vuejs-com" identifier="laravel-vuejs-com"
                             :url="this.post.url"></vue-disqus>
@@ -175,10 +165,8 @@
 </template>
 
 <script>
-    import seo from '@/mixins/seo'
 
     export default {
-        mixins: [seo],
         components: {
             Breadcrumb: () => import('@/components/shared/partials/elements/breadcrumb'),
             ArticleItem: () => import("@/components/shared/partials/elements/article-item"),
@@ -196,23 +184,6 @@
                     first: this.$store.state.post.single.related_posts.slice(0, 2),
                     second: this.$store.state.post.single.related_posts.slice(2, 4),
                     last: this.$store.state.post.single.related_posts.slice(4),
-                }
-            },
-            hashTags() {
-                let tags = [];
-                this.post.tags.forEach((tag) => {
-                    tags.push(tag.name)
-                })
-                return tags.join(',')
-            },
-            seo() {
-                return {
-                    title: this.post.title,
-                    description: this.post.excerpt,
-                    image: this.post.image_url,
-                    url: this.post.url,
-                    tags: this.post.tags,
-                    type: 'article',
                 }
             },
         },

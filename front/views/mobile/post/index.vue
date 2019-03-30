@@ -1,158 +1,155 @@
 <template lang="html">
-  <section class="posts-container">
-    <breadcrumb :pages="breadcrumbsData()"/>
-    <div class="mobile-container">
-      <div class="single-page-header">
-        <div class="is-flex">
-          <div class="author is-flex">
-            <div class="img-wrp">
-              <img src="@/assets/images/brackets.png" alt="LV">
-            </div>
-            <h5 class="name">Alex JIG</h5>
-            <span class="role">Collaborator</span>
-          </div>
-          <div class="category is-flex">
-            <img src="@/assets/images/icons-category.svg" alt="LV">
-            <h1>{{ post.categories[0].name }}</h1>
-          </div>
-        </div>
-        <div class="date-time">
-            <img src="@/assets/images/icons-clock.svg" alt="LV">
-            <span>3 Minutes ago. 12 JUI 2018. 13:55</span>
-          </div>
-      </div>
-    </div>
-    <div class="mobile-container">
-      <div class="post-content">
-        <ul class="actions-list is-flex">
-            <div class="is-flex">
-              <li><a href="#"><img src="@/assets/images/zoom-in-colored.svg" alt="LV"></a></li>
-              <li><a href="#"><img src="@/assets/images/zoom-out.svg" alt="LV"></a></li>
-            </div>
-            <!-- <li><a href="#"><img src="@/assets/images/icons-star-2.svg" alt="LV"></a></li> -->
-          </ul>
-        <h1 class="text-center">{{ post.title.substring(0, 45) }}</h1>
-        <!--<p>{{ post.excerpt }}</p>-->
-        <p>Ah, those warm summer months are the best, aren’t they? And not just because they’re synonymous with lounging poolside or trekking down to the river with family and friends. There’s just something about this time of year that makes it perfect for setting and accomplishing goals, or tackling that special project that’s been at the back of your mind.</p>
-        <p>I don’t know if it’s the heat, or the long days, or maybe just that extra touch of playfulness that seems to tickle folks between Spring and Fall. But there’s just something about the summertime that is perfect for finally cleaning out the garage, or taking a class, or picking up a new hobby.</p>
-        <div class="image-container">
-            <div class="thumbnail-area">
-              <thumbnail  :src="post.image_url" :alt="post.title" :to="post.url"/>
-              <span class="copyright">&copy; 2018. Copyrights</span>
+    <section class="posts-container">
+        <breadcrumb :pages="breadcrumbsData()"/>
+        <div class="mobile-container">
+            <div class="single-page-header">
+                <div class="is-flex">
+                    <div class="author is-flex">
+                        <div class="img-wrp">
+                            <img src="@/assets/images/brackets.png" alt="LV">
+                        </div>
+                        <h5 class="name">{{post.user.name}}</h5>
+                        <span class="role">Collaborator</span>
+                    </div>
+                    <div class="category is-flex" v-if="post.categories[0]">
+                        <img src="@/assets/images/icons-category.svg" alt="LV">
+                        <h1>{{ post.categories[0].name }}</h1>
+                    </div>
+                </div>
+                <div class="date-time">
+                    <img src="@/assets/images/icons-clock.svg" alt="LV">
+                    <span>{{post.time_ago}}</span>
+                </div>
             </div>
         </div>
-        <p>It’s an ideal time for learning some new code skills or building on the ones you already have. Think about it: If you set your mind to it, I mean really committed yourself to doing something awesome, how much could you learn in a single summer? What sorts of cool projects could you build in that time?</p>
-        <div class="grid-container">
-          <div class="grid-articles">
-            <article-item
-              title="New Blade Directives Coming to Laravel 5.6"
-              image=""
-              to="/"
-              horizontal
-            />
-            <article-item
-              title="Displaying the Weather With Serverless and Colors"
-              image=""
-              to="/"
-              horizontal
-            />
-          </div>
+        <div class="mobile-container">
+            <div class="post-content">
+                <ul class="actions-list is-flex">
+                    <div class="is-flex">
+                        <li><a href="#"><img src="@/assets/images/zoom-in-colored.svg" alt="LV"></a></li>
+                        <li><a href="#"><img src="@/assets/images/zoom-out.svg" alt="LV"></a></li>
+                    </div>
+                    <!-- <li><a href="#"><img src="@/assets/images/icons-star-2.svg" alt="LV"></a></li> -->
+                </ul>
+                <h1 class="text-center">{{ post.title.substring(0, 45) }}</h1>
+                <p>{{ post.excerpt }}</p>
+                <div class="image-container">
+                    <div class="thumbnail-area">
+                        <thumbnail :src="post.image_url" :alt="post.title" :to="post.url"/>
+                        <span class="copyright">&copy; 2018. Copyrights</span>
+                    </div>
+                </div>
+
+                <div class="grid-container">
+                    <div class="grid-articles">
+                        <template v-for="(item, key) in related.first">
+                            <article-item :title="item.title"
+                                          :image="item.image_url"
+                                          :key="key"
+                                          :to="{ name: 'slug', params: { slug: item.slug }}"
+                                          horizontal
+                            />
+                        </template>
+                    </div>
+                </div>
+                <p v-html="post.content" id="content"></p>
+                <div class="grid-container">
+                    <div class="grid-articles">
+                        <template v-for="(item, key) in related.second">
+                            <article-item :title="item.title"
+                                          :image="item.image_url"
+                                          :key="key"
+                                          :to="{ name: 'slug', params: { slug: item.slug }}"
+                                          horizontal
+                            />
+                        </template>
+                    </div>
+                </div>
+
+                <social-sharing :url="$parent.seo.url"
+                                :title="$parent.seo.title"
+                                :description="$parent.seo.description"
+                                :media="$parent.seo.image"
+                                :hashtags="$parent.hashTags"
+                                twitter-user="laravelvuejs"
+                                inline-template
+                                network-tag="li"
+                >
+
+                    <ul class="share-links">
+                        <network network="facebook" class="facebook">
+                            <i class="fa fa-facebook"></i>
+                            <span>Facebook</span>
+                        </network>
+                        <network network="twitter" class="twitter">
+                            <i class="fa fa-twitter"></i>
+                            <span>Twitter</span>
+                        </network>
+                        <network network="whatsapp" class="whatsapp">
+                            <i class="fa fa-whatsapp"></i>
+                            <span>Whats App</span>
+                        </network>
+                    </ul>
+                </social-sharing>
+
+                <adsbygoogle/>
+
+            </div>
         </div>
-        <p>If you have your sights set on learning some code and upping your web dev game, here are some great tips and tricks to help you on your way and keep you focused amid those many tantalizing and/or obligatory summertime distractions.</p>
-        <div class="pre-box">
-          <div class="pre-header">JS</div>
-          <pre>
-  new Vue({
-    el: '#app',
-    components: { toogle },
-    date: {
-      buttonPressed: false
-    },
-    methods: {
-      click(fn) {
-        this.buttonPressed = true
-        fn()
-      },
-    },
-  });
-          </pre>
+        <div class="has-bg">
+            <div class="single-post-container">
+                <app-featured title="Related Posts" :items="related.last"/>
+            </div>
         </div>
-        <p>The summertime sure has its fair share of distractions. The kids are out of school. There are concerts and festivals that beckon. Nature’s in full bloom and enticing us to its beaches and parks. With a million fun and distracting things going on all around us, it can be incredibly difficult to stay focused at times. But where there’s a will, there’s a way — and where there’s a problem, there’s an opportunity for a solution. Like investing in a pair of noise-cancelling headphones, or taking up some mindfulness exercises and practices to quiet and calm the mind and increase your control over your actions, thoughts, and decisions.</p>
-        <ul class="share-links">
-          <li>
-              <a href="#" class="facebook">
-                  <i class="fa fa-facebook"></i>
-                  <span>Facebook</span>
-              </a>
-          </li>
-          <li>
-              <a href="#" class="twitter">
-                <i class="fa fa-twitter"></i>
-                <span>Twitter</span>
-              </a>
-          </li>
-          <li>
-              <a href="#" class="whatssap">
-                <i class="fa fa-whatsapp"></i>
-                <span>Whats App</span>
-              </a>
-          </li>
-        </ul>
-        <!-- <div class="swiper-area">
-          <heading>Source</heading>
-          <ul>
-            <li>Treehouse Team</li>
-            <li>Laravel.com</li>
-          </ul>
-          <app-jobs-swiper />
-        </div> -->
-        <div class="ads">720x90px</div>
-      </div>
-    </div>
-    <div class="has-bg">
-      <div class="single-post-container">
-        <app-featured />
-      </div>
-    </div>
-    <div class="single-post-container has-p-45-120">
-      <app-comment-area />
-    </div>
-  </section>
+        <div class="single-post-container has-p-45-120">
+            <div class="comment-container">
+                <vue-disqus shortname="laravel-vuejs-com" identifier="laravel-vuejs-com"
+                            :url="this.post.url"></vue-disqus>
+            </div>
+        </div>
+    </section>
 </template>
 
 <script>
-  export default {
-    components: {
-      Breadcrumb: () => import('@/components/shared/partials/elements/breadcrumb'),
-      ArticleItem: () =>  import("@/components/shared/partials/elements/article-item"),
-      // AppJobsSwiper: () =>  import("@/components/mobile/partials/app-jobs-swiper"),
-      AppFeatured: () =>  import("@/components/mobile/partials/app-featured"),
-      AppCommentArea: () =>  import("@/components/mobile/partials/app-comment-area")
-    },
-    name: 'post',
-    computed: {
-      post() {
-        return this.$store.state.post.single
-      }
-    },
-    data() {
-      return {
-        breadcrumbsData: () => [
-          {
-            name: 'Home',
-            link: "/"
-          },
-          {
-            name: this.post.categories[0].name,
-            link: '/'
-          },
-          {
-            name: this.post.title.substring(0, 35)
-          }
-        ]
-      }
+    export default {
+        components: {
+            Breadcrumb: () => import('@/components/shared/partials/elements/breadcrumb'),
+            ArticleItem: () => import("@/components/shared/partials/elements/article-item"),
+            // AppJobsSwiper: () =>  import("@/components/mobile/partials/app-jobs-swiper"),
+            AppFeatured: () => import("@/components/mobile/partials/app-featured"),
+            // AppCommentArea: () =>  import("@/components/mobile/partials/app-comment-area")
+        },
+        name: 'post',
+        computed: {
+            post() {
+                return this.$store.state.post.single
+            },
+            related() {
+                return {
+                    first: this.$store.state.post.single.related_posts.slice(0, 2),
+                    second: this.$store.state.post.single.related_posts.slice(2, 4),
+                    last: this.$store.state.post.single.related_posts.slice(4),
+                }
+            },
+        },
+        data() {
+            return {
+                breadcrumbsData: () => [
+                    {
+                        name: 'Home',
+                        link: "/"
+                    },
+                    {
+                        name: this.post.categories[0].name,
+                        link: '/'
+                    },
+                    {
+                        name: this.post.title.substring(0, 35)
+                    }
+                ]
+            }
+        }
     }
-  }
 
 </script>
 
@@ -324,5 +321,15 @@
           background-color rgba($secondary, .05)
       &:last-child
           margin-bottom 0
+
+
+#content
+  & /deep/
+      a.cs-btn.cs-btn-default
+      a.cs-btn.cs-btn-Default
+          padding 10px
+          margin 2px
+          display block
+          text-align center
 
 </style>
