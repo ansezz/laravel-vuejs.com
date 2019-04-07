@@ -9,7 +9,7 @@
         </nuxt-link>
       </div>
       <div class="user">
-        <nuxt-link to="/">
+        <nuxt-link to="/auth/signup">
           <i class="fa fa-user"></i>
         </nuxt-link>
       </div>
