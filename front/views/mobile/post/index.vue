@@ -51,6 +51,7 @@
                             />
                         </template>
                     </div>
+                    <adsbygoogle/>
                 </div>
                 <p v-html="post.content" id="content"></p>
                 <div class="grid-container">
@@ -64,6 +65,7 @@
                             />
                         </template>
                     </div>
+                    <adsbygoogle/>
                 </div>
 
                 <social-sharing :url="$parent.seo.url"
@@ -97,8 +99,6 @@
                         </network>
                     </ul>
                 </social-sharing>
-
-                <adsbygoogle/>
 
             </div>
         </div>

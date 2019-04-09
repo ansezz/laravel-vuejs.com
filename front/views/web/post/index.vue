@@ -76,6 +76,7 @@
                             />
                         </template>
                     </div>
+                    <adsbygoogle/>
                 </div>
                 <p v-html="post.content" id="content"></p>
                 <div class="grid-container">
@@ -89,6 +90,7 @@
                             />
                         </template>
                     </div>
+                    <adsbygoogle/>
                 </div>
 
                 <div>
@@ -142,8 +144,6 @@
                         </div>
                     </social-sharing>
                 </div>
-
-                <adsbygoogle/>
 
             </div>
         </div>
