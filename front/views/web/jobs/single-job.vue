@@ -11,7 +11,7 @@
                     <span>Casablanca, Morocco</span>
                 </div>
                 <div class="wrap is-flex">
-                    <img src="@/assets/images/icons-category.svg" alt="LV">
+                    <i class="fa fa-folder-o"></i>
                     <h6>JEE</h6>
                 </div>
                 <div class="wrap">
@@ -189,6 +189,10 @@
             letter-spacing 2px
             color $secondary
             margin-left 10px
+          .fa
+            font-size 20px
+            color $secondary
+            margin-top 5px
         li
             img
                 margin-right 10px

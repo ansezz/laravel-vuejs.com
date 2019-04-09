@@ -6,7 +6,7 @@
             <div class="post-heading-filters">
                 <div class="post-heading">
                     <div class="user-avatar">
-                        <img src="@/assets/images/icons-category.svg" alt="LV">
+                      <i class="fa fa-folder-o"></i>
                     </div>
                     <h1 v-if="tag">{{tag.name}}</h1>
                 </div>
@@ -150,6 +150,10 @@
             color $tertiary
             margin-top 10px
             line-height 1
+        .fa
+          font-size 20px
+          color $secondary
+          margin-top 5px
 
     .filters
         display flex

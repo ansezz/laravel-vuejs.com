@@ -5,7 +5,7 @@
             <div class="post-heading-filters">
                 <div class="post-heading">
                     <div class="user-avatar">
-                        <img src="@/assets/images/icons-category.svg" alt="LV">
+                      <i class="fa fa-folder-o"></i>
                     </div>
                     <h1>Posts</h1>
                 </div>
@@ -150,6 +150,10 @@
             color $tertiary
             line-height 1
             margin-left 10px
+        .fa
+          font-size 20px
+          color $secondary
+          margin-top 5px
 
     .article-grid
         display grid

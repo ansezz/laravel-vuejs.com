@@ -5,13 +5,13 @@
                 <ul class="navbar-list">
                     <li>
                         <a href="#" @click.prevent="toggleNavigationVisibility">
-                            <img src="@/assets/images/icons-menu.png" alt="LV">
+                            <i class="fa fa-bars"></i>
                             <span>Menu</span>
                         </a>
                     </li>
                     <li>
                         <a @click.prevent="toggleSearchVisibility" href="#">
-                            <img src="@/assets/images/icons-search.png" alt="LV">
+                            <i class="fa fa-search"></i>
                             <span>Search</span>
                         </a>
                     </li>
@@ -24,19 +24,19 @@
                 <ul class="navbar-list">
                     <li>
                         <nuxt-link to="/page/newsletter">
-                            <img src="@/assets/images/icons-email.png" alt="LV">
+                            <i class="fa fa-envelope"></i>
                             <span>Newsletter</span>
                         </nuxt-link>
                     </li>
                     <li v-if="loggedIn && me">
                         <nuxt-link to="/auth/account">
-                            <img src="@/assets/images/icons-user.png" :alt="me.name">
+                            <i class="fa fa-user"></i>
                             <span>{{me.name}}</span>
                         </nuxt-link>
                     </li>
                     <li v-else>
                         <nuxt-link to="/auth/signup">
-                            <img src="@/assets/images/icons-user.png" alt="LV">
+                            <i class="fa fa-user"></i>
                             <span>Sign up/in</span>
                         </nuxt-link>
                     </li>
@@ -116,10 +116,11 @@
                         align-items center
                         letter-spacing 1px
 
-                        img
-                            margin-right 12px
+                        .fa
+                          font-size 15px
 
                         span
                             margin-top 4px
+                            margin-left 10px
 
 </style>

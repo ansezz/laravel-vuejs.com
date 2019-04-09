@@ -1,7 +1,7 @@
 <template>
     <header class="header is-flex">
       <div class="menu-open" @click="menu = true">
-        <img src="@/assets/images/icons-menu.png" alt="LV">
+        <i class="fa fa-bars"></i>
       </div>
       <div class="logo">
         <nuxt-link to="/">
@@ -9,8 +9,8 @@
         </nuxt-link>
       </div>
       <div class="user">
-        <nuxt-link to="/">
-          <img src="@/assets/images/icons-user.png" alt="LV">
+        <nuxt-link to="/auth/signup">
+          <i class="fa fa-user"></i>
         </nuxt-link>
       </div>
       <div :class="[menu ? 'opened': '' ,'menu']">
@@ -22,7 +22,7 @@
           </div>
           <div class="is-flex">
             <div class="search" @click.prevent="toggleSearchVisibility">
-              <img src="@/assets/images/icons-search.svg" alt="LV">
+              <i class="fa fa-search"></i>
             </div>
             <div class="close-menu" @click="menu = false">
               <img src="@/assets/images/cancel.png" alt="LV">
@@ -97,6 +97,12 @@
   .header
     padding 18px 30px
     border-bottom 5px solid $primary
+    .fa
+      font-size 15px
+      color $secondary
+      &.fa-search
+        font-size 18px
+        margin-top 3px
   .menu
     width 100%
     position fixed

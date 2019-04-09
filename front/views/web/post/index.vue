@@ -11,11 +11,11 @@
                     <span class="role">Collaborator</span>
                 </div>
                 <div class="category is-flex" v-if="post.categories[0]">
-                    <img src="@/assets/images/icons-category.svg" alt="LV">
+                    <i class="fa fa-folder-o"></i>
                     <h1>{{ post.categories[0].name }}</h1>
                 </div>
                 <div class="date-time">
-                    <img src="@/assets/images/icons-clock.svg" alt="LV">
+                    <i class="fa fa-clock-o"></i>
                     <span>{{post.time_ago}}</span>
                 </div>
             </div>
@@ -35,20 +35,20 @@
                                     inline-template>
                         <ul class="share-links">
                             <network network="facebook">
-                                <a href="#">
-                                    <img src="@/assets/images/icons-facebook-light.svg" alt="LV">
+                                <a href="#" class="facebook">
+                                  <i class="fa fa-facebook"></i>
                                     <span>Facebook</span>
                                 </a>
                             </network>
                             <network network="whatsapp">
-                                <a href="#">
-                                    <img src="@/assets/images/icons-whats-app.svg" alt="LV">
+                                <a href="#" class="whatsapp">
+                                  <i class="fa fa-whatsapp"></i>
                                     <span>WhatsApp</span>
                                 </a>
                             </network>
                             <network network="twitter">
-                                <a href="#">
-                                    <img src="@/assets/images/icons-twitter-light.svg" alt="LV">
+                                <a href="#" class="twitter">
+                                    <i class="fa fa-twitter"></i>
                                     <span>Twitter</span>
                                 </a>
                             </network>
@@ -260,8 +260,18 @@
                 font-weight 600
                 letter-spacing 2px
                 text-transform uppercase
-                img
+                &.facebook
+                  .fa
+                      color #3b5998
+                &.whatsapp
+                  .fa
+                    color #25D366
+                &.twitter
+                  .fa
+                    color #00acee
+                .fa
                     margin-right 10px
+                    font-size 18px
 
         .actions-list
             display flex
@@ -318,6 +328,9 @@
                 font-weight 400
 
         .category
+            .fa
+                font-size 20px
+                color $secondary
             h1
                 font-size 12px
                 letter-spacing 2px
@@ -328,6 +341,9 @@
                 padding-top 3px
 
         .date-time
+            .fa
+                font-size 20px
+                color $secondary
             span
                 color rgba(#616d82, .8)
                 font-size 14px

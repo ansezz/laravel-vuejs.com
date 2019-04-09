@@ -1,15 +1,22 @@
+<!--laravelvuejs_Home_M.png-->
 <template>
-  <section>
-    <h1>SignUp Mobile</h1>
+  <section class="app-signup">
+    <AppSignup/>
   </section>
 </template>
 
 <script>
+  import AppSignup from "@/components/mobile/partials/app-signup"
+
   export default {
-    components: {},
+    components: {
+      AppSignup
+    },
     name: "SignUp"
   }
 </script>
 
 <style lang="stylus" scoped>
+  .app-signup
+    padding 65px 0
 </style>

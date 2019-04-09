@@ -12,12 +12,12 @@
                         <span class="role">Collaborator</span>
                     </div>
                     <div class="category is-flex" v-if="post.categories[0]">
-                        <img src="@/assets/images/icons-category.svg" alt="LV">
+                        <i class="fa fa-folder-o"></i>
                         <h1>{{ post.categories[0].name }}</h1>
                     </div>
                 </div>
                 <div class="date-time">
-                    <img src="@/assets/images/icons-clock.svg" alt="LV">
+                    <i class="fa fa-clock-o"></i>
                     <span>{{post.time_ago}}</span>
                 </div>
             </div>
@@ -78,16 +78,22 @@
 
                     <ul class="share-links">
                         <network network="facebook" class="facebook">
-                            <i class="fa fa-facebook"></i>
-                            <span>Facebook</span>
+                            <a class="facebook">
+                              <i class="fa fa-facebook"></i>
+                              <span>Facebook</span>
+                            </a>
                         </network>
                         <network network="twitter" class="twitter">
-                            <i class="fa fa-twitter"></i>
-                            <span>Twitter</span>
+                            <a class="twitter">
+                              <i class="fa fa-twitter"></i>
+                              <span>Twitter</span>
+                            </a>
                         </network>
                         <network network="whatsapp" class="whatsapp">
-                            <i class="fa fa-whatsapp"></i>
-                            <span>Whats App</span>
+                            <a class="whatsapp">
+                              <i class="fa fa-whatsapp"></i>
+                              <span>Whats App</span>
+                            </a>
                         </network>
                     </ul>
                 </social-sharing>
@@ -188,6 +194,9 @@
         text-transform uppercase
         margin-left 10px
         padding-top 3px
+      .fa
+          color $secondary
+          font-size 16px
     .date-time
       span
         color rgba(#616d82, .8)
@@ -196,6 +205,9 @@
         display inline-block
         margin-left 10px
         padding-top 3px
+      .fa
+        color $secondary
+        font-size 16px
   .post-content
     h1
       font-size 28px
@@ -207,6 +219,11 @@
       line-height 28px
       color #616d82
       margin-bottom 20px
+      & >>>
+        img
+          max-width 100%
+        a
+          word-break break-all
     .thumbnail-area
       margin-bottom 20px
       .article-image
@@ -280,29 +297,30 @@
     display grid
     grid-template-columns repeat(3, 1fr)
     margin 0 -30px 40px
-    li
+    & >>>
+      li
+        display flex
+        align-items center
+        justify-content center
+        font-size 12px
+        font-weight 500
+        letter-spacing 1px
+        text-transform uppercase
+        padding 10px
         a
-            display flex
-            align-items center
-            justify-content center
-            color #FFF
-            font-size 12px
-            font-weight 500
-            letter-spacing 1px
-            text-transform uppercase
-            padding 10px
-            &.facebook
-              background-color #3B5998
-            &.twitter
-              background-color #38A1F3
-            &.whatssap
-              background-color #25D366
-            .fa
-              margin-right 10px
-              padding-top 3px
-              font-size 14px
-            span
-              padding-top 3px
+          color #FFF
+        &.facebook
+          background-color #3B5998
+        &.twitter
+          background-color #38A1F3
+        &.whatsapp
+          background-color #25D366
+        .fa
+          margin-right 10px
+          padding-top 3px
+          font-size 14px
+        span
+          padding-top 3px
 .actions-list
   margin-bottom 20px
   .is-flex
@@ -331,5 +349,7 @@
           margin 2px
           display block
           text-align center
+.comment-container
+  padding 0 30px
 
 </style>
