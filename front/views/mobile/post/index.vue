@@ -39,20 +39,6 @@
                         <span class="copyright">&copy; 2018. Copyrights</span>
                     </div>
                 </div>
-
-                <div class="grid-container">
-                    <div class="grid-articles">
-                        <template v-for="(item, key) in related.first">
-                            <article-item :title="item.title"
-                                          :image="item.image_url"
-                                          :key="key"
-                                          :to="{ name: 'slug', params: { slug: item.slug }}"
-                                          horizontal
-                            />
-                        </template>
-                    </div>
-                    <adsbygoogle/>
-                </div>
                 <p v-html="post.content" id="content"></p>
                 <div class="grid-container">
                     <div class="grid-articles">
@@ -146,8 +132,8 @@
                         link: "/"
                     },
                     {
-                        name: this.post.categories[0].name,
-                        link: '/'
+                        name: this.post.categories[0] ? this.post.categories[0].name : 'Category',
+                        link: this.post.categories[0] ? {name: 'category-slug', params : {slug : this.post.categories[0].slug}} : null
                     },
                     {
                         name: this.post.title.substring(0, 35)
