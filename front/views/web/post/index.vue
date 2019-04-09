@@ -60,8 +60,8 @@
                         <span class="copyright">&copy; 2018. Copyrights</span>
                     </div>
                     <ul class="actions-list">
-                        <li><a href="#"><img src="@/assets/images/zoom-in-colored.svg" alt="LV"></a></li>
-                        <li class="m-b-40"><a href="#"><img src="@/assets/images/zoom-out.svg" alt="LV"></a></li>
+                        <!--<li><a href="#"><img src="@/assets/images/zoom-in-colored.svg" alt="LV"></a></li>-->
+                        <!--<li class="m-b-40"><a href="#"><img src="@/assets/images/zoom-out.svg" alt="LV"></a></li>-->
                         <!-- <li><a href="#"><img src="@/assets/images/icons-star-2.svg" alt="LV"></a></li> -->
                     </ul>
                 </div>

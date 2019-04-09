@@ -26,10 +26,10 @@
             <div class="post-content">
                 <ul class="actions-list is-flex">
                     <div class="is-flex">
-                        <li><a href="#"><img src="@/assets/images/zoom-in-colored.svg" alt="LV"></a></li>
-                        <li><a href="#"><img src="@/assets/images/zoom-out.svg" alt="LV"></a></li>
+                        <!--<li><a href="#"><img src="@/assets/images/zoom-in-colored.svg" alt="LV"></a></li>-->
+                        <!--<li><a href="#"><img src="@/assets/images/zoom-out.svg" alt="LV"></a></li>-->
+                        <!-- <li><a href="#"><img src="@/assets/images/icons-star-2.svg" alt="LV"></a></li> -->
                     </div>
-                    <!-- <li><a href="#"><img src="@/assets/images/icons-star-2.svg" alt="LV"></a></li> -->
                 </ul>
                 <h1 class="text-center">{{ post.title.substring(0, 45) }}</h1>
                 <p>{{ post.excerpt }}</p>
