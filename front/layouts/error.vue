@@ -26,15 +26,21 @@
 <style lang="stylus" scoped>
     .error-page
         padding 120px 0
+        @media (max-width 768px)
+          padding 60px 20px
 
         .error-thumb
             text-align center
             margin-bottom 60px
+            @media (max-width 768px)
+              margin-bottom 30px
 
         .error-body
             text-align center
             width 460px
             margin auto
+            @media (max-width 768px)
+              width 100%
 
             h1
                 color $tertiary
