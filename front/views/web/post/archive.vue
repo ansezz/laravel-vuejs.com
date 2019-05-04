@@ -135,7 +135,7 @@
         position relative
         overflow hidden
         display flex
-        align-items flex-end
+        align-items center
         justify-content space-between
         margin 60px 0 40px
 
