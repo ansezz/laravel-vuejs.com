@@ -2,7 +2,7 @@
 <template>
     <section class="posts-container">
         <breadcrumb :pages="breadcrumbsData()"/>
-        <div class="container">
+        <div class="mobile-container">
             <div class="post-heading-filters">
                 <div class="post-heading">
                     <div class="user-avatar">
@@ -40,7 +40,7 @@
 
     export default {
         components: {
-            filters: () => import('@/components/shared/partials/elements/filters'),
+            filters: () => import('@/components/mobile/elements/filters'),
             Breadcrumb: () => import('@/components/shared/partials/elements/breadcrumb'),
             ArticleItem: () => import('@/components/shared/partials/elements/article-item')
         },
@@ -131,17 +131,9 @@
 
     .post-heading-filters
         position relative
-        height 60px
-        overflow hidden
-        display flex
-        align-items flex-end
-        justify-content flex-end
-        margin 60px 0 40px
+        margin 20px 0 30px
 
     .post-heading
-        position absolute
-        left 50%
-        transform translateX(-50%)
         text-align center
 
         h1

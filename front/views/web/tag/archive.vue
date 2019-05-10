@@ -134,7 +134,7 @@
         height 60px
         overflow hidden
         display flex
-        align-items flex-end
+        align-items center
         justify-content flex-end
         margin 60px 0 40px
 

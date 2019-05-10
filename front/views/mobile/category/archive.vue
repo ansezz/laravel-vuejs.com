@@ -2,11 +2,11 @@
 <template>
     <section class="posts-container">
         <breadcrumb :pages="breadcrumbsData()"/>
-        <div class="container">
+        <div class="mobile-container">
             <div class="post-heading-filters">
                 <div class="post-heading">
                     <div class="user-avatar">
-                      <i class="fa fa-folder-o"></i>
+                      <img src="@/assets/images/icons-category.svg" alt="L-V">
                     </div>
                     <h1 v-if="category">{{category.name}}</h1>
                 </div>
@@ -22,10 +22,12 @@
                 />
             </div>
 
-            <button @click="showMore()"
+            <div class="text-center">
+              <button @click="showMore()" class="button"
                     v-if="hasMorePages && !show_more">
                 {{ $apollo.queries.postsByCategory.loading ? 'Loading ...' : 'Show more'}}
-            </button>
+              </button>
+            </div>
 
             <no-ssr>
                 <infinite-loading
@@ -42,7 +44,7 @@
 
     export default {
         components: {
-            filters: () => import('@/components/shared/partials/elements/filters'),
+            filters: () => import('@/components/mobile/elements/filters'),
             Breadcrumb: () => import('@/components/shared/partials/elements/breadcrumb'),
             ArticleItem: () => import('@/components/shared/partials/elements/article-item')
         },
@@ -130,21 +132,13 @@
 
 <style lang="stylus" scoped>
     .posts-container
-        padding-bottom 120px
+        padding-bottom 80px
 
     .post-heading-filters
         position relative
-        height 60px
-        overflow hidden
-        display flex
-        align-items flex-end
-        justify-content flex-end
-        margin 60px 0 40px
+        margin 20px 0 30px
 
     .post-heading
-        position absolute
-        left 50%
-        transform translateX(-50%)
         text-align center
 
         h1
@@ -156,11 +150,11 @@
 
     .article-grid
         display grid
-        grid-template-columns repeat(4, 1fr)
+        grid-template-columns repeat(1, 1fr)
         grid-gap 40px 10px
 
     .ads
-        width 900px
+        width 300px
         height 250px
         display flex
         align-items center
@@ -169,4 +163,6 @@
         font-size 24px
         color $white
         margin 60px auto
+  .text-center
+    padding-top 30px
 </style>

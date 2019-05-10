@@ -11,14 +11,14 @@
                         <h5 class="name">{{post.user.name}}</h5>
                         <span class="role">Collaborator</span>
                     </div>
-                    <div class="category is-flex" v-if="post.categories[0]">
+                    <div class="date-time">
+                      <i class="fa fa-clock-o"></i>
+                      <span>{{post.time_ago}}</span>
+                    </div>
+                    <!-- <div class="category is-flex" v-if="post.categories[0]">
                         <i class="fa fa-folder-o"></i>
                         <h1>{{ post.categories[0].name }}</h1>
-                    </div>
-                </div>
-                <div class="date-time">
-                    <i class="fa fa-clock-o"></i>
-                    <span>{{post.time_ago}}</span>
+                    </div> -->
                 </div>
             </div>
         </div>
@@ -167,6 +167,8 @@
         font-weight 600
         color #384457
         margin 0 20px 0 10px
+        width 60px
+        overflow hidden
       .role
         font-size 14px
         color rgba(#616d82, .8)
