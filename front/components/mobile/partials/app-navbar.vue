@@ -76,6 +76,7 @@
         watch: {
           $route: function () {
                 this.setSearchVisibility(false)
+                this.menu = false
             }
         },
         methods: {

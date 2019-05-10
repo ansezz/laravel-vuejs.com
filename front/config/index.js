@@ -47,6 +47,10 @@ export const second_menu = [
     {
         name: 'About us',
         url: '/page/about-us',
+    },
+    {
+        name: 'Hire us',
+        url: '/page/hire-us',
     }
 ]
 

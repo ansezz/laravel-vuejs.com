@@ -1,4 +1,9 @@
 - Loading spinner
-- About us mobile 
-- Hire us mobile 
-Hire us
+
+Check Mobile & WEB : 
+  DMCA Policy
+  Privacy Policy
+  Terms and Conditions
+  Contact us
+  About us
+  Hire us
