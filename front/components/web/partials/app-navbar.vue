@@ -23,9 +23,9 @@
 
                 <ul class="navbar-list">
                     <li>
-                        <nuxt-link to="/page/newsletter">
-                            <i class="fa fa-envelope"></i>
-                            <span>Newsletter</span>
+                        <nuxt-link to="/page/hire-us">
+                            <i class="fa fa-briefcase"></i>
+                            <span>Hire Us</span>
                         </nuxt-link>
                     </li>
                     <li v-if="loggedIn && me">

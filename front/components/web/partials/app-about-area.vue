@@ -4,7 +4,7 @@
             <div class="about-us-container">
                 <div class="about-caption">
                     <h1>Who We Are?</h1>
-                    <p>Treehouse brings affordable technology education to people everywhere in order to help them achieve their dreams and change the world.</p>
+                    <p>The mission of Laravel & VueJs web site is to help web professionals up their skill and knowledge of Laravel & VueJs.</p>
                 </div>
                 <div class="about-us-men">
                     <img src="@/assets/images/about-svg.svg" alt="LV">

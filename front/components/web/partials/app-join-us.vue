@@ -3,7 +3,7 @@
         <div class="join-us-box text-center">
             <h3>Join us now!</h3>
             <p>You think you can make it better?</p>
-            <nuxt-link to="/" class="button white-button">Send us your greats</nuxt-link>
+            <nuxt-link to="/page/contact-us" class="button white-button">Send us your greats</nuxt-link>
         </div>
         <div class="join-us-svg">
             <img src="@/assets/images/group.svg" alt="LV">

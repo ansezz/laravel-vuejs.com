@@ -2,11 +2,42 @@
     <section class="app-facts">
         <div class="small-container">
             <div class="simple-heading">
-                <h2 class="text-center">Some Facts..</h2>
-                <p>Treehouse believes in the democratization of technical education. There are currently too many barriers, economical and psychological. Our students learn at their own pace and become job ready within months at a fraction of the cost.</p>
-                <p>We are committed to making education accessible to students of all races, genders, sexual orientations, and socio-economic backgrounds.</p>
+                <h2 class="text-center">Who We Are?</h2>
+                <p>
+                The mission of Laravel & VueJs web site is to help web professionals up their skill and knowledge of Laravel & VueJs.
+                We provide articles and tutorials through our blog, and a weekly newsletter to keep you up-to-date with the best content from the wider Laravel & VueJs community.
+                </p>
+
+                <p>
+                    Our online community has now grown to thousands of developers passionate about Laravel & VueJs. You join us in the following ways:
+                    •  Laravel & VueJs   <a href="https://www.facebook.com/groups/LaravelVueJs/" target="_blank">Facebook group</a>
+                    You can also follow Laravel & VueJs on social media:
+                </p>
+                <ul>
+                    <li><a href="https://www.facebook.com/LaravelVueJs" target="_blank" name="facebook">Facebook</a>
+                    </li>
+                    <li><a href="https://twitter.com/LaravelVueJs" target="_blank" name="Twitter">Twitter</a></li>
+                    <li><a href="https://www.linkedin.com/in/laravel-vuejs/" target="_blank"
+                           name="LinkedIn">LinkedIn</a></li>
+                    <li><a href="http://instagram.com/LaravelVueJs" target="_blank" name="Instagram">Instagram</a></li>
+                </ul>
+
+                <h2 class="text-center">Advertise with us</h2>
+                <p>
+                We offer a great way to expose your brand to web development professionals by offering a variety of advertising options across our newsletter and highly active social media assets.
+                Email contact@laravel-vuejs.com to inquire about rates.
+                </p>
+                <h2 class="text-center">Contribute to the blog</h2>
+                <p>
+                We're always on the lookout for new contributors to the Laravel & VueJs blog to ensure our articles represent a diverse set of skills and experiences.
+                For authors, we can offer you a great way to expose your article to thousands of Laravel & VueJs enthusiasts from around the world, in addition to powerful backlinks to your own web assets. If you're interested in publishing an article, get in touch at contact@laravel-vuejs.com .
+                </p>
+                    <h2 class="text-center">Laravel & VueJs freelance and remote jobs</h2>
+                <p>
+                    Are you looking for (or offering) Laravel & VueJs freelance projects or remote jobs? Join and post for free in our Laravel & VueJs - <a href="https://www.facebook.com/groups/Laravel.Vuejs.Jobs" target="_blank">Freelance & Remote Jobs Group</a>
+                </p>
             </div>
-            <ul class="facts-grid">
+            <ul class="facts-grid" v-if="false">
                 <li class="fact">
                     <div class="fact-img">
                         <img src="@/assets/images/fac-1.png" alt="LV">
@@ -45,9 +76,9 @@
                 </li>
             </ul>
             <div class="links-action">
-                <nuxt-link to="/" class="button">jobs offers</nuxt-link>
+                <a href="https://www.facebook.com/groups/Laravel.Vuejs.Jobs" class="button" target="_blank">Jobs offers</a>
                 <span>Or</span>
-                <nuxt-link to="/" class="button">our news feed</nuxt-link>
+                <nuxt-link to="/" class="button">Our news feed</nuxt-link>
             </div>
         </div>
     </section>
