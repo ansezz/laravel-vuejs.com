@@ -104,10 +104,10 @@ export const social_media = [
         title: "Telegram",
         href: "http://t.me/LaravelVueJs",
         class: "paper-plane"
-    },
+    }/*,
     {
         title: "Rss",
         href: "https://www.laravel-vuejs.com/feed/",
         class: "rss"
-    },
+    },*/
 ]
