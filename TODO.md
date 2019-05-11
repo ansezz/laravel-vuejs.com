@@ -1,4 +1,4 @@
-- Loading spinner
+- Loading spinner in  forms
 
 Check Mobile & WEB : 
   DMCA Policy
