@@ -108,7 +108,7 @@
 
 <style lang="stylus" scoped>
     .dmca-container
-        padding-bottom 120px
+        padding-bottom 30px
     header
         text-align center
         margin 60px 0 30px
@@ -118,4 +118,10 @@
             color $tertiary
             margin 10px 0
             line-height 1.4
+    .terms-desc
+      p
+        font-size 18px
+        line-height 28px
+        color #616d82
+        margin-bottom 20px
 </style>
