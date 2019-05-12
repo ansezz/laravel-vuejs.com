@@ -13,7 +13,7 @@
                     •  Laravel & VueJs   <a href="https://www.facebook.com/groups/LaravelVueJs/" target="_blank">Facebook group</a>
                     You can also follow Laravel & VueJs on social media:
                 </p>
-                <ul>
+                <ul class="social-media">
                     <li><a href="https://www.facebook.com/LaravelVueJs" target="_blank" name="facebook">Facebook</a>
                     </li>
                     <li><a href="https://twitter.com/LaravelVueJs" target="_blank" name="Twitter">Twitter</a></li>
@@ -119,4 +119,17 @@
             display block
             margin 0 20px
             line-height 1.56
+    .social-media
+      display flex
+      align-items center
+      margin-bottom 20px
+      padding-bottom 20px
+      border-bottom 1px solid #EEE
+      li
+        padding-right 20px
+        &:last-child
+          padding-right 0
+        a
+          font-size 16px
+          color #311d5a
 </style>
