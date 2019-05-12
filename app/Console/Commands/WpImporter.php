@@ -93,8 +93,7 @@ class WpImporter extends Command
 
                     $excerpt = trim((string)$e_excerpt->encoded);
 
-                    /** @var Post $post */
-                    $post = Post::create([
+                    $post_data = [
                         'user_id' => 1,
                         'title' => (string)$item->title,
                         'slug' => (string)$wp->post_name,
@@ -105,9 +104,11 @@ class WpImporter extends Command
                         'type' => 1,
                         'status' => 1,
                         'comment_status' => 1,
-                        'created_at' => $created_at,
+                        'created_at' => $created_at->year < 0 ? Carbon::now() : $created_at,
                         'updated_at' => Carbon::now(),
-                    ]);
+                    ];
+                    /** @var Post $post */
+                    $post = Post::create($post_data);
 
                     preg_match('/<img.+src=[\'"](?P<src>.+?)[\'"].*>/i', $content, $image);
 
@@ -134,6 +135,8 @@ class WpImporter extends Command
 
             }
         } catch (\Exception $exception) {
+            var_dump($post_data);
+            var_dump($item);
             $this->error($exception->getMessage());
         }
 
