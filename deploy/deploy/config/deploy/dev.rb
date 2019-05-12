@@ -14,4 +14,4 @@ role :server, %w{dev.laravel-vuejs.com}
 
 set :deploy_to, "/var/www/dev.laravel-vuejs.com/web"
 
-set :linked_files, %w{.env front/.env public/blog/wp-config.php}
+set :linked_files, %w{.env front/.env}

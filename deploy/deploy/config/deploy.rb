@@ -115,10 +115,10 @@ namespace :app do
   task :build do
     on roles(:server) do
       within release_path do
-        execute "cd #{release_path}/back && composer install --prefer-dist --no-interaction --optimize-autoloader"
-        #execute "chmod 777 -R #{release_path}/storage" execute "cd #{release_path}/back && php artisan migrate:fresh --seed"
-        execute "cd #{release_path}/back && php artisan migrate"
-        execute "cd #{release_path}/back && php artisan storage:link"
+        execute "cd #{release_path} && composer install --prefer-dist --no-interaction --optimize-autoloader"
+        #execute "chmod 777 -R #{release_path}/storage" execute "cd #{release_path} && php artisan migrate:fresh --seed"
+        execute "cd #{release_path} && php artisan migrate"
+        execute "cd #{release_path} && php artisan storage:link"
       end
     end
   end
@@ -138,13 +138,13 @@ namespace :app do
 namespace :npm do
   task :install do
     on roles(:server) do
-        execute "cd #{release_path}/back && npm install"
+        execute "cd #{release_path} && npm install"
         execute "cd #{release_path}/front && npm install"
     end
   end
   task :build do
     on roles(:server) do
-        execute "cd #{release_path}/back && npm run dev"
+        execute "cd #{release_path} && npm run dev"
         execute "cd #{release_path}/front && npm run build"
     end
   end end
