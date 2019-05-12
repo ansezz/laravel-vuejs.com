@@ -94,6 +94,8 @@
 <style lang="stylus" scoped>
     .app-facts
         padding 120px 0
+        @media (max-width 768px)
+          padding 60px 0
     .facts-grid
         display grid
         grid-template-columns repeat(4, 1fr)
@@ -113,6 +115,10 @@
         display flex
         align-items center
         justify-content center
+        @media (max-width 768px)
+          flex-direction column
+          .button
+            width 100%
         span
             font-size 18px
             color #616d82

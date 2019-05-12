@@ -24,11 +24,17 @@
 <style lang="stylus" scoped>
     .about-us-area
         background-color #e5e7e6
+        @media (max-width 768px)
+          padding 20px 0
         .about-us-container
             display flex
             align-items center
+            @media (max-width 768px)
+              flex-direction column
             .about-caption
                 width 450px
+                @media (max-width 768px)
+                  width 100%
                 h1
                     color #384457
                     font-size 28px
@@ -40,6 +46,8 @@
                     margin-bottom 0
             .about-us-men
                 width calc(100% - 450px)
+                @media (max-width 768px)
+                  width 100%
                 img
                     width 100%
 </style>
