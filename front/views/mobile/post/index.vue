@@ -282,9 +282,13 @@
     padding 35px 0 60px
 
  .share-links
+    position fixed
+    bottom 0
+    width 100%
     display grid
     grid-template-columns repeat(3, 1fr)
-    margin 0 -30px 40px
+    margin 0 -20px 0
+    z-index 1
     & >>>
       li
         display flex
