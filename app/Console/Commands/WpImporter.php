@@ -125,10 +125,10 @@ class WpImporter extends Command
 
                 echo '>>>>>>>>>>>>>>>>>>>>> DONE ';
 
-                Storage::disk('local')->move(
+                /*Storage::disk('local')->move(
                     'wp-importer' . DIRECTORY_SEPARATOR . 'in-progress' . DIRECTORY_SEPARATOR . $this->file_name,
                     'wp-importer' . DIRECTORY_SEPARATOR . 'done' . DIRECTORY_SEPARATOR . $this->file_name
-                );
+                );*/
 
             }
         } catch (\Exception $exception) {
