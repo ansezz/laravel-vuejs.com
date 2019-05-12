@@ -76,8 +76,8 @@ class WpImporter extends Command
                         }
                     }
 
-                    $e_content = $item->children("content", true);
-                    $e_excerpt = $item->children("excerpt", true);
+                    $e_content = $item->children('content', true);
+                    $e_excerpt = $item->children('excerpt', true);
 
                     $wp = $item->children("wp", true);
 
@@ -89,17 +89,19 @@ class WpImporter extends Command
 
                     $created_at = new Carbon($wp->post_date_gmt);
 
-                    $wp = $item->children("wp", true);
+                    $wp = $item->children('wp', true);
 
                     $content = (string)$e_content->encoded;
                     $content = str_replace(array('[ad_1]', '[ad_2]', '[ad_3]', '#9b59b6', '#408bb7', '#b70900'), array('', '', '', '#63F9E6', '#6936D3', '#384457'), $content);
+
+                    $excerpt = (string)$e_excerpt->encoded;
 
                     /** @var Post $post */
                     $post = Post::create([
                         'user_id' => 1,
                         'title' => (string)$item->title,
                         'slug' => (string)$wp->post_name,
-                        'excerpt' => (string)$e_excerpt->encoded,
+                        'excerpt' => empty($excerpt) ? strip_tags(substr($content, 0, 200)) : $excerpt,
                         'content' => $content,
                         'views' => $wp_postmeta['tie_views'] ? ((int)$wp_postmeta['tie_views'] + 8000) : random_int(500, 8000),
                         'source' => $wp_postmeta['original_link'] ?? null,
