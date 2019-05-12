@@ -58,7 +58,18 @@ class WpImporter extends Command
 
                 foreach ($xml->channel->item as $item) {
 
-                    $this->info($item->title);
+                    $wp = $item->children('wp', true);
+
+                    $slug = trim((string)$wp->post_name);
+
+                    $exist = Post::whereSlug($slug)->count();
+
+                    if ($exist) {
+                        $this->info('#Exist :' . $item->title);
+                        continue;
+                    }
+
+                    $this->info('#New :' . $item->title);
 
 
                     $categories = [];
@@ -76,8 +87,6 @@ class WpImporter extends Command
                     $e_content = $item->children('content', true);
                     $e_excerpt = $item->children('excerpt', true);
 
-                    $wp = $item->children('wp', true);
-
 
                     $wp_postmeta = [];
                     foreach ($wp->postmeta as $value) {
@@ -93,11 +102,13 @@ class WpImporter extends Command
 
                     $excerpt = trim((string)$e_excerpt->encoded);
 
+                    $excerpt = empty($excerpt) ? trim(strip_tags(substr($content, 0, 400))) : $excerpt;
+
                     $post_data = [
                         'user_id' => 1,
                         'title' => (string)$item->title,
-                        'slug' => (string)$wp->post_name,
-                        'excerpt' => empty($excerpt) ? trim(strip_tags(substr($content, 0, 400))) : $excerpt,
+                        'slug' => $slug,
+                        'excerpt' => mb_convert_encoding($excerpt, 'UTF-8'),
                         'content' => $content,
                         'views' => $wp_postmeta['tie_views'] ? ((int)$wp_postmeta['tie_views'] + 8000) : random_int(500, 8000),
                         'source' => $wp_postmeta['original_link'] ?? null,
