@@ -76,7 +76,7 @@ class WpImporter extends Command
                     $e_content = $item->children('content', true);
                     $e_excerpt = $item->children('excerpt', true);
 
-                    $wp = $item->children("wp", true);
+                    $wp = $item->children('wp', true);
 
 
                     $wp_postmeta = [];
