@@ -145,8 +145,8 @@ namespace :npm do
   end
   task :build do
     on roles(:server) do
-        execute "cd #{release_path} && npm run dev"
-        execute "cd #{release_path}/front && npm run build && npm run build-category && npm run build-wp-importer"
+        execute "cd #{release_path} && npm run dev && npm run build-category && npm run build-wp-importer"
+        execute "cd #{release_path}/front && npm run build"
     end
   end end
 
