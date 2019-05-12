@@ -68,7 +68,6 @@ set :laravel_ensure_acl_paths_exist, true
 # Set ACLs for the paths in laravel_acl_paths?
 set :laravel_set_acl_paths, true
 
-# Run the database migrations. invoke 'laravel:migrate'
 
 
 namespace :conf do
@@ -115,7 +114,7 @@ namespace :app do
   task :build do
     on roles(:server) do
       within release_path do
-        execute "cd #{release_path} && composer install --prefer-dist --no-interaction --optimize-autoloader"
+        #execute "cd #{release_path} && composer install --prefer-dist --no-interaction --optimize-autoloader"
         #execute "chmod 777 -R #{release_path}/storage" execute "cd #{release_path} && php artisan migrate:fresh --seed"
         execute "cd #{release_path} && php artisan migrate"
         execute "cd #{release_path} && php artisan storage:link"
@@ -139,13 +138,15 @@ namespace :npm do
   task :install do
     on roles(:server) do
         execute "cd #{release_path} && npm install"
+        execute "cd #{release_path}/nova-components/nova-categories-field && npm install"
+        execute "cd #{release_path}/nova-components/nova-components/WpImporter && npm install"
         execute "cd #{release_path}/front && npm install"
     end
   end
   task :build do
     on roles(:server) do
         execute "cd #{release_path} && npm run dev"
-        execute "cd #{release_path}/front && npm run build"
+        execute "cd #{release_path}/front && npm run build && npm run build-category && npm run build-wp-importer"
     end
   end end
 
@@ -183,7 +184,7 @@ namespace :pm2 do
 #  klass: Slackistrano::CustomMessaging, channel: '#deploy', webhook: 'https://hooks.slack.com/services/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'
 #}
 
-#after "composer:run", "app:build"
+after "composer:run", "app:build"
 
 after "composer:run", "app:symlink"
 
