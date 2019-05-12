@@ -111,9 +111,11 @@ class WpImporter extends Command
 
                     preg_match('/<img.+src=[\'"](?P<src>.+?)[\'"].*>/i', $content, $image);
 
+
                     try {
-                        $post->addMediaFromUrl($image['src'])
-                            ->toMediaCollection(Post::MEDIA_COLLECTION);
+                        if (!empty($image) && isset($image['src'])) {
+                            $post->addMediaFromUrl($image['src'])->toMediaCollection(Post::MEDIA_COLLECTION);
+                        }
                     } catch (FileCannotBeAdded $e) {
                         $this->warn($e->getMessage());
                     }
