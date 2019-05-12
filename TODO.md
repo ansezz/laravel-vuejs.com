@@ -1,13 +1,24 @@
-# TODO
+# Laravel + VueJs, NuxtJs + GraphQl
+ 
+> ## Back-End
+- [ ] NewsLetter
+- [ ] Website Setting
+- [ ] Post types ?
 
-- [ ] Loading spinner in  forms
-
-- [ ] Check Mobile & WEB : 
-  - [ ] DMCA Policy
-  - [ ] Privacy Policy
-  - [ ] Terms and Conditions
-  - [ ] Contact us
-  - [ ] About us
-  - [ ] Hire us
-  
-  
+> ## API 
+- [X] Single post
+- [ ] Website Setting
+- [X] Featured posts
+- [ ] Post by category
+- [ ] Post by tag
+- [ ] Post by author
+- [ ] Posts with pagination and filter
+- [ ] Search
+- [ ] NewsLetter
+- [ ] Profile  
+- [ ] Auth 
+    - [ ] Login
+    - [ ] Logout
+    - [ ] Register
+    - [ ] Forget password
+    - [ ] reset password
