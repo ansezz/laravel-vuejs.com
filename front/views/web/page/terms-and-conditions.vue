@@ -78,7 +78,7 @@
 
 <style lang="stylus" scoped>
     .container
-        padding-bottom 120px
+        padding-bottom 30px
 
     header
         text-align center
