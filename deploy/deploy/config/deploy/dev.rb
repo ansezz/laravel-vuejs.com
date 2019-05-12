@@ -6,7 +6,7 @@ ask(:branch, 'blog')
 
 set :stage, "staging"
 
-set :env, "develop"
+set :env, "dev"
 
 server 'dev.laravel-vuejs.com', user: fetch(:user), roles: %w{app}
 
