@@ -45,7 +45,7 @@ class WpImporter extends Command
         try {
             ini_set('memory_limit', '-1');
 
-            echo '>>>>>>>>>>> START ';
+            $this->info('>>>>>>>>>>> START ');
             /** @var string $path */
             // $path = storage_path('app' . DIRECTORY_SEPARATOR . 'wp-importer' . DIRECTORY_SEPARATOR . 'in-progress' . DIRECTORY_SEPARATOR . $this->file_name);
 
@@ -58,12 +58,9 @@ class WpImporter extends Command
 
                 foreach ($xml->channel->item as $item) {
 
-                    /*foreach ($wp as $key => $value) {
-                        echo (string)$key;
-                        echo (string)$value;
-                    }*/
+                    $this->info($item->title);
 
-                    echo (string)$item->title . ' ';
+
                     $categories = [];
                     $tags = [];
                     foreach ($item->category as $cat) {
@@ -94,14 +91,14 @@ class WpImporter extends Command
                     $content = (string)$e_content->encoded;
                     $content = str_replace(array('[ad_1]', '[ad_2]', '[ad_3]', '#9b59b6', '#408bb7', '#b70900'), array('', '', '', '#63F9E6', '#6936D3', '#384457'), $content);
 
-                    $excerpt = (string)$e_excerpt->encoded;
+                    $excerpt = trim((string)$e_excerpt->encoded);
 
                     /** @var Post $post */
                     $post = Post::create([
                         'user_id' => 1,
                         'title' => (string)$item->title,
                         'slug' => (string)$wp->post_name,
-                        'excerpt' => empty($excerpt) ? strip_tags(substr($content, 0, 200)) : $excerpt,
+                        'excerpt' => empty($excerpt) ? trim(strip_tags(substr($content, 0, 400))) : $excerpt,
                         'content' => $content,
                         'views' => $wp_postmeta['tie_views'] ? ((int)$wp_postmeta['tie_views'] + 8000) : random_int(500, 8000),
                         'source' => $wp_postmeta['original_link'] ?? null,
@@ -118,14 +115,15 @@ class WpImporter extends Command
                         $post->addMediaFromUrl($image['src'])
                             ->toMediaCollection(Post::MEDIA_COLLECTION);
                     } catch (FileCannotBeAdded $e) {
-                        echo $e->getMessage();
+                        $this->warn($e->getMessage());
                     }
 
                     $post->attachTags($tags);
                     $post->attachCategories($categories);
                 }
 
-                echo '>>>>>>>>>>>>>>>>>>>>> DONE ';
+
+                $this->info('>>>>>>>>>>>>>>>>>>>>> DONE ');
 
                 /*Storage::disk('local')->move(
                     'wp-importer' . DIRECTORY_SEPARATOR . 'in-progress' . DIRECTORY_SEPARATOR . $this->file_name,
@@ -134,7 +132,7 @@ class WpImporter extends Command
 
             }
         } catch (\Exception $exception) {
-            echo $exception->getMessage();
+            $this->error($exception->getMessage());
         }
 
     }

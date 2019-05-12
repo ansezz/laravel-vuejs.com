@@ -139,7 +139,7 @@ namespace :npm do
     on roles(:server) do
         execute "cd #{release_path} && npm install"
         execute "cd #{release_path}/nova-components/nova-categories-field && npm install"
-        execute "cd #{release_path}/nova-components/nova-components/WpImporter && npm install"
+        execute "cd #{release_path}/nova-components/WpImporter && npm install"
         execute "cd #{release_path}/front && npm install"
     end
   end
