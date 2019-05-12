@@ -159,18 +159,16 @@
                     align-items center
                     flex-wrap wrap
                     padding 0 32px 30px
-
                     li
-                        padding-right 15px
                         margin-bottom 5px
+                        text-align center
+                        width calc(100% / 5)
 
                         &:last-child
                             padding-right 0
 
                         a
                             display block
-                            width 16px
-                            height 16px
                             font-size 17px
                             color #311d5a
 </style>

@@ -1,7 +1,7 @@
 <template>
     <footer class="footer">
         <div class="mobile-container">
-            <ul class="footer-menu">
+            <!-- <ul class="footer-menu">
                 <li class="parent">
                     <nuxt-link to="/">Blog</nuxt-link>
                     <ul>
@@ -13,12 +13,12 @@
                 <!--<li class="parent">
                     <nuxt-link to="/">Jobs</nuxt-link>
                 </li>-->
-            </ul>
-            <ul class="main-menu">
+            <!-- </ul> -->
+            <!-- <ul class="main-menu">
                 <li v-for="(item ,key) in second_menu" :key="key">
                     <nuxt-link :to="item.url">{{item.name}}</nuxt-link>
-                </li>
-            </ul>
+                </li> -->
+            <!--</ul> -->
             <div class="sign-up">
                 <nuxt-link to="/" class="button has-icon">
                     <i class="fa fa-user"></i>
