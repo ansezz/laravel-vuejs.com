@@ -39,7 +39,7 @@ export default {
     .app-newsletter
         padding 62px 0 70px
     .newsletter-box
-        width 500px
+        width 600px
         margin auto
         header
             text-align center
