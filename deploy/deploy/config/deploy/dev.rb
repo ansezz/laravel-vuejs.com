@@ -1,20 +1,17 @@
+# "Enter you user in the server (:user@server.leventures.com)"
+ask(:user, 'root')
 
-#set :user, "#{`whoami`.strip}"
+# "Enter branch name (develop by default): "
+ask(:branch, 'blog')
 
-set :user, "laravel-vuejs"
+set :stage, "staging"
 
-set :username, "laravel-vuejs"
+set :env, "develop"
 
-set :branch, "blog"
+server 'dev.laravel-vuejs.com', user: fetch(:user), roles: %w{app}
 
-set :domain, "newdev.laravel-vuejs.com"
+role :server, %w{dev.laravel-vuejs.com}
 
-server '207.180.198.220', user: fetch(:user), roles: %w{app}
+set :deploy_to, "/var/www/dev.laravel-vuejs.com/web"
 
-role :server, %w{207.180.198.220}
-
-set :deploy_to, "/home/#{fetch(:username)}/domains/#{fetch(:domain)}/public_html"
-
-set :tmp_dir, "/home/#{fetch(:username)}/tmp"
-
-set :linked_files, %w{back/.env front/.env }
+set :linked_files, %w{.env front/.env public/blog/wp-config.php}
