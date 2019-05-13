@@ -65,11 +65,9 @@
     width 100%
     background-color rgba($tertiary, .05)
     background-size 50%
-
-    &::before
-      display block
-      padding-top 54%
-      content ''
+    &::before {
+  padding-top: 42.857143%
+}
 
     img
       position absolute

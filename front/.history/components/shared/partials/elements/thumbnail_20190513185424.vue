@@ -1,7 +1,7 @@
 <template>
   <nuxt-link :to="to" class="article-image" v-lazy-container="{ selector: 'img' }">
     <img v-if="src" :data-src="src" :alt="alt">
-    <span class="post-loader">
+    <span class="post-loader is-absolute:center">
       <Loader/>
     </span>
     <span class="post-error"></span>
@@ -37,7 +37,6 @@
     position absolute
     top 50%
     left 50%
-    transform translate3d(-50%, -50%, 0) scale(.5)
 
   .post-error
     position absolute
@@ -63,13 +62,9 @@
     overflow hidden
     padding 0
     width 100%
+    height 136px
     background-color rgba($tertiary, .05)
     background-size 50%
-
-    &::before
-      display block
-      padding-top 54%
-      content ''
 
     img
       position absolute

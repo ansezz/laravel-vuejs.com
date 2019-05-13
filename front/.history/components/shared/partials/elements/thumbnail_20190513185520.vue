@@ -63,13 +63,9 @@
     overflow hidden
     padding 0
     width 100%
+    height 136px
     background-color rgba($tertiary, .05)
     background-size 50%
-
-    &::before
-      display block
-      padding-top 54%
-      content ''
 
     img
       position absolute
