@@ -68,8 +68,9 @@
 
     &::before
       display block
-      padding-top 54%
       content ''
+
+    padding-top 54%
 
     img
       position absolute

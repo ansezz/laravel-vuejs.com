@@ -2,7 +2,10 @@
   <nuxt-link :to="to" class="article-image" v-lazy-container="{ selector: 'img' }">
     <img v-if="src" :data-src="src" :alt="alt">
     <span class="post-loader">
-      <Loader/>
+      <span class="sk-cube1 sk-cube"></span>
+      <span class="sk-cube2 sk-cube"></span>
+      <span class="sk-cube4 sk-cube"></span>
+      <span class="sk-cube3 sk-cube"></span>
     </span>
     <span class="post-error"></span>
   </nuxt-link>
@@ -11,9 +14,6 @@
 <script>
   export default {
     name: "Thumbnail",
-    components: {
-      Loader: () => import("./loader")
-    },
     props: {
       to: [String, Object],
       paramValue: {
@@ -35,9 +35,65 @@
 <style lang="stylus" scoped>
   .post-loader
     position absolute
-    top 50%
-    left 50%
-    transform translate3d(-50%, -50%, 0) scale(.5)
+    width 30px
+    height 30px
+    transition opacity .25s ease-in-out
+    transform rotateZ(45deg)
+
+    .sk-cube
+      position relative
+      float left
+      width 50%
+      height 50%
+      transform scale(1.1)
+
+      &:before
+        position absolute
+        top 0
+        left 0
+        width 100%
+        height 100%
+        background-color rgba(56, 68, 87, .5)
+        content ''
+        transform-origin 100% 100%
+        animation sk-foldCubeAngle 2.4s infinite linear both
+
+      &.sk-cube2
+        transform scale(1.1) rotateZ(90deg)
+
+        &:before
+          animation-delay .3s
+
+      &.sk-cube3
+        transform scale(1.1) rotateZ(180deg)
+
+        &:before
+          animation-delay .6s
+
+      &.sk-cube4
+        transform scale(1.1) rotateZ(270deg)
+
+        &:before
+          animation-delay .9s
+
+  @keyframes sk-foldCubeAngle
+    0%
+    10%
+      opacity 0
+      transform perspective(140px) rotateX(-180deg)
+      -webkit-transform perspective(140px) rotateX(-180deg)
+
+    25%
+    75%
+      opacity 1
+      transform perspective(140px) rotateX(0)
+      -webkit-transform perspective(140px) rotateX(0)
+
+    90%
+    100%
+      opacity 0
+      transform perspective(140px) rotateY(180deg)
+      -webkit-transform perspective(140px) rotateY(180deg)
 
   .post-error
     position absolute
@@ -63,13 +119,9 @@
     overflow hidden
     padding 0
     width 100%
+    height 136px
     background-color rgba($tertiary, .05)
     background-size 50%
-
-    &::before
-      display block
-      padding-top 54%
-      content ''
 
     img
       position absolute

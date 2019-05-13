@@ -67,9 +67,7 @@
     background-size 50%
 
     &::before
-      display block
       padding-top 54%
-      content ''
 
     img
       position absolute

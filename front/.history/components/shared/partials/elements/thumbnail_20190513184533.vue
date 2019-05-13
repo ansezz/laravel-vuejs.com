@@ -1,9 +1,7 @@
 <template>
   <nuxt-link :to="to" class="article-image" v-lazy-container="{ selector: 'img' }">
     <img v-if="src" :data-src="src" :alt="alt">
-    <span class="post-loader">
-      <Loader/>
-    </span>
+    <span class="post-loader"></span>
     <span class="post-error"></span>
   </nuxt-link>
 </template>
@@ -12,7 +10,7 @@
   export default {
     name: "Thumbnail",
     components: {
-      Loader: () => import("./loader")
+      loader: () => require("./loader")
     },
     props: {
       to: [String, Object],
@@ -35,9 +33,9 @@
 <style lang="stylus" scoped>
   .post-loader
     position absolute
-    top 50%
-    left 50%
-    transform translate3d(-50%, -50%, 0) scale(.5)
+    width 30px
+    height 30px
+    transition opacity .25s ease-in-out
 
   .post-error
     position absolute
@@ -63,13 +61,9 @@
     overflow hidden
     padding 0
     width 100%
+    height 136px
     background-color rgba($tertiary, .05)
     background-size 50%
-
-    &::before
-      display block
-      padding-top 54%
-      content ''
 
     img
       position absolute
