@@ -98,10 +98,10 @@ module.exports = {
         link: [
             {rel: "icon", type: "image/x-icon", href: "/favicon.ico"},
             {rel: "stylesheet", href: "https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"}
-        ],
-        script: [
-            {src: "https://code.jquery.com/jquery-1.12.4.min.js"}
         ]
+        /*,script: [
+            {src: "https://code.jquery.com/jquery-1.12.4.min.js"}
+        ]*/
     },
     /*
      ** Customize the progress bar color
@@ -157,8 +157,8 @@ module.exports = {
         {src: "~/plugins/vee-validate", ssr: false},
         {src: "~/plugins/lazyload", ssr: false},
         {src: '~/plugins/vue-tags-input', ssr: false},
-        {src: '~/plugins/bootstrap.min.js', ssr: false},
         {src: '~/plugins/infinite-loading', ssr: false}
+        /*,{src: '~/plugins/bootstrap.min.js', ssr: false}*/
     ],
 
     css: [
