@@ -5,7 +5,7 @@
       </header>
     <main class="article-main">
       <nuxt-link :to="to">
-        <h3 class="article-title" v-html="truncate(title, 55)"/>
+        <h3 class="article-title" v-html="truncate(title, 120)"/>
       </nuxt-link>
       <!-- <p v-if="description" class="article-description" v-html="truncate(description, 60)"/> -->
     </main>

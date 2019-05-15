@@ -22,7 +22,7 @@
     </div>
     <div class="single-post-container">
       <div class="post-content">
-        <h1 class="text-center">{{ post.title.substring(0, 45) }}</h1>
+        <h1 class="text-center">{{ post.title }}</h1>
         <!--<p>{{ post.excerpt }}</p>-->
         <p>Ah, those warm summer months are the best, aren’t they? And not just because they’re synonymous with lounging poolside or trekking down to the river with family and friends. There’s just something about this time of year that makes it perfect for setting and accomplishing goals, or tackling that special project that’s been at the back of your mind.</p>
         <p>I don’t know if it’s the heat, or the long days, or maybe just that extra touch of playfulness that seems to tickle folks between Spring and Fall. But there’s just something about the summertime that is perfect for finally cleaning out the garage, or taking a class, or picking up a new hobby.</p>
@@ -143,7 +143,7 @@
             link: '/'
           },
           {
-            name: this.post.title.substring(0, 45)
+            name: this.post.title
           }
         ]
       }

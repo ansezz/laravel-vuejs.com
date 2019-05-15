@@ -1,29 +1,27 @@
 <template>
-    <component :is="this.$store.state.platform"/>
+  <component :is="this.$store.state.platform"/>
 </template>
 
 <script>
-    import seo from '@/mixins/seo'
+  import seo from '@/mixins/seo'
 
-    export default {
-        mixins: [seo],
-        layout: ({store}) => store.state.platform,
-        computed: {
-            seo() {
-                return {
-                    title: '🚀 Dmca Policy ',
-                    description: 'Dmca Policy page',
-                    image: '',
-                    url: 'https://laravel-vuejs.com/dmca-policy',
-                    type: 'website',
-                }
-            },
-        },
-        components: {
-            mobile: () => import(`~/views/mobile/page/dmca-policy`),
-            web: () => import(`~/views/web/page/dmca-policy`)
+  export default {
+    layout: ({store}) => store.state.platform,
+    mixins: [seo],
+    computed: {
+      seo() {
+        return {
+          title: '🚀 Dmca Policy ',
+          description: 'Dmca Policy page',
+          type: 'website',
         }
+      },
+    },
+    components: {
+      mobile: () => import(`~/views/mobile/page/dmca-policy`),
+      web: () => import(`~/views/web/page/dmca-policy`)
     }
+  }
 </script>
 
 <style>

@@ -3,11 +3,22 @@
 </template>
 
 <script>
+  import seo from '@/mixins/seo'
+
   export default {
+    mixins: [seo],
+
     layout: ({store}) => store.state.platform,
 
     middleware: ["tag"],
     computed: {
+      seo() {
+        return {
+          title: this.tag.name,
+          description: this.tag.name,
+          type: 'website',
+        }
+      },
       tag() {
         return this.$store.state.tag.tag
       }

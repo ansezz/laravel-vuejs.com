@@ -31,7 +31,7 @@
                         <!-- <li><a href="#"><img src="@/assets/images/icons-star-2.svg" alt="LV"></a></li> -->
                     </div>
                 </ul>
-                <h1 class="text-center">{{ post.title.substring(0, 45) }}</h1>
+                <h1 class="text-center">{{ post.title }}</h1>
                 <p>{{ post.excerpt }}</p>
                 <div class="image-container">
                     <div class="thumbnail-area">
@@ -136,7 +136,7 @@
                         link: this.post.categories[0] ? {name: 'category-slug', params : {slug : this.post.categories[0].slug}} : null
                     },
                     {
-                        name: this.post.title.substring(0, 35)
+                        name: this.post.title
                     }
                 ]
             }
