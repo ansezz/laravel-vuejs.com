@@ -35,6 +35,7 @@ class Post extends Model implements HasMedia, Feedable
         'featured',
         'comment_status',
         'source',
+        'views',
         'user_id',
         'created_at',
         'updated_at',
