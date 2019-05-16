@@ -31,7 +31,7 @@
     "@nuxtjs/moment": "^1.1.0",
     "@nuxtjs/pwa": "^2.6.0",
     "@nuxtjs/sitemap": "^0.2.0",
-    "@nuxtjs/toast": "^3.0.2",
+    "@nuxtjs/toast": "^3.1.0",
     "@nuxtjs/webpackmonitor": "^0.1.0",
     "apollo-boost": "^0.1.27",
     "apollo-cache-inmemory": "^1.4.2",
@@ -54,9 +54,9 @@
     "vue-social-sharing": "^2.4.2"
   },
   "devDependencies": {
-    "core-js": "^2.6.3",
     "@babel/plugin-proposal-nullish-coalescing-operator": "^7.2.0",
     "babel-eslint": "^10.0.1",
+    "core-js": "^2.6.3",
     "eslint": "^5.13.0",
     "eslint-friendly-formatter": "^4.0.1",
     "eslint-loader": "^2.1.2",
@@ -67,6 +67,6 @@
     "stylus": "^0.54.5",
     "stylus-loader": "^3.0.2",
     "vue-lazyload": "^1.2.6",
-    "webpack-bundle-analyzer": "^3.0.3"
+    "webpack-bundle-analyzer": "^3.3.2"
   }
 }

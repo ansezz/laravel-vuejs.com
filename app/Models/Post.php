@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 use GraphQL\Type\Definition\ResolveInfo;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use LaravelVueJs\Traits\HasCategories;
+use Spatie\Feed\Feedable;
+use Spatie\Feed\FeedItem;
 use Spatie\MediaLibrary\HasMedia\HasMedia;
 use Spatie\MediaLibrary\HasMedia\HasMediaTrait;
 use Spatie\Sluggable\HasSlug;
@@ -14,7 +16,7 @@ use Spatie\Sluggable\SlugOptions;
 use Spatie\MediaLibrary\Models\Media;
 use Spatie\Tags\HasTags;
 
-class Post extends Model implements HasMedia
+class Post extends Model implements HasMedia, Feedable
 {
     use HasSlug, HasMediaTrait, HasTags, HasCategories;
 
@@ -203,6 +205,20 @@ class Post extends Model implements HasMedia
     public static function getTagClassName(): string
     {
         return Tag::class;
+    }
+
+    /**
+     * @return array|FeedItem
+     */
+    public function toFeedItem()
+    {
+        return FeedItem::create()
+            ->id($this->id)
+            ->title($this->title)
+            ->summary($this->excerpt)
+            ->updated($this->updated_at)
+            ->link($this->url)
+            ->author($this->user->name);
     }
 }
 

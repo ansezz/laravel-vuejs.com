@@ -4,12 +4,14 @@ namespace LaravelVueJs\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Spatie\EloquentSortable\SortableTrait;
+use Spatie\Feed\Feedable;
+use Spatie\Feed\FeedItem;
 use Spatie\Sluggable\HasSlug;
 use Spatie\Sluggable\SlugOptions;
 use Illuminate\Database\Eloquent\Collection as DbCollection;
 use Illuminate\Database\Eloquent\Builder;
 
-class Category extends Model
+class Category extends Model implements Feedable
 {
     use SortableTrait, HasSlug;
 
@@ -70,9 +72,9 @@ class Category extends Model
 
         if (!$category) {
             $category = static::create([
-                'name'        => $name,
+                'name' => $name,
                 'description' => $name,
-                'type'        => $type,
+                'type' => $type,
             ]);
         }
 
@@ -104,5 +106,30 @@ class Category extends Model
     public function posts()
     {
         return $this->morphedByMany(Post::class, 'categorizable');
+    }
+
+    /**
+     * Get the Post Url.
+     *
+     * @return string
+     */
+    public function getUrlAttribute(): string
+    {
+        return url('/category/' . $this->slug);
+    }
+
+
+    /**
+     * @return array|FeedItem
+     */
+    public function toFeedItem()
+    {
+        return FeedItem::create()
+            ->id($this->id)
+            ->title($this->name)
+            ->summary($this->description ?? $this->name)
+            ->updated($this->updated_at)
+            ->link($this->url)
+            ->author(config('app.name'));
     }
 }
