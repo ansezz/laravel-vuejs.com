@@ -33,6 +33,6 @@ class ContactMail extends Mailable implements ShouldQueue
         return $this->replyTo($this->data['email'])
             ->cc($this->data['email'], $this->data['name'])
             ->to('contact@laravel-vuejs.com')
-            ->markdown('emails.contact', $this->data);
+            ->markdown('emails.contact')->with('data', $this->data);
     }
 }

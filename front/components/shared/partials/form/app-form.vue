@@ -1,5 +1,5 @@
 <template>
-  <form class="form">
+  <form class="form" @submit.prevent="submit">
     <header>
         <slot name="desc" />
     </header>
@@ -15,7 +15,11 @@
 <script>
 export default {
   name: "AppForm",
-  props: {}
+  props: {
+    submit :{
+      type:Function
+    }
+  }
 }
 </script>
 

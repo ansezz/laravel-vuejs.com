@@ -10,19 +10,19 @@
           </div>
         </div>
         <div class="col-sm-6">
-          <app-form class="subscribe-form">
+          <app-form class="subscribe-form" :submit="subscribe">
             <div class="alert alert-success" role="alert" v-if="message">
               {{message}}
             </div>
             <div class="form-group">
-              <input type="email" class="form-control" placeholder="E-mail" v-model="email">
+              <input type="email" class="form-control" placeholder="E-mail" v-model="email" required aria-label="email">
               <div class="img">
                 <i class="fa fa-envelope"></i>
               </div>
             </div>
             <template slot="actions">
-              <button class="button" type="submit" @click.prevent="subscribe">Subscribe</button>
-              <button class="button no-background" type="submit">Advenced subscribe</button>
+              <button class="button" type="submit" :disabled="loading">Subscribe</button>
+              <!--<button class="button no-background" type="submit">Advenced subscribe</button>-->
             </template>
           </app-form>
         </div>
@@ -38,13 +38,14 @@
     name: "AppSubscribe",
 
     props: {},
-    computed :{
+    computed: {
       loggedIn() {
         return this.$store.state.auth.loggedIn;
       }
     },
     data() {
       return {
+        loading: false,
         email: '',
         message: null
       }
@@ -56,10 +57,13 @@
 
         let variables = {email: this.email};
         this.message = null;
+        this.loading = true;
         this.$apollo.mutate({mutation: subscribeQql, variables})
           .then((data) => {
             this.message = data.data.subscribe
-          })
+          }).finally(() => {
+          this.loading = false
+        })
       }
     },
     mounted() {
