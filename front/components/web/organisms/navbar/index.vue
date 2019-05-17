@@ -1,5 +1,5 @@
 <template>
-  <nav class="navbar">
+  <nav class="navbar" :class="{ 'is-loading' : loading }">
     <div class="container">
       <div class="navbar-container">
         <ul class="navbar-list">
@@ -102,6 +102,9 @@
     border-radius 0
     background #fff
 
+    &.is-loading .navbar-list
+      opacity 0
+
   .navbar-brand
     display block
     padding 0
@@ -118,6 +121,7 @@
   .navbar-list
     display flex
     align-items center
+    transition .25s opacity ease
 
     li
       padding-right 42px
