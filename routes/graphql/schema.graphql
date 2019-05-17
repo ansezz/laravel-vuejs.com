@@ -19,8 +19,6 @@ type Login {
 }
 
 type Query {
-    users: [User!]! @paginate(type: "paginator" model: "User")
-    user(id: ID @eq): User @find(model: "User")
     postsAll: [Post!]! @all
     settings: [Setting!]! @all
     post(id: Int! @eq): Post @find
@@ -43,4 +41,5 @@ extend type Query @middleware(checks: ["auth:api"]) {
 type Mutation {
     signup(email: String! @rules(apply: ["email","unique:users"]), password: String! @rules(apply: ["min:6"]), name: String! ): User @event(fire: "Illuminate\\Auth\\Events\\Registered")
     subscribe(email: String! @rules(apply: ["email"])) : String
+    contact(email: String! @rules(apply: ["email"]), name: String!, subject: String! , message: String! ) : String
 }

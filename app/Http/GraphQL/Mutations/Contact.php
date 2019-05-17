@@ -3,10 +3,11 @@
 namespace LaravelVueJs\Http\GraphQL\Mutations;
 
 use GraphQL\Type\Definition\ResolveInfo;
+use Illuminate\Support\Facades\Mail;
+use LaravelVueJs\Mail\ContactMail;
 use Nuwave\Lighthouse\Support\Contracts\GraphQLContext;
-use Spatie\Newsletter\Newsletter;
 
-class Subscribe
+class Contact
 {
     /**
      * Return a value for the field.
@@ -20,12 +21,8 @@ class Subscribe
      */
     public function resolve($rootValue, array $args, GraphQLContext $context = null, ResolveInfo $resolveInfo)
     {
-        if (!Newsletter::isSubscribed($args['email'])) {
-            Newsletter::subscribePending($args['email'], ['firstName' => $args['firstName'] ?? '', 'lastName' => $args['lastName'] ?? '']);
+        Mail::queue(new ContactMail($args));
 
-            return 'Thank You For Subscribing!';
-        }
-
-        return 'You have already subscribed !';
+        return 'Thank you for your message. we will respond as soon as possible !';
     }
 }
