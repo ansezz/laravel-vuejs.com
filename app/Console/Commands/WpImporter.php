@@ -61,6 +61,7 @@ class WpImporter extends Command
                     $wp = $item->children('wp', true);
 
                     $slug = trim((string)$wp->post_name);
+                    $slug = self::ConvertToUTF8($slug);
 
                     $exist = Post::whereSlug($slug)->count();
 
@@ -79,7 +80,7 @@ class WpImporter extends Command
                             $categories[] = (string)$cat['nicename'];
                         }
 
-                        if ($cat['domain'] == 'post_tag') {
+                        if ($cat['domain'] == 'post_tag' || $cat['domain'] == 'yst_prominent_words') {
                             $tags[] = (string)$cat['nicename'];
                         }
                     }
@@ -95,10 +96,9 @@ class WpImporter extends Command
 
                     $created_at = new Carbon($wp->post_date_gmt);
 
-                    $wp = $item->children('wp', true);
-
                     $content = (string)$e_content->encoded;
                     $content = str_replace(array('[ad_1]', '[ad_2]', '[ad_3]', '#9b59b6', '#408bb7', '#b70900'), array('', '', '', '#63F9E6', '#6936D3', '#384457'), $content);
+                    $content = self::ConvertToUTF8($content);
 
                     $excerpt = trim((string)$e_excerpt->encoded);
 
@@ -108,14 +108,14 @@ class WpImporter extends Command
                         'user_id' => 1,
                         'title' => (string)$item->title,
                         'slug' => $slug,
-                        'excerpt' => mb_convert_encoding($excerpt, 'UTF-8'),
+                        'excerpt' => self::ConvertToUTF8($excerpt),
                         'content' => $content,
                         'views' => $wp_postmeta['tie_views'] ? ((int)$wp_postmeta['tie_views'] + 8000) : random_int(500, 8000),
                         'source' => $wp_postmeta['original_link'] ?? null,
                         'type' => 1,
                         'status' => 1,
                         'comment_status' => 1,
-                        'created_at' => $created_at->year < 0 ? Carbon::now() : $created_at,
+                        'created_at' => $created_at->year < 0 ? Carbon::create(2016, 03, 22) : $created_at,
                         'updated_at' => Carbon::now(),
                     ];
                     /** @var Post $post */
@@ -152,4 +152,21 @@ class WpImporter extends Command
         }
 
     }
+
+    public static function ConvertToUTF8($text)
+    {
+
+        $encoding = mb_detect_encoding($text, mb_detect_order(), false);
+
+        if ($encoding == "UTF-8") {
+            $text = mb_convert_encoding($text, 'UTF-8', 'UTF-8');
+        }
+
+
+        $out = iconv(mb_detect_encoding($text, mb_detect_order(), false), "UTF-8//IGNORE", $text);
+
+
+        return $out;
+    }
+
 }
