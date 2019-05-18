@@ -3,22 +3,22 @@
     <div class="mobile-container">
       <div class="subscribe-info">
         <h3>Stay in Touch</h3>
-        <p>Sign up for our newsletter, and we'll send you news and tutorials on web design, coding, business, and
-          more!</p>
+        <p>Sign up for our newsletter, and we'll send you news and tutorials, coding, business, and more!</p>
       </div>
-      <app-form class="subscribe-form">
+      <app-form class="subscribe-form" :submit="subscribe">
         <div class="alert alert-success" role="alert" v-if="message">
-          {{message}}
+          <i class="glyphicon glyphicon-check"></i>
+          <b>{{message}}</b>
         </div>
         <div class="form-group">
-          <input type="email" class="form-control" placeholder="E-mail" v-model="email">
+          <input type="email" class="form-control" placeholder="E-mail" v-model="email" required aria-label="Email">
           <div class="img">
             <i class="fa fa-envelope"></i>
           </div>
         </div>
         <template slot="actions">
-          <button class="button" type="submit" @click.prevent="subscribe">Subscribe</button>
-          <button class="button no-background" type="submit">Advenced subscribe</button>
+          <button class="button" type="submit">Subscribe</button>
+          <!--<button class="button no-background" type="submit">Advenced subscribe</button>-->
         </template>
       </app-form>
     </div>
@@ -33,6 +33,7 @@
     props: {},
     data() {
       return {
+        loading: false,
         email: '',
         message: null
       }
@@ -47,12 +48,15 @@
         if (!this.email)
           return;
 
-        let variables = {email: this.email};
-        this.message = null;
+        let variables = {email: this.email}
+        this.message = null
+        this.loading = false
         this.$apollo.mutate({mutation: subscribeQql, variables})
           .then((data) => {
             this.message = data.data.subscribe
-          })
+          }).finally(() => {
+          this.loading = true
+        })
       }
     },
     mounted() {

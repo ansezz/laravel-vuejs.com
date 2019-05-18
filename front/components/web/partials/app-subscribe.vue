@@ -5,14 +5,14 @@
         <div class="col-sm-6">
           <div class="subscribe-info">
             <h3>Stay in Touch</h3>
-            <p>Sign up for our newsletter, and we'll send you news and tutorials on web design, coding, business, and
-              more!</p>
+            <p>Sign up for our newsletter, and we'll send you news and tutorials, coding, business, and more!</p>
           </div>
         </div>
         <div class="col-sm-6">
           <app-form class="subscribe-form" :submit="subscribe">
-            <div class="alert alert-success" role="alert" v-if="message">
-              {{message}}
+            <div class="alert alert-success text-center" role="alert" v-if="message">
+              <i class="glyphicon glyphicon-check"></i>
+              <b>{{message}}</b>
             </div>
             <div class="form-group">
               <input type="email" class="form-control" placeholder="E-mail" v-model="email" required aria-label="email">

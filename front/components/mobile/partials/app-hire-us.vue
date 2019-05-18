@@ -8,21 +8,30 @@
                 <h1>Contact us || Hire us</h1>
                 <p>Send us a message, Explain to us what you need !</p>
             </header>
-            <form action="/">
+            <form @submit="contact">
+                <div class="alert alert-success text-center" role="alert" v-if="message">
+                    <i class="glyphicon glyphicon-check"></i>
+                    <b>{{message}}</b>
+                </div>
                 <div class="form-group">
-                    <input type="text" name="name" class="form-control has-custom" placeholder="Full Name" />
+                    <input type="text" name="name" class="form-control has-custom" placeholder="Name" required
+                           v-model="form.name" aria-label="Name"/>
                 </div>
                 <div class="form-group m-20">
-                    <input type="email" name="email" class="form-control has-custom" placeholder="Your E-mail" />
+                    <input type="email" name="email" class="form-control has-custom" placeholder="Your E-mail" required
+                           v-model="form.email" aria-label="Email"/>
                 </div>
                 <div class="form-group m-20">
-                    <input type="text" name="subject" class="form-control has-custom" placeholder="Subject" />
+                    <input type="text" name="subject" class="form-control has-custom" placeholder="Subject" required
+                           v-model="form.subject" aria-label="Subject"/>
                 </div>
                 <div class="form-group m-20">
-                    <textarea class="form-control has-custom" name="message" placeholder="Your Message" style="min-height: 200px;"></textarea>
+                    <textarea class="form-control has-custom" name="message" placeholder="Your Message" style="min-height: 200px;"
+                              required v-model="form.message" aria-label="Message"
+                    ></textarea>
                 </div>
                 <div class="form-actions">
-                    <button class="button" type="submit" name="subscribe">Send</button>
+                    <button class="button" type="submit" name="contact" :disabled="loading">Send</button>
                 </div>
             </form>
         </div>
@@ -30,9 +39,43 @@
 </template>
 
 <script>
-export default {
-    name: "AppNewsletter",
-}
+    import contactQql from '@/graphql/mutations/contact.graphql';
+
+    export default {
+        name: "AppNewsletter",
+        props: {},
+        computed: {
+            loggedIn() {
+                return this.$store.state.auth.loggedIn;
+            }
+        },
+        data() {
+            return {
+                loading: false,
+                message: null,
+                form: {
+                    email: '',
+                    name: '',
+                    subject: '',
+                    message: ''
+                }
+            }
+        },
+        methods: {
+            contact() {
+                this.loading = true
+                let variables = this.form
+                this.$apollo.mutate({mutation: contactQql, variables})
+                    .then((data) => {
+                        this.message = data.data.contact
+                    }).finally(() => {
+                    this.loading = true
+                })
+            }
+        },
+        mounted() {
+        }
+    }
 </script>
 
 <style lang="stylus" scoped>

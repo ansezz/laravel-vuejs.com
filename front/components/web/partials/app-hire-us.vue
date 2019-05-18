@@ -8,7 +8,7 @@
         <h1>Contact us || Hire us</h1>
         <p>Send us a message, Explain to us what you need !</p>
       </header>
-      <form>
+      <form @submit="contact">
         <div class="alert alert-success text-center" role="alert" v-if="message">
           <i class="glyphicon glyphicon-check"></i>
           <b>{{message}}</b>
@@ -32,7 +32,7 @@
           </textarea>
         </div>
         <div class="form-actions">
-          <button class="button" type="submit" name="contact" @click.prevent="contact" :disabled="loading">
+          <button class="button" type="submit" name="contact" :disabled="loading">
             Send Message
           </button>
         </div>
