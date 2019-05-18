@@ -32,7 +32,7 @@
           </textarea>
         </div>
         <div class="form-actions">
-          <button class="button" type="submit" name="contact" :disabled="loading">
+          <button class="button pull-right" type="submit" name="contact" :disabled="loading">
             Send Message
           </button>
         </div>
