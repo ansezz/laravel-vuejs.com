@@ -67,20 +67,32 @@
                     <ul class="share-links">
                         <network network="facebook" class="facebook">
                             <a class="facebook">
-                              <i class="fa fa-facebook"></i>
-                              <span>Facebook</span>
+                                <i class="fa fa-facebook"></i>
                             </a>
                         </network>
                         <network network="twitter" class="twitter">
                             <a class="twitter">
-                              <i class="fa fa-twitter"></i>
-                              <span>Twitter</span>
+                                <i class="fa fa-twitter"></i>
                             </a>
                         </network>
                         <network network="whatsapp" class="whatsapp">
                             <a class="whatsapp">
-                              <i class="fa fa-whatsapp"></i>
-                              <span>Whats App</span>
+                                <i class="fa fa-whatsapp"></i>
+                            </a>
+                        </network>
+                        <network network="telegram" class="telegram">
+                            <a class="telegram">
+                                <i class="fa fa-telegram"></i>
+                            </a>
+                        </network>
+                        <network network="reddit" class="reddit">
+                            <a class="reddit">
+                                <i class="fa fa-reddit"></i>
+                            </a>
+                        </network>
+                        <network network="linkedin" class="linkedin">
+                            <a class="linkedin">
+                                <i class="fa fa-linkedin"></i>
                             </a>
                         </network>
                     </ul>
@@ -286,7 +298,7 @@
     bottom 0
     width 100%
     display grid
-    grid-template-columns repeat(3, 1fr)
+    grid-template-columns repeat(6, 1fr)
     margin 0 -20px 0
     z-index 1
     & >>>
@@ -307,6 +319,12 @@
           background-color #38A1F3
         &.whatsapp
           background-color #25D366
+        &.telegram
+          background-color #0088cc
+        &.linkedin
+          background-color #0077b5
+        &.reddit
+          background-color #ff4500
         .fa
           margin-right 10px
           padding-top 3px

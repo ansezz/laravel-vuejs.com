@@ -7,6 +7,8 @@ const resolve = require("path").resolve
 
 module.exports = {
   modules: [
+    '@nuxtjs/onesignal',
+    "@nuxtjs/pwa",
     '@nuxtjs/apollo',
     "@nuxtjs/axios",
     "@nuxtjs/dotenv",
@@ -15,16 +17,37 @@ module.exports = {
     "@nuxtjs/google-analytics",
     '@nuxtjs/google-adsense',
     "@nuxtjs/sitemap",
-    "@nuxtjs/pwa",
     "@nuxtjs/moment",
     "@nuxtjs/webpackmonitor",
     "nuxt-device-detect",
+    '@nuxtjs/sentry',
+    'nuxt-google-optimize',
     // @TODO enable component cache only in prod
     // ['@nuxtjs/component-cache', {maxAge: 1000 * 60 * 60}],
     /*["@nuxtjs/google-tag-manager", {
         id: process.env.GOOGLE_TAG_MANAGER
     }]*/
   ],
+  // Optional options
+  googleOptimize: {
+    // experimentsDir: '~/experiments',
+    // maxAge: 60 * 60 * 24 * 7 // 1 Week
+    // pushPlugin: true,
+  },
+  // @TODO : this.$sentry.captureException(new Error('example'))
+  sentry: {
+    dsn: 'https://05823801c6c64430a9716187dc90f7bd@sentry.io/188197', // Enter your project's DSN here
+    config: {}, // Additional config
+  },
+  oneSignal: {
+    init: {
+      appId: '0574cfe4-d2e3-403d-b7b5-875f56652248',
+      allowLocalhostAsSecureOrigin: true,
+      welcomeNotification: {
+        disable: true
+      }
+    }
+  },
   toast: {
     position: 'top-center',
     duration: 4000
@@ -81,12 +104,8 @@ module.exports = {
     ],
     htmlAttrs: {dir: "ltr"},
     link: [
-      {rel: "icon", type: "image/x-icon", href: "/favicon.ico"},
-      {rel: "stylesheet", href: "https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"}
+      {rel: "icon", type: "image/x-icon", href: "/favicon.ico"}
     ]
-    /*,script: [
-        {src: "https://code.jquery.com/jquery-1.12.4.min.js"}
-    ]*/
   },
   /*
    ** Customize the progress bar color
@@ -145,7 +164,6 @@ module.exports = {
     {src: "~/plugins/lazyload", ssr: false},
     {src: '~/plugins/vue-tags-input', ssr: false},
     {src: '~/plugins/infinite-loading', ssr: false}
-    /*,{src: '~/plugins/bootstrap.min.js', ssr: false}*/
   ],
 
   css: [

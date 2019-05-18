@@ -21,3 +21,5 @@ sw.*
 .idea/
 
 .env
+
+OneSignalSDK*
