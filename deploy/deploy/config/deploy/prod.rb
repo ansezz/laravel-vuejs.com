@@ -15,3 +15,6 @@ role :server, %w{167.86.113.173}
 set :deploy_to, "/var/www/laravel-vuejs.com/web"
 
 set :linked_files, %w{.env front/.env}
+
+# Which dotenv file to transfer to the server
+set :laravel_dotenv_file, "./../config/prod/.env"

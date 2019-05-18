@@ -34,9 +34,6 @@ set :laravel_version, 5.7
 # Whether to upload the dotenv file on deploy
 set :laravel_upload_dotenv_file_on_deploy, true
 
-# Which dotenv file to transfer to the server
-set :laravel_dotenv_file, "./../config/#{fetch(:env)}/.env"
-
 # The user that the server is running under (used for ACLs)
 set :laravel_server_user, "#{fetch(:user)}"
 

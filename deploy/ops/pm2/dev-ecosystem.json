@@ -1,12 +1,16 @@
 {
-  "apps": [
-    {
-      "name": "laravel-vuejs-dev",
-      "script": "./node_modules/nuxt/bin/nuxt-start --port=3001",
-      "cwd": "/var/www/dev.laravel-vuejs.com/web/current/front",
-      "error_file": "/var/www/dev.laravel-vuejs.com/logs/app.err.log",
-      "out_file": "/var/www/dev.laravel-vuejs.com/logs/app.out.log",
-      "exec_mode": "fork_mode"
-    }
-  ]
+ "apps": [
+  {
+   "name": "laravel-vuejs-dev",
+   "script": "./node_modules/nuxt/bin/nuxt-start --port=3001",
+   "cwd": "/var/www/dev.laravel-vuejs.com/web/current/front",
+   "error_file": "/var/www/dev.laravel-vuejs.com/logs/app.err.log",
+   "out_file": "/var/www/dev.laravel-vuejs.com/logs/app.out.log",
+   "exec_mode": "fork_mode",
+   "env": {
+    "PORT": 3000,
+    "NODE_ENV": "development"
+   }
+  }
+ ]
 }
