@@ -21,7 +21,8 @@ module.exports = {
     "@nuxtjs/webpackmonitor",
     "nuxt-device-detect",
     '@nuxtjs/sentry',
-    'nuxt-google-optimize',
+    // @TOD : create Creating an experiment fro google optimize
+    /*'nuxt-google-optimize',*/
     // @TODO enable component cache only in prod
     // ['@nuxtjs/component-cache', {maxAge: 1000 * 60 * 60}],
     /*["@nuxtjs/google-tag-manager", {
