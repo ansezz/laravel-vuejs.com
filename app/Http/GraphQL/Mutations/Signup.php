@@ -5,6 +5,7 @@ namespace LaravelVueJs\Http\GraphQL\Mutations;
 use GraphQL\Type\Definition\ResolveInfo;
 use LaravelVueJs\Models\User;
 use Nuwave\Lighthouse\Support\Contracts\GraphQLContext;
+use Newsletter;
 
 class Signup
 {
@@ -21,12 +22,18 @@ class Signup
     public function resolve($rootValue, array $args, GraphQLContext $context = null, ResolveInfo $resolveInfo)
     {
         $user = new User([
-            'name'     => $args['name'],
-            'email'    => $args['email'],
+            'name' => $args['name'],
+            'email' => $args['email'],
             'password' => bcrypt($args['password']),
         ]);
 
         $user->save();
+
+
+        if (!Newsletter::isSubscribed($args['email'])) {
+            Newsletter::subscribePending($args['email'], ['firstName' => $args['name'] ?? '']);
+        }
+
 
         return $user;
     }

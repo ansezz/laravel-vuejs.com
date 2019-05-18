@@ -4,7 +4,7 @@ namespace LaravelVueJs\Http\GraphQL\Mutations;
 
 use GraphQL\Type\Definition\ResolveInfo;
 use Nuwave\Lighthouse\Support\Contracts\GraphQLContext;
-use Spatie\Newsletter\Newsletter;
+use Newsletter;
 
 class Subscribe
 {
