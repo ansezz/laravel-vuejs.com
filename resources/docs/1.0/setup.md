@@ -24,7 +24,7 @@ cp .env.example .env
 
 - Install dependencies
 ```bash
-composer install :
+composer install
 ```
 - Migrate database :
 ```bash
@@ -35,9 +35,7 @@ php artisan migrate
 ```bash
 php artisan db:seed
 ```
-Or Import existing Wordpress articles. First export you article, follow this [tutorial](https://en.support.wordpress.com/export/).
-
-You will get an `XML` file, after that run this command : 
+- Or Import existing Wordpress articles. First export you article, follow this [tutorial](https://en.support.wordpress.com/export/).  You will get an `XML` file, after that run this command : 
 ```bash
 php artisan wp:import /path/to/your/xml/file.xml
 ```
