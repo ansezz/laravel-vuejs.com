@@ -46,21 +46,6 @@ module.exports = {
       }
     }
   },
-  /* sitemap: {
-     path: "/sitemap.xml",
-     // hostname: 'https://example.com',
-     cacheTime: 1000 * 60 * 15,
-     gzip: true,
-     generate: false, // Enable me when using nuxt generate
-     exclude: [
-       // '/cms/!**'
-     ],
-     routes() {
-       return axios
-         .get(process.env.SITE_MAP_URL)
-         .then(res => res.data.data.data.map(post => "/" + post.slug))
-     }
-   },*/
   "google-analytics": {
     id: process.env.GOOGLE_ANALYTICS
   },

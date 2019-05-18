@@ -1,0 +1,5 @@
+- ## Get Started
+    - [Overview](/{{route}}/{{version}}/overview)
+    - [Setup](/{{route}}/{{version}}/setup)
+        - [Frontend](/{{route}}/{{version}}/setup#frontend)
+        - [Backend](/{{route}}/{{version}}/setup#backend)
