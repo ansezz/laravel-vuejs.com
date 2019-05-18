@@ -35,7 +35,7 @@ set :laravel_version, 5.7
 set :laravel_upload_dotenv_file_on_deploy, true
 
 # Which dotenv file to transfer to the server
-set :laravel_dotenv_file, './../config/dev/.env'
+set :laravel_dotenv_file, "./../config/#{fetch(:env)}/.env"
 
 # The user that the server is running under (used for ACLs)
 set :laravel_server_user, "#{fetch(:user)}"
@@ -73,8 +73,8 @@ set :laravel_set_acl_paths, true
 namespace :conf do
   task :update do
     on roles(:server) do
-        upload! "../config/dev/.env" , "#{fetch(:deploy_to)}/shared/.env"
-        upload! "../config/dev/front/.env" , "#{fetch(:deploy_to)}/shared/front/.env"
+        upload! "../config/#{fetch(:env)}/.env" , "#{fetch(:deploy_to)}/shared/.env"
+        upload! "../config/#{fetch(:env)}/front/.env" , "#{fetch(:deploy_to)}/shared/front/.env"
     end
   end end
 
