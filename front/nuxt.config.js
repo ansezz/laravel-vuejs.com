@@ -118,7 +118,7 @@ module.exports = {
     build: {
 //    analyze: true,
         babel: {
-            // plugins: ['"@babel/plugin-proposal-nullish-coalescing-operator"']
+             plugins: ['"@babel/plugin-proposal-nullish-coalescing-operator"']
         },
         plugins: [
             new webpack.LoaderOptionsPlugin({
