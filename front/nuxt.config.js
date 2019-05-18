@@ -12,7 +12,7 @@ module.exports = {
         "@nuxtjs/dotenv",
         "@nuxtjs/font-awesome",
         "@nuxtjs/toast",
-        //"@nuxtjs/google-analytics",
+        "@nuxtjs/google-analytics",
         '@nuxtjs/google-adsense',
         "@nuxtjs/sitemap",
         "@nuxtjs/pwa",
@@ -61,9 +61,9 @@ module.exports = {
            .then(res => res.data.data.data.map(post => "/" + post.slug))
        }
      },*/
-    /*"google-analytics": {
+    "google-analytics": {
         id: process.env.GOOGLE_ANALYTICS
-    },*/
+    },
     axios: {
         baseURL: process.env.API_URL,
         headers: {

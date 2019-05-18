@@ -4,14 +4,14 @@ ask(:user, 'root')
 # "Enter branch name (develop by default): "
 ask(:branch, 'blog')
 
-set :stage, "staging"
+set :stage, "production"
 
-set :env, "dev"
+set :env, "prod"
 
 server '167.86.113.173', user: fetch(:user), roles: %w{app}
 
-role :server, %w{dev.laravel-vuejs.com}
+role :server, %w{laravel-vuejs.com}
 
-set :deploy_to, "/var/www/dev.laravel-vuejs.com/web"
+set :deploy_to, "/var/www/laravel-vuejs.com/web"
 
 set :linked_files, %w{.env front/.env}
