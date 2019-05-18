@@ -306,7 +306,6 @@
         display flex
         align-items center
         justify-content center
-        font-size 12px
         font-weight 500
         letter-spacing 1px
         text-transform uppercase
@@ -326,9 +325,8 @@
         &.reddit
           background-color #ff4500
         .fa
-          margin-right 10px
           padding-top 3px
-          font-size 14px
+          font-size 20px
         span
           padding-top 3px
 .actions-list
