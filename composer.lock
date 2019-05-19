@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "fd579dc593861197d2be822c7a7d3a70",
+    "content-hash": "1963cc03060eeea0c80a0e409e3d4fba",
     "packages": [
         {
             "name": "algolia/algoliasearch-client-php",
@@ -104,39 +104,6 @@
                 "MIT"
             ],
             "description": "A Laravel Nova field.",
-            "keywords": [
-                "laravel",
-                "nova"
-            ]
-        },
-        {
-            "name": "ansezz/wp-importer",
-            "version": "dev-master",
-            "dist": {
-                "type": "path",
-                "url": "./nova-components/WpImporter",
-                "reference": "9018f3913ac99217aea1a2c2a58ace7e5c6732a3"
-            },
-            "require": {
-                "php": ">=7.1.0"
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "providers": [
-                        "Ansezz\\WpImporter\\ToolServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Ansezz\\WpImporter\\": "src/"
-                }
-            },
-            "license": [
-                "MIT"
-            ],
-            "description": "A Laravel Nova tool.",
             "keywords": [
                 "laravel",
                 "nova"
@@ -807,16 +774,16 @@
         },
         {
             "name": "ebess/advanced-nova-media-library",
-            "version": "2.7.0",
+            "version": "2.7.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ebess/advanced-nova-media-library.git",
-                "reference": "88b1ff6525baea09dc6cbcae0bd48696aa5e54aa"
+                "reference": "3881a71c1447b76af83ddf2f4fbe6cc87a836c86"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ebess/advanced-nova-media-library/zipball/88b1ff6525baea09dc6cbcae0bd48696aa5e54aa",
-                "reference": "88b1ff6525baea09dc6cbcae0bd48696aa5e54aa",
+                "url": "https://api.github.com/repos/ebess/advanced-nova-media-library/zipball/3881a71c1447b76af83ddf2f4fbe6cc87a836c86",
+                "reference": "3881a71c1447b76af83ddf2f4fbe6cc87a836c86",
                 "shasum": ""
             },
             "require": {
@@ -846,7 +813,7 @@
                 "laravel",
                 "nova"
             ],
-            "time": "2019-05-14T12:55:09+00:00"
+            "time": "2019-05-15T16:01:18+00:00"
         },
         {
             "name": "egulias/email-validator",
@@ -2746,16 +2713,16 @@
         },
         {
             "name": "nesbot/carbon",
-            "version": "2.17.1",
+            "version": "2.18.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/briannesbitt/Carbon.git",
-                "reference": "96acbc0c03782e8115156dd4dd8b736267155066"
+                "reference": "8322b7bd1805be31867c13bf3cdaab948a0dd406"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/briannesbitt/Carbon/zipball/96acbc0c03782e8115156dd4dd8b736267155066",
-                "reference": "96acbc0c03782e8115156dd4dd8b736267155066",
+                "url": "https://api.github.com/repos/briannesbitt/Carbon/zipball/8322b7bd1805be31867c13bf3cdaab948a0dd406",
+                "reference": "8322b7bd1805be31867c13bf3cdaab948a0dd406",
                 "shasum": ""
             },
             "require": {
@@ -2802,7 +2769,7 @@
                 "datetime",
                 "time"
             ],
-            "time": "2019-04-27T18:04:27+00:00"
+            "time": "2019-05-16T18:44:35+00:00"
         },
         {
             "name": "nikic/php-parser",

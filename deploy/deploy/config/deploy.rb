@@ -136,13 +136,12 @@ namespace :npm do
     on roles(:server) do
         execute "cd #{release_path} && npm install"
         execute "cd #{release_path}/nova-components/nova-categories-field && npm install"
-        execute "cd #{release_path}/nova-components/WpImporter && npm install"
         execute "cd #{release_path}/front && npm install"
     end
   end
   task :build do
     on roles(:server) do
-        execute "cd #{release_path} && npm run dev && npm run build-category && npm run build-wp-importer"
+        execute "cd #{release_path} && npm run dev && npm run build-category"
         execute "cd #{release_path}/front && npm run build"
     end
   end end

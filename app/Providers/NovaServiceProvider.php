@@ -2,7 +2,6 @@
 
 namespace LaravelVueJs\Providers;
 
-use Ansezz\WpImporter\WpImporter;
 use Laravel\Nova\Nova;
 use Laravel\Nova\Cards\Help;
 use Illuminate\Support\Facades\Gate;
@@ -69,7 +68,6 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
     public function tools()
     {
         return [
-            new WpImporter(),
         ];
     }
 

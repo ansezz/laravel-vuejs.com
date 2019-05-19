@@ -8,7 +8,7 @@
                         <img src="@/assets/images/brackets.png" alt="LV">
                     </div>
                     <h5 class="name">{{post.user.name}}</h5>
-                    <span class="role">Collaborator</span>
+                    <!--<span class="role">Collaborator</span>-->
                 </div>
                 <div class="category is-flex" v-if="post.categories[0]">
                     <i class="fa fa-folder-o"></i>

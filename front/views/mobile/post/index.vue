@@ -9,7 +9,7 @@
                             <img src="@/assets/images/brackets.png" alt="LV">
                         </div>
                         <h5 class="name">{{post.user.name}}</h5>
-                        <span class="role">Collaborator</span>
+                        <!--<span class="role">Collaborator</span>-->
                     </div>
                     <div class="date-time">
                       <i class="fa fa-clock-o"></i>
@@ -146,9 +146,6 @@
                     {
                         name: this.post.categories[0] ? this.post.categories[0].name : 'Category',
                         link: this.post.categories[0] ? {name: 'category-slug', params : {slug : this.post.categories[0].slug}} : null
-                    },
-                    {
-                        name: this.post.title
                     }
                 ]
             }
