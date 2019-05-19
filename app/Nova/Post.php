@@ -9,6 +9,7 @@ use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\ID;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\MorphToMany;
+use Laravel\Nova\Fields\Number;
 use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Textarea;
@@ -49,7 +50,7 @@ class Post extends Resource
     /**
      * Get the fields displayed by the resource.
      *
-     * @param  \Illuminate\Http\Request $request
+     * @param \Illuminate\Http\Request $request
      *
      * @return array
      */
@@ -69,9 +70,7 @@ class Post extends Resource
             Images::make('Image', \LaravelVueJs\Models\Post::MEDIA_COLLECTION)
                 ->customPropertiesFields([
                     Text::make('Alt'),
-                ])
-                ->thumbnail('thumb')
-                ->multiple(),
+                ]),
 
             Trix::make('Content')
                 ->rules('required'),
@@ -96,6 +95,8 @@ class Post extends Resource
 
             Text::make('Source')->hideFromIndex(),
 
+            Number::make('Views')->onlyOnIndex()->sortable(),
+
 
         ];
     }
@@ -103,7 +104,7 @@ class Post extends Resource
     /**
      * Get the cards available for the request.
      *
-     * @param  \Illuminate\Http\Request $request
+     * @param \Illuminate\Http\Request $request
      *
      * @return array
      */
@@ -115,7 +116,7 @@ class Post extends Resource
     /**
      * Get the filters available for the resource.
      *
-     * @param  \Illuminate\Http\Request $request
+     * @param \Illuminate\Http\Request $request
      *
      * @return array
      */
@@ -127,7 +128,7 @@ class Post extends Resource
     /**
      * Get the lenses available for the resource.
      *
-     * @param  \Illuminate\Http\Request $request
+     * @param \Illuminate\Http\Request $request
      *
      * @return array
      */
@@ -139,7 +140,7 @@ class Post extends Resource
     /**
      * Get the actions available for the resource.
      *
-     * @param  \Illuminate\Http\Request $request
+     * @param \Illuminate\Http\Request $request
      *
      * @return array
      */

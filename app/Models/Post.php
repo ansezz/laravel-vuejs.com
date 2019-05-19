@@ -16,6 +16,10 @@ use Spatie\Sluggable\SlugOptions;
 use Spatie\MediaLibrary\Models\Media;
 use Spatie\Tags\HasTags;
 
+/**
+ * @method static whereSlug($slug)
+ * @method static create(array $fields)
+ */
 class Post extends Model implements HasMedia, Feedable
 {
     use HasSlug, HasMediaTrait, HasTags, HasCategories;
