@@ -62,7 +62,7 @@ class Post extends Resource
             BelongsTo::make('User'),
 
             Text::make('Title')
-                ->resolveUsing(function ($title) {
+                ->displayUsing(function ($title) {
                     return substr($title, 0, 50) . '...';
                 })->sortable()
                 ->rules('required'),
