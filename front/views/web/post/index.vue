@@ -367,6 +367,7 @@
         & >>>
           img
             max-width 100%
+            margin 20px 0
 
         .thumbnail-area
             margin-bottom 20px

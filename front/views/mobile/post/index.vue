@@ -219,6 +219,7 @@
       & >>>
         img
           max-width 100%
+          margin 10px 0
         a
           word-break break-all
     .thumbnail-area
