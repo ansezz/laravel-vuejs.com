@@ -127,10 +127,6 @@
 </script>
 
 <style lang="stylus" scoped>
-  .text-center,
-  .show-more
-    padding-top 40px
-
     .posts-container
         padding-bottom 120px
 
@@ -205,4 +201,8 @@
         font-size 24px
         color $white
         margin 60px auto
+
+    .text-center,
+    .show-more
+      padding-top 40px
 </style>

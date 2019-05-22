@@ -79,9 +79,9 @@
                     <adsbygoogle/>
                 </div>
                 <p v-html="post.content" id="content"></p>
-                <div class="tags" v-for="tag in post.tags" :key="tag.id">
-                    <h4>Tags : </h4>
-                    <nuxt-link :to="{name: 'tag-slug', params : {slug : tag.slug}}" class="label label-default">
+                <h4>Tags : </h4>
+                <div class="tags">
+                    <nuxt-link v-for="tag in post.tags" :key="tag.id" :to="{name: 'tag-slug', params : {slug : tag.slug}}" >
                         {{tag.name}}
                     </nuxt-link>
                 </div>
@@ -478,10 +478,23 @@
 
     .tags
         a
-            font-size 15px
-            padding 10px 5px
-
-
+            border 1px solid $secondary
+            display inline-block
+            background #FFF
+            -webkit-box-shadow 0 1px 1px 0 rgba(180,180,180,0.1)
+            box-shadow 0 1px 1px 0 rgba(180,180,180,0.1)
+            -webkit-transition all .1s ease-in-out
+            -moz-transition all .1s ease-in-out
+            -o-transition all .1s ease-in-out
+            -ms-transition all .1s ease-in-out
+            transition all .1s ease-in-out
+            border-radius 2px
+            margin 0 3px 6px 0
+            padding 5px 10px
+            &:hover
+                border-color $primary
+                color $secondary
+                font-weight 500
     #content
         & /deep/
             a.cs-btn.cs-btn-default
