@@ -58,9 +58,7 @@ module.exports = {
   },
   // Give apollo module options
   apollo: {
-    errorHandler(error) {
-      console.log(error)
-    },
+    errorHandler: '~/plugins/apollo-error-handler.js',
     // required
     clientConfigs: {
       default: {
@@ -70,7 +68,6 @@ module.exports = {
       }
     }
   },
-  errorHandler: '~/plugins/apollo-error-handler.js',
   "google-analytics": {
     id: process.env.GOOGLE_ANALYTICS
   },

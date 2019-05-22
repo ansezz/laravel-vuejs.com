@@ -20,7 +20,7 @@
   },
   "dependencies": {
     "@johmun/vue-tags-input": "^2.0.0",
-    "@nuxtjs/apollo": "^4.0.0-rc2.3",
+    "@nuxtjs/apollo": "^4.0.0-rc6",
     "@nuxtjs/axios": "^5.3.6",
     "@nuxtjs/component-cache": "^1.1.4",
     "@nuxtjs/dotenv": "^1.1.1",
