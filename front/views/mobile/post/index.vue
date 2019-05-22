@@ -40,6 +40,12 @@
                     </div>
                 </div>
                 <p v-html="post.content" id="content"></p>
+                <div class="tags" v-for="tag in post.tags" :key="tag.id">
+                    <h4>Tags : </h4>
+                    <nuxt-link :to="{name: 'tag-slug', params : {slug : tag.slug}}" class="label label-default">
+                        {{tag.name}}
+                    </nuxt-link>
+                </div>
                 <div class="grid-container">
                     <div class="grid-articles">
                         <template v-for="(item, key) in related.second">
@@ -347,7 +353,12 @@
           margin-bottom 0
 
 
-#content
+.tags
+    a
+        font-size 15px
+        padding 10px 5px
+
+  #content
   & /deep/
       a.cs-btn.cs-btn-default
       a.cs-btn.cs-btn-Default

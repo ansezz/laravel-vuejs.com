@@ -480,8 +480,6 @@
         a
             font-size 15px
             padding 10px 5px
-            &:first-letter
-                text-transform uppercase
 
 
     #content
