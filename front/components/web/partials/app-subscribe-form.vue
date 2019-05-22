@@ -1,5 +1,5 @@
 <template>
-  <div class="widget">
+  <div v-if="!loggedIn" class="widget">
     <heading>Subsribe</heading>
     <app-form class="subscribe-widget">
       <template slot="desc">
@@ -12,7 +12,7 @@
       <div class="form-group">
         <input type="email" class="form-control" placeholder="E-mail" v-model="email">
         <div class="img">
-          <img src="@/assets/images/icons-email.png" alt="#">
+          <i class="fa fa-envelope"></i>
         </div>
       </div>
       <template slot="actions">
@@ -31,6 +31,11 @@
       return {
         email: null,
         message: null
+      }
+    },
+    computed :{
+      loggedIn() {
+        return this.$store.state.auth.loggedIn;
       }
     },
     methods: {

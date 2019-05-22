@@ -8,6 +8,7 @@
                         :description="item.excerpt"
                         :key="item.id"
                         :to="{ name: 'slug', params: { slug: item.slug }}"
+                        horizontal
           />
         </div>
     </div>

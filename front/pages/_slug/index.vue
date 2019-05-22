@@ -13,6 +13,13 @@
       post() {
         return this.$store.state.post.single
       },
+      hashTags() {
+        let tags = [];
+        this.post.tags.forEach((tag) => {
+          tags.push(tag.name)
+        })
+        return tags.join(',')
+      },
       seo() {
         return {
           title: this.post.title,

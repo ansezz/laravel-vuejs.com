@@ -10,6 +10,7 @@ npm-debug.log
 # Nuxt generate
 dist
 
+.history/
 
 .idea/
 
@@ -18,3 +19,7 @@ sw.*
 .monitor
 
 .idea/
+
+.env
+
+OneSignalSDK*

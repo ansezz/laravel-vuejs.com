@@ -38,7 +38,7 @@
 
 <style lang="stylus" scoped>
   .main-posts
-    padding 60px 0 120px
+    padding 60px 0 80px
 
   .posts-wrapper
     display flex

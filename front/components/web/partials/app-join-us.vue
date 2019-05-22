@@ -3,7 +3,7 @@
         <div class="join-us-box text-center">
             <h3>Join us now!</h3>
             <p>You think you can make it better?</p>
-            <nuxt-link to="/" class="button white-button">Send us your greats</nuxt-link>
+            <nuxt-link to="/page/contact-us" class="button white-button">Send us your greats</nuxt-link>
         </div>
         <div class="join-us-svg">
             <img src="@/assets/images/group.svg" alt="LV">
@@ -24,7 +24,12 @@
         display flex
         align-items center
         justify-content space-between
+        @media (max-width 768px)
+          padding 0
+          flex-direction column
     .join-us-box
+      @media (max-width 768px)
+        margin-bottom 20px
         h3
             font-size 24px
             color #384457
@@ -36,6 +41,8 @@
             margin-bottom 40px
     .join-us-svg
         width 433px
+        @media (max-width 768px)
+          width 100%
         img
             width 100%
 </style>

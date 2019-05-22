@@ -15,7 +15,6 @@
           title: '🚀 Home ',
           description: 'Home page',
           image: '',
-          url: 'https://laravel-vuejs.com',
           type: 'website',
         }
       },

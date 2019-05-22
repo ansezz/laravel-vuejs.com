@@ -1,4 +1,4 @@
 export default function(context) {
-  let platform = context.isMobile ? 'mobile' : 'web'
+  let platform = context.isMobileOrTablet ? 'mobile' : 'web'
   context.store.commit('SET_PLATFORM', {platform: platform})
 }

@@ -1,158 +1,162 @@
 <template lang="html">
-  <section class="posts-container">
-    <breadcrumb :pages="breadcrumbsData()"/>
-    <div class="mobile-container">
-      <div class="single-page-header">
-        <div class="is-flex">
-          <div class="author is-flex">
-            <div class="img-wrp">
-              <img src="@/assets/images/brackets.png" alt="LV">
-            </div>
-            <h5 class="name">Alex JIG</h5>
-            <span class="role">Collaborator</span>
-          </div>
-          <div class="category is-flex">
-            <img src="@/assets/images/icons-category.svg" alt="LV">
-            <h1>{{ post.categories[0].name }}</h1>
-          </div>
-        </div>
-        <div class="date-time">
-            <img src="@/assets/images/icons-clock.svg" alt="LV">
-            <span>3 Minutes ago. 12 JUI 2018. 13:55</span>
-          </div>
-      </div>
-    </div>
-    <div class="mobile-container">
-      <div class="post-content">
-        <ul class="actions-list is-flex">
-            <div class="is-flex">
-              <li><a href="#"><img src="@/assets/images/zoom-in-colored.svg" alt="LV"></a></li>
-              <li><a href="#"><img src="@/assets/images/zoom-out.svg" alt="LV"></a></li>
-            </div>
-            <li><a href="#"><img src="@/assets/images/icons-star-2.svg" alt="LV"></a></li>
-          </ul>
-        <h1 class="text-center">{{ post.title.substring(0, 45) }}</h1>
-        <!--<p>{{ post.excerpt }}</p>-->
-        <p>Ah, those warm summer months are the best, aren’t they? And not just because they’re synonymous with lounging poolside or trekking down to the river with family and friends. There’s just something about this time of year that makes it perfect for setting and accomplishing goals, or tackling that special project that’s been at the back of your mind.</p>
-        <p>I don’t know if it’s the heat, or the long days, or maybe just that extra touch of playfulness that seems to tickle folks between Spring and Fall. But there’s just something about the summertime that is perfect for finally cleaning out the garage, or taking a class, or picking up a new hobby.</p>
-        <div class="image-container">
-            <div class="thumbnail-area">
-              <thumbnail  :src="post.image_url" :alt="post.title" :to="post.url"/>
-              <span class="copyright">&copy; 2018. Copyrights</span>
+    <section class="posts-container">
+        <breadcrumb :pages="breadcrumbsData()"/>
+        <div class="mobile-container">
+            <div class="single-page-header">
+                <div class="is-flex">
+                    <div class="author is-flex">
+                        <div class="img-wrp">
+                            <img src="@/assets/images/brackets.png" alt="LV">
+                        </div>
+                        <h5 class="name">{{post.user.name}}</h5>
+                        <!--<span class="role">Collaborator</span>-->
+                    </div>
+                    <div class="date-time">
+                      <i class="fa fa-clock-o"></i>
+                      <span>{{post.time_ago}}</span>
+                    </div>
+                    <!-- <div class="category is-flex" v-if="post.categories[0]">
+                        <i class="fa fa-folder-o"></i>
+                        <h1>{{ post.categories[0].name }}</h1>
+                    </div> -->
+                </div>
             </div>
         </div>
-        <p>It’s an ideal time for learning some new code skills or building on the ones you already have. Think about it: If you set your mind to it, I mean really committed yourself to doing something awesome, how much could you learn in a single summer? What sorts of cool projects could you build in that time?</p>
-        <div class="grid-container">
-          <div class="grid-articles">
-            <article-item
-              title="New Blade Directives Coming to Laravel 5.6"
-              image=""
-              to="/"
-              horizontal
-            />
-            <article-item
-              title="Displaying the Weather With Serverless and Colors"
-              image=""
-              to="/"
-              horizontal
-            />
-          </div>
+        <div class="mobile-container">
+            <div class="post-content">
+                <ul class="actions-list is-flex">
+                    <div class="is-flex">
+                        <!--<li><a href="#"><img src="@/assets/images/zoom-in-colored.svg" alt="LV"></a></li>-->
+                        <!--<li><a href="#"><img src="@/assets/images/zoom-out.svg" alt="LV"></a></li>-->
+                        <!-- <li><a href="#"><img src="@/assets/images/icons-star-2.svg" alt="LV"></a></li> -->
+                    </div>
+                </ul>
+                <h1 class="text-center">{{ post.title }}</h1>
+                <p>{{ post.excerpt }}</p>
+                <div class="image-container">
+                    <div class="thumbnail-area">
+                        <thumbnail :src="post.image_url" :alt="post.title" :to="post.url"/>
+                        <span class="copyright">&copy; 2018. Copyrights</span>
+                    </div>
+                </div>
+                <p v-html="post.content" id="content"></p>
+                <h4>Tags : </h4>
+                <div class="tags">
+                    <nuxt-link v-for="tag in post.tags" :key="tag.id" :to="{name: 'tag-slug', params : {slug : tag.slug}}" >
+                        {{tag.name}}
+                    </nuxt-link>
+                </div>
+                <div class="grid-container">
+                    <div class="grid-articles">
+                        <template v-for="(item, key) in related.second">
+                            <article-item :title="item.title"
+                                          :image="item.image_url"
+                                          :key="key"
+                                          :to="{ name: 'slug', params: { slug: item.slug }}"
+                                          horizontal
+                            />
+                        </template>
+                    </div>
+                    <adsbygoogle/>
+                </div>
+
+                <social-sharing :url="$parent.seo.url"
+                                :title="$parent.seo.title"
+                                :description="$parent.seo.description"
+                                :media="$parent.seo.image"
+                                :hashtags="$parent.hashTags"
+                                twitter-user="laravelvuejs"
+                                inline-template
+                                network-tag="li"
+                >
+
+                    <ul class="share-links">
+                        <network network="facebook" class="facebook">
+                            <a class="facebook">
+                                <i class="fa fa-facebook"></i>
+                            </a>
+                        </network>
+                        <network network="twitter" class="twitter">
+                            <a class="twitter">
+                                <i class="fa fa-twitter"></i>
+                            </a>
+                        </network>
+                        <network network="whatsapp" class="whatsapp">
+                            <a class="whatsapp">
+                                <i class="fa fa-whatsapp"></i>
+                            </a>
+                        </network>
+                        <network network="telegram" class="telegram">
+                            <a class="telegram">
+                                <i class="fa fa-telegram"></i>
+                            </a>
+                        </network>
+                        <network network="reddit" class="reddit">
+                            <a class="reddit">
+                                <i class="fa fa-reddit"></i>
+                            </a>
+                        </network>
+                        <network network="linkedin" class="linkedin">
+                            <a class="linkedin">
+                                <i class="fa fa-linkedin"></i>
+                            </a>
+                        </network>
+                    </ul>
+                </social-sharing>
+
+            </div>
         </div>
-        <p>If you have your sights set on learning some code and upping your web dev game, here are some great tips and tricks to help you on your way and keep you focused amid those many tantalizing and/or obligatory summertime distractions.</p>
-        <div class="pre-box">
-          <div class="pre-header">JS</div>
-          <pre>
-  new Vue({
-    el: '#app',
-    components: { toogle },
-    date: {
-      buttonPressed: false
-    },
-    methods: {
-      click(fn) {
-        this.buttonPressed = true
-        fn()
-      },
-    },
-  });
-          </pre>
+        <div class="has-bg">
+            <div class="single-post-container">
+                <app-featured title="Related Posts" :items="related.last"/>
+            </div>
         </div>
-        <p>The summertime sure has its fair share of distractions. The kids are out of school. There are concerts and festivals that beckon. Nature’s in full bloom and enticing us to its beaches and parks. With a million fun and distracting things going on all around us, it can be incredibly difficult to stay focused at times. But where there’s a will, there’s a way — and where there’s a problem, there’s an opportunity for a solution. Like investing in a pair of noise-cancelling headphones, or taking up some mindfulness exercises and practices to quiet and calm the mind and increase your control over your actions, thoughts, and decisions.</p>
-        <ul class="share-links">
-          <li>
-              <a href="#" class="facebook">
-                  <i class="fa fa-facebook"></i>
-                  <span>Facebook</span>
-              </a>
-          </li>
-          <li>
-              <a href="#" class="twitter">
-                <i class="fa fa-twitter"></i>
-                <span>Twitter</span>
-              </a>
-          </li>
-          <li>
-              <a href="#" class="whatssap">
-                <i class="fa fa-whatsapp"></i>
-                <span>Whats App</span>
-              </a>
-          </li>
-        </ul>
-        <div class="swiper-area">
-          <heading>Source</heading>
-          <ul>
-            <li>Treehouse Team</li>
-            <li>Laravel.com</li>
-          </ul>
-          <app-jobs-swiper />
+        <div class="single-post-container has-p-45-120">
+            <div class="comment-container">
+                <vue-disqus shortname="laravel-vuejs-com" identifier="laravel-vuejs-com"
+                            :url="this.post.url"></vue-disqus>
+            </div>
         </div>
-        <div class="ads">720x90px</div>
-      </div>
-    </div>
-    <div class="has-bg">
-      <div class="single-post-container">
-        <app-featured />
-      </div>
-    </div>
-    <div class="single-post-container has-p-45-120">
-      <app-comment-area />
-    </div>
-  </section>
+    </section>
 </template>
 
 <script>
-  export default {
-    components: {
-      Breadcrumb: () => import('@/components/shared/partials/elements/breadcrumb'),
-      ArticleItem: () =>  import("@/components/shared/partials/elements/article-item"),
-      AppJobsSwiper: () =>  import("@/components/mobile/partials/app-jobs-swiper"),
-      AppFeatured: () =>  import("@/components/mobile/partials/app-featured"),
-      AppCommentArea: () =>  import("@/components/mobile/partials/app-comment-area")
-    },
-    name: 'post',
-    computed: {
-      post() {
-        return this.$store.state.post.single
-      }
-    },
-    data() {
-      return {
-        breadcrumbsData: () => [
-          {
-            name: 'Home',
-            link: "/"
-          },
-          {
-            name: this.post.categories[0].name,
-            link: '/'
-          },
-          {
-            name: this.post.title.substring(0, 35)
-          }
-        ]
-      }
+    export default {
+        components: {
+            Breadcrumb: () => import('@/components/shared/partials/elements/breadcrumb'),
+            ArticleItem: () => import("@/components/shared/partials/elements/article-item"),
+            // AppJobsSwiper: () =>  import("@/components/mobile/partials/app-jobs-swiper"),
+            AppFeatured: () => import("@/components/mobile/partials/app-featured"),
+            // AppCommentArea: () =>  import("@/components/mobile/partials/app-comment-area")
+        },
+        name: 'post',
+        computed: {
+            post() {
+                return this.$store.state.post.single
+            },
+            related() {
+                return {
+                    first: this.$store.state.post.single.related_posts.slice(0, 2),
+                    second: this.$store.state.post.single.related_posts.slice(2, 4),
+                    last: this.$store.state.post.single.related_posts.slice(4),
+                }
+            },
+        },
+        data() {
+            return {
+                breadcrumbsData: () => [
+                    {
+                        name: 'Home',
+                        link: "/"
+                    },
+                    {
+                        name: this.post.categories[0] ? this.post.categories[0].name : 'Category',
+                        link: this.post.categories[0] ? {name: 'category-slug', params : {slug : this.post.categories[0].slug}} : null
+                    }
+                ]
+            }
+        }
     }
-  }
 
 </script>
 
@@ -178,6 +182,8 @@
         font-weight 600
         color #384457
         margin 0 20px 0 10px
+        width 60px
+        overflow hidden
       .role
         font-size 14px
         color rgba(#616d82, .8)
@@ -191,6 +197,9 @@
         text-transform uppercase
         margin-left 10px
         padding-top 3px
+      .fa
+          color $secondary
+          font-size 16px
     .date-time
       span
         color rgba(#616d82, .8)
@@ -199,6 +208,9 @@
         display inline-block
         margin-left 10px
         padding-top 3px
+      .fa
+        color $secondary
+        font-size 16px
   .post-content
     h1
       font-size 28px
@@ -210,6 +222,12 @@
       line-height 28px
       color #616d82
       margin-bottom 20px
+      & >>>
+        img
+          max-width 100%
+          margin 10px 0
+        a
+          word-break break-all
     .thumbnail-area
       margin-bottom 20px
       .article-image
@@ -280,32 +298,41 @@
     padding 35px 0 60px
 
  .share-links
+    position fixed
+    bottom 0
+    width 100%
     display grid
-    grid-template-columns repeat(3, 1fr)
-    margin 0 -30px
-    li
+    grid-template-columns repeat(6, 1fr)
+    margin 0 -20px 0
+    z-index 1
+    & >>>
+      li
+        display flex
+        align-items center
+        justify-content center
+        font-weight 500
+        letter-spacing 1px
+        text-transform uppercase
+        padding 10px
         a
-            display flex
-            align-items center
-            justify-content center
-            color #FFF
-            font-size 12px
-            font-weight 500
-            letter-spacing 1px
-            text-transform uppercase
-            padding 10px
-            &.facebook
-              background-color #3B5998
-            &.twitter
-              background-color #38A1F3
-            &.whatssap
-              background-color #25D366
-            .fa
-              margin-right 10px
-              padding-top 3px
-              font-size 14px
-            span
-              padding-top 3px
+          color #FFF
+        &.facebook
+          background-color #3B5998
+        &.twitter
+          background-color #38A1F3
+        &.whatsapp
+          background-color #25D366
+        &.telegram
+          background-color #0088cc
+        &.linkedin
+          background-color #0077b5
+        &.reddit
+          background-color #ff4500
+        .fa
+          padding-top 3px
+          font-size 20px
+        span
+          padding-top 3px
 .actions-list
   margin-bottom 20px
   .is-flex
@@ -324,5 +351,37 @@
           background-color rgba($secondary, .05)
       &:last-child
           margin-bottom 0
+
+
+.tags
+  a
+      border 1px solid $secondary
+      display inline-block
+      background #FFF
+      -webkit-box-shadow 0 1px 1px 0 rgba(180,180,180,0.1)
+      box-shadow 0 1px 1px 0 rgba(180,180,180,0.1)
+      -webkit-transition all .1s ease-in-out
+      -moz-transition all .1s ease-in-out
+      -o-transition all .1s ease-in-out
+      -ms-transition all .1s ease-in-out
+      transition all .1s ease-in-out
+      border-radius 2px
+      margin 0 3px 6px 0
+      padding 5px 10px
+      &:hover
+          border-color $primary
+          color $secondary
+          font-weight 500
+
+  #content
+  & /deep/
+      a.cs-btn.cs-btn-default
+      a.cs-btn.cs-btn-Default
+          padding 10px
+          margin 2px
+          display block
+          text-align center
+.comment-container
+  padding 0 30px
 
 </style>

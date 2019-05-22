@@ -4,7 +4,7 @@
         <div class="small-container">
             <app-facts />
         </div>
-        <div class="team-container">
+        <div class="team-container" v-if="false">
             <div class="small-container">
                 <app-team />
             </div>

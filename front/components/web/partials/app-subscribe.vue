@@ -1,28 +1,28 @@
 <template>
-  <section class="subscribe">
+  <section class="subscribe" v-if="!loggedIn">
     <div class="container">
       <div class="row">
         <div class="col-sm-6">
           <div class="subscribe-info">
             <h3>Stay in Touch</h3>
-            <p>Sign up for our newsletter, and we'll send you news and tutorials on web design, coding, business, and
-              more!</p>
+            <p>Sign up for our newsletter, and we'll send you news and tutorials, coding, business, and more!</p>
           </div>
         </div>
         <div class="col-sm-6">
-          <app-form class="subscribe-form">
-            <div class="alert alert-success" role="alert" v-if="message">
-              {{message}}
+          <app-form class="subscribe-form" :submit="subscribe">
+            <div class="alert alert-success text-center" role="alert" v-if="message">
+              <i class="glyphicon glyphicon-check"></i>
+              <b>{{message}}</b>
             </div>
             <div class="form-group">
-              <input type="email" class="form-control" placeholder="E-mail" v-model="email">
+              <input type="email" class="form-control" placeholder="E-mail" v-model="email" required aria-label="email">
               <div class="img">
-                <img src="@/assets/images/icons-email.png" alt="#">
+                <i class="fa fa-envelope"></i>
               </div>
             </div>
             <template slot="actions">
-              <button class="button" type="submit" @click.prevent="subscribe">Subscribe</button>
-              <button class="button no-background" type="submit">Advenced subscribe</button>
+              <button class="button" type="submit" :disabled="loading">Subscribe</button>
+              <!--<button class="button no-background" type="submit">Advenced subscribe</button>-->
             </template>
           </app-form>
         </div>
@@ -38,8 +38,14 @@
     name: "AppSubscribe",
 
     props: {},
+    computed: {
+      loggedIn() {
+        return this.$store.state.auth.loggedIn;
+      }
+    },
     data() {
       return {
+        loading: false,
         email: '',
         message: null
       }
@@ -51,10 +57,13 @@
 
         let variables = {email: this.email};
         this.message = null;
+        this.loading = true;
         this.$apollo.mutate({mutation: subscribeQql, variables})
           .then((data) => {
             this.message = data.data.subscribe
-          })
+          }).finally(() => {
+          this.loading = false
+        })
       }
     },
     mounted() {

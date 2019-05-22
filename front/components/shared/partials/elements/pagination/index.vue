@@ -17,7 +17,7 @@
           </a>
         </li>
 
-        <li class="pagination-link" v-for="(page, key) in computed.lastPage" :key="key"
+        <li class="pagination-link" v-for="(page, key) in computed.pageRange" :key="key"
             :class="{ 'active': page === computed.currentPage }">
           <a href="#" @click="onPaginationChangePage(page)" :class="{'current-link' : computed.currentPage === page}">
             {{ page }}
@@ -51,7 +51,7 @@
       },
       limit: {
         type: Number,
-        default: 0
+        default: 5
       }
     },
     methods: {

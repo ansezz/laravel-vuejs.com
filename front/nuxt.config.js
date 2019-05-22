@@ -7,24 +7,48 @@ const resolve = require("path").resolve
 
 module.exports = {
   modules: [
+    '@nuxtjs/onesignal',
+    "@nuxtjs/pwa",
     '@nuxtjs/apollo',
     "@nuxtjs/axios",
     "@nuxtjs/dotenv",
     "@nuxtjs/font-awesome",
     "@nuxtjs/toast",
-    //"@nuxtjs/google-analytics",
+    "@nuxtjs/google-analytics",
     '@nuxtjs/google-adsense',
     "@nuxtjs/sitemap",
-    "@nuxtjs/pwa",
     "@nuxtjs/moment",
     "@nuxtjs/webpackmonitor",
     "nuxt-device-detect",
+    '@nuxtjs/sentry',
+    // @TOD : create Creating an experiment fro google optimize
+    /*'nuxt-google-optimize',*/
     // @TODO enable component cache only in prod
     // ['@nuxtjs/component-cache', {maxAge: 1000 * 60 * 60}],
     /*["@nuxtjs/google-tag-manager", {
         id: process.env.GOOGLE_TAG_MANAGER
     }]*/
   ],
+  // Optional options
+  googleOptimize: {
+    // experimentsDir: '~/experiments',
+    // maxAge: 60 * 60 * 24 * 7 // 1 Week
+    // pushPlugin: true,
+  },
+  // @TODO : this.$sentry.captureException(new Error('example'))
+  sentry: {
+    dsn: 'https://05823801c6c64430a9716187dc90f7bd@sentry.io/188197', // Enter your project's DSN here
+    config: {}, // Additional config
+  },
+  oneSignal: {
+    init: {
+      appId: '0574cfe4-d2e3-403d-b7b5-875f56652248',
+      allowLocalhostAsSecureOrigin: true,
+      welcomeNotification: {
+        disable: true
+      }
+    }
+  },
   toast: {
     position: 'top-center',
     duration: 4000
@@ -34,9 +58,7 @@ module.exports = {
   },
   // Give apollo module options
   apollo: {
-    errorHandler(error) {
-      console.log(error)
-    },
+    errorHandler: '~/plugins/apollo-error-handler.js',
     // required
     clientConfigs: {
       default: {
@@ -46,24 +68,9 @@ module.exports = {
       }
     }
   },
-  /* sitemap: {
-     path: "/sitemap.xml",
-     // hostname: 'https://example.com',
-     cacheTime: 1000 * 60 * 15,
-     gzip: true,
-     generate: false, // Enable me when using nuxt generate
-     exclude: [
-       // '/cms/!**'
-     ],
-     routes() {
-       return axios
-         .get(process.env.SITE_MAP_URL)
-         .then(res => res.data.data.data.map(post => "/" + post.slug))
-     }
-   },*/
-  /*"google-analytics": {
-      id: process.env.GOOGLE_ANALYTICS
-  },*/
+  "google-analytics": {
+    id: process.env.GOOGLE_ANALYTICS
+  },
   axios: {
     baseURL: process.env.API_URL,
     headers: {
@@ -89,7 +96,7 @@ module.exports = {
    ** Headers of the page
    */
   head: {
-    titleTemplate: '%s  ←  Laravel-VueJs.com',
+    titleTemplate: '%s  ←  Laravel-VueJs.com > Beta',
     title: "Laravel-VueJs.com",
     meta: [
       {charset: "utf-8"}, {name: "viewport", content: "width=device-width, initial-scale=1"}
@@ -97,16 +104,15 @@ module.exports = {
     htmlAttrs: {dir: "ltr"},
     link: [
       {rel: "icon", type: "image/x-icon", href: "/favicon.ico"}
-    ],
-    script: [
-      {src: "https://code.jquery.com/jquery-1.12.4.min.js"}
     ]
   },
   /*
    ** Customize the progress bar color
    */
   loading: {
-    color: "#63F9E6"
+    color: "#6936D3",
+    height: '10px',
+    continuous: true
   },
   // @TODO : custom loading
   //  loading: '~/components/loading.vue'
@@ -117,7 +123,7 @@ module.exports = {
   build: {
 //    analyze: true,
     babel: {
-      // plugins: ['"@babel/plugin-proposal-nullish-coalescing-operator"']
+      plugins: ['@babel/plugin-proposal-nullish-coalescing-operator']
     },
     plugins: [
       new webpack.LoaderOptionsPlugin({
@@ -148,6 +154,7 @@ module.exports = {
   plugins: [
     // new BundleAnalyzerPlugin(),
     {src: "~/plugins/ui"},
+    {src: '~/plugins/disqus'},
     {src: "~/plugins/http"},
     {src: "~/plugins/utils"},
     {src: "~/plugins/social-sharing"},
@@ -155,7 +162,7 @@ module.exports = {
     {src: "~/plugins/vee-validate", ssr: false},
     {src: "~/plugins/lazyload", ssr: false},
     {src: '~/plugins/vue-tags-input', ssr: false},
-    {src: '~/plugins/bootstrap.min.js', ssr: false}
+    {src: '~/plugins/infinite-loading', ssr: false}
   ],
 
   css: [

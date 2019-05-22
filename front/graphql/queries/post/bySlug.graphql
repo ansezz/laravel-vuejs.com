@@ -1,32 +1,41 @@
 query posts($slug: String!) {
-  postBySlug(slug: $slug) {
-    id
-    title
-    content
-    excerpt
-    image_url
-    url
-    type
-    status
-    comment_status
-    user {
-      id
-      name
+    postBySlug(slug: $slug) {
+        id
+        title
+        content
+        excerpt
+        image_url
+        url
+        source
+        views
+        type
+        status
+        comment_status
+        time_ago
+        related_posts {
+            id
+            title
+            slug
+            image_url
+        }
+        user {
+            id
+            name
+        }
+        media {
+            id
+            full_url
+        }
+        tags {
+            id
+            name
+            slug
+        }
+        categories {
+            id
+            name
+            slug
+        }
     }
-    media {
-      id
-      full_url
-    }
-    tags {
-      id
-      name
-      slug
-    }
-    categories {
-      id
-      name
-      slug
-    }
-  }
 }
 

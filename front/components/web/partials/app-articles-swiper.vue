@@ -10,7 +10,14 @@
                             <h4>{{item.title}}</h4>
                           </nuxt-link>
                             <ul class="cats">
-                                <li>In News. Last update: 4 Minutes ago.</li>
+                                <li><span v-if="item.categories[0]">In
+                                    <strong>
+                                        <nuxt-link
+                                                :to="{name: 'category-slug', params : {slug : item.categories[0].slug}}">
+                                            {{item.categories[0].name}}
+                                        </nuxt-link>
+                                    </strong>.</span> Last update: {{item.time_ago}}.
+                                </li>
                             </ul>
                         </div>
                     </div>
@@ -59,7 +66,7 @@
 
 <style lang="stylus" scoped>
     .articles-swiper
-        width 540px
+        width calc(100% - 490px)
         overflow hidden
         .article-image
             height 270px
@@ -70,7 +77,7 @@
     .swiper-container
         height 410px
         .swiper-wrapper
-            width 500px
+            width calc(100% - 40px)
             .swiper-slide
                 height 410px !important
         .article-info
