@@ -111,7 +111,7 @@ namespace :app do
   task :build do
     on roles(:server) do
       within release_path do
-        #execute "cd #{release_path} && composer install --prefer-dist --no-interaction --optimize-autoloader"
+        execute "cd #{release_path} && composer install"
         #execute "chmod 777 -R #{release_path}/storage" execute "cd #{release_path} && php artisan migrate:fresh --seed"
         execute "cd #{release_path} && php artisan migrate"
         execute "cd #{release_path} && php artisan storage:link"
@@ -184,7 +184,9 @@ after "composer:run", "app:build"
 
 after "composer:run", "app:symlink"
 
-after "composer:run", "npm:install" 
+after "composer:run", "npm:install"
+
+after "composer:run", "app:build"
 
 after "npm:install", "npm:build"
 

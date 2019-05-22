@@ -14,7 +14,6 @@
 </template>
 
 <script>
-  import AppNavbar from "@/components/web/partials/app-navbar";
   import AppFooter from "@/components/web/partials/app-footer";
   import AppNavigation from "@/components/web/partials/app-navigation";
   import AppMain from "@/components/web/partials/app-main";
