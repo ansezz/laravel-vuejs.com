@@ -70,6 +70,7 @@ module.exports = {
       }
     }
   },
+  errorHandler: '~/plugins/apollo-error-handler.js',
   "google-analytics": {
     id: process.env.GOOGLE_ANALYTICS
   },
