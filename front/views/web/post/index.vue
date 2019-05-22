@@ -358,11 +358,14 @@
             color #384457
             font-weight 500
             margin-bottom 40px
+        & >>>
+            h1, h2, h3, h4, h5, h6
+                margin 25px 0 15px 0
 
         p
           font-size 18px
-          line-height 28px
-          color #616d82
+          line-height 34px
+          color #2c2f34
           margin-bottom 20px
         & >>>
           img
