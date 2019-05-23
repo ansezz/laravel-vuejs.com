@@ -1,7 +1,6 @@
 <template>
   <div class="app">
     <app-navbar/>
-    <adsbygoogle/>
     <main>
       <nuxt/>
     </main>
