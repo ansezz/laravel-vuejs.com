@@ -40,7 +40,7 @@
     "apollo-client": "^2.4.12",
     "apollo-link": "^1.2.6",
     "apollo-link-http": "^1.5.9",
-    "bootstrap": "3.4.0",
+    "bootstrap": ">=3.4.1",
     "graphql": "^14.1.1",
     "graphql-tag": "^2.10.1",
     "ionicons": "^4.5.5",
