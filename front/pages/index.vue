@@ -12,8 +12,8 @@
     computed: {
       seo() {
         return {
-          title: '🚀 Home ',
-          description: 'Home page',
+          title: '🚀The latest Articles , Q/A, Trends, Video, Jobs, Services, news, tutorials, plugins, packages, repositories, repository, Vue.Js Vue Laravel',
+          description: 'Laravel VueJs The latest Articles , Q/A, Trends, Video, Jobs, Services, news, tutorials, plugins, packages, repositories, repository, Vue.Js Vue Laravel',
           image: '',
           type: 'website',
         }
