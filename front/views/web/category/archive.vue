@@ -8,7 +8,7 @@
           <div class="user-avatar">
             <i class="fa fa-folder-o"></i>
           </div>
-          <h1 v-if="category">{{category.name}}</h1>
+          <h1 v-if="category" v-html="category.name"></h1>
         </div>
         <filters route-name="category-slug"></filters>
       </div>
