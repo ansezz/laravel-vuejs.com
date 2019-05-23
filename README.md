@@ -1,5 +1,5 @@
 # Laravel-VueJs.com CMS
-Source Code of Laravel-VueJs.com Website https://Laravel-VueJs.com
+Laravel-VueJs.com Website https://Laravel-VueJs.com
 CMS based on Latest technologies of Laravel and VueJs, using Laravel nova, 
 GraphQL, NuxtJs, Apollo and ...more
 
