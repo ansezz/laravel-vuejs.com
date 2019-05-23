@@ -56,8 +56,8 @@
                     </social-sharing>
 
                     <div class="thumbnail-area">
-                        <thumbnail :src="post.image_url" :alt="post.title" :to="post.url"/>
-                        <span class="copyright">&copy; 2018. Copyrights</span>
+                        <thumbnail :src="post.image_url" :alt="post.title" :to="{ name: 'slug', params: { slug: $route.params.slug }}"/>
+                        <!--<span class="copyright">&copy; 2018. Copyrights</span>-->
                     </div>
                     <ul class="actions-list">
                         <!--<li><a href="#"><img src="@/assets/images/zoom-in-colored.svg" alt="LV"></a></li>-->
