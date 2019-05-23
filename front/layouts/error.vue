@@ -4,7 +4,8 @@
             <img src="@/assets/images/404.png" alt="LV">
         </div>
         <div class="error-body">
-            <pre>{{error}}</pre>
+            <!--@TODO : Show error only oin dev env-->
+            <!--<pre>{{error}}</pre>-->
             <h1 v-if="error.statusCode === 404">Mate, page not found!</h1>
             <h1 v-else>An error occurred</h1>
             <p>You might not have permissions to see this page or isn’t exists anymore.</p>

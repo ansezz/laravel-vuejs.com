@@ -104,7 +104,10 @@ module.exports = {
     htmlAttrs: {dir: "ltr"},
     link: [
       {rel: "icon", type: "image/x-icon", href: "/favicon.ico"}
-    ]
+    ],
+    script: [
+      {src: '//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js', async: true}
+    ],
   },
   /*
    ** Customize the progress bar color
@@ -162,7 +165,8 @@ module.exports = {
     {src: "~/plugins/vee-validate", ssr: false},
     {src: "~/plugins/lazyload", ssr: false},
     {src: '~/plugins/vue-tags-input', ssr: false},
-    {src: '~/plugins/infinite-loading', ssr: false}
+    {src: '~/plugins/infinite-loading', ssr: false},
+    {src: '~/plugins/auto-ads', ssr: false}
   ],
 
   css: [

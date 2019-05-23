@@ -1,12 +1,19 @@
 <template>
   <div class="app">
     <app-navbar/>
+    <adsbygoogle/>
     <main>
       <nuxt/>
     </main>
+    <div class="container">
+      <adsbygoogle/>
+    </div>
     <div class='onesignal-customlink-container'></div>
     <app-subscribe/>
     <app-footer/>
+    <div class="container">
+      <adsbygoogle/>
+    </div>
   </div>
 </template>
 

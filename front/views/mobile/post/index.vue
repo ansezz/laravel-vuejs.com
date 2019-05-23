@@ -36,17 +36,15 @@
                 <div class="image-container">
                     <div class="thumbnail-area">
                         <thumbnail :src="post.image_url" :alt="post.title" :to="post.url"/>
-                        <span class="copyright">&copy; 2018. Copyrights</span>
+                        <!--<span class="copyright">&copy; 2018. Copyrights</span>-->
                     </div>
                 </div>
-                <p v-html="post.content" id="content"></p>
-                <h4>Tags : </h4>
-                <div class="tags">
-                    <nuxt-link v-for="tag in post.tags" :key="tag.id" :to="{name: 'tag-slug', params : {slug : tag.slug}}" >
-                        {{tag.name}}
-                    </nuxt-link>
-                </div>
                 <div class="grid-container">
+                    <adsbygoogle/>
+                </div>
+                <p v-html="post.content" id="content"></p>
+                <div class="grid-container">
+                    <adsbygoogle/>
                     <div class="grid-articles">
                         <template v-for="(item, key) in related.second">
                             <article-item :title="item.title"
@@ -57,9 +55,13 @@
                             />
                         </template>
                     </div>
-                    <adsbygoogle/>
                 </div>
-
+                <h4>Tags : </h4>
+                <div class="tags">
+                    <nuxt-link v-for="tag in post.tags" :key="tag.id" :to="{name: 'tag-slug', params : {slug : tag.slug}}" >
+                        {{tag.name}}
+                    </nuxt-link>
+                </div>
                 <social-sharing :url="$parent.seo.url"
                                 :title="$parent.seo.title"
                                 :description="$parent.seo.description"
@@ -109,6 +111,7 @@
         <div class="has-bg">
             <div class="single-post-container">
                 <app-featured title="Related Posts" :items="related.last"/>
+                <adsbygoogle/>
             </div>
         </div>
         <div class="single-post-container has-p-45-120">
