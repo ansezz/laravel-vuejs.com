@@ -12,7 +12,7 @@
                 </div>
                 <div class="category is-flex" v-if="post.categories[0]">
                     <i class="fa fa-folder-o"></i>
-                    <h1>{{ post.categories[0].name }}</h1>
+                    <h1 v-html="post.categories[0].name"></h1>
                 </div>
                 <div class="date-time">
                     <i class="fa fa-clock-o"></i>
@@ -22,7 +22,7 @@
         </div>
         <div class="single-post-container">
             <div class="post-content">
-                <h1 class="text-center">{{ post.title }}</h1>
+                <h1 class="text-center" v-html="post.title"></h1>
                 <p v-html="post.excerpt"></p>
                 <div class="image-container">
                     <social-sharing :url="$parent.seo.url"
