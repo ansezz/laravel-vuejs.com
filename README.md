@@ -5,7 +5,7 @@ GraphQL, NuxtJs, Apollo and ...more
 
 \#Laravel #VueJS #GraphQL #Apollo #NuxtJs #Nova
 
-## [DOCS](http://laravel-vuejs.com/docs)
+## [DOCS (WIP)](http://laravel-vuejs.com/docs)
 ## [Laravel-VueJs.com](http://laravel-vuejs.com/docs)
 
 <a name="Server"></a>
