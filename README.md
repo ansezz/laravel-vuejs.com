@@ -7,6 +7,8 @@ GraphQL, NuxtJs, Apollo and ...more
 
 ## [DOCS (WIP)](http://laravel-vuejs.com/docs)
 ## [Laravel-VueJs.com](http://laravel-vuejs.com/docs)
+ 
+![home page](https://www.laravel-vuejs.com/home2.png "Home Page")
 
 <a name="Server"></a>
 ## Server
@@ -57,3 +59,8 @@ The Laravel framework has a few system requirements.
 - Disqus
 - Awesome swiper
 ... and more 
+
+
+## Images : 
+![home page](https://www.laravel-vuejs.com/home2.png "Home Page")
+![home page](https://www.laravel-vuejs.com/home1.png "Home Page")
