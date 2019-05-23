@@ -8,6 +8,7 @@
     <div class="container">
       <adsbygoogle/>
     </div>
+    <div class='onesignal-customlink-container'></div>
     <app-subscribe/>
     <app-footer/>
   </div>

@@ -4,6 +4,7 @@
     <main>
       <nuxt/>
     </main>
+    <div class='onesignal-customlink-container'></div>
     <app-subscribe/>
     <app-footer/>
   </div>
