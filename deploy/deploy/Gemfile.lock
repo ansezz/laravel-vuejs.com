@@ -8,6 +8,14 @@ GEM
       i18n
       rake (>= 10.0.0)
       sshkit (>= 1.9.0)
+    capistrano-composer (0.0.6)
+      capistrano (>= 3.0.0.pre)
+    capistrano-file-permissions (1.0.0)
+      capistrano (~> 3.0)
+    capistrano-laravel (1.2.2)
+      capistrano (>= 3.0.0)
+      capistrano-composer (>= 0.0.6)
+      capistrano-file-permissions (>= 1.0.0)
     concurrent-ruby (1.0.5)
     i18n (1.0.1)
       concurrent-ruby (~> 1.0)
@@ -23,7 +31,8 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  capistrano (= 3.11.0)
+  capistrano (~> 3.11.0)
+  capistrano-laravel
 
 BUNDLED WITH
-   1.16.1
+   1.17.1

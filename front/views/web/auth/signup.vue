@@ -17,4 +17,6 @@
 </script>
 
 <style lang="stylus" scoped>
+  .app-signup
+    padding 65px 0 120px
 </style>

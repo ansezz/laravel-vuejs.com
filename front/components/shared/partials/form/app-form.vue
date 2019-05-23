@@ -1,5 +1,5 @@
 <template>
-  <form class="form">
+  <form class="form" @submit.prevent="submit">
     <header>
         <slot name="desc" />
     </header>
@@ -15,7 +15,11 @@
 <script>
 export default {
   name: "AppForm",
-  props: {}
+  props: {
+    submit :{
+      type:Function
+    }
+  }
 }
 </script>
 
@@ -47,6 +51,9 @@ export default {
                 display flex
                 align-items center
                 justify-content center
+                .fa
+                  font-size 15px
+                  color $secondary
 
   .form-actions
     display flex

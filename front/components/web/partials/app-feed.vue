@@ -10,7 +10,11 @@
                     :to="{ name: 'slug', params: { slug: item.slug }}"
       />
     </div>
-    <Pagination :data="paginator" @pagination-change-page="changePage"/>
+
+    <div class="text-center show-more">
+      <nuxt-link :to="{name : 'posts'}" class="button">Show more Posts</nuxt-link>
+    </div>
+
   </section>
 </template>
 
@@ -18,7 +22,6 @@
   export default {
     name: 'AppFeed',
     components: {
-      Pagination: () => import('@/components/shared/partials/elements/pagination/index')
     },
     data() {
       return {}
@@ -42,6 +45,8 @@
 </script>
 
 <style lang="stylus" scoped>
+  .show-more
+    padding-top 30px
   .feed
     width calc(100% - 300px)
     padding-right 20px
@@ -56,10 +61,10 @@
     &:nth-child(1)
       width calc(100% + 97px)
       grid-row span 2
+      & >>>
+        .article-image
+          height 240px
 
-      >>>
-      .article-image
-        height 240px
 
     &:nth-child(2)
     &:nth-child(3)

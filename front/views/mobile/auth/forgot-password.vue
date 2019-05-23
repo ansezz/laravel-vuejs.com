@@ -1,15 +1,20 @@
 <template>
-  <section>
-    <h1>Forgot Password Mobile</h1>
-  </section>
+    <section class="forgot-password">
+        <app-forgot-password />
+    </section>
 </template>
 
 <script>
-  export default {
-    components: {},
-    name: "ForgotPassword"
-  }
+export default {
+    name: "ForgotPassword",
+    components: {
+        AppForgotPassword: () => import('@/components/mobile/partials/app-forgot-password'),
+    },
+    props: {}
+}
 </script>
 
 <style lang="stylus" scoped>
+    .forgot-password
+        padding 65px 0
 </style>

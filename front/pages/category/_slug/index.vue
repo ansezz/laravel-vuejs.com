@@ -3,21 +3,22 @@
 </template>
 
 <script>
+  import seo from '@/mixins/seo'
+
   export default {
     layout: ({store}) => store.state.platform,
-
+    mixins: [seo],
     middleware: ["category"],
     computed: {
+      seo() {
+        return {
+          title: this.category.name,
+          description: this.category.description,
+          type: 'website'
+        }
+      },
       category() {
         return this.$store.state.category.category
-      }
-    },
-    head() {
-      return {
-        title: this.category.name,
-        meta: [
-          {hid: 'description', name: 'description', content: this.category.description}
-        ]
       }
     },
     components: {

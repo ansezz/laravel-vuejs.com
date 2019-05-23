@@ -1,21 +1,22 @@
-query posts($count: Int!, $page : Int, $sort_by : String) {
-  posts(count : $count, page : $page, sort_by : $sort_by) {
-    data {
-      id
-      title
-      slug
-      excerpt
-      image_url
+query posts($count: Int!, $page : Int, $sort_by : String, $s : String) {
+    posts(count : $count, page : $page, sort_by : $sort_by, s : $s ) {
+        data {
+            id
+            title
+            slug
+            excerpt
+            image_url
+            time_ago
+        }
+        paginatorInfo {
+            count
+            currentPage
+            firstItem
+            hasMorePages
+            lastItem
+            lastPage
+            perPage
+            total
+        }
     }
-    paginatorInfo {
-      count
-      currentPage
-      firstItem
-      hasMorePages
-      lastItem
-      lastPage
-      perPage
-      total
-    }
-  }
 }

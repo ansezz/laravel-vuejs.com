@@ -1,15 +1,15 @@
 <template>
     <section class="featured-articles">
         <div class="container">
-            <heading>Featured Posts</heading>
+            <heading>{{title}}</heading>
             <div class="posts-grid">
-              <article-item v-for="item in featured"
-                            :title="item.title"
-                            :image="item.image_url"
-                            :description="item.excerpt"
-                            :key="item.id"
-                            :to="{ name: 'slug', params: { slug: item.slug }}"
-              />
+                <article-item v-for="item in posts"
+                              :title="item.title"
+                              :image="item.image_url"
+                              :description="item.excerpt"
+                              :key="item.id"
+                              :to="{ name: 'slug', params: { slug: item.slug }}"
+                />
             </div>
         </div>
     </section>
@@ -17,19 +17,31 @@
 
 <script>
     import ArticleItem from "@/components/shared/partials/elements/article-item"
+
     export default {
         name: 'AppFeatured',
         components: {
             ArticleItem
         },
-      computed: {
-        featured() {
-          return this.$store.state.post.featured.data
-        },
-      },
-        data() {
-            return {
+        props: {
+            title: {
+                type: String,
+                default: 'Featured Posts'
+            },
+            items: {
+                type: [Object, Array]
             }
+        },
+        computed: {
+            posts() {
+                if (this.items && this.items.length > 0)
+                    return this.items
+
+                return this.$store.state.post.featured.data
+            },
+        },
+        data() {
+            return {}
         }
     }
 
@@ -39,6 +51,7 @@
     .featured-articles
         position relative
         padding 60px 0
+
         &:after
             content ""
             height 1px

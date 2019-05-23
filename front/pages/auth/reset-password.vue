@@ -3,7 +3,19 @@
 </template>
 
 <script>
+  import seo from '@/mixins/seo'
+
   export default {
+    mixins: [seo],
+    computed: {
+      seo() {
+        return {
+          title: 'Reset your password',
+          description: 'Reset your password',
+          type: 'website'
+        }
+      }
+    },
     layout: ({store}) => store.state.platform,
     middleware: ['guest'],
     components: {

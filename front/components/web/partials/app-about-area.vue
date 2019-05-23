@@ -4,7 +4,7 @@
             <div class="about-us-container">
                 <div class="about-caption">
                     <h1>Who We Are?</h1>
-                    <p>Treehouse brings affordable technology education to people everywhere in order to help them achieve their dreams and change the world.</p>
+                    <p>The mission of Laravel & VueJs web site is to help web professionals up their skill and knowledge of Laravel & VueJs.</p>
                 </div>
                 <div class="about-us-men">
                     <img src="@/assets/images/about-svg.svg" alt="LV">
@@ -24,11 +24,17 @@
 <style lang="stylus" scoped>
     .about-us-area
         background-color #e5e7e6
+        @media (max-width 768px)
+          padding 20px 0
         .about-us-container
             display flex
             align-items center
+            @media (max-width 768px)
+              flex-direction column
             .about-caption
                 width 450px
+                @media (max-width 768px)
+                  width 100%
                 h1
                     color #384457
                     font-size 28px
@@ -40,6 +46,8 @@
                     margin-bottom 0
             .about-us-men
                 width calc(100% - 450px)
+                @media (max-width 768px)
+                  width 100%
                 img
                     width 100%
 </style>

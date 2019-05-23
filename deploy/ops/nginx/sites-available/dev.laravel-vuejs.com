@@ -7,7 +7,7 @@ map $sent_http_content_type $expires {
 
 server {
     server_name .dev.laravel-vuejs.com;
-    root "/var/www/laravel-vuejs/domains/dev.laravel-vuejs.com/public_html/current/htdocs";
+    root "/var/www/dev.laravel-vuejs.com/web/current/htdocs";
 
     index index.html index.htm index.php;
 
@@ -17,11 +17,11 @@ server {
     gzip_min_length 1000;
 
     #catch cms admin
-        location /cms {
+        location /admin {
             try_files $uri $uri/ /index.php?$query_string;
         }
 
-        location /content {
+        location /graphql {
             try_files $uri $uri/ /index.php?$query_string;
         }
 
