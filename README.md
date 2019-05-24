@@ -61,6 +61,7 @@ The Laravel framework has a few system requirements.
 ... and more 
 
 
-## Images : 
+### Image 1 : 
 ![home page](https://www.laravel-vuejs.com/home2.png "Home Page")
+### Image 2 : 
 ![home page](https://www.laravel-vuejs.com/home1.png "Home Page")
