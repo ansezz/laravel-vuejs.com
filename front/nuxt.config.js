@@ -45,7 +45,7 @@ module.exports = {
       appId: '0574cfe4-d2e3-403d-b7b5-875f56652248',
       allowLocalhostAsSecureOrigin: true,
       welcomeNotification: {
-        disable: true
+        disable: false
       }
     }
   },
@@ -165,8 +165,7 @@ module.exports = {
     {src: "~/plugins/vee-validate", ssr: false},
     {src: "~/plugins/lazyload", ssr: false},
     {src: '~/plugins/vue-tags-input', ssr: false},
-    {src: '~/plugins/infinite-loading', ssr: false},
-    {src: '~/plugins/auto-ads', ssr: false}
+    {src: '~/plugins/infinite-loading', ssr: false}
   ],
 
   css: [

@@ -20,6 +20,7 @@
   import AppNavbar from "@/components/mobile/partials/app-navbar";
   import AppFooter from "@/components/mobile/partials/app-footer";
   import AppSubscribe from "@/components/mobile/partials/app-subscribe";
+
   export default {
     components: {
       AppNavbar,
@@ -28,6 +29,8 @@
     },
     data() {
       return {};
+    },
+    mounted() {
     },
     methods: {}
   };

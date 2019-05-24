@@ -116,8 +116,11 @@
         </div>
         <div class="single-post-container has-p-45-120">
             <div class="comment-container">
-                <vue-disqus shortname="laravel-vuejs-com" identifier="laravel-vuejs-com"
-                            :url="this.post.url"></vue-disqus>
+                <vue-disqus shortname="laravel-vuejs-com"
+                            :identifier="post.slug"
+                            :title="post.title"
+                            :url="this.post.url">
+                </vue-disqus>
             </div>
         </div>
     </section>

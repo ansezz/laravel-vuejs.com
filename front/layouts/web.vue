@@ -22,7 +22,7 @@
   import AppNavigation from "@/components/web/partials/app-navigation";
   import AppMain from "@/components/web/partials/app-main";
   import AppSubscribe from "@/components/web/partials/app-subscribe";
-  import { mapActions } from "vuex";
+  import {mapActions} from "vuex";
 
   export default {
     components: {
@@ -38,7 +38,10 @@
       })
     },
     data() {
-      return {};
+      return {
+      };
+    },
+    mounted() {
     },
     created() {
       if (this.$route.query.token) {
