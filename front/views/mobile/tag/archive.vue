@@ -22,10 +22,12 @@
                 />
             </div>
 
-            <button @click="showMore()"
+            <div class="text-center">
+              <button @click="showMore()" class="button"
                     v-if="hasMorePages && !show_more">
                 {{ $apollo.queries.postsByTag.loading ? 'Loading ...' : 'Show more'}}
-            </button>
+              </button>
+            </div>
 
             <no-ssr>
                 <infinite-loading @infinite="showMore"
@@ -127,7 +129,7 @@
 
 <style lang="stylus" scoped>
     .posts-container
-        padding-bottom 120px
+        padding-bottom 80px
 
     .post-heading-filters
         position relative
@@ -175,11 +177,11 @@
 
     .article-grid
         display grid
-        grid-template-columns repeat(4, 1fr)
+        grid-template-columns repeat(1, 1fr)
         grid-gap 40px 10px
 
     .ads
-        width 900px
+        width 100%
         height 250px
         display flex
         align-items center
@@ -188,4 +190,6 @@
         font-size 24px
         color $white
         margin 60px auto
+    .text-center
+      margin-top 20px
 </style>
