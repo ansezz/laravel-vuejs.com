@@ -10,7 +10,7 @@
                     <span class="time">2:34</span>
                 </div>
             </div>
-            <nuxt-link to="/" class="is-absolute" />
+            <nuxt-link aria-label="Link LV" to="/" class="is-absolute" />
         </div>
         <div class="course">
             <thumbnail />
@@ -22,7 +22,7 @@
                     <span class="time">2:34</span>
                 </div>
             </div>
-            <nuxt-link to="/" class="is-absolute" />
+            <nuxt-link aria-label="Link LV" to="/" class="is-absolute" />
         </div>
         <div class="course">
             <thumbnail />
@@ -34,7 +34,7 @@
                     <span class="time">2:34</span>
                 </div>
             </div>
-            <nuxt-link to="/" class="is-absolute" />
+            <nuxt-link aria-label="Link LV" to="/" class="is-absolute" />
         </div>
         <div class="course">
             <thumbnail />
@@ -46,7 +46,7 @@
                     <span class="time">2:34</span>
                 </div>
             </div>
-            <nuxt-link to="/" class="is-absolute" />
+            <nuxt-link aria-label="Link LV" to="/" class="is-absolute" />
         </div>
         <div class="course">
             <thumbnail />
@@ -58,7 +58,7 @@
                     <span class="time">2:34</span>
                 </div>
             </div>
-            <nuxt-link to="/" class="is-absolute" />
+            <nuxt-link aria-label="Link LV" to="/" class="is-absolute" />
         </div>
         <div class="course">
             <thumbnail />
@@ -70,7 +70,7 @@
                     <span class="time">2:34</span>
                 </div>
             </div>
-            <nuxt-link to="/" class="is-absolute" />
+            <nuxt-link aria-label="Link LV" to="/" class="is-absolute" />
         </div>
         <div class="course">
             <thumbnail />
@@ -82,7 +82,7 @@
                     <span class="time">2:34</span>
                 </div>
             </div>
-            <nuxt-link to="/" class="is-absolute" />
+            <nuxt-link aria-label="Link LV" to="/" class="is-absolute" />
         </div>
         <div class="course">
             <thumbnail />
@@ -94,7 +94,7 @@
                     <span class="time">2:34</span>
                 </div>
             </div>
-            <nuxt-link to="/" class="is-absolute" />
+            <nuxt-link aria-label="Link LV" to="/" class="is-absolute" />
         </div>
     </div>
 </template>

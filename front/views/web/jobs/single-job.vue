@@ -77,16 +77,16 @@
                 <div class="medium-container">
                     <ul class="tags">
                         <li>
-                            <nuxt-link to="/">Full-time</nuxt-link>
+                            <nuxt-link aria-label="Link LV" to="/">Full-time</nuxt-link>
                         </li>
                         <li>
-                            <nuxt-link to="/">Casablanca</nuxt-link>
+                            <nuxt-link aria-label="Link LV" to="/">Casablanca</nuxt-link>
                         </li>
                         <li>
-                            <nuxt-link to="/">Full-time</nuxt-link>
+                            <nuxt-link aria-label="Link LV" to="/">Full-time</nuxt-link>
                         </li>
                         <li>
-                            <nuxt-link to="/">Full-time</nuxt-link>
+                            <nuxt-link aria-label="Link LV" to="/">Full-time</nuxt-link>
                         </li>
                     </ul>
                 </div>
@@ -95,7 +95,7 @@
                 <div class="medium-container">
                     <h3>Need help? Check the our support center.</h3>
                     <div class="apply-now">
-                        <nuxt-link to="/">
+                        <nuxt-link aria-label="Link LV" to="/">
                             <span>Apply now</span>
                             <img src="@/assets/images/icons-arrow.png" alt="LV">
                         </nuxt-link>

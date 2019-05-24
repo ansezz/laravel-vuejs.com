@@ -10,7 +10,7 @@
                    <span>USA</span>
                </div>
                <div class="right-area">
-                   <nuxt-link to="/">
+                   <nuxt-link aria-label="Link LV" to="/">
                        <span>7 Offers</span>
                    </nuxt-link>
                </div>
@@ -38,7 +38,7 @@
                         </li>
                     </ul>
                 </div>
-                <nuxt-link to="/" class="is-absolute" />
+                <nuxt-link aria-label="Link LV" to="/" class="is-absolute" />
             </div>
         </div>
         <div class="job-container">
@@ -51,7 +51,7 @@
                    <span>USA</span>
                </div>
                <div class="right-area">
-                   <nuxt-link to="/">
+                   <nuxt-link aria-label="Link LV" to="/">
                        <span>7 Offers</span>
                    </nuxt-link>
                </div>
@@ -79,7 +79,7 @@
                         </li>
                     </ul>
                 </div>
-                <nuxt-link to="/" class="is-absolute" />
+                <nuxt-link aria-label="Link LV" to="/" class="is-absolute" />
             </div>
         </div>
         <div class="job-container">
@@ -92,7 +92,7 @@
                    <span>USA</span>
                </div>
                <div class="right-area">
-                   <nuxt-link to="/">
+                   <nuxt-link aria-label="Link LV" to="/">
                        <span>7 Offers</span>
                    </nuxt-link>
                </div>
@@ -120,7 +120,7 @@
                         </li>
                     </ul>
                 </div>
-                <nuxt-link to="/" class="is-absolute" />
+                <nuxt-link aria-label="Link LV" to="/" class="is-absolute" />
             </div>
         </div>
         <div class="job-container">
@@ -133,7 +133,7 @@
                    <span>USA</span>
                </div>
                <div class="right-area">
-                   <nuxt-link to="/">
+                   <nuxt-link aria-label="Link LV" to="/">
                        <span>7 Offers</span>
                    </nuxt-link>
                </div>
@@ -161,7 +161,7 @@
                         </li>
                     </ul>
                 </div>
-                <nuxt-link to="/" class="is-absolute" />
+                <nuxt-link aria-label="Link LV" to="/" class="is-absolute" />
             </div>
         </div>
         <div class="job-container">
@@ -174,7 +174,7 @@
                    <span>USA</span>
                </div>
                <div class="right-area">
-                   <nuxt-link to="/">
+                   <nuxt-link aria-label="Link LV" to="/">
                        <span>7 Offers</span>
                    </nuxt-link>
                </div>
@@ -202,7 +202,7 @@
                         </li>
                     </ul>
                 </div>
-                <nuxt-link to="/" class="is-absolute" />
+                <nuxt-link aria-label="Link LV" to="/" class="is-absolute" />
             </div>
         </div>
         <div class="job-container">
@@ -215,7 +215,7 @@
                    <span>USA</span>
                </div>
                <div class="right-area">
-                   <nuxt-link to="/">
+                   <nuxt-link aria-label="Link LV" to="/">
                        <span>7 Offers</span>
                    </nuxt-link>
                </div>
@@ -243,7 +243,7 @@
                         </li>
                     </ul>
                 </div>
-                <nuxt-link to="/" class="is-absolute" />
+                <nuxt-link aria-label="Link LV" to="/" class="is-absolute" />
             </div>
         </div>
         <div class="job-container">
@@ -256,7 +256,7 @@
                    <span>USA</span>
                </div>
                <div class="right-area">
-                   <nuxt-link to="/">
+                   <nuxt-link aria-label="Link LV" to="/">
                        <span>7 Offers</span>
                    </nuxt-link>
                </div>
@@ -284,7 +284,7 @@
                         </li>
                     </ul>
                 </div>
-                <nuxt-link to="/" class="is-absolute" />
+                <nuxt-link aria-label="Link LV" to="/" class="is-absolute" />
             </div>
         </div>
         <div class="job-container">
@@ -297,7 +297,7 @@
                    <span>USA</span>
                </div>
                <div class="right-area">
-                   <nuxt-link to="/">
+                   <nuxt-link aria-label="Link LV" to="/">
                        <span>7 Offers</span>
                    </nuxt-link>
                </div>
@@ -325,7 +325,7 @@
                         </li>
                     </ul>
                 </div>
-                <nuxt-link to="/" class="is-absolute" />
+                <nuxt-link aria-label="Link LV" to="/" class="is-absolute" />
             </div>
         </div>
     </div>

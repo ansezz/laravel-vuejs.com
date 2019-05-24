@@ -14,7 +14,7 @@
             </h1>
             <h1 v-else>An error occurred</h1>
             <p>You might not have permissions to see this page or isn’t exists anymore.</p>
-            <nuxt-link to="/page/contact-us" class="button has-icon">
+            <nuxt-link aria-label="Link LV" to="/page/contact-us" class="button has-icon">
                 <img src="@/assets/images/icons-report.svg" alt="LV">
                 <span>report this to our team</span>
             </nuxt-link>

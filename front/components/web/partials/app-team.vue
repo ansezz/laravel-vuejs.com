@@ -10,7 +10,7 @@
                     <img src="@/assets/images/big-brackets.png" alt="LV">
                 </div>
                 <div class="member-info">
-                    <nuxt-link to="/" class="social-media-link">
+                    <nuxt-link aria-label="Link LV" to="/" class="social-media-link">
                         <img src="@/assets/images/icons-linkedin.png" alt="LV">
                     </nuxt-link>
                     <span class="member-name">Anass Ez-Zouaine</span>
@@ -22,7 +22,7 @@
                     <img src="@/assets/images/big-brackets.png" alt="LV">
                 </div>
                 <div class="member-info">
-                    <nuxt-link to="/" class="social-media-link">
+                    <nuxt-link aria-label="Link LV" to="/" class="social-media-link">
                         <img src="@/assets/images/icons-linkedin.png" alt="LV">
                     </nuxt-link>
                     <span class="member-name">John Smith</span>
@@ -34,7 +34,7 @@
                     <img src="@/assets/images/big-brackets.png" alt="LV">
                 </div>
                 <div class="member-info">
-                    <nuxt-link to="/" class="social-media-link">
+                    <nuxt-link aria-label="Link LV" to="/" class="social-media-link">
                         <img src="@/assets/images/icons-linkedin.png" alt="LV">
                     </nuxt-link>
                     <span class="member-name">Ely Wahib</span>
@@ -46,7 +46,7 @@
                     <img src="@/assets/images/big-brackets.png" alt="LV">
                 </div>
                 <div class="member-info">
-                    <nuxt-link to="/" class="social-media-link">
+                    <nuxt-link aria-label="Link LV" to="/" class="social-media-link">
                         <img src="@/assets/images/icons-linkedin.png" alt="LV">
                     </nuxt-link>
                     <span class="member-name">Lamya Alaoui</span>

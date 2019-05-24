@@ -3,36 +3,36 @@
         <div class="mobile-container">
             <!-- <ul class="footer-menu">
                 <li class="parent">
-                    <nuxt-link to="/">Blog</nuxt-link>
+                    <nuxt-link aria-label="Link LV" to="/">Blog</nuxt-link>
                     <ul>
                         <li v-for="(item ,key) in main_menu" :key="key">
-                            <nuxt-link :to="item.url">{{item.name}}</nuxt-link>
+                            <nuxt-link aria-label="Link LV" :to="item.url">{{item.name}}</nuxt-link>
                         </li>
                     </ul>
                 </li>
                 <!--<li class="parent">
-                    <nuxt-link to="/">Jobs</nuxt-link>
+                    <nuxt-link aria-label="Link LV" to="/">Jobs</nuxt-link>
                 </li>-->
             <!-- </ul> -->
             <!-- <ul class="main-menu">
                 <li v-for="(item ,key) in second_menu" :key="key">
-                    <nuxt-link :to="item.url">{{item.name}}</nuxt-link>
+                    <nuxt-link aria-label="Link LV" :to="item.url">{{item.name}}</nuxt-link>
                 </li> -->
             <!--</ul> -->
             <div class="sign-up">
-                <nuxt-link to="/" class="button has-icon">
+                <nuxt-link aria-label="Link LV" to="/" class="button has-icon">
                     <i class="fa fa-user"></i>
                     <span>Sign up/in</span>
                 </nuxt-link>
             </div>
             <div class="footer-bottom">
-                <nuxt-link class="footer-logo" to="/">
+                <nuxt-link aria-label="Link LV" class="footer-logo" to="/">
                     <img src="@/assets/images/logo-grey.png" alt="LV">
                 </nuxt-link>
                 <ul class="social-media">
                     <li v-for="(item, index) in social_media" :key="index"
                         :class="item.class">
-                        <a :href="item.href" target="_blank">
+                        <a :href="item.href"  target="_blank" rel="noreferrer" >
                             <i class="fa" :class="'fa-'+item.class"/>
                         </a>
                     </li>

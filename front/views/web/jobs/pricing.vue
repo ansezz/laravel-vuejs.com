@@ -7,7 +7,7 @@
                     <div class="caption">
                         <h1>Get the space you need and so much more.</h1>
                         <p>L&V individual plans are the best way to store, share, and securely access all your files.</p>
-                        <nuxt-link to="/" class="button">Check a plan</nuxt-link>
+                        <nuxt-link aria-label="Link LV" to="/" class="button">Check a plan</nuxt-link>
                         <span>You can cancel or downgrade at any time.</span>
                     </div>
                 </div>
@@ -29,7 +29,7 @@
                     </div>
                     <div class="col-sm-6">
                         <div class="support-links">
-                            <nuxt-link to="/" class="button has-icon right-icon">
+                            <nuxt-link aria-label="Link LV" to="/" class="button has-icon right-icon">
                                 <span>Support center</span>
                                 <img src="@/assets/images/icons-support.svg" alt="LV">
                             </nuxt-link>

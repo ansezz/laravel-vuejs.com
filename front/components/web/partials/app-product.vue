@@ -9,8 +9,8 @@
                 <h6>VueJs2 (1/15)</h6>
                 <span>24 JUL 2018</span>
                 <div class="actions">
-                    <nuxt-link to="/" class="button">Details</nuxt-link>
-                    <nuxt-link to="/" class="button inverse-button">Preview</nuxt-link>
+                    <nuxt-link aria-label="Link LV" to="/" class="button">Details</nuxt-link>
+                    <nuxt-link aria-label="Link LV" to="/" class="button inverse-button">Preview</nuxt-link>
                 </div>
             </div>
         </div>
@@ -23,8 +23,8 @@
                 <h6>VueJs2 (1/15)</h6>
                 <span>24 JUL 2018</span>
                 <div class="actions">
-                    <nuxt-link to="/" class="button">Details</nuxt-link>
-                    <nuxt-link to="/" class="button inverse-button">Preview</nuxt-link>
+                    <nuxt-link aria-label="Link LV" to="/" class="button">Details</nuxt-link>
+                    <nuxt-link aria-label="Link LV" to="/" class="button inverse-button">Preview</nuxt-link>
                 </div>
             </div>
         </div>
@@ -37,8 +37,8 @@
                 <h6>VueJs2 (1/15)</h6>
                 <span>24 JUL 2018</span>
                 <div class="actions">
-                    <nuxt-link to="/" class="button">Details</nuxt-link>
-                    <nuxt-link to="/" class="button inverse-button">Preview</nuxt-link>
+                    <nuxt-link aria-label="Link LV" to="/" class="button">Details</nuxt-link>
+                    <nuxt-link aria-label="Link LV" to="/" class="button inverse-button">Preview</nuxt-link>
                 </div>
             </div>
         </div>
@@ -51,8 +51,8 @@
                 <h6>VueJs2 (1/15)</h6>
                 <span>24 JUL 2018</span>
                 <div class="actions">
-                    <nuxt-link to="/" class="button">Details</nuxt-link>
-                    <nuxt-link to="/" class="button inverse-button">Preview</nuxt-link>
+                    <nuxt-link aria-label="Link LV" to="/" class="button">Details</nuxt-link>
+                    <nuxt-link aria-label="Link LV" to="/" class="button inverse-button">Preview</nuxt-link>
                 </div>
             </div>
         </div>
@@ -65,8 +65,8 @@
                 <h6>VueJs2 (1/15)</h6>
                 <span>24 JUL 2018</span>
                 <div class="actions">
-                    <nuxt-link to="/" class="button">Details</nuxt-link>
-                    <nuxt-link to="/" class="button inverse-button">Preview</nuxt-link>
+                    <nuxt-link aria-label="Link LV" to="/" class="button">Details</nuxt-link>
+                    <nuxt-link aria-label="Link LV" to="/" class="button inverse-button">Preview</nuxt-link>
                 </div>
             </div>
         </div>

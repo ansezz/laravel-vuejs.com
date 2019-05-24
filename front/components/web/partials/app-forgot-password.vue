@@ -18,7 +18,7 @@
                 </div>
             </form>
             <footer class="text-center">
-                <nuxt-link to="/auth/login" class="forgot-password">
+                <nuxt-link aria-label="Link LV" to="/auth/login" class="forgot-password">
                     <img src="@/assets/images/icons-next.svg" alt="LV">
                     <span>was a mistake take me back</span>
                 </nuxt-link>

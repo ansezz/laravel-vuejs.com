@@ -12,7 +12,7 @@
                             <h6>Free</h6>
                         </div>
                         <p>Free storage and access to files across multiple devices.</p>
-                        <nuxt-link to="/" class="button">Sign up/in</nuxt-link>
+                        <nuxt-link aria-label="Link LV" to="/" class="button">Sign up/in</nuxt-link>
                     </div>
                     <div class="pricing-table-body">
                         <ul>
@@ -31,7 +31,7 @@
                             <span>Monthly</span>
                         </div>
                         <p>Additional storage space and expanded access.</p>
-                        <nuxt-link to="/" class="button">Purchase now</nuxt-link>
+                        <nuxt-link aria-label="Link LV" to="/" class="button">Purchase now</nuxt-link>
                     </div>
                     <div class="pricing-table-body">
                         <ul>
@@ -47,7 +47,7 @@
                     <div class="pricing-table-header">
                         <h5>Professional</h5>
                         <div class="options">
-                            <nuxt-link to="/">
+                            <nuxt-link aria-label="Link LV" to="/">
                                 <span>Contact support</span>
                             </nuxt-link>
                         </div>

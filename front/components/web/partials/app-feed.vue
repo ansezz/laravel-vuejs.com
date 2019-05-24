@@ -12,7 +12,7 @@
     </div>
 
     <div class="text-center show-more">
-      <nuxt-link :to="{name : 'posts'}" class="button">Show more Posts</nuxt-link>
+      <nuxt-link aria-label="Link LV" :to="{name : 'posts'}" class="button">Show more Posts</nuxt-link>
     </div>
 
   </section>

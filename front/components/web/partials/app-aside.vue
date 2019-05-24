@@ -7,7 +7,7 @@
                     <ul class="social-media">
                         <li v-for="(item, index) in social_media" :key="index"
                             :class="item.class">
-                            <a :href="item.href" target="_blank">
+                            <a :href="item.href"  target="_blank" rel="noreferrer" >
                                 <i class="fa" :class="'fa-' + item.class"/>
                             </a>
                         </li>

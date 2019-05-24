@@ -10,16 +10,16 @@
 
                 <p>
                     Our online community has now grown to thousands of developers passionate about Laravel & VueJs. You join us in the following ways:
-                    •  Laravel & VueJs   <a href="https://www.facebook.com/groups/LaravelVueJs/" target="_blank">Facebook group</a>
+                    •  Laravel & VueJs   <a href="https://www.facebook.com/groups/LaravelVueJs/"  target="_blank" rel="noreferrer" >Facebook group</a>
                     You can also follow Laravel & VueJs on social media:
                 </p>
                 <ul class="social-media">
-                    <li><a href="https://www.facebook.com/LaravelVueJs" target="_blank" name="facebook">Facebook</a>
+                    <li><a href="https://www.facebook.com/LaravelVueJs"  target="_blank" rel="noreferrer"  name="facebook">Facebook</a>
                     </li>
-                    <li><a href="https://twitter.com/LaravelVueJs" target="_blank" name="Twitter">Twitter</a></li>
-                    <li><a href="https://www.linkedin.com/in/laravel-vuejs/" target="_blank"
+                    <li><a href="https://twitter.com/LaravelVueJs"  target="_blank" rel="noreferrer"  name="Twitter">Twitter</a></li>
+                    <li><a href="https://www.linkedin.com/in/laravel-vuejs/"  target="_blank" rel="noreferrer"
                            name="LinkedIn">LinkedIn</a></li>
-                    <li><a href="http://instagram.com/LaravelVueJs" target="_blank" name="Instagram">Instagram</a></li>
+                    <li><a href="http://instagram.com/LaravelVueJs"  target="_blank" rel="noreferrer"  name="Instagram">Instagram</a></li>
                 </ul>
 
                 <h2 class="text-center">Advertise with us</h2>
@@ -34,7 +34,7 @@
                 </p>
                     <h2 class="text-center">Laravel & VueJs freelance and remote jobs</h2>
                 <p>
-                    Are you looking for (or offering) Laravel & VueJs freelance projects or remote jobs? Join and post for free in our Laravel & VueJs - <a href="https://www.facebook.com/groups/Laravel.Vuejs.Jobs" target="_blank">Freelance & Remote Jobs Group</a>
+                    Are you looking for (or offering) Laravel & VueJs freelance projects or remote jobs? Join and post for free in our Laravel & VueJs - <a href="https://www.facebook.com/groups/Laravel.Vuejs.Jobs"  target="_blank" rel="noreferrer" >Freelance & Remote Jobs Group</a>
                 </p>
             </div>
             <ul class="facts-grid" v-if="false">
@@ -76,9 +76,9 @@
                 </li>
             </ul>
             <div class="links-action">
-                <a href="https://www.facebook.com/groups/Laravel.Vuejs.Jobs" class="button" target="_blank">Jobs offers</a>
+                <a href="https://www.facebook.com/groups/Laravel.Vuejs.Jobs" class="button"  target="_blank" rel="noreferrer" >Jobs offers</a>
                 <span>Or</span>
-                <nuxt-link to="/" class="button">Our news feed</nuxt-link>
+                <nuxt-link aria-label="Link LV" to="/" class="button">Our news feed</nuxt-link>
             </div>
         </div>
     </section>

@@ -11,7 +11,7 @@
                     <span>Developer</span>
                     <p>Joined a 2 mins ago</p>
                 </div>
-                <nuxt-link to="/" class="is-absolute" />
+                <nuxt-link aria-label="Link LV" to="/" class="is-absolute" />
             </li>
             <li>
                 <div class="avatar">
@@ -22,7 +22,7 @@
                     <span>Developer</span>
                     <p>Joined a 2 mins ago</p>
                 </div>
-                <nuxt-link to="/" class="is-absolute" />
+                <nuxt-link aria-label="Link LV" to="/" class="is-absolute" />
             </li>
             <li>
                 <div class="avatar">
@@ -33,7 +33,7 @@
                     <span>Developer</span>
                     <p>Joined a 2 mins ago</p>
                 </div>
-                <nuxt-link to="/" class="is-absolute" />
+                <nuxt-link aria-label="Link LV" to="/" class="is-absolute" />
             </li>
         </ul>
         <div class="check-more">

@@ -2,33 +2,33 @@
     <div class="pagination-container">
         <ul class="app-pagination">
             <li class="pagination-link">
-                <nuxt-link to="/">
+                <nuxt-link aria-label="Link LV" to="/">
                   <i class="fa fa-caret-left"></i><i class="fa fa-caret-left"></i>
                 </nuxt-link>
             </li>
             <li class="pagination-link">
-                <nuxt-link to="/"><i class="fa fa-caret-left"></i></nuxt-link>
+                <nuxt-link aria-label="Link LV" to="/"><i class="fa fa-caret-left"></i></nuxt-link>
             </li>
             <li class="current-link">
-                <nuxt-link to="/">1</nuxt-link>
+                <nuxt-link aria-label="Link LV" to="/">1</nuxt-link>
             </li>
             <li>
-                <nuxt-link to="/">2</nuxt-link>
+                <nuxt-link aria-label="Link LV" to="/">2</nuxt-link>
             </li>
             <li>
-                <nuxt-link to="/">3</nuxt-link>
+                <nuxt-link aria-label="Link LV" to="/">3</nuxt-link>
             </li>
             <li>
-                <nuxt-link to="/">..</nuxt-link>
+                <nuxt-link aria-label="Link LV" to="/">..</nuxt-link>
             </li>
             <li>
-                <nuxt-link to="/">15</nuxt-link>
+                <nuxt-link aria-label="Link LV" to="/">15</nuxt-link>
             </li>
             <li class="pagination-link">
-                <nuxt-link to="/"><i class="fa fa-caret-right"></i></nuxt-link>
+                <nuxt-link aria-label="Link LV" to="/"><i class="fa fa-caret-right"></i></nuxt-link>
             </li>
             <li class="pagination-link">
-                <nuxt-link to="/">
+                <nuxt-link aria-label="Link LV" to="/">
                   <i class="fa fa-caret-right"></i><i class="fa fa-caret-right"></i>
                 </nuxt-link>
             </li>

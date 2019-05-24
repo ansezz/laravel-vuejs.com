@@ -103,7 +103,12 @@ module.exports = {
     ],
     htmlAttrs: {dir: "ltr"},
     link: [
-      {rel: "icon", type: "image/x-icon", href: "/favicon.ico"}
+      {rel: "icon", type: "image/x-icon", href: "/favicon.ico"},
+      {rel: "preconnect", href: "https://www.google.co.ma"},
+      {rel: "preconnect", href: "https://www.google.com"},
+      {rel: "preconnect", href: "https://image6.pubmatic.com"},
+      {rel: "preconnect", href: "https://id.rlcdn.com"},
+      {rel: "preconnect", href: "https://fonts.gstatic.com"},
     ],
     script: [
       {src: '//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js', async: true}

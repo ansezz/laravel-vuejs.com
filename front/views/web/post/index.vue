@@ -94,7 +94,7 @@
                 </div>
                 <h4>Tags : </h4>
                 <div class="tags">
-                    <nuxt-link v-for="tag in post.tags" :key="tag.id" :to="{name: 'tag-slug', params : {slug : tag.slug}}" >
+                    <nuxt-link aria-label="Link LV" v-for="tag in post.tags" :key="tag.id" :to="{name: 'tag-slug', params : {slug : tag.slug}}" >
                         {{tag.name}}
                     </nuxt-link>
                 </div>
