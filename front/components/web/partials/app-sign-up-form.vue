@@ -1,6 +1,6 @@
 <template>
     <section>
-        <div class="sign-up-form" v-if="register" id="register">
+        <div class="sign-up-form is-relative" v-if="register" id="register">
             <h3>Sign Up Now!</h3>
             <form @submit.prevent="submitSignup" :class="{'is-loading' : form.loading}">
                 <div class="form-group">
@@ -59,6 +59,9 @@
                     <a @click="register=false" class="button no-background" href="#login">I have an account</a>
                 </div>
             </form>
+            <div class="loader-container">
+              <div class="loader-form"></div>
+            </div>
         </div>
 
         <div class="sign-up-form" v-if="!register" id="login" @submit.prevent="submitLogin"

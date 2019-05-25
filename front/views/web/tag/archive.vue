@@ -133,16 +133,12 @@
     .post-heading-filters
         position relative
         height 60px
-        overflow hidden
         display flex
         align-items center
-        justify-content flex-end
+        justify-content space-between
         margin 60px 0 40px
 
     .post-heading
-        position absolute
-        left 50%
-        transform translateX(-50%)
         text-align center
 
         h1

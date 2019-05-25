@@ -380,6 +380,7 @@
           img
             max-width 100%
             margin 20px 0
+            height auto
 
         .thumbnail-area
             margin-bottom 20px

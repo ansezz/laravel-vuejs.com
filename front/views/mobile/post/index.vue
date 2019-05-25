@@ -232,8 +232,15 @@
         img
           max-width 100%
           margin 10px 0
+          height auto
         a
           word-break break-all
+    & >>>
+      img
+        max-width 100%
+        height auto
+      code
+        word-break break-all
     .thumbnail-area
       margin-bottom 20px
       .article-image
