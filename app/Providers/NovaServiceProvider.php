@@ -41,13 +41,13 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
      */
     protected function gate()
     {
-        Gate::define('viewNova', function ($user) {
+        /*Gate::define('viewNova', function ($user) {
             return in_array($user->email, [
                 'ansezzouaine@gmail.com',
                 'ans-ezzouaine@hotmail.com',
                 'admin@laravel-vuejs.com',
             ]);
-        });
+        });*/
     }
 
     /**
