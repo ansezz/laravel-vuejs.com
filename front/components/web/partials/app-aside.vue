@@ -15,11 +15,11 @@
                 </div>
                 <app-popular-posts/>
                 <div class="widget">
-                    <adsbygoogle/>
+                    <adsbygoogle  class="adsbygoogle"/>
                 </div>
                 <app-subscribe-form/>
                 <div class="widget last-widget">
-                    <adsbygoogle/>
+                    <adsbygoogle  class="adsbygoogle"/>
                 </div>
             </div>
         </aside>

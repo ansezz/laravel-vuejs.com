@@ -40,11 +40,11 @@
                     </div>
                 </div>
                 <div class="grid-container">
-                    <adsbygoogle/>
+                    <adsbygoogle  class="adsbygoogle"/>
                 </div>
                 <p v-html="post.content" id="content"></p>
                 <div class="grid-container">
-                    <adsbygoogle/>
+                    <adsbygoogle  class="adsbygoogle"/>
                     <div class="grid-articles">
                         <template v-for="(item, key) in related.second">
                             <article-item :title="item.title"
@@ -111,7 +111,7 @@
         <div class="has-bg">
             <div class="single-post-container">
                 <app-featured title="Related Posts" :items="related.last"/>
-                <adsbygoogle/>
+                <adsbygoogle  class="adsbygoogle"/>
             </div>
         </div>
         <div class="single-post-container has-p-45-120">

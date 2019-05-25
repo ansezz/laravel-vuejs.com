@@ -3,11 +3,11 @@
   <section>
     <app-header/>
     <div class="container">
-      <adsbygoogle/>
+      <adsbygoogle  class="adsbygoogle"/>
     </div>
     <app-featured/>
     <div class="container">
-      <adsbygoogle/>
+      <adsbygoogle  class="adsbygoogle"/>
     </div>
     <div class="main-posts">
       <div class="container">
