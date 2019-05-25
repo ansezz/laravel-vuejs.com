@@ -1,6 +1,6 @@
 <template>
   <div class="app">
-    <github-corner></github-corner>
+    <github-corner/>
     <Navbar/>
     <app-navigation/>
     <app-main>

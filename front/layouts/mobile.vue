@@ -1,5 +1,6 @@
 <template>
   <div class="app">
+    <!--<github-corner/>-->
     <app-navbar/>
     <main>
       <nuxt/>
@@ -21,6 +22,7 @@
 
   export default {
     components: {
+      // githubCorner: () => import("@/components/shared/partials/elements/github-corner"),
       AppNavbar,
       AppFooter,
       AppSubscribe
