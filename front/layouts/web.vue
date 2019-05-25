@@ -1,5 +1,6 @@
 <template>
   <div class="app">
+    <github-corner></github-corner>
     <Navbar/>
     <app-navigation/>
     <app-main>
@@ -27,6 +28,7 @@
   export default {
     components: {
       Navbar: () => import("@/components/web/organisms/navbar"),
+      githubCorner: () => import("@/components/shared/partials/elements/github-corner"),
       AppFooter,
       AppNavigation,
       AppMain,
