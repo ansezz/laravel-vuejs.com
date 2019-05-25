@@ -1,8 +1,8 @@
 <template>
-    <section>
-        <div class="sign-up-form is-relative" v-if="register" id="register">
+    <section class="is-relative">
+        <div class="sign-up-form" v-if="register" id="register">
             <h3>Sign Up Now!</h3>
-            <form @submit.prevent="submitSignup" :class="{'is-loading' : form.loading}">
+            <form @submit.prevent="submitSignup" :class="{'is-loading' : loading}">
                 <div class="form-group">
                     <input type="text" class="form-control has-custom"
                            name="name"
@@ -35,6 +35,7 @@
                            name="password"
                            required
                            v-validate="'required|min:6'"
+                           autocomplete="password"
                     >
                     <no-ssr>
                         <small class="text-danger" v-if="errors">{{ errors.first('password') }}</small>
@@ -59,9 +60,6 @@
                     <a @click="register=false" class="button no-background" href="#login">I have an account</a>
                 </div>
             </form>
-            <div class="loader-container">
-              <div class="loader-form"></div>
-            </div>
         </div>
 
         <div class="sign-up-form" v-if="!register" id="login" @submit.prevent="submitLogin"
@@ -77,7 +75,7 @@
                     >
                 </div>
                 <div class="form-group">
-                    <input type="password" name="password" class="form-control has-custom"
+                    <input type="password" name="password" class="form-control has-custom" autocomplete="password"
                            placeholder="Password" v-model="form.password" required
                     >
                 </div>
@@ -98,6 +96,9 @@
                     <a class="button no-background" @click="register=true" href="#register">Register</a>
                 </div>
             </form>
+        </div>
+        <div class="loader-container" v-if="loading">
+            <div class="loader-form"></div>
         </div>
     </section>
 </template>
