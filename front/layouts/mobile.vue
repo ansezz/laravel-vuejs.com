@@ -1,6 +1,7 @@
 <template>
   <div class="app">
-    <app-navbar/>
+    <Navbar/>
+    <app-navigation/>
     <main>
       <nuxt/>
     </main>
@@ -10,12 +11,13 @@
 </template>
 
 <script>
-  import AppNavbar from "@/components/mobile/partials/app-navbar";
   import AppFooter from "@/components/mobile/partials/app-footer";
+  import AppNavigation from "@/components/web/partials/app-navigation";
   import AppSubscribe from "@/components/mobile/partials/app-subscribe";
   export default {
     components: {
-      AppNavbar,
+      Navbar: () => import("@/components/organisms/navbar"),
+      AppNavigation,
       AppFooter,
       AppSubscribe
     },

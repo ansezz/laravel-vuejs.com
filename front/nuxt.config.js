@@ -1,25 +1,25 @@
 var webpack = require('webpack') // Do not forget to add this dependency, or else you will get an error
 // const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
-require("dotenv").config()
+require('dotenv').config()
 // const axios = require("axios")
-const resolve = require("path").resolve
+const resolve = require('path').resolve
 
 module.exports = {
   modules: [
     '@nuxtjs/onesignal',
-    "@nuxtjs/pwa",
+    '@nuxtjs/pwa',
     '@nuxtjs/apollo',
-    "@nuxtjs/axios",
-    "@nuxtjs/dotenv",
-    "@nuxtjs/font-awesome",
-    "@nuxtjs/toast",
-    "@nuxtjs/google-analytics",
+    '@nuxtjs/axios',
+    '@nuxtjs/dotenv',
+    '@nuxtjs/font-awesome',
+    '@nuxtjs/toast',
+    '@nuxtjs/google-analytics',
     '@nuxtjs/google-adsense',
-    "@nuxtjs/sitemap",
-    "@nuxtjs/moment",
-    "@nuxtjs/webpackmonitor",
-    "nuxt-device-detect",
+    '@nuxtjs/sitemap',
+    '@nuxtjs/moment',
+    '@nuxtjs/webpackmonitor',
+    'nuxt-device-detect',
     '@nuxtjs/sentry',
     // @TOD : create Creating an experiment fro google optimize
     /*'nuxt-google-optimize',*/
@@ -45,16 +45,16 @@ module.exports = {
       appId: '0574cfe4-d2e3-403d-b7b5-875f56652248',
       allowLocalhostAsSecureOrigin: true,
       welcomeNotification: {
-        disable: true
-      }
-    }
+        disable: true,
+      },
+    },
   },
   toast: {
     position: 'top-center',
-    duration: 4000
+    duration: 4000,
   },
   'google-adsense': {
-    id: process.env.GOOGLE_ADSENSE
+    id: process.env.GOOGLE_ADSENSE,
   },
   // Give apollo module options
   apollo: {
@@ -65,54 +65,53 @@ module.exports = {
         fetchPolicy: 'no-cache',
         httpEndpoint: process.env.GRAPHQL_URL,
         // wsEndpoint: process.env.GRAPHQL_WS
-      }
-    }
+      },
+    },
   },
-  "google-analytics": {
-    id: process.env.GOOGLE_ANALYTICS
+  'google-analytics': {
+    id: process.env.GOOGLE_ANALYTICS,
   },
   axios: {
     baseURL: process.env.API_URL,
     headers: {
-      "X-Requested-With": "XMLHttpRequest"
+      'X-Requested-With': 'XMLHttpRequest',
     },
-    withCredentials: false
+    withCredentials: false,
   },
   manifest: {
-    name: "Laravel-VueJs.com",
-    short_name: "Laravel-VueJs.com",
-    title: "Laravel-VueJs.com",
-    "og:title": "Laravel-VueJs.com",
-    description: "Laravel-VueJs.com",
-    "og:description": "Laravel-VueJs.com",
-    lang: "en",
-    theme_color: "#42b883",
-    background_color: "#35495e"
+    name: 'Laravel-VueJs.com',
+    short_name: 'Laravel-VueJs.com',
+    title: 'Laravel-VueJs.com',
+    'og:title': 'Laravel-VueJs.com',
+    description: 'Laravel-VueJs.com',
+    'og:description': 'Laravel-VueJs.com',
+    lang: 'en',
+    theme_color: '#42b883',
+    background_color: '#35495e',
   },
   router: {
-    middleware: ["platform", "global"]
+    middleware: ['platform', 'global'],
   },
   /*
    ** Headers of the page
    */
   head: {
     titleTemplate: '%s  ←  Laravel-VueJs.com > Beta',
-    title: "Laravel-VueJs.com",
+    title: 'Laravel-VueJs.com',
     meta: [
-      {charset: "utf-8"}, {name: "viewport", content: "width=device-width, initial-scale=1"}
+      { charset: 'utf-8' },
+      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
     ],
-    htmlAttrs: {dir: "ltr"},
-    link: [
-      {rel: "icon", type: "image/x-icon", href: "/favicon.ico"}
-    ]
+    htmlAttrs: { dir: 'ltr' },
+    link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }],
   },
   /*
    ** Customize the progress bar color
    */
   loading: {
-    color: "#6936D3",
-    height: '10px',
-    continuous: true
+    color: '#6936D3',
+    height: '2px',
+    continuous: true,
   },
   // @TODO : custom loading
   //  loading: '~/components/loading.vue'
@@ -121,21 +120,21 @@ module.exports = {
    ** Build configuration
    */
   build: {
-//    analyze: true,
+    //    analyze: true,
     babel: {
-      plugins: ['@babel/plugin-proposal-nullish-coalescing-operator']
+      plugins: ['@babel/plugin-proposal-nullish-coalescing-operator'],
     },
     plugins: [
       new webpack.LoaderOptionsPlugin({
         options: {
           stylus: {
             import: [
-              resolve(__dirname, "./assets/stylus/index.styl"),
-              "~rupture/rupture/index.styl"
-            ]
-          }
-        }
-      })
+              resolve(__dirname, './assets/stylus/index.styl'),
+              '~rupture/rupture/index.styl',
+            ],
+          },
+        },
+      }),
     ],
     postcss: {
       // Add plugin names as key and arguments as value
@@ -143,33 +142,33 @@ module.exports = {
       plugins: {
         // Disable a plugin by passing false as value
         'postcss-rtl': {},
-        'lost': {},
+        lost: {},
       },
     },
-    extend(config, {isDev, isClient}) {
-    }
+    extend(config, { isDev, isClient }) {},
   },
 
   //
   plugins: [
     // new BundleAnalyzerPlugin(),
-    {src: "~/plugins/ui"},
-    {src: '~/plugins/disqus'},
-    {src: "~/plugins/http"},
-    {src: "~/plugins/utils"},
-    {src: "~/plugins/social-sharing"},
-    {src: "~/plugins/swiper", ssr: false},
-    {src: "~/plugins/vee-validate", ssr: false},
-    {src: "~/plugins/lazyload", ssr: false},
-    {src: '~/plugins/vue-tags-input', ssr: false},
-    {src: '~/plugins/infinite-loading', ssr: false}
+    { src: '~/mixins/platforms' },
+    { src: '~/plugins/ui' },
+    { src: '~/plugins/disqus' },
+    { src: '~/plugins/http' },
+    { src: '~/plugins/utils' },
+    { src: '~/plugins/social-sharing' },
+    { src: '~/plugins/swiper', ssr: false },
+    { src: '~/plugins/vee-validate', ssr: false },
+    { src: '~/plugins/lazyload', ssr: false },
+    { src: '~/plugins/vue-tags-input', ssr: false },
+    { src: '~/plugins/infinite-loading', ssr: false },
   ],
 
   css: [
-    "swiper/dist/css/swiper.css",
-    "ionicons/dist/css/ionicons.min.css",
-    "bootstrap/dist/css/bootstrap.css",
-    "~/assets/AvenirNextLTPro.css"
+    'swiper/dist/css/swiper.css',
+    'ionicons/dist/css/ionicons.min.css',
+    'bootstrap/dist/css/bootstrap.css',
+    '~/assets/AvenirNextLTPro.css',
   ],
 
   // yarn nuxt build --webpackmonitor --analyze
@@ -178,6 +177,6 @@ module.exports = {
     // target: '../monitor/myStatsStore.json', // default -> '../monitor/stats.json'
     launch: true, // -> default 'false'
     port: 3030, // default -> 8081
-    excludeSourceMaps: true // default 'true'
-  }
+    excludeSourceMaps: true, // default 'true'
+  },
 }
