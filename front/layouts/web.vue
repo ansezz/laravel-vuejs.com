@@ -22,7 +22,7 @@
 
   export default {
     components: {
-      Navbar: () => import("@/components/web/organisms/navbar"),
+      Navbar: () => import("@/components/organisms/navbar"),
       AppFooter,
       AppNavigation,
       AppMain,

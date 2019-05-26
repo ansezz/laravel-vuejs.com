@@ -21,6 +21,10 @@
       loading: {
         type: Boolean,
         default: false
+      },
+      fill: {
+        type: String,
+        default: null
       }
     }
   };
