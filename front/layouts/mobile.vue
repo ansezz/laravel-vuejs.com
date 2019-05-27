@@ -1,7 +1,8 @@
 <template>
   <div class="app">
     <!--<github-corner/>-->
-    <app-navbar/>
+    <Navbar/>
+    <app-navigation/>
     <main>
       <nuxt/>
     </main>
@@ -16,14 +17,15 @@
 </template>
 
 <script>
-  import AppNavbar from "@/components/mobile/partials/app-navbar";
   import AppFooter from "@/components/mobile/partials/app-footer";
+  import AppNavigation from "@/components/web/partials/app-navigation";
   import AppSubscribe from "@/components/mobile/partials/app-subscribe";
 
   export default {
     components: {
-      // githubCorner: () => import("@/components/shared/partials/elements/github-corner"),
-      AppNavbar,
+      Navbar: () => import("@/components/organisms/navbar"),
+      AppNavigation,
+  // githubCorner: () => import("@/components/shared/partials/elements/github-corner"),
       AppFooter,
       AppSubscribe
     },

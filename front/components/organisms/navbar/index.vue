@@ -1,15 +1,16 @@
+
 <template>
-  <nav class="navbar" :class="{ 'is-loading' : loading }">
+  <nav class="navbar" :class="{ 'is-loading' : loading, 'is-mobile' : isMobile }">
     <div class="container">
       <div class="navbar-container">
         <ul class="navbar-list">
           <li>
             <a href="#" @click.prevent="toggleNavigationVisibility">
               <i class="fa fa-bars"></i>
-              <span>Menu</span>
+              <span v-if="isWeb()">Menu</span>
             </a>
           </li>
-          <li>
+          <li v-if="isWeb()">
             <a @click.prevent="toggleSearchVisibility" href="#">
               <i class="fa fa-search"></i>
               <span>Search</span>
@@ -22,7 +23,7 @@
         </nuxt-link>
 
         <ul class="navbar-list">
-          <li>
+          <li v-if="isWeb()">
             <nuxt-link aria-label="Link LV" to="/page/hire-us">
               <i class="fa fa-briefcase"></i>
               <span>Hire Us</span>
@@ -31,13 +32,14 @@
           <li v-if="loggedIn && me">
             <nuxt-link aria-label="Link LV" to="/auth/account">
               <i class="fa fa-user"></i>
-              <span>{{me.name}}</span>
+              <span v-if="isWeb()">{{me.name}}</span>
             </nuxt-link>
           </li>
           <li v-else>
             <nuxt-link aria-label="Link LV" to="/auth/signup">
               <i class="fa fa-user"></i>
-              <span>Sign up/in</span>
+
+              <span v-if="isWeb()">Sign up/in</span>
             </nuxt-link>
           </li>
         </ul>
@@ -57,10 +59,6 @@
     components: {
       AppSearch: () => import("@/components/web/partials/app-search"),
       Brand: () => import("@/components/shared/atoms/brand")
-    },
-
-    data() {
-      return {};
     },
 
     watch: {
@@ -111,10 +109,14 @@
     width 100px + 25%
     height 24px + 25%
 
+  .container
+    padding 0
+
   .navbar-container
     display flex
     justify-content space-between
     align-items center
+    padding 0 20px
     height 70px
     border-bottom 5px solid $primary
 

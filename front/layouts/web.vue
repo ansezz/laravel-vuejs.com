@@ -25,7 +25,7 @@
 
   export default {
     components: {
-      Navbar: () => import("@/components/web/organisms/navbar"),
+      Navbar: () => import("@/components/organisms/navbar"),
       githubCorner: () => import("@/components/shared/partials/elements/github-corner"),
       AppFooter,
       AppNavigation,
