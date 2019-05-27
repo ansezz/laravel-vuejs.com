@@ -10,7 +10,7 @@
                     <h5>TeleMadrid</h5>
                     <span>Madrid, Spain</span>
                 </div>
-                <nuxt-link to="/" class="is-absolute" />
+                <nuxt-link aria-label="Link LV" to="/" class="is-absolute" />
             </li>
             <li>
                 <div class="avatar">
@@ -20,7 +20,7 @@
                     <h5>TeleMadrid</h5>
                     <span>Madrid, Spain</span>
                 </div>
-                <nuxt-link to="/" class="is-absolute" />
+                <nuxt-link aria-label="Link LV" to="/" class="is-absolute" />
             </li>
             <li>
                 <div class="avatar">
@@ -30,7 +30,7 @@
                     <h5>TeleMadrid</h5>
                     <span>Madrid, Spain</span>
                 </div>
-                <nuxt-link to="/" class="is-absolute" />
+                <nuxt-link aria-label="Link LV" to="/" class="is-absolute" />
             </li>
         </ul>
     </div>

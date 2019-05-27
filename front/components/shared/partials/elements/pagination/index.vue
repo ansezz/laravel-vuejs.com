@@ -6,7 +6,7 @@
           slot-scope="{ data, limit, computed }">
 
         <li class="pagination-link">
-          <nuxt-link to="/">
+          <nuxt-link aria-label="Link LV" to="/">
             <i class="fa fa-caret-left"></i> <i class="fa fa-caret-left"></i>
           </nuxt-link>
         </li>
@@ -29,7 +29,7 @@
         </li>
 
         <li class="pagination-link" :class="{'disabled': !computed.hasMorePages}">
-          <nuxt-link to="/">
+          <nuxt-link aria-label="Link LV" to="/">
             <i class="fa fa-caret-right"></i><i class="fa fa-caret-right"></i>
           </nuxt-link>
         </li>

@@ -4,19 +4,19 @@
         <i class="fa fa-bars"></i>
       </div>
       <div class="logo">
-        <nuxt-link to="/">
+        <nuxt-link aria-label="Link LV" to="/">
           <img src="@/assets/images/logo.png" alt="LV">
         </nuxt-link>
       </div>
       <div class="user">
-        <nuxt-link to="/auth/signup">
+        <nuxt-link aria-label="Link LV" to="/auth/signup">
           <i class="fa fa-user"></i>
         </nuxt-link>
       </div>
       <div :class="[menu ? 'opened': '' ,'menu']">
         <div class="menu-header is-flex">
           <div class="logo">
-            <nuxt-link to="/">
+            <nuxt-link aria-label="Link LV" to="/">
               <img src="@/assets/images/logo.png" alt="LV">
             </nuxt-link>
           </div>
@@ -32,18 +32,18 @@
         <div class="menu-body">
           <ul>
             <li v-for="(item ,key) in main_menu" :key="key">
-              <nuxt-link :to="item.url">{{item.name}}</nuxt-link>
+              <nuxt-link aria-label="Link LV" :to="item.url">{{item.name}}</nuxt-link>
             </li>
           </ul>
           <ul class="second-menu">
             <li v-for="(item ,key) in second_menu" :key="key">
-                <nuxt-link :to="item.url">{{item.name}}</nuxt-link>
+                <nuxt-link aria-label="Link LV" :to="item.url">{{item.name}}</nuxt-link>
               </li>
           </ul>
           <ul class="social-media">
             <li v-for="(item, index) in social_media" :key="index"
                 :class="item.class">
-                <a :href="item.href" target="_blank">
+                <a :href="item.href"  target="_blank" rel="noreferrer"   aria-label="external link "   >
                     <i class="fa" :class="'fa-'+item.class"/>
                 </a>
             </li>

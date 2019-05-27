@@ -59,7 +59,7 @@
                         <div class="content-wrapper">
                             <div class="col-9">
                                 <app-jobs />
-                                <pagination/>  
+                                <pagination/>
                             </div>
                             <div class="col-3">
                                 <app-companies-trust />
@@ -71,7 +71,7 @@
                         <div class="content-wrapper">
                             <div class="col-9">
                                 <app-jobs />
-                                <pagination/>  
+                                <pagination/>
                             </div>
                             <div class="col-3">
                                 <app-companies-trust />
@@ -83,7 +83,7 @@
                         <div class="content-wrapper">
                             <div class="col-9">
                                 <app-jobs />
-                                <pagination/>  
+                                <pagination/>
                             </div>
                             <div class="col-3">
                                 <app-companies-trust />
@@ -95,7 +95,7 @@
                         <div class="content-wrapper">
                             <div class="col-9">
                                 <app-jobs />
-                                <pagination/>  
+                                <pagination/>
                             </div>
                             <div class="col-3">
                                 <app-companies-trust />
@@ -107,7 +107,7 @@
                         <div class="content-wrapper">
                             <div class="col-9">
                                 <app-jobs />
-                                <pagination/>  
+                                <pagination/>
                             </div>
                             <div class="col-3">
                                 <app-companies-trust />
@@ -119,7 +119,7 @@
                         <div class="content-wrapper">
                             <div class="col-9">
                                 <app-jobs />
-                                <pagination/>  
+                                <pagination/>
                             </div>
                             <div class="col-3">
                                 <app-companies-trust />
@@ -131,7 +131,7 @@
                         <div class="content-wrapper">
                             <div class="col-9">
                                 <app-jobs />
-                                <pagination/>  
+                                <pagination/>
                             </div>
                             <div class="col-3">
                                 <app-companies-trust />
@@ -261,7 +261,7 @@
                     color $secondary
                     border 2px solid #ebeef2
                     border-bottom 0
-            
+
     .filters
         float right
         display flex
@@ -292,5 +292,5 @@
             outline none
             -webkit-appearance none
             -moz-appearance none
-            appearance none    
+            appearance none
 </style>

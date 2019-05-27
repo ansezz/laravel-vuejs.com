@@ -9,6 +9,10 @@
     layout: ({store}) => store.state.platform,
     mixins: [seo],
     middleware: ["category"],
+    async asyncData({error, store}) {
+      if (!store.state.category.category)
+        error({statusCode: 404, message: 'Category not found or deleted'})
+    },
     computed: {
       seo() {
         return {

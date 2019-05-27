@@ -2,8 +2,8 @@
     <nav class="breadcrumbs">
         <ul class="breadcrumb-list">
            <li :class="{'is-active' : pages.length === index + 1}" v-for="(page,index) in pages" class="breadcrumb-item">
-                <nuxt-link v-if="page.link" :to="page.link" class="breadcrumb-anchor">{{page.name}}</nuxt-link>
-                <a v-else class="breadcrumb-anchor">{{ page.name }}</a>
+                <nuxt-link aria-label="Link LV" v-if="page.link" :to="page.link" class="breadcrumb-anchor" v-html="page.name"></nuxt-link>
+                <a v-else class="breadcrumb-anchor" v-html="page.name"></a>
             </li>
         </ul>
     </nav>

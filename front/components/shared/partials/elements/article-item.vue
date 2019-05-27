@@ -4,7 +4,7 @@
         <thumbnail :src="image" :alt="title" :to="to"/>
       </header>
     <main class="article-main">
-      <nuxt-link :to="to">
+      <nuxt-link aria-label="Link LV" :to="to">
         <h3 class="article-title" v-html="title"/>
       </nuxt-link>
        <!--<p v-if="description" class="article-description" v-html="truncate(description, 60)"/>-->

@@ -61,14 +61,14 @@
             </div>
             <div class="form-actions">
                 <button class="button" type="submit" name="go">go ahead</button>
-                <nuxt-link to="/auth/signup" class="button no-background">Comeback, it was a mistake.</nuxt-link>
+                <nuxt-link aria-label="Link LV" to="/auth/signup" class="button no-background">Comeback, it was a mistake.</nuxt-link>
             </div>
             <div class="notification">
                 <span>*You need to wait a few hours before we accept your offer.</span>
             </div>
         </form>
         <footer class="text-center">
-            <nuxt-link to="/page/term-conditions">Check the guideline and Terms.</nuxt-link>
+            <nuxt-link aria-label="Link LV" to="/page/term-conditions">Check the guideline and Terms.</nuxt-link>
         </footer>
     </div>
 </template>

@@ -12,7 +12,7 @@
                 </div>
                 <div class="category is-flex" v-if="post.categories[0]">
                     <i class="fa fa-folder-o"></i>
-                    <h1>{{ post.categories[0].name }}</h1>
+                    <h1 v-html="post.categories[0].name"></h1>
                 </div>
                 <div class="date-time">
                     <i class="fa fa-clock-o"></i>
@@ -22,7 +22,7 @@
         </div>
         <div class="single-post-container">
             <div class="post-content">
-                <h1 class="text-center">{{ post.title }}</h1>
+                <h1 class="text-center" v-html="post.title"></h1>
                 <p v-html="post.excerpt"></p>
                 <div class="image-container">
                     <social-sharing :url="$parent.seo.url"
@@ -56,8 +56,8 @@
                     </social-sharing>
 
                     <div class="thumbnail-area">
-                        <thumbnail :src="post.image_url" :alt="post.title" :to="post.url"/>
-                        <span class="copyright">&copy; 2018. Copyrights</span>
+                        <thumbnail :src="post.image_url" :alt="post.title" :to="{ name: 'slug', params: { slug: $route.params.slug }}"/>
+                        <!--<span class="copyright">&copy; 2018. Copyrights</span>-->
                     </div>
                     <ul class="actions-list">
                         <!--<li><a href="#"><img src="@/assets/images/zoom-in-colored.svg" alt="LV"></a></li>-->
@@ -76,16 +76,11 @@
                             />
                         </template>
                     </div>
-                    <adsbygoogle/>
+                    <adsbygoogle  class="adsbygoogle"/>
                 </div>
                 <p v-html="post.content" id="content"></p>
-                <h4>Tags : </h4>
-                <div class="tags">
-                    <nuxt-link v-for="tag in post.tags" :key="tag.id" :to="{name: 'tag-slug', params : {slug : tag.slug}}" >
-                        {{tag.name}}
-                    </nuxt-link>
-                </div>
                 <div class="grid-container">
+                    <adsbygoogle  class="adsbygoogle"/>
                     <div class="grid-articles">
                         <template v-for="(item, key) in related.second">
                             <article-item :title="item.title"
@@ -96,9 +91,13 @@
                             />
                         </template>
                     </div>
-                    <adsbygoogle/>
                 </div>
-
+                <h4>Tags : </h4>
+                <div class="tags">
+                    <nuxt-link aria-label="Link LV" v-for="tag in post.tags" :key="tag.id" :to="{name: 'tag-slug', params : {slug : tag.slug}}" >
+                        {{tag.name}}
+                    </nuxt-link>
+                </div>
                 <div>
                     <social-sharing :url="$parent.seo.url"
                                     :title="$parent.seo.title"
@@ -156,12 +155,16 @@
         <div class="has-bg">
             <div class="single-post-container">
                 <app-featured title="Related Posts" :items="related.last"/>
+                <adsbygoogle  class="adsbygoogle"/>
             </div>
         </div>
         <div class="single-post-container has-p-45-120">
             <div class="comment-container">
-                <vue-disqus shortname="laravel-vuejs-com" identifier="laravel-vuejs-com"
-                            :url="this.post.url"></vue-disqus>
+                <vue-disqus shortname="laravel-vuejs-com"
+                            :identifier="post.slug"
+                            :title="post.title"
+                            :url="this.post.url">
+                </vue-disqus>
             </div>
         </div>
     </section>

@@ -56,6 +56,11 @@ export const second_menu = [
 
 export const social_media = [
     {
+        title: "GitHub",
+        href: "https://github.com/ansezz/laravel-vuejs.com",
+        class: "github"
+    },
+    {
         title: "Facebook",
         href: "https://www.facebook.com/LaravelVueJs",
         class: "facebook"
@@ -104,10 +109,10 @@ export const social_media = [
         title: "Telegram",
         href: "http://t.me/LaravelVueJs",
         class: "paper-plane"
-    }/*,
+    },
     {
         title: "Rss",
         href: "https://www.laravel-vuejs.com/feed/",
         class: "rss"
-    },*/
+    }
 ]

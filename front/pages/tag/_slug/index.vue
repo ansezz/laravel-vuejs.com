@@ -7,9 +7,11 @@
 
   export default {
     mixins: [seo],
-
     layout: ({store}) => store.state.platform,
-
+    async asyncData({error, store}) {
+      if (!store.state.tag.tag)
+        error({statusCode: 404, message: 'Tag not found or deleted'})
+    },
     middleware: ["tag"],
     computed: {
       seo() {

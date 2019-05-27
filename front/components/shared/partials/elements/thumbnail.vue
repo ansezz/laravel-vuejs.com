@@ -1,5 +1,5 @@
 <template>
-  <nuxt-link :to="to" class="article-image" v-lazy-container="{ selector: 'img' }">
+  <nuxt-link aria-label="Link LV" :to="to" class="article-image" v-lazy-container="{ selector: 'img' }">
     <img v-if="src" :data-src="src" :alt="alt">
     <span class="post-loader">
       <Loader/>

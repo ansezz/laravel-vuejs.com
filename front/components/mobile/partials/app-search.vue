@@ -15,7 +15,7 @@
                             <h3>{{item.title}}</h3>
                             <span> <i class="fa fa-clock-o"></i> {{item.time_ago}} </span>
                         </div>
-                        <nuxt-link :to="{ name: 'slug', params: { slug: item.slug }}" class="is-absolute"/>
+                        <nuxt-link aria-label="Link LV" :to="{ name: 'slug', params: { slug: item.slug }}" class="is-absolute"/>
                     </li>
                 </ul>
                 <ul class="search-result" v-if="posts.data && posts.data.length === 0">
@@ -25,7 +25,7 @@
                         </div>
                     </li>
                 </ul>
-                <nuxt-link :to="{name : 'posts', query : {s :searchText }}" class="button"
+                <nuxt-link aria-label="Link LV" :to="{name : 'posts', query : {s :searchText }}" class="button"
                            v-if="posts.data && posts.data.length > 0">
                     Show all result
                 </nuxt-link>

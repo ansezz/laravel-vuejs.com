@@ -4,13 +4,13 @@
             <div class="row">
                 <div class="col-sm-3">
                     <div class="footer-box">
-                        <nuxt-link class="footer-logo" to="/">
+                        <nuxt-link aria-label="Link LV" class="footer-logo" to="/">
                             <img src="@/assets/images/logo-grey.png" alt="LV">
                         </nuxt-link>
                         <ul class="social-media">
                             <li v-for="(item, index) in social_media" :key="index"
                                 :class="item.class">
-                                <a :href="item.href" target="_blank">
+                                <a :href="item.href"  target="_blank" rel="noreferrer"   aria-label="external link "   >
                                     <i class="fa" :class="'fa-'+item.class"/>
                                 </a>
                             </li>
@@ -26,7 +26,7 @@
                                     <span>Blog</span>
                                 </li>
                                 <li v-for="(item ,key) in main_menu" :key="key">
-                                    <nuxt-link :to="item.url">{{item.name}}</nuxt-link>
+                                    <nuxt-link aria-label="Link LV" :to="item.url">{{item.name}}</nuxt-link>
                                 </li>
                             </ul>
                         </div>
@@ -45,10 +45,10 @@
                         <div class="footer-box">
                             <ul class="items last-items">
                                 <li v-for="(item ,key) in second_menu" :key="key">
-                                    <nuxt-link :to="item.url">{{item.name}}</nuxt-link>
+                                    <nuxt-link aria-label="Link LV" :to="item.url">{{item.name}}</nuxt-link>
                                 </li>
                             </ul>
-                            <nuxt-link class="button has-icon has-ex-w" to="/auth/login">
+                            <nuxt-link aria-label="Link LV" class="button has-icon has-ex-w" to="/auth/login">
                                 <i class="fa fa-user"></i>
                                 <span>Sign up/in</span>
                             </nuxt-link>

@@ -18,25 +18,25 @@
           </li>
         </ul>
 
-        <nuxt-link class="navbar-brand" to="/">
+        <nuxt-link aria-label="Link LV" class="navbar-brand" to="/">
           <Brand :loading="loading"/>
         </nuxt-link>
 
         <ul class="navbar-list">
           <li v-if="isWeb()">
-            <nuxt-link to="/page/hire-us">
+            <nuxt-link aria-label="Link LV" to="/page/hire-us">
               <i class="fa fa-briefcase"></i>
               <span>Hire Us</span>
             </nuxt-link>
           </li>
           <li v-if="loggedIn && me">
-            <nuxt-link to="/auth/account">
+            <nuxt-link aria-label="Link LV" to="/auth/account">
               <i class="fa fa-user"></i>
               <span v-if="isWeb()">{{me.name}}</span>
             </nuxt-link>
           </li>
           <li v-else>
-            <nuxt-link to="/auth/signup">
+            <nuxt-link aria-label="Link LV" to="/auth/signup">
               <i class="fa fa-user"></i>
 
               <span v-if="isWeb()">Sign up/in</span>

@@ -1,15 +1,18 @@
 <template>
   <div class="app">
+    <github-corner/>
     <Navbar/>
     <app-navigation/>
     <app-main>
       <nuxt :nuxt-child-key="$route.fullPath"/>
     </app-main>
     <div class="container">
-      <adsbygoogle/>
+      <adsbygoogle  class="adsbygoogle"/>
     </div>
+    <div class='onesignal-customlink-container'></div>
     <app-subscribe/>
     <app-footer/>
+      <adsbygoogle  class="adsbygoogle" :pageLevelAds="true"/>
   </div>
 </template>
 
@@ -18,11 +21,12 @@
   import AppNavigation from "@/components/web/partials/app-navigation";
   import AppMain from "@/components/web/partials/app-main";
   import AppSubscribe from "@/components/web/partials/app-subscribe";
-  import { mapActions } from "vuex";
+  import {mapActions} from "vuex";
 
   export default {
     components: {
       Navbar: () => import("@/components/organisms/navbar"),
+      githubCorner: () => import("@/components/shared/partials/elements/github-corner"),
       AppFooter,
       AppNavigation,
       AppMain,
@@ -34,7 +38,10 @@
       })
     },
     data() {
-      return {};
+      return {
+      };
+    },
+    mounted() {
     },
     created() {
       if (this.$route.query.token) {

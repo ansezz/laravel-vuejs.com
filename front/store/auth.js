@@ -39,7 +39,7 @@ export const actions = {
         return true;
     },
     async LOAD_ME({commit}) {
-        await this.app.apolloProvider.defaultClient.query({query: meQql})
+        return await this.app.apolloProvider.defaultClient.query({query: meQql})
             .then(({data}) => {
                 console.log(data)
                 if (data.me) {
@@ -64,7 +64,7 @@ export const actions = {
             })
     },
     async LOGOUT({commit}) {
-        await this.app.apolloProvider.defaultClient.query({query: logoutQql})
+        return await this.app.apolloProvider.defaultClient.query({query: logoutQql})
             .then(async ({data}) => {
                 commit('SET_LOGGED_IN', false)
                 await this.app.$apolloHelpers.onLogout()
@@ -75,10 +75,10 @@ export const actions = {
             })
     },
     async SIGNUP({commit}, params) {
-        await this.app.apolloProvider.defaultClient.mutate({mutation: signupQql, variables: params})
-            .then(({data}) => {
-                if (data.signup)
-                    this.$router.push('/auth/login')
-            })
+        return await this.app.apolloProvider.defaultClient.mutate({mutation: signupQql, variables: params})
+          .then((response) => {
+              if (response.data.signup)
+                  this.$router.push('/auth/login')
+          })
     },
 }

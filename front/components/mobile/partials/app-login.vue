@@ -29,11 +29,11 @@
             </div>
             <div class="form-actions">
                 <button class="button" type="submit" name="go">go ahead</button>
-                <nuxt-link to="/auth/signup" class="button no-background">I don’t an account yet</nuxt-link>
+                <nuxt-link aria-label="Link LV" to="/auth/signup" class="button no-background">I don’t an account yet</nuxt-link>
             </div>
         </form>
         <footer class="text-center">
-            <nuxt-link to="/auth/forgot-password" class="forgot-password">What? you forgot your password?</nuxt-link>
+            <nuxt-link aria-label="Link LV" to="/auth/forgot-password" class="forgot-password">What? you forgot your password?</nuxt-link>
         </footer>
     </div>
 </template>

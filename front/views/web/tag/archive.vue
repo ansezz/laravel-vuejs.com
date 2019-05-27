@@ -8,7 +8,7 @@
           <div class="user-avatar">
             <i class="fa fa-folder-o"></i>
           </div>
-          <h1 v-if="tag">{{tag.name}}</h1>
+          <h1 v-if="tag" v-html="tag.name"></h1>
         </div>
         <filters route-name="tag-slug"></filters>
       </div>

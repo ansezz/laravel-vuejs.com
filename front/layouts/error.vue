@@ -4,11 +4,17 @@
             <img src="@/assets/images/404.png" alt="LV">
         </div>
         <div class="error-body">
-            <pre>{{error}}</pre>
-            <h1 v-if="error.statusCode === 404">Mate, page not found!</h1>
+            <!--@TODO : Show error only oin dev env-->
+            <!--<pre>{{error}}</pre>-->
+            <h1 v-if="error.statusCode === 404">
+            <span v-if="error.message">
+              {{error.message}}
+            </span>
+              <span v-else>Mate, page not found!</span>
+            </h1>
             <h1 v-else>An error occurred</h1>
             <p>You might not have permissions to see this page or isn’t exists anymore.</p>
-            <nuxt-link to="/" class="button has-icon">
+            <nuxt-link aria-label="Link LV" to="/page/contact-us" class="button has-icon">
                 <img src="@/assets/images/icons-report.svg" alt="LV">
                 <span>report this to our team</span>
             </nuxt-link>

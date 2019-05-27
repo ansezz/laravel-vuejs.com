@@ -6,13 +6,13 @@
                     <div class="article-box">
                         <thumbnail  :src="item.image_url" :alt="item.title" :to="{ name: 'slug', params: { slug: item.slug }}"/>
                         <div class="article-info">
-                          <nuxt-link :to="{ name: 'slug', params: { slug: item.slug }}">
+                          <nuxt-link aria-label="Link LV" :to="{ name: 'slug', params: { slug: item.slug }}">
                             <h4>{{item.title}}</h4>
                           </nuxt-link>
                             <ul class="cats">
                                 <li><span v-if="item.categories[0]">In
                                     <strong>
-                                        <nuxt-link
+                                        <nuxt-link aria-label="Link LV"
                                                 :to="{name: 'category-slug', params : {slug : item.categories[0].slug}}">
                                             {{item.categories[0].name}}
                                         </nuxt-link>

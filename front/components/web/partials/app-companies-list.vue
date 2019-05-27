@@ -2,84 +2,84 @@
     <div class="companies-grid">
         <div class="company">
             <div class="avatar">
-                <nuxt-link to="/">
+                <nuxt-link aria-label="Link LV" to="/">
                     <img src="@/assets/images/rainbow-treecare.png" alt="LV">
                 </nuxt-link>
             </div>
             <div class="company-info">
                 <h5>Beats Electronics</h5>
                 <span class="city">Casablanca, Morocco</span>
-                <nuxt-link to="/" class="offers-count">
+                <nuxt-link aria-label="Link LV" to="/" class="offers-count">
                     <span>88 Offers</span>
                 </nuxt-link>
             </div>
         </div>
         <div class="company">
             <div class="avatar">
-                <nuxt-link to="/">
+                <nuxt-link aria-label="Link LV" to="/">
                     <img src="@/assets/images/telemadrid.png" alt="LV">
                 </nuxt-link>
             </div>
             <div class="company-info">
                 <h5>Beats Electronics</h5>
                 <span class="city">Casablanca, Morocco</span>
-                <nuxt-link to="/" class="offers-count">
+                <nuxt-link aria-label="Link LV" to="/" class="offers-count">
                     <span>88 Offers</span>
                 </nuxt-link>
             </div>
         </div>
         <div class="company">
             <div class="avatar">
-                <nuxt-link to="/">
+                <nuxt-link aria-label="Link LV" to="/">
                     <img src="@/assets/images/telemadrid.png" alt="LV">
                 </nuxt-link>
             </div>
             <div class="company-info">
                 <h5>Beats Electronics</h5>
                 <span class="city">Casablanca, Morocco</span>
-                <nuxt-link to="/" class="offers-count">
+                <nuxt-link aria-label="Link LV" to="/" class="offers-count">
                     <span>88 Offers</span>
                 </nuxt-link>
             </div>
         </div>
         <div class="company">
             <div class="avatar">
-                <nuxt-link to="/">
+                <nuxt-link aria-label="Link LV" to="/">
                     <img src="@/assets/images/beats-electronics.png" alt="LV">
                 </nuxt-link>
             </div>
             <div class="company-info">
                 <h5>Beats Electronics</h5>
                 <span class="city">Casablanca, Morocco</span>
-                <nuxt-link to="/" class="offers-count">
+                <nuxt-link aria-label="Link LV" to="/" class="offers-count">
                     <span>88 Offers</span>
                 </nuxt-link>
             </div>
         </div>
         <div class="company">
             <div class="avatar">
-                <nuxt-link to="/">
+                <nuxt-link aria-label="Link LV" to="/">
                     <img src="@/assets/images/rainbow-treecare.png" alt="LV">
                 </nuxt-link>
             </div>
             <div class="company-info">
                 <h5>Beats Electronics</h5>
                 <span class="city">Casablanca, Morocco</span>
-                <nuxt-link to="/" class="offers-count">
+                <nuxt-link aria-label="Link LV" to="/" class="offers-count">
                     <span>88 Offers</span>
                 </nuxt-link>
             </div>
         </div>
         <div class="company">
             <div class="avatar">
-                <nuxt-link to="/">
+                <nuxt-link aria-label="Link LV" to="/">
                     <img src="@/assets/images/rainbow-treecare.png" alt="LV">
                 </nuxt-link>
             </div>
             <div class="company-info">
                 <h5>Beats Electronics</h5>
                 <span class="city">Casablanca, Morocco</span>
-                <nuxt-link to="/" class="offers-count">
+                <nuxt-link aria-label="Link LV" to="/" class="offers-count">
                     <span>88 Offers</span>
                 </nuxt-link>
             </div>

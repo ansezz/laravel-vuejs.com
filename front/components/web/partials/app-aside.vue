@@ -7,7 +7,7 @@
                     <ul class="social-media">
                         <li v-for="(item, index) in social_media" :key="index"
                             :class="item.class">
-                            <a :href="item.href" target="_blank">
+                            <a :href="item.href"  target="_blank" rel="noreferrer"   aria-label="external link "   >
                                 <i class="fa" :class="'fa-' + item.class"/>
                             </a>
                         </li>
@@ -15,11 +15,11 @@
                 </div>
                 <app-popular-posts/>
                 <div class="widget">
-                    <adsbygoogle/>
+                    <adsbygoogle  class="adsbygoogle"/>
                 </div>
                 <app-subscribe-form/>
                 <div class="widget last-widget">
-                    <adsbygoogle/>
+                    <adsbygoogle  class="adsbygoogle"/>
                 </div>
             </div>
         </aside>

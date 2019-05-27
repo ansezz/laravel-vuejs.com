@@ -7,6 +7,10 @@
 
   export default {
     mixins: [seo],
+    async asyncData({error, store}) {
+      if (!store.state.post.single)
+        error({statusCode: 404, message: 'Post not found or deleted'})
+    },
     layout: ({store}) => store.state.platform,
     middleware: ["post"],
     computed: {

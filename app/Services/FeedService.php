@@ -31,4 +31,10 @@ class FeedService
     {
         return Media::all();
     }
+
+    public static function getMainFeed()
+    {
+        return Post::all();
+    }
+
 }
