@@ -96,11 +96,12 @@ module.exports = {
    ** Headers of the page
    */
   head: {
-    titleTemplate: '%s  ←  Laravel-VueJs.com > Beta',
+    titleTemplate: '%s  ←  Laravel-VueJs.com',
     title: 'Laravel-VueJs.com',
     meta: [
       { charset: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+      { name: 'google-site-verification', content: process.env.GOOGLE_SITE_VERIFICATION },
     ],
     htmlAttrs: { dir: 'ltr' },
     link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }],
