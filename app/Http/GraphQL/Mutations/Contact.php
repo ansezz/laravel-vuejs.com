@@ -21,6 +21,8 @@ class Contact
      */
     public function resolve($rootValue, array $args, GraphQLContext $context = null, ResolveInfo $resolveInfo)
     {
+        \LaravelVueJs\Models\Contact::create($args);
+
         Mail::queue(new ContactMail($args));
 
         return 'Thank you for your message. we will respond as soon as possible !';

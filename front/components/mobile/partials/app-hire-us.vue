@@ -8,7 +8,7 @@
                 <h1>Contact us || Hire us</h1>
                 <p>Send us a message, Explain to us what you need !</p>
             </header>
-            <form @submit="contact">
+            <form @submit.prevent="contact">
                 <div class="alert alert-success text-center" role="alert" v-if="message">
                     <i class="glyphicon glyphicon-check"></i>
                     <b>{{message}}</b>
