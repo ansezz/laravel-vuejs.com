@@ -16,9 +16,10 @@
         "binarytorch/larecipe": "^2.1",
         "ebess/advanced-nova-media-library": "^2.1",
         "fideloper/proxy": "^4.0",
+        "genealabs/nova-gutenberg": "*",
         "jameslkingsley/nova-stripe-theme": "^1.0",
         "laravel/framework": "5.8.*",
-        "laravel/nova": "~2.0",
+        "laravel/nova": "*",
         "laravel/passport": "^7.0",
         "laravel/scout": "^7.1",
         "laravel/socialite": "^4.0",
@@ -45,8 +46,8 @@
     },
     "repositories": [
         {
-            "type": "composer",
-            "url": "https://nova.laravel.com"
+            "type": "path",
+            "url": "./nova"
         },
         {
             "type": "path",

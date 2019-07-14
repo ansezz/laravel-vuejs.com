@@ -4,6 +4,7 @@ namespace LaravelVueJs\Nova;
 
 
 use Ebess\AdvancedNovaMediaLibrary\Fields\Images;
+use GeneaLabs\NovaGutenberg\Gutenberg;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\ID;
@@ -72,7 +73,7 @@ class Post extends Resource
                     Text::make('Alt'),
                 ]),
 
-            Trix::make('Content')
+            Gutenberg::make('Content')
                 ->rules('required'),
 
             Textarea::make('Excerpt'),
