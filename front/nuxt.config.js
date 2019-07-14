@@ -157,7 +157,7 @@ module.exports = {
     { src: '~/plugins/disqus' },
     { src: '~/plugins/http' },
     { src: '~/plugins/utils' },
-    { src: '~/plugins/social-sharing' },
+    { src: '~/plugins/social-sharing', ssr: false },
     { src: '~/plugins/swiper', ssr: false },
     { src: '~/plugins/vee-validate', ssr: false },
     { src: '~/plugins/lazyload', ssr: false },
