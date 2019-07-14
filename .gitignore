@@ -19,3 +19,4 @@ yarn.lock
 storage/app/wp-importer/*
 .idea/
 nova/
+public/photos

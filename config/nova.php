@@ -78,4 +78,7 @@ return [
         Authorize::class,
     ],
 
+    'tinymce_api_key' => env('TINYMCE_API_KEY'),
+
+
 ];

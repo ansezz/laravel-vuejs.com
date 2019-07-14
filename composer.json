@@ -15,8 +15,8 @@
         "bensampo/laravel-enum": "^1.19",
         "binarytorch/larecipe": "^2.1",
         "ebess/advanced-nova-media-library": "^2.1",
+        "emilianotisato/nova-tinymce": "^0.5.4",
         "fideloper/proxy": "^4.0",
-        "genealabs/nova-gutenberg": "*",
         "jameslkingsley/nova-stripe-theme": "^1.0",
         "laravel/framework": "5.8.*",
         "laravel/nova": "*",
@@ -34,7 +34,8 @@
         "spatie/laravel-newsletter": "^4.4",
         "spatie/laravel-sluggable": "^2.1",
         "spatie/nova-tags-field": "^1.1",
-        "spatie/nova-translatable": "^1.0"
+        "spatie/nova-translatable": "^1.0",
+        "unisharp/laravel-filemanager": "~1.8"
     },
     "require-dev": {
         "beyondcode/laravel-dump-server": "^1.0",

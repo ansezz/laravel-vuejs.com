@@ -37,7 +37,7 @@ module.exports = {
   },
   // @TODO : this.$sentry.captureException(new Error('example'))
   sentry: {
-    dsn: 'https://05823801c6c64430a9716187dc90f7bd@sentry.io/188197', // Enter your project's DSN here
+    dsn: process.env.SENTRY_DSN, // Enter your project's DSN here
     config: {}, // Additional config
   },
   oneSignal: {
