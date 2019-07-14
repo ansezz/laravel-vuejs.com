@@ -15,7 +15,7 @@
               <b>{{message}}</b>
             </div>
             <div class="form-group">
-              <input type="email" class="form-control" placeholder="E-mail" v-model="email" required aria-label="email">
+              <input type="email" class="form-control" placeholder="E-mail" v-model="email" required aria-label="email" autocomplete="true">
               <div class="img">
                 <i class="fa fa-envelope"></i>
               </div>
