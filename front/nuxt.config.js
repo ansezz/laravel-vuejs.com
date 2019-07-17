@@ -117,16 +117,12 @@ module.exports = {
   // @TODO : custom loading
   //  loading: '~/components/loading.vue'
 
-  generate: {
-    minify: {
-      collapseWhitespace: false
-    }
-  },
   /*
    ** Build configuration
    */
   build: {
     minify: {
+      collapseBooleanAttributes: false,
       collapseWhitespace: false
     },
     //    analyze: true,
