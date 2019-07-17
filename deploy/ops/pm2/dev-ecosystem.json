@@ -2,7 +2,7 @@
  "apps": [
   {
    "name": "laravel-vuejs-dev",
-   "script": "./node_modules/nuxt/bin/nuxt-start --port=3001",
+   "script": "./node_modules/nuxt/bin/nuxt-start",
    "cwd": "/var/www/dev.laravel-vuejs.com/web/current/front",
    "error_file": "/var/www/dev.laravel-vuejs.com/logs/app.err.log",
    "out_file": "/var/www/dev.laravel-vuejs.com/logs/app.out.log",
