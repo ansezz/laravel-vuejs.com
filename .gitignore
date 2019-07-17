@@ -12,9 +12,7 @@ Homestead.json
 Homestead.yaml
 npm-debug.log
 yarn-error.log
-package-lock.json
 /nova-app
-yarn.lock
 
 storage/app/wp-importer/*
 .idea/
