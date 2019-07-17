@@ -57,6 +57,7 @@
                     </div>
                 </div>
                 <h4>Tags : </h4>
+                <br>
                 <div class="tags">
                     <nuxt-link aria-label="Link LV" v-for="tag in post.tags" :key="tag.id" :to="{name: 'tag-slug', params : {slug : tag.slug}}" >
                         {{tag.name}}
