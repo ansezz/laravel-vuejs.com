@@ -117,10 +117,18 @@ module.exports = {
   // @TODO : custom loading
   //  loading: '~/components/loading.vue'
 
+  generate: {
+    minify: {
+      collapseWhitespace: false
+    }
+  },
   /*
    ** Build configuration
    */
   build: {
+    minify: {
+      collapseWhitespace: false
+    },
     //    analyze: true,
     babel: {
       plugins: ['@babel/plugin-proposal-nullish-coalescing-operator'],
