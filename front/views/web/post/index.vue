@@ -20,6 +20,7 @@
                 </div>
             </div>
         </div>
+        <adsbygoogle  class="adsbygoogle" :pageLevelAds="true"/>
         <div class="single-post-container">
             <div class="post-content">
                 <h1 class="text-center" v-html="post.title"></h1>

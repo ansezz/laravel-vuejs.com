@@ -7,12 +7,14 @@
       <nuxt/>
     </main>
     <div class="container">
-      <adsbygoogle  class="adsbygoogle"/>
+      <adsbygoogle  class="adsbygoogle" :pageLevelAds="true"/>
     </div>
     <div class='onesignal-customlink-container'></div>
     <app-subscribe/>
     <app-footer/>
-    <adsbygoogle  class="adsbygoogle" :pageLevelAds="true"/>
+    <div class="container">
+      <adsbygoogle  class="adsbygoogle" :pageLevelAds="true"/>
+    </div>
   </div>
 </template>
 

@@ -22,7 +22,7 @@
                 </div>
             </div>
         </div>
-        <div class="mobile-container">
+      <div class="mobile-container">
             <div class="post-content">
                 <ul class="actions-list is-flex">
                     <div class="is-flex">
@@ -32,6 +32,9 @@
                     </div>
                 </ul>
                 <h1 class="text-center">{{ post.title }}</h1>
+                <div class="grid-container">
+                  <adsbygoogle  class="adsbygoogle" :pageLevelAds="true"/>
+                </div>
                 <p>{{ post.excerpt }}</p>
                 <div class="image-container">
                     <div class="thumbnail-area">
@@ -40,11 +43,11 @@
                     </div>
                 </div>
                 <div class="grid-container">
-                    <adsbygoogle  class="adsbygoogle"/>
+                    <adsbygoogle  class="adsbygoogle" :pageLevelAds="true"/>
                 </div>
                 <div v-html="post.content" id="content"></div>
                 <div class="grid-container">
-                    <adsbygoogle  class="adsbygoogle"/>
+                    <adsbygoogle  class="adsbygoogle" :pageLevelAds="true"/>
                     <div class="grid-articles">
                         <template v-for="(item, key) in related.second">
                             <article-item :title="item.title"
@@ -111,7 +114,9 @@
         <div class="has-bg">
             <div class="single-post-container">
                 <app-featured title="Related Posts" :items="related.last"/>
-                <adsbygoogle  class="adsbygoogle"/>
+                <div class="grid-container">
+                  <adsbygoogle  class="adsbygoogle" :pageLevelAds="true"/>
+                </div>
             </div>
         </div>
         <div class="single-post-container has-p-45-120">

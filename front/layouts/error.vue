@@ -19,6 +19,9 @@
                 <span>report this to our team</span>
             </nuxt-link>
         </div>
+        <div class="container">
+          <adsbygoogle  class="adsbygoogle" :pageLevelAds="true"/>
+        </div>
       <app-featured/>
     </div>
 </template>
