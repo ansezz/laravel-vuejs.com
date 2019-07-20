@@ -1,6 +1,6 @@
 <template>
-  <nuxt-link aria-label="Link LV" :to="to" class="article-image" v-lazy-container="{ selector: 'img' }">
-    <img v-if="src" :data-src="src" :alt="alt">
+  <nuxt-link aria-label="Link LV" :to="to" class="article-image">
+    <img :src="src" :alt="alt">
     <span class="post-loader">
       <Loader/>
     </span>
