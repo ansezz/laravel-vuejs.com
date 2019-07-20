@@ -1,10 +1,10 @@
 <template>
   <nuxt-link aria-label="Link LV" :to="to" class="article-image">
     <img :src="src" :alt="alt">
-    <span class="post-loader">
+   <!-- <span class="post-loader">
       <Loader/>
     </span>
-    <span class="post-error"></span>
+    <span class="post-error"></span>-->
   </nuxt-link>
 </template>
 
@@ -78,7 +78,6 @@
       left 0
       width 100%
       height 100%
-      opacity 0
       transition opacity .25s ease-in-out, transform .5s ease-in-out
       object-fit cover
 
