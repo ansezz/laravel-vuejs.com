@@ -158,7 +158,7 @@ module.exports = {
     // new BundleAnalyzerPlugin(),
     { src: '~/mixins/platforms' },
     { src: '~/plugins/ui' },
-    { src: '~/plugins/disqus' },
+    { src: '~/plugins/disqus', ssr: false },
     { src: '~/plugins/http' },
     { src: '~/plugins/utils' },
     { src: '~/plugins/social-sharing', ssr: false },

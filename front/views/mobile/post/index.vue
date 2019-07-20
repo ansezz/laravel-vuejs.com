@@ -42,7 +42,7 @@
                 <div class="grid-container">
                     <adsbygoogle  class="adsbygoogle"/>
                 </div>
-                <p v-html="post.content" id="content"></p>
+                <div v-html="post.content" id="content"></div>
                 <div class="grid-container">
                     <adsbygoogle  class="adsbygoogle"/>
                     <div class="grid-articles">
@@ -63,6 +63,7 @@
                         {{tag.name}}
                     </nuxt-link>
                 </div>
+              <no-ssr>
                 <social-sharing :url="$parent.seo.url"
                                 :title="$parent.seo.title"
                                 :description="$parent.seo.description"
@@ -106,7 +107,7 @@
                         </network>
                     </ul>
                 </social-sharing>
-
+              </no-ssr>
             </div>
         </div>
         <div class="has-bg">
@@ -117,11 +118,13 @@
         </div>
         <div class="single-post-container has-p-45-120">
             <div class="comment-container">
+              <no-ssr>
                 <vue-disqus shortname="laravel-vuejs-com"
                             :identifier="post.slug"
                             :title="post.title"
                             :url="this.post.url">
                 </vue-disqus>
+              </no-ssr>
             </div>
         </div>
     </section>
