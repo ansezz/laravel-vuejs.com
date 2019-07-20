@@ -19,14 +19,21 @@
                 <span>report this to our team</span>
             </nuxt-link>
         </div>
+      <app-featured/>
     </div>
 </template>
 
 <script>
-    export default {
-        props: ['error'],
-        layout: ({store}) => store.state.platform
+  export default {
+    props: ['error'],
+    beforeMount(){
+      this.$store.dispatch("post/LOAD_FEATURED_POSTS")
+    },
+    layout: ({store}) => store.state.platform,
+    components: {
+      AppFeatured: () => import('@/components/web/partials/app-featured')
     }
+  }
 </script>
 
 <style lang="stylus" scoped>
