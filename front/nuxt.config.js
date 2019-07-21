@@ -18,16 +18,16 @@ module.exports = {
     '@nuxtjs/google-adsense',
     '@nuxtjs/sitemap',
     '@nuxtjs/moment',
-    '@nuxtjs/webpackmonitor',
+    // '@nuxtjs/webpackmonitor',
     'nuxt-device-detect',
     '@nuxtjs/sentry',
     // @TODO : create Creating an experiment fro google optimize
-    'nuxt-google-optimize',
+    //'nuxt-google-optimize',
     // @TODO enable component cache only in prod
-    ['@nuxtjs/component-cache', {maxAge: 1000 * 60 * 60}],
-    ["@nuxtjs/google-tag-manager", {
+    //['@nuxtjs/component-cache', {maxAge: 1000 * 60 * 60}],
+    /*["@nuxtjs/google-tag-manager", {
         id: process.env.GOOGLE_TAG_MANAGER
-    }]
+    }]*/
   ],
   // Optional options
   googleOptimize: {
