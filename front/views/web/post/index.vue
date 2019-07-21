@@ -26,6 +26,7 @@
                 <h1 class="text-center" v-html="post.title"></h1>
                 <p v-html="post.excerpt"></p>
                 <div class="image-container">
+                  <no-ssr>
                     <social-sharing :url="$parent.seo.url"
                                     :title="$parent.seo.title"
                                     :description="$parent.seo.description"
@@ -55,6 +56,7 @@
                             </network>
                         </ul>
                     </social-sharing>
+                  </no-ssr>
                     <div class="thumbnail-area">
                         <thumbnail :src="post.image_url" :alt="post.title" :to="{ name: 'slug', params: { slug: $route.params.slug }}"/>
                         <!--<span class="copyright">&copy; 2018. Copyrights</span>-->
@@ -100,6 +102,7 @@
                     </nuxt-link>
                 </div>
                 <div>
+                  <no-ssr>
                     <social-sharing :url="$parent.seo.url"
                                     :title="$parent.seo.title"
                                     :description="$parent.seo.description"
@@ -149,6 +152,7 @@
                             </network>
                         </div>
                     </social-sharing>
+                  </no-ssr>
                 </div>
 
             </div>

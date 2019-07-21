@@ -21,13 +21,13 @@ module.exports = {
     '@nuxtjs/webpackmonitor',
     'nuxt-device-detect',
     '@nuxtjs/sentry',
-    // @TOD : create Creating an experiment fro google optimize
-    /*'nuxt-google-optimize',*/
+    // @TODO : create Creating an experiment fro google optimize
+    'nuxt-google-optimize',
     // @TODO enable component cache only in prod
-    // ['@nuxtjs/component-cache', {maxAge: 1000 * 60 * 60}],
-    /*["@nuxtjs/google-tag-manager", {
+    ['@nuxtjs/component-cache', {maxAge: 1000 * 60 * 60}],
+    ["@nuxtjs/google-tag-manager", {
         id: process.env.GOOGLE_TAG_MANAGER
-    }]*/
+    }]
   ],
   // Optional options
   googleOptimize: {
@@ -82,9 +82,7 @@ module.exports = {
     name: 'Laravel-VueJs.com',
     short_name: 'Laravel-VueJs.com',
     title: 'Laravel-VueJs.com',
-    'og:title': 'Laravel-VueJs.com',
     description: 'Laravel-VueJs.com',
-    'og:description': 'Laravel-VueJs.com',
     lang: 'en',
     theme_color: '#42b883',
     background_color: '#35495e',
@@ -124,7 +122,7 @@ module.exports = {
     minify: {
       collapseWhitespace: false
     },
-    //    analyze: true,
+    analyze: true,
     babel: {
       plugins: ['@babel/plugin-proposal-nullish-coalescing-operator'],
     },
