@@ -122,7 +122,7 @@ module.exports = {
     minify: {
       collapseWhitespace: false
     },
-    analyze: true,
+    analyze: false,
     babel: {
       plugins: ['@babel/plugin-proposal-nullish-coalescing-operator'],
     },
@@ -155,7 +155,7 @@ module.exports = {
     // new BundleAnalyzerPlugin(),
     { src: '~/mixins/platforms' },
     { src: '~/plugins/ui' },
-    { src: '~/plugins/disqus', ssr: false},
+    { src: '~/plugins/disqus'},
     { src: '~/plugins/http' },
     { src: '~/plugins/utils' },
     { src: '~/plugins/social-sharing', ssr: false},
