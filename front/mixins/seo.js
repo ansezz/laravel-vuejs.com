@@ -3,7 +3,7 @@ let config = {
   twitter: '@LaravelVueJs',
   fbAppId: '111025849614074',
   themeColor: '#42b883',
-  local: 'en',
+  local: 'en_us',
 }
 
 // seo.url
