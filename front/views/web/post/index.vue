@@ -19,14 +19,13 @@
                     <span>{{post.time_ago}}</span>
                 </div>
             </div>
+          <adsbygoogle  class="adsbygoogle container" :pageLevelAds="true" />
         </div>
-        <adsbygoogle  class="adsbygoogle" :pageLevelAds="true"/>
         <div class="single-post-container">
             <div class="post-content">
                 <h1 class="text-center" v-html="post.title"></h1>
                 <p v-html="post.excerpt"></p>
-                <div class="image-container">
-                  <no-ssr>
+                <div class="image-container" v-if="ready">
                     <social-sharing :url="$parent.seo.url"
                                     :title="$parent.seo.title"
                                     :description="$parent.seo.description"
@@ -56,7 +55,6 @@
                             </network>
                         </ul>
                     </social-sharing>
-                  </no-ssr>
                     <div class="thumbnail-area">
                         <thumbnail :src="post.image_url" :alt="post.title" :to="{ name: 'slug', params: { slug: $route.params.slug }}"/>
                         <!--<span class="copyright">&copy; 2018. Copyrights</span>-->
@@ -78,11 +76,10 @@
                             />
                         </template>
                     </div>
-                    <adsbygoogle  class="adsbygoogle"/>
                 </div>
+                <adsbygoogle  class="adsbygoogle" :pageLevelAds="true" />
                 <div v-html="post.content" id="content"></div>
                 <div class="grid-container">
-                    <adsbygoogle  class="adsbygoogle"/>
                     <div class="grid-articles">
                         <template v-for="(item, key) in related.second">
                             <article-item :title="item.title"
@@ -94,15 +91,15 @@
                         </template>
                     </div>
                 </div>
-                <h4>Tags : </h4>
+              <adsbygoogle  class="adsbygoogle" :pageLevelAds="true" />
+              <h4>Tags : </h4>
                 <br>
                 <div class="tags">
                     <nuxt-link aria-label="Link LV" v-for="tag in post.tags" :key="tag.id" :to="{name: 'tag-slug', params : {slug : tag.slug}}" >
                         {{tag.name}}
                     </nuxt-link>
                 </div>
-                <div>
-                  <no-ssr>
+                <div v-if="ready">
                     <social-sharing :url="$parent.seo.url"
                                     :title="$parent.seo.title"
                                     :description="$parent.seo.description"
@@ -152,25 +149,25 @@
                             </network>
                         </div>
                     </social-sharing>
-                  </no-ssr>
                 </div>
 
             </div>
         </div>
-        <div class="has-bg">
-            <div class="single-post-container">
-                <app-featured title="Related Posts" :items="related.last"/>
-                <adsbygoogle  class="adsbygoogle"/>
-            </div>
-        </div>
         <div class="single-post-container has-p-45-120">
-            <div class="comment-container">
+            <div class="comment-container" v-if="ready">
                 <vue-disqus shortname="laravel-vuejs-com"
                             :identifier="post.slug"
                             :title="post.title"
                             :url="this.post.url">
                 </vue-disqus>
             </div>
+          <adsbygoogle  class="adsbygoogle" :pageLevelAds="true" />
+        </div>
+      <div class="has-bg">
+          <div class="single-post-container">
+            <app-featured title="Related Posts" :items="related.last"/>
+            <adsbygoogle  class="adsbygoogle" :pageLevelAds="true" />
+          </div>
         </div>
     </section>
 </template>
@@ -198,9 +195,15 @@
                 }
             },
         },
+        created () {
+          this.$nextTick(function () {
+            this.ready = true
+          })
+        },
         data() {
             return {
-                breadcrumbsData: () => [
+              ready: false,
+              breadcrumbsData: () => [
                     {
                         name: 'Home',
                         link: "/"

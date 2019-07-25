@@ -1,6 +1,7 @@
 <template>
     <section class="app-header">
         <div class="container">
+          <adsbygoogle  class="adsbygoogle" :pageLevelAds="true" />
             <div class="app-header-flexed">
                 <app-articles-swiper :class="loggedIn ? 'full-width' : '' "/>
                 <app-sign-up-form v-if="!loggedIn" />
@@ -31,7 +32,7 @@
 <style lang="stylus" scoped>
   .app-header
       background-color $tertiary
-      padding 60px 0
+      padding 15px 0
       .app-header-flexed
           display flex
           justify-content space-between

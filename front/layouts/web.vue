@@ -6,9 +6,6 @@
     <app-main>
       <nuxt :nuxt-child-key="$route.fullPath"/>
     </app-main>
-    <div class="container">
-      <adsbygoogle  class="adsbygoogle" :pageLevelAds="true"/>
-    </div>
     <div class='onesignal-customlink-container'></div>
     <app-subscribe/>
     <app-footer/>

@@ -2,19 +2,21 @@
   <section class="feed">
     <heading>Latest Posts</heading>
     <div class="articles-list">
-      <article-item v-for="item in posts"
-                    :title="item.title"
-                    :image="item.image_url"
-                    :description="item.excerpt"
-                    :key="item.id"
-                    :to="{ name: 'slug', params: { slug: item.slug }}"
-      />
+      <template v-for="(item, index) in posts">
+        <article-item :title="item.title"
+                      :image="item.image_url"
+                      :description="item.excerpt"
+                      :key="item.id"
+                      :to="{ name: 'slug', params: { slug: item.slug }}"
+        />
+      </template>
     </div>
 
     <div class="text-center show-more">
       <nuxt-link aria-label="Link LV" :to="{name : 'posts'}" class="button">Show more Posts</nuxt-link>
     </div>
 
+    <adsbygoogle class="adsbygoogle" :pageLevelAds="true"/>
   </section>
 </template>
 

@@ -40,29 +40,29 @@ const seo = {
         {name: 'fb:app_id', content: config.fbAppId},
         {name: 'author', content: this.seo.url},
         {name: 'publisher', content: this.seo.url},
-        {name: 'apple-mobile-web-app-title', content: this.seo.title},
+        {hid: 'apple-mobile-web-app-title', name: 'apple-mobile-web-app-title', content: this.seo.title},
         {name: 'theme-color', content: config.themeColor},
 
         // The list of types is available here: http://ogp.me/#types
-        {name: 'og:type', content: this.seo.type},
+        {hid: 'og:type',name: 'og:type', content: this.seo.type},
         // Should the the same as your canonical link, see below.
-        {name: 'og:url', content: this.seo.url},
-        {name: 'og:image', content: this.seo.image},
+        {hid: 'og:url',name: 'og:url', content: this.seo.url},
+        {hid: 'og:image',name: 'og:image', content: this.seo.image},
         // Often the same as your meta description, but not always.
-        {name: 'og:description', content: this.seo.description},
-        {name: 'og:title', content: this.seo.title},
+        {hid: 'og:description',name: 'og:description', content: this.seo.description},
+        {hid: 'og:title',name: 'og:title', content: this.seo.title},
         {name: 'og:site_name', content: config.siteName},
         {name: 'og:locale', content: this.seo.locale},
 
         // Twitter card
-        {name: 'twitter:card', content: 'summary_large_image'},
-        {name: 'twitter:site', content: this.seo.url},
-        {name: 'twitter:title', content: this.seo.title},
-        {name: 'twitter:description', content: this.seo.description},
+        {hid: 'twitter:card',name: 'twitter:card', content: 'summary_large_image'},
+        {hid: 'twitter:site',name: 'twitter:site', content: this.seo.url},
+        {hid: 'twitter:title',name: 'twitter:title', content: this.seo.title},
+        {hid: 'twitter:description',name: 'twitter:description', content: this.seo.description},
         // Your twitter handle, if you have one.
-        {name: 'twitter:creator', content: config.twitter},
-        {name: 'twitter:image', content: this.seo.image},
-        {name: 'twitter:image:src', content: this.seo.image},
+        {hid: 'twitter:creator',name: 'twitter:creator', content: config.twitter},
+        {hid: 'twitter:image',name: 'twitter:image', content: this.seo.image},
+        {hid: 'twitter:image:src',name: 'twitter:image:src', content: this.seo.image},
 
         // Google / Schema.org markup:
         {itemprop: 'name', content: this.seo.title},

@@ -19,6 +19,9 @@
                                   :key="key"
                                   :to="{ name: 'slug', params: { slug: item.slug }}"
                     />
+                    <article class="post"  v-if="key % 6 === 0 && key !== 0" >
+                      <adsbygoogle class="adsbygoogle" :pageLevelAds="true" ad-slot="4475432520"/>
+                    </article>
                 </template>
             </div>
 

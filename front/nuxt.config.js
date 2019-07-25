@@ -79,10 +79,10 @@ module.exports = {
     withCredentials: false,
   },
   manifest: {
-    name: 'Laravel-VueJs.com',
-    short_name: 'Laravel-VueJs.com',
+    name: 'Laravel & VueJs',
+    short_name: 'Laravel & VueJs',
     title: 'Laravel-VueJs.com',
-    description: 'Laravel-VueJs.com',
+    description: 'Laravel VueJs',
     lang: 'en',
     theme_color: '#42b883',
     background_color: '#35495e',
@@ -95,7 +95,7 @@ module.exports = {
    */
   head: {
     titleTemplate: '%s  ←  Laravel-VueJs.com',
-    title: 'Laravel-VueJs.com',
+    title: 'Laravel VueJs',
     meta: [
       { charset: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },

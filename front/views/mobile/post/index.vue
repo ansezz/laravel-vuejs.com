@@ -74,6 +74,7 @@
                                 twitter-user="laravelvuejs"
                                 inline-template
                                 network-tag="li"
+                                v-if="ready"
                 >
 
                     <ul class="share-links">
@@ -120,7 +121,7 @@
             </div>
         </div>
         <div class="single-post-container has-p-45-120">
-            <div class="comment-container">
+            <div class="comment-container" v-if="ready">
                 <vue-disqus shortname="laravel-vuejs-com"
                             :identifier="post.slug"
                             :title="post.title"
@@ -153,8 +154,14 @@
                 }
             },
         },
+        created () {
+          this.$nextTick(function () {
+            this.ready = true
+          })
+        },
         data() {
             return {
+                ready : false,
                 breadcrumbsData: () => [
                     {
                         name: 'Home',
