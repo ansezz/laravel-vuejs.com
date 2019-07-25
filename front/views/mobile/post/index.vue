@@ -42,12 +42,10 @@
                         <!--<span class="copyright">&copy; 2018. Copyrights</span>-->
                     </div>
                 </div>
-                <div class="grid-container">
-                    <adsbygoogle  class="adsbygoogle" :pageLevelAds="true"/>
-                </div>
+                <adsbygoogle  class="adsbygoogle" :pageLevelAds="true"/>
                 <div v-html="post.content" id="content"></div>
+                <adsbygoogle  class="adsbygoogle" :pageLevelAds="true"/>
                 <div class="grid-container">
-                    <adsbygoogle  class="adsbygoogle" :pageLevelAds="true"/>
                     <div class="grid-articles">
                         <template v-for="(item, key) in related.second">
                             <article-item :title="item.title"
@@ -112,21 +110,19 @@
                 </social-sharing>
             </div>
         </div>
-        <div class="has-bg">
+      <div class="single-post-container has-p-45-120">
+        <div class="comment-container" v-if="ready">
+          <vue-disqus shortname="laravel-vuejs-com"
+                      :identifier="post.slug"
+                      :title="post.title"
+                      :url="this.post.url">
+          </vue-disqus>
+        </div>
+      </div>
+      <adsbygoogle  class="adsbygoogle" :pageLevelAds="true"/>
+      <div class="has-bg">
             <div class="single-post-container">
                 <app-featured title="Related Posts" :items="related.last"/>
-                <div class="grid-container">
-                  <adsbygoogle  class="adsbygoogle" :pageLevelAds="true"/>
-                </div>
-            </div>
-        </div>
-        <div class="single-post-container has-p-45-120">
-            <div class="comment-container" v-if="ready">
-                <vue-disqus shortname="laravel-vuejs-com"
-                            :identifier="post.slug"
-                            :title="post.title"
-                            :url="this.post.url">
-                </vue-disqus>
             </div>
         </div>
     </section>

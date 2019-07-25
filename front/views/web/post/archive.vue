@@ -11,20 +11,18 @@
                 </div>
                 <filters route-name="posts"></filters>
             </div>
-            <div class="article-grid">
-                <template v-for="(item, key) in posts.data">
+          <adsbygoogle class="adsbygoogle" :pageLevelAds="true" />
+          <div class="article-grid">
+              <template v-for="(item, key) in posts.data">
                     <article-item :title="item.title"
                                   :image="item.image_url"
                                   :description="item.excerpt"
                                   :key="key"
                                   :to="{ name: 'slug', params: { slug: item.slug }}"
                     />
-                    <article class="post"  v-if="key % 6 === 0 && key !== 0" >
-                      <adsbygoogle class="adsbygoogle" :pageLevelAds="true" ad-slot="4475432520"/>
-                    </article>
                 </template>
             </div>
-
+            <adsbygoogle class="adsbygoogle" :pageLevelAds="true" />
             <div class="text-center">
                 <button @click="showMore()"
                         v-if="hasMorePages && !show_more" class="button">
