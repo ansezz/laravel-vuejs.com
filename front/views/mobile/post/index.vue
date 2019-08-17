@@ -57,6 +57,7 @@
                         </template>
                     </div>
                 </div>
+                <adsbygoogle  class="adsbygoogle" :pageLevelAds="true"/>
                 <h4>Tags : </h4>
                 <br>
                 <div class="tags">
@@ -110,6 +111,7 @@
                 </social-sharing>
             </div>
         </div>
+      <adsbygoogle  class="adsbygoogle" :pageLevelAds="true"/>
       <div class="single-post-container has-p-45-120">
         <div class="comment-container" v-if="ready">
           <vue-disqus shortname="laravel-vuejs-com"
@@ -124,6 +126,7 @@
             <div class="single-post-container">
                 <app-featured title="Related Posts" :items="related.last"/>
             </div>
+        <adsbygoogle  class="adsbygoogle" :pageLevelAds="true"/>
         </div>
     </section>
 </template>

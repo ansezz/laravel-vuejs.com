@@ -65,6 +65,7 @@
                         <!-- <li><a href="#"><img src="@/assets/images/icons-star-2.svg" alt="LV"></a></li> -->
                     </ul>
                 </div>
+                <adsbygoogle  class="adsbygoogle" :pageLevelAds="true" />
                 <div class="grid-container">
                     <div class="grid-articles">
                         <template v-for="(item, key) in related.first">
@@ -79,6 +80,7 @@
                 </div>
                 <adsbygoogle  class="adsbygoogle" :pageLevelAds="true" />
                 <div v-html="post.content" id="content"></div>
+                <adsbygoogle  class="adsbygoogle" :pageLevelAds="true" />
                 <div class="grid-container">
                     <div class="grid-articles">
                         <template v-for="(item, key) in related.second">
@@ -154,6 +156,7 @@
             </div>
         </div>
         <div class="single-post-container has-p-45-120">
+          <adsbygoogle  class="adsbygoogle" :pageLevelAds="true" />
             <div class="comment-container" v-if="ready">
                 <vue-disqus shortname="laravel-vuejs-com"
                             :identifier="post.slug"
@@ -165,6 +168,7 @@
         </div>
       <div class="has-bg">
           <div class="single-post-container">
+            <adsbygoogle  class="adsbygoogle" :pageLevelAds="true" />
             <app-featured title="Related Posts" :items="related.last"/>
             <adsbygoogle  class="adsbygoogle" :pageLevelAds="true" />
           </div>
