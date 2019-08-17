@@ -38,6 +38,9 @@
     components: {
       mobile: () => import(`~/views/mobile/post`),
       web: () => import(`~/views/web/post`)
+    },
+    mounted() {
+      this.Prism.highlightAll();
     }
   }
 </script>

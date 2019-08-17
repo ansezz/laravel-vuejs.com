@@ -107,12 +107,9 @@ module.exports = {
     ],
     htmlAttrs: {dir: 'ltr'},
     link: [
-      {rel: 'icon', type: 'image/x-icon', href: '/favicon.ico'},
-      {rel: 'stylesheet', href: '/css/prism.css'}
+      {rel: 'icon', type: 'image/x-icon', href: '/favicon.ico'}
     ],
-    script: [
-      {src: '/js/prism.js'}
-    ]
+    script: []
   },
   /*
    ** Customize the progress bar color
@@ -174,7 +171,8 @@ module.exports = {
     {src: '~/plugins/vee-validate', ssr: false},
     {src: '~/plugins/lazyload', ssr: false},
     {src: '~/plugins/vue-tags-input', ssr: false},
-    {src: '~/plugins/infinite-loading', ssr: false}
+    {src: '~/plugins/infinite-loading', ssr: false},
+    {src: '~/plugins/prismjs', ssr: false}
   ],
 
   css: [
