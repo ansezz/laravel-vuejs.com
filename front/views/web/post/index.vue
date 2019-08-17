@@ -205,7 +205,6 @@
           })
         },
         updated() {
-          alert('HERE UPDATED')
           this.Prism.highlightAll();
         },
         data() {

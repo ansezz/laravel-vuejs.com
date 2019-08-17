@@ -153,6 +153,9 @@
                 }
             },
         },
+        updated() {
+          this.Prism.highlightAll();
+        },
         created () {
           this.$nextTick(function () {
             this.ready = true
