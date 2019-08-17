@@ -204,6 +204,10 @@
             this.ready = true
           })
         },
+        updated() {
+          alert('HERE UPDATED')
+          this.Prism.highlightAll();
+        },
         data() {
             return {
               ready: false,
