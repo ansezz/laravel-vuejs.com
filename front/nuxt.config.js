@@ -22,12 +22,12 @@ module.exports = {
     'nuxt-device-detect',
     '@nuxtjs/sentry',
     // @TODO : create Creating an experiment fro google optimize
-    //'nuxt-google-optimize',
+    'nuxt-google-optimize',
     // @TODO enable component cache only in prod
-    //['@nuxtjs/component-cache', {maxAge: 1000 * 60 * 60}],
-    /*["@nuxtjs/google-tag-manager", {
-        id: process.env.GOOGLE_TAG_MANAGER
-    }]*/
+    ['@nuxtjs/component-cache', {maxAge: 1000 * 60 * 60}],
+    ["@nuxtjs/google-tag-manager", {
+      id: process.env.GOOGLE_TAG_MANAGER
+    }]
   ],
   // Optional options
   googleOptimize: {
@@ -97,12 +97,16 @@ module.exports = {
     titleTemplate: '%s  ←  Laravel-VueJs.com',
     title: 'Laravel VueJs',
     meta: [
-      { charset: 'utf-8' },
-      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { name: 'google-site-verification', content: process.env.GOOGLE_SITE_VERIFICATION },
+      {charset: 'utf-8'},
+      {name: 'viewport', content: 'width=device-width, initial-scale=1'},
+      {name: 'google-site-verification', content: process.env.GOOGLE_SITE_VERIFICATION},
     ],
-    htmlAttrs: { dir: 'ltr' },
-    link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }],
+    htmlAttrs: {dir: 'ltr'},
+    link: [
+      {rel: 'icon', type: 'image/x-icon', href: '/favicon.ico'},
+      {rel: 'stylesheet', href: '/css/prism.css'}
+    ],
+    script: [{src: '/js/prism.js'}]
   },
   /*
    ** Customize the progress bar color
@@ -147,30 +151,31 @@ module.exports = {
         lost: {},
       },
     },
-    extend(config, { isDev, isClient }) {},
+    extend(config, {isDev, isClient}) {
+    },
   },
 
   //
   plugins: [
     // new BundleAnalyzerPlugin(),
-    { src: '~/mixins/platforms' },
-    { src: '~/plugins/ui' },
-    { src: '~/plugins/disqus'},
-    { src: '~/plugins/http' },
-    { src: '~/plugins/utils' },
-    { src: '~/plugins/social-sharing', ssr: false},
-    { src: '~/plugins/swiper', ssr: false },
-    { src: '~/plugins/vee-validate', ssr: false },
-    { src: '~/plugins/lazyload', ssr: false },
-    { src: '~/plugins/vue-tags-input', ssr: false },
-    { src: '~/plugins/infinite-loading', ssr: false }
+    {src: '~/mixins/platforms'},
+    {src: '~/plugins/ui'},
+    {src: '~/plugins/disqus'},
+    {src: '~/plugins/http'},
+    {src: '~/plugins/utils'},
+    {src: '~/plugins/social-sharing', ssr: false},
+    {src: '~/plugins/swiper', ssr: false},
+    {src: '~/plugins/vee-validate', ssr: false},
+    {src: '~/plugins/lazyload', ssr: false},
+    {src: '~/plugins/vue-tags-input', ssr: false},
+    {src: '~/plugins/infinite-loading', ssr: false}
   ],
 
   css: [
     'swiper/dist/css/swiper.css',
     'ionicons/dist/css/ionicons.min.css',
     'bootstrap/dist/css/bootstrap.css',
-    '~/assets/AvenirNextLTPro.css',
+    '~/assets/AvenirNextLTPro.css'
   ],
 
   // yarn nuxt build --webpackmonitor --analyze
