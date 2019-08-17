@@ -28,7 +28,7 @@ class Kernel extends ConsoleKernel
         // $schedule->command('inspire')
         //          ->hourly();
 
-        $schedule->command('sitemap:generate')->daily();
+        $schedule->command('sitemap:generate')->weekly();
 
     }
 

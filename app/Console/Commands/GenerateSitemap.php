@@ -49,6 +49,8 @@ class GenerateSitemap extends Command
     public function handle()
     {
 
+        // Index site map
+        $this->info("Generate Site map Index");
         $sitemap = SitemapIndex::create()
                  ->add(Sitemap::create('sitemap_posts.xml')
                      ->setLastModificationDate(Carbon::yesterday()))
@@ -61,6 +63,7 @@ class GenerateSitemap extends Command
 
 
         // posts
+        $this->info("Generate Posts Site map ");
 
         $posts = Post::limit(50)->get();
 
@@ -72,7 +75,9 @@ class GenerateSitemap extends Command
         $sitemap_posts->writeToFile(public_path('sitemap_posts.xml'));
 
 
+
         // categories
+        $this->info("Generate Categories Site map ");
         $categories = Category::all();
 
         $sitemap_categories = SitemapGenerator::create(config('app.url'))->getSitemap();
@@ -85,6 +90,7 @@ class GenerateSitemap extends Command
 
 
         // tags
+        $this->info("Generate Tags Site map ");
         $tags = Tag::all();
 
         $sitemap_tags = SitemapGenerator::create(config('app.url'))->getSitemap();
