@@ -18,3 +18,4 @@ storage/app/wp-importer/*
 .idea/
 nova/
 public/photos
+public/sitemap*

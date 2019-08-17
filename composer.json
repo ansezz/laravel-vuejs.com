@@ -19,7 +19,7 @@
         "fideloper/proxy": "^4.0",
         "jameslkingsley/nova-stripe-theme": "^1.0",
         "laravel/framework": "5.8.*",
-        "laravel/nova": "*",
+        "laravel/nova": "~2.0",
         "laravel/passport": "^7.0",
         "laravel/scout": "^7.1",
         "laravel/socialite": "^4.0",
@@ -32,6 +32,7 @@
         "spatie/eloquent-sortable": "^3.4",
         "spatie/laravel-feed": "^2.2",
         "spatie/laravel-newsletter": "^4.4",
+        "spatie/laravel-sitemap": "^5.3",
         "spatie/laravel-sluggable": "^2.1",
         "spatie/nova-tags-field": "^1.1",
         "spatie/nova-translatable": "^1.0",
@@ -47,8 +48,8 @@
     },
     "repositories": [
         {
-            "type": "path",
-            "url": "./nova"
+            "type": "composer",
+            "url": "https://nova.laravel.com"
         },
         {
             "type": "path",
