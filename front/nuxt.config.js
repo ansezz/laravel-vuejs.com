@@ -55,6 +55,10 @@ module.exports = {
   },
   'google-adsense': {
     id: process.env.GOOGLE_ADSENSE,
+    pageLevelAds: true,
+    includeQuery: true,
+    analyticsUacct: process.env.GOOGLE_ANALYTICS,
+    test: process.env.NODE_ENV === 'test'
   },
   // Give apollo module options
   apollo: {
@@ -106,7 +110,9 @@ module.exports = {
       {rel: 'icon', type: 'image/x-icon', href: '/favicon.ico'},
       {rel: 'stylesheet', href: '/css/prism.css'}
     ],
-    script: [{src: '/js/prism.js'}]
+    script: [
+      {src: '/js/prism.js'}
+    ]
   },
   /*
    ** Customize the progress bar color
