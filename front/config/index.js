@@ -112,7 +112,7 @@ export const social_media = [
     },
     {
         title: "Rss",
-        href: "https://www.laravel-vuejs.com/feed/",
+        href: "https://www.laravel-vuejs.com/feed.xml/",
         class: "rss"
     }
 ]

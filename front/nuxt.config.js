@@ -107,7 +107,12 @@ module.exports = {
     ],
     htmlAttrs: {dir: 'ltr'},
     link: [
-      {rel: 'icon', type: 'image/x-icon', href: '/favicon.ico'}
+      {rel: 'icon', type: 'image/x-icon', href: '/favicon.ico'},
+      {rel: 'alternate', type: 'application/atom+xml', href: '/feed.xml', title: "News"},
+      {rel: 'alternate', type: 'application/atom+xml', href: '/feed/posts.xml', title: "Posts News"},
+      {rel: 'alternate', type: 'application/atom+xml', href: '/feed/categories.xml', title: "Categories News"},
+      {rel: 'alternate', type: 'application/atom+xml', href: '/feed/tags.xml', title: "Tags News"},
+      {rel: 'alternate', type: 'application/atom+xml', href: '/feed/medias.xml', title: "Medias News"},
     ],
     script: []
   },

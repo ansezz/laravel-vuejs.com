@@ -16,7 +16,7 @@ return [
             /*
              * The feed will be available on this url.
              */
-            'url' => '/feed',
+            'url' => '/feed.xml',
 
             'title' => 'Laravel VueJs feeds',
 
@@ -39,7 +39,7 @@ return [
             /*
              * The feed will be available on this url.
              */
-            'url' => '/feed/posts',
+            'url' => '/feed/posts.xml',
 
             'title' => 'Laravel VueJs posts feeds',
 
@@ -62,7 +62,7 @@ return [
             /*
              * The feed will be available on this url.
              */
-            'url' => '/feed/categories',
+            'url' => '/feed/categories.xml',
 
             'title' => 'Laravel VueJs categories feed',
 
@@ -85,7 +85,7 @@ return [
             /*
              * The feed will be available on this url.
              */
-            'url' => '/feed/tags',
+            'url' => '/feed/tags.xml',
 
             'title' => 'Laravel VueJs tags feed',
 
@@ -108,7 +108,7 @@ return [
             /*
              * The feed will be available on this url.
              */
-            'url' => '/feed/medias',
+            'url' => '/feed/medias.xml',
 
             'title' => 'Laravel VueJs medias feed',
 
