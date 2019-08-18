@@ -65,7 +65,7 @@ class GenerateSitemap extends Command
         // posts
         $this->info("Generate Posts Site map ");
 
-        $posts = Post::limit(50)->get();
+        $posts = Post::latest()->limit(100)->get();
 
         $sitemap_posts = SitemapGenerator::create(config('app.url'))->getSitemap();
         $posts->each(function ($post) use (&$sitemap_posts) {
@@ -78,7 +78,7 @@ class GenerateSitemap extends Command
 
         // categories
         $this->info("Generate Categories Site map ");
-        $categories = Category::all();
+        $categories = Category::latest()->limit(100)->get();
 
         $sitemap_categories = SitemapGenerator::create(config('app.url'))->getSitemap();
 
@@ -91,13 +91,15 @@ class GenerateSitemap extends Command
 
         // tags
         $this->info("Generate Tags Site map ");
-        $tags = Tag::all();
+        $tags = Tag::latest()->limit(100)->get();
 
         $sitemap_tags = SitemapGenerator::create(config('app.url'))->getSitemap();
 
         $tags->each(function ($tag) use (&$sitemap_tags) {
             $sitemap_tags->add(Url::create($tag->url)->setLastModificationDate($tag->updated_at));
         });
+
+        $sitemap_tags->writeToFile(public_path('sitemap_tags.xml'));
 
 
     }
