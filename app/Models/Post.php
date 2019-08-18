@@ -118,6 +118,19 @@ class Post extends Model implements HasMedia, Feedable
 
         $query = $tag->posts()->where('status', 1)->getQuery();
 
+        $sort_by = $args['sort_by'] ?? 'latest';
+        switch ($sort_by) {
+            case 'oldest':
+                $query->oldest();
+                break;
+            case 'popular':
+                $query->orderBy('views', 'desc');
+                break;
+            default:
+                $query->latest();
+                break;
+        }
+
         if (isset($args['s'])) {
             $query->where(function ($query) use ($args) {
                 return $query->where('title', 'LIKE', '%' . $args['s'] . '%')
@@ -137,6 +150,19 @@ class Post extends Model implements HasMedia, Feedable
 
 
         $query = $category->posts()->where('status', 1)->getQuery();
+
+        $sort_by = $args['sort_by'] ?? 'latest';
+        switch ($sort_by) {
+            case 'oldest':
+                $query->oldest();
+                break;
+            case 'popular':
+                $query->orderBy('views', 'desc');
+                break;
+            default:
+                $query->latest();
+                break;
+        }
 
         if (isset($args['s'])) {
             $query->where(function ($query) use ($args) {
