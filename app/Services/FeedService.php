@@ -14,27 +14,27 @@ class FeedService
 
     public static function getPostFeed()
     {
-        return Post::latest()->limit(100);
+        return Post::latest()->limit(100)->get();
     }
 
     public static function getCategoryFeed()
     {
-        return Category::latest()->limit(100);
+        return Category::latest()->limit(100)->get();
     }
 
     public static function getTagFeed()
     {
-        return Tag::latest()->limit(100);
+        return Tag::latest()->limit(100)->get();
     }
 
     public static function getMediaFeed()
     {
-        return Media::latest()->limit(100);
+        return Media::latest()->limit(100)->get();
     }
 
     public static function getMainFeed()
     {
-        return Post::latest()->limit(100);
+        return Post::latest()->limit(100)->get();
     }
 
 }
