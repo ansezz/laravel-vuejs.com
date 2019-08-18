@@ -19,7 +19,7 @@ class CategoriesFieldController extends Controller
         $query = Category::query();
 
         if ($request->has('filter.containing')) {
-            $query->containing($request['filter']['containing']);
+            $query->where('name', 'like', '%' . $request['filter']['containing'] . '%');
         }
 
         if ($request->has('filter.type')) {
