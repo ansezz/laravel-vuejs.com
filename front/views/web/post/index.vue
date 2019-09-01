@@ -22,6 +22,12 @@
           <adsbygoogle  class="adsbygoogle container" :pageLevelAds="true" />
         </div>
         <div class="single-post-container">
+            <div class="info-wrap-right" v-if="show_sticky_ads">
+              <adsbygoogle  class="adsbygoogle info" :pageLevelAds="true"  :test="true" />
+            </div>
+            <div class="info-wrap-left" v-if="show_sticky_ads">
+              <adsbygoogle  class="adsbygoogle info" :pageLevelAds="true" :test="true"/>
+            </div>
             <div class="post-content">
                 <h1 class="text-center" v-html="post.title"></h1>
                 <p v-html="post.excerpt"></p>
@@ -207,8 +213,22 @@
         updated() {
           this.Prism.highlightAll();
         },
+        mounted(){
+            window.addEventListener('resize', this.reportWindowSize);
+            this.reportWindowSize()
+        },
+        methods : {
+            reportWindowSize(){
+                if(document.body.clientWidth >= 1490){
+                    this.show_sticky_ads = true;
+                }else{
+                    this.show_sticky_ads = false;
+                }
+            }
+        },
         data() {
             return {
+              show_sticky_ads : false,
               ready: false,
               breadcrumbsData: () => [
                     {
@@ -230,6 +250,26 @@
 </script>
 
 <style lang="stylus" scoped>
+
+  .info-wrap-left
+      position fixed
+      top 100px
+      bottom 606
+      left 0
+      z-index 1
+    .info-wrap-right
+      position fixed
+      top 100px
+      right 0
+      z-index 1
+      bottom 606
+
+    .info
+      width 160px
+      height 600px
+      margin-bottom 20px
+      background-color yellow
+
     .share-links
       &.is-flex
         justify-content center
