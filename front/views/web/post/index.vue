@@ -376,97 +376,105 @@
                 margin-left 10px
                 padding-top 3px
 
-    .post-content
-        h1
-            font-size 28px
-            color #384457
-            font-weight 500
-            margin-bottom 40px
-        & >>>
-            h1, h2, h3, h4, h5, h6
-                margin 25px 0 15px 0
+    .post-content >>>
+          h1
+            & /deep/
+              font-size 28px
+              color #384457
+              font-weight 500
+              margin-bottom 40px
+          & /deep/
+              h1, h2, h3, h4, h5, h6
+                  margin 25px 0 15px 0
 
-        p
-          font-size 18px
-          line-height 34px
-          color #2c2f34
-          margin-bottom 20px
-        & >>>
-          img
-            max-width 100%
-            margin 20px 0
-            height auto
-
-        .thumbnail-area
+          p
+            font-size 18px
+            line-height 34px
+            color #2c2f34
             margin-bottom 20px
-            width 800px
 
-            .article-image
-                height 430px
-                margin-bottom 10px
+          div
+            font-size 18px
+            line-height 34px
+            color #2c2f34
+            margin-bottom 20px
 
-            .copyright
-                font-size 14px
-                color rgba(#616d82, .8)
-                font-weight 400
+          & >>>
+            img
+              max-width 100%
+              margin 20px 0
+              height auto
 
-        .grid-articles
-            display grid
-            grid-template-columns repeat(2, 1fr)
-            grid-gap 20px
-            margin 40px 0
+          .thumbnail-area
+              margin-bottom 20px
+              width 800px
 
-        .pre-box
-            padding 20px 0 40px
+              .article-image
+                  height 430px
+                  margin-bottom 10px
 
-            .pre-header
-                background-color $primary
-                font-size 16px
-                font-weight 700
-                color $secondary
-                padding 3px 20px 0
+              .copyright
+                  font-size 14px
+                  color rgba(#616d82, .8)
+                  font-weight 400
 
-            pre
-                background-color #384457
-                border-radius 0
-                border 0
-                color #FFF
-                font-size 16px
-                font-weight 400
-                font-family $family-sans-serif
-                padding 20px
-                height 327px
-                overflow-y hidden
+          .grid-articles
+              display grid
+              grid-template-columns repeat(2, 1fr)
+              grid-gap 20px
+              margin 40px 0
 
-        .swiper-area
-            margin 40px 0 10px
+          .pre-box
+              padding 20px 0 40px
 
-            .heading
-                padding-bottom 20px
+              .pre-header
+                  background-color $primary
+                  font-size 16px
+                  font-weight 700
+                  color $secondary
+                  padding 3px 20px 0
 
-            ul
-                padding-left 35px
+              pre
+                  background-color #384457
+                  border-radius 0
+                  border 0
+                  color #FFF
+                  font-size 16px
+                  font-weight 400
+                  font-family $family-sans-serif
+                  padding 20px
+                  height 327px
+                  overflow-y hidden
 
-                li
-                    color #616d82
-                    font-size 16px
-                    padding-bottom 10px
-                    display flex
-                    align-items center
-                    & >>>
-                      a
-                        color #616d82
+          .swiper-area
+              margin 40px 0 10px
 
-                    &:before
-                        content ""
-                        width 6px
-                        height 6px
-                        background-color #616d82
-                        border-radius 50%
-                        margin-right 20px
+              .heading
+                  padding-bottom 20px
 
-                    &:last-child
-                        padding-bottom 0
+              ul >>>
+                  padding-left 35px
+
+                  li >>>
+                      color #616d82
+                      font-size 16px
+                      padding-bottom 10px
+                      display flex
+                      align-items center
+                      & >>>
+                        a
+                          color #616d82
+
+                      &:before
+                          content ""
+                          width 6px
+                          height 6px
+                          background-color #616d82
+                          border-radius 50%
+                          margin-right 20px
+
+                      &:last-child
+                          padding-bottom 0
 
     .ads
         width 720px
