@@ -231,13 +231,17 @@
       .fa
         color $secondary
         font-size 16px
-  .post-content
+  .post-content >>>
     h1
-      font-size 28px
-      color #384457
-      font-weight 500
-      margin-bottom 20px
-    p
+      & /deep/
+        font-size 28px
+        color #384457
+        font-weight 500
+        margin-bottom 20px
+    & /deep/
+       h1, h2, h3, h4, h5, h6
+          margin 25px 0 15px 0
+    p, div
       font-size 18px
       line-height 28px
       color #616d82
@@ -292,9 +296,9 @@
       margin 20px 0 30px
       .heading
         padding-bottom 20px
-      ul
+      ul >>>
         padding-left 10px
-        li
+        li >>>
           color #616d82
           font-size 16px
           padding-bottom 10px

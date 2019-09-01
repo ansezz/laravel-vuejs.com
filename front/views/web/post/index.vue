@@ -387,18 +387,11 @@
               h1, h2, h3, h4, h5, h6
                   margin 25px 0 15px 0
 
-          p
+          p, div
             font-size 18px
             line-height 34px
             color #2c2f34
             margin-bottom 20px
-
-          div
-            font-size 18px
-            line-height 34px
-            color #2c2f34
-            margin-bottom 20px
-
           & >>>
             img
               max-width 100%
