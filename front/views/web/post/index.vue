@@ -23,10 +23,10 @@
         </div>
         <div class="single-post-container">
             <div class="info-wrap-right" v-if="show_sticky_ads">
-              <adsbygoogle  class="adsbygoogle info" :pageLevelAds="true"  :test="true" />
+              <adsbygoogle  class="adsbygoogle info" :pageLevelAds="true" />
             </div>
             <div class="info-wrap-left" v-if="show_sticky_ads">
-              <adsbygoogle  class="adsbygoogle info" :pageLevelAds="true" :test="true"/>
+              <adsbygoogle  class="adsbygoogle info" :pageLevelAds="true"/>
             </div>
             <div class="post-content">
                 <h1 class="text-center" v-html="post.title"></h1>
@@ -268,8 +268,7 @@
       width 160px
       height 600px
       margin-bottom 20px
-      background-color yellow
-
+  
     .share-links
       &.is-flex
         justify-content center
