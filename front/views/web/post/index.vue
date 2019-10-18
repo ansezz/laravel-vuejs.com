@@ -65,7 +65,7 @@
                         <!-- <li><a href="#"><img src="@/assets/images/icons-star-2.svg" alt="LV"></a></li> -->
                     </ul>
                 </div>
-                <adsbygoogle  class="adsbygoogle" :pageLevelAds="true" />
+                <no-ssr><adsbygoogle  class="adsbygoogle" :pageLevelAds="true" /></no-ssr>
                 <div class="grid-container">
                     <div class="grid-articles">
                         <template v-for="(item, key) in related.first">
@@ -78,9 +78,9 @@
                         </template>
                     </div>
                 </div>
-                <adsbygoogle  class="adsbygoogle" :pageLevelAds="true" />
+                <no-ssr><adsbygoogle  class="adsbygoogle" :pageLevelAds="true" /></no-ssr>
                 <div v-html="post.content" id="content"></div>
-                <adsbygoogle  class="adsbygoogle" :pageLevelAds="true" />
+                <no-ssr><adsbygoogle  class="adsbygoogle" :pageLevelAds="true" /></no-ssr>
                 <div class="grid-container">
                     <div class="grid-articles">
                         <template v-for="(item, key) in related.second">
@@ -93,7 +93,7 @@
                         </template>
                     </div>
                 </div>
-              <adsbygoogle  class="adsbygoogle" :pageLevelAds="true" />
+              <no-ssr><adsbygoogle  class="adsbygoogle" :pageLevelAds="true" /></no-ssr>
               <h4>Tags : </h4>
                 <br>
                 <div class="tags">
@@ -156,7 +156,7 @@
             </div>
         </div>
         <div class="single-post-container has-p-45-120">
-          <adsbygoogle  class="adsbygoogle" :pageLevelAds="true" />
+          <no-ssr><adsbygoogle  class="adsbygoogle" :pageLevelAds="true" /></no-ssr>
             <div class="comment-container" v-if="ready">
                 <vue-disqus shortname="laravel-vuejs-com"
                             :identifier="post.slug"
@@ -164,13 +164,13 @@
                             :url="this.post.url">
                 </vue-disqus>
             </div>
-          <adsbygoogle  class="adsbygoogle" :pageLevelAds="true" />
+          <no-ssr><adsbygoogle  class="adsbygoogle" :pageLevelAds="true" /></no-ssr>
         </div>
       <div class="has-bg">
           <div class="single-post-container">
-            <adsbygoogle  class="adsbygoogle" :pageLevelAds="true" />
+            <no-ssr><adsbygoogle  class="adsbygoogle" :pageLevelAds="true" /></no-ssr>
             <app-featured title="Related Posts" :items="related.last"/>
-            <adsbygoogle  class="adsbygoogle" :pageLevelAds="true" />
+            <no-ssr><adsbygoogle  class="adsbygoogle" :pageLevelAds="true" /></no-ssr>
           </div>
         </div>
     </section>

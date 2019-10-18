@@ -15,11 +15,11 @@
                 </div>
                 <app-popular-posts/>
                 <div class="widget">
-                    <adsbygoogle  class="adsbygoogle"/>
+                    <no-ssr><adsbygoogle  class="adsbygoogle" :pageLevelAds="true" /></no-ssr>
                 </div>
                 <app-subscribe-form/>
                 <div class="widget last-widget">
-                    <adsbygoogle  class="adsbygoogle"/>
+                    <no-ssr><adsbygoogle  class="adsbygoogle" :pageLevelAds="true" /></no-ssr>
                 </div>
             </div>
         </aside>

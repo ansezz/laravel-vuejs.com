@@ -33,7 +33,7 @@
                 </ul>
                 <h1 class="text-center">{{ post.title }}</h1>
                 <div class="grid-container">
-                  <adsbygoogle  class="adsbygoogle" :pageLevelAds="true"/>
+                  <no-ssr><adsbygoogle  class="adsbygoogle" :pageLevelAds="true" /></no-ssr>
                 </div>
                 <p>{{ post.excerpt }}</p>
                 <div class="image-container">
@@ -42,9 +42,9 @@
                         <!--<span class="copyright">&copy; 2018. Copyrights</span>-->
                     </div>
                 </div>
-                <adsbygoogle  class="adsbygoogle" :pageLevelAds="true"/>
+                <no-ssr><adsbygoogle  class="adsbygoogle" :pageLevelAds="true" /></no-ssr>
                 <div v-html="post.content" id="content"></div>
-                <adsbygoogle  class="adsbygoogle" :pageLevelAds="true"/>
+                <no-ssr><adsbygoogle  class="adsbygoogle" :pageLevelAds="true" /></no-ssr>
                 <div class="grid-container">
                     <div class="grid-articles">
                         <template v-for="(item, key) in related.second">
@@ -57,7 +57,7 @@
                         </template>
                     </div>
                 </div>
-                <adsbygoogle  class="adsbygoogle" :pageLevelAds="true"/>
+                <no-ssr><adsbygoogle  class="adsbygoogle" :pageLevelAds="true" /></no-ssr>
                 <h4>Tags : </h4>
                 <br>
                 <div class="tags">
@@ -111,7 +111,7 @@
                 </social-sharing>
             </div>
         </div>
-      <adsbygoogle  class="adsbygoogle" :pageLevelAds="true"/>
+      <no-ssr><adsbygoogle  class="adsbygoogle" :pageLevelAds="true" /></no-ssr>
       <div class="single-post-container has-p-45-120">
         <div class="comment-container" v-if="ready">
           <vue-disqus shortname="laravel-vuejs-com"
@@ -121,12 +121,12 @@
           </vue-disqus>
         </div>
       </div>
-      <adsbygoogle  class="adsbygoogle" :pageLevelAds="true"/>
+      <no-ssr><adsbygoogle  class="adsbygoogle" :pageLevelAds="true" /></no-ssr>
       <div class="has-bg">
             <div class="single-post-container">
                 <app-featured title="Related Posts" :items="related.last"/>
             </div>
-        <adsbygoogle  class="adsbygoogle" :pageLevelAds="true"/>
+        <no-ssr><adsbygoogle  class="adsbygoogle" :pageLevelAds="true" /></no-ssr>
         </div>
     </section>
 </template>

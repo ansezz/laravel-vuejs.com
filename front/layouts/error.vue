@@ -20,7 +20,7 @@
             </nuxt-link>
         </div>
         <div class="container">
-          <adsbygoogle  class="adsbygoogle" :pageLevelAds="true"/>
+          <no-ssr><adsbygoogle  class="adsbygoogle" :pageLevelAds="true" /></no-ssr>
         </div>
       <app-featured/>
     </div>

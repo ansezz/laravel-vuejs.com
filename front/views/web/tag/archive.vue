@@ -13,7 +13,7 @@
         <filters route-name="tag-slug"></filters>
       </div>
 
-      <adsbygoogle  class="adsbygoogle" :pageLevelAds="true" />
+      <no-ssr><adsbygoogle  class="adsbygoogle" :pageLevelAds="true" /></no-ssr>
 
       <div class="article-grid">
         <article-item v-for="item in postsByTag.data"
@@ -25,7 +25,7 @@
         />
       </div>
 
-      <adsbygoogle  class="adsbygoogle" :pageLevelAds="true" />
+      <no-ssr><adsbygoogle  class="adsbygoogle" :pageLevelAds="true" /></no-ssr>
 
       <div class="text-center">
         <button @click="showMore()" class="button"

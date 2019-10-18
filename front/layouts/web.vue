@@ -16,7 +16,7 @@
     <app-subscribe/>
     <app-footer/>
     <div class="container">
-      <adsbygoogle  class="adsbygoogle" :pageLevelAds="true"/>
+      <no-ssr><adsbygoogle  class="adsbygoogle" :pageLevelAds="true" /></no-ssr>
     </div>
   </div>
 </template>

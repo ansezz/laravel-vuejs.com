@@ -1,7 +1,7 @@
 <template>
     <section class="app-header">
         <div class="container">
-          <adsbygoogle  class="adsbygoogle" :pageLevelAds="true" />
+          <no-ssr><adsbygoogle  class="adsbygoogle" :pageLevelAds="true" /></no-ssr>
             <div class="app-header-flexed">
                 <app-articles-swiper :class="loggedIn ? 'full-width' : '' "/>
                 <app-sign-up-form v-if="!loggedIn" />

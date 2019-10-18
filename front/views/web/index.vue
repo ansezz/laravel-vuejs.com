@@ -3,11 +3,11 @@
   <section>
     <app-header/>
     <div class="container">
-      <adsbygoogle  class="adsbygoogle"/>
+      <no-ssr><adsbygoogle  class="adsbygoogle" :pageLevelAds="true" /></no-ssr>
     </div>
     <app-featured/>
     <div class="container">
-      <adsbygoogle  class="adsbygoogle"/>
+      <no-ssr><adsbygoogle  class="adsbygoogle" :pageLevelAds="true" /></no-ssr>
     </div>
     <div class="main-posts">
       <div class="container">
