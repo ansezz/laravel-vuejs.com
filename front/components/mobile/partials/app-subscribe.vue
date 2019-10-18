@@ -85,7 +85,7 @@
         font-weight 300
         opacity 0.8
     .subscribe-form
-      &/deep/
+      & >>>
         .form-controls
           margin-bottom 0
           .form-group

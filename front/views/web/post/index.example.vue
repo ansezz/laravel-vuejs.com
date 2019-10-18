@@ -321,7 +321,7 @@
     .featured-articles
       &:after
         display none
-    &/deep/
+    & >>>
       .container
         width 100%
       .posts-grid

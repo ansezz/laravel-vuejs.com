@@ -383,12 +383,12 @@
 
     .post-content >>>
           h1
-            & /deep/
+            & >>>
               font-size 28px
               color #384457
               font-weight 500
               margin-bottom 40px
-          & /deep/
+          & >>>
               h1, h2, h3, h4, h5, h6
                   margin 25px 0 15px 0
 
@@ -492,7 +492,7 @@
         &:after
           display none
 
-        & /deep/
+        & >>>
           .container
             width 100%
           .posts-grid
@@ -521,7 +521,7 @@
                 color $secondary
                 font-weight 500
     #content
-        & /deep/
+        & >>>
             a.cs-btn.cs-btn-default
             a.cs-btn.cs-btn-Default
                 padding 10px

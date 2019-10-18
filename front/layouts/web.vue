@@ -4,10 +4,10 @@
     <Navbar/>
     <app-navigation/>
     <app-main>
-      <div class="info-wrap-right" v-if="show_sticky_ads">
+      <div class="info-wrap-right" v-show="show_sticky_ads">
         <adsbygoogle  class="adsbygoogle info" :pageLevelAds="true" />
       </div>
-      <div class="info-wrap-left" v-if="show_sticky_ads">
+      <div class="info-wrap-left" v-show="show_sticky_ads">
         <adsbygoogle  class="adsbygoogle info" :pageLevelAds="true"/>
       </div>
       <nuxt :nuxt-child-key="$route.fullPath"/>
