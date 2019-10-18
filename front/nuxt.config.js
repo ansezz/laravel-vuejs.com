@@ -108,11 +108,11 @@ module.exports = {
     htmlAttrs: {dir: 'ltr'},
     link: [
       {rel: 'icon', type: 'image/x-icon', href: '/favicon.ico'},
-      {rel: 'alternate', type: 'application/atom+xml', href: '/feed.xml', title: "News"},
-      {rel: 'alternate', type: 'application/atom+xml', href: '/feed/posts.xml', title: "Posts News"},
-      {rel: 'alternate', type: 'application/atom+xml', href: '/feed/categories.xml', title: "Categories News"},
-      {rel: 'alternate', type: 'application/atom+xml', href: '/feed/tags.xml', title: "Tags News"},
-      {rel: 'alternate', type: 'application/atom+xml', href: '/feed/medias.xml', title: "Medias News"},
+      {rel: 'alternate', type: 'application/atom+xml', href: '/feed', title: "News"},
+      {rel: 'alternate', type: 'application/atom+xml', href: '/feed/posts', title: "Posts News"},
+      {rel: 'alternate', type: 'application/atom+xml', href: '/feed/categories', title: "Categories News"},
+      {rel: 'alternate', type: 'application/atom+xml', href: '/feed/tags', title: "Tags News"},
+      {rel: 'alternate', type: 'application/atom+xml', href: '/feed/medias', title: "Medias News"},
     ],
     script: []
   },
@@ -121,7 +121,7 @@ module.exports = {
    */
   loading: {
     color: '#6936D3',
-    height: '2px',
+    height: '6px',
     continuous: true,
   },
   // @TODO : custom loading

@@ -26,7 +26,8 @@
                                     <span>Blog</span>
                                 </li>
                                 <li v-for="(item ,key) in main_menu" :key="key">
-                                    <nuxt-link aria-label="Link LV" :to="item.url">{{item.name}}</nuxt-link>
+                                  <nuxt-link :aria-label="item.name" :to="item.url" v-if="!item.external">{{item.name}}</nuxt-link>
+                                  <a v-else :aria-label="item.name" :href="item.url" target="_blank"> {{item.name}} </a>
                                 </li>
                             </ul>
                         </div>
@@ -45,7 +46,8 @@
                         <div class="footer-box">
                             <ul class="items last-items">
                                 <li v-for="(item ,key) in second_menu" :key="key">
-                                    <nuxt-link aria-label="Link LV" :to="item.url">{{item.name}}</nuxt-link>
+                                  <nuxt-link :aria-label="item.name" :to="item.url" v-if="!item.external">{{item.name}}</nuxt-link>
+                                  <a v-else :aria-label="item.name" :href="item.url" target="_blank"> {{item.name}} </a>
                                 </li>
                             </ul>
                             <nuxt-link aria-label="Link LV" class="button has-icon has-ex-w" to="/auth/login">

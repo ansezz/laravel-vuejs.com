@@ -51,6 +51,11 @@ export const second_menu = [
     {
         name: 'Hire us',
         url: '/page/hire-us',
+    },
+    {
+      name: 'Laravel Best',
+      url: 'https://Laravel.Best',
+      external: true
     }
 ]
 

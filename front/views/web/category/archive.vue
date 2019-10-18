@@ -12,6 +12,9 @@
         </div>
         <filters route-name="category-slug"></filters>
       </div>
+
+      <adsbygoogle  class="adsbygoogle" :pageLevelAds="true" />
+
       <div class="article-grid">
         <article-item v-for="item in postsByCategory.data"
                       :title="item.title"
@@ -21,6 +24,8 @@
                       :to="{ name: 'slug', params: { slug: item.slug }}"
         />
       </div>
+
+      <adsbygoogle  class="adsbygoogle" :pageLevelAds="true" />
 
       <div class="text-center">
         <button @click="showMore()" class="button"
