@@ -268,7 +268,7 @@
       width 160px
       height 600px
       margin-bottom 20px
-  
+
     .share-links
       &.is-flex
         justify-content center
