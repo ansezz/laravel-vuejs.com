@@ -14,7 +14,7 @@ let config = {
 // seo.twitter
 // seo.themeColor
 
-const seo = {
+export default {
   methods: {
     // Add meta tags to head
     tags() {
@@ -74,5 +74,3 @@ const seo = {
     }
   },
 }
-
-export default seo
