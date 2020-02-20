@@ -42,6 +42,9 @@ class WpImporter extends Command
     {
         $file = $this->argument('file');
 
+        $post_data = null;
+        $item = null;
+
         try {
             ini_set('memory_limit', '-1');
 
@@ -97,7 +100,8 @@ class WpImporter extends Command
                     $created_at = new Carbon($wp->post_date_gmt);
 
                     $content = (string)$e_content->encoded;
-                    $content = str_replace(array('[ad_1]', '[ad_2]', '[ad_3]', '#9b59b6', '#408bb7', '#b70900'), array('', '', '', '#63F9E6', '#6936D3', '#384457'), $content);
+                    $content = str_replace(['[ad_1]', '[ad_2]', '[ad_3]', '#9b59b6', '#408bb7', '#b70900'],
+                        ['', '', '', '#63F9E6', '#6936D3', '#384457'], $content);
                     $content = self::ConvertToUTF8($content);
 
                     $excerpt = trim((string)$e_excerpt->encoded);
@@ -105,18 +109,20 @@ class WpImporter extends Command
                     $excerpt = empty($excerpt) ? trim(strip_tags(substr($content, 0, 400))) : $excerpt;
 
                     $post_data = [
-                        'user_id' => 1,
-                        'title' => (string)$item->title,
-                        'slug' => $slug,
-                        'excerpt' => iconv(mb_detect_encoding($excerpt, mb_detect_order(), true), 'UTF-8', $excerpt),
-                        'content' => $content,
-                        'views' => $wp_postmeta['tie_views'] ? ((int)$wp_postmeta['tie_views'] + 8000) : random_int(500, 8000),
-                        'source' => $wp_postmeta['original_link'] ?? null,
-                        'type' => 1,
-                        'status' => 1,
+                        'user_id'        => 1,
+                        'title'          => (string)$item->title,
+                        'slug'           => $slug,
+                        'excerpt'        => iconv(mb_detect_encoding($excerpt, mb_detect_order(), true), 'UTF-8',
+                            $excerpt),
+                        'content'        => $content,
+                        'views'          => $wp_postmeta['tie_views'] ? ((int)$wp_postmeta['tie_views'] + 8000) : random_int(500,
+                            8000),
+                        'source'         => $wp_postmeta['original_link'] ?? null,
+                        'type'           => 1,
+                        'status'         => 1,
                         'comment_status' => 1,
-                        'created_at' => $created_at->year < 0 ? Carbon::create(2016, 03, 22) : $created_at,
-                        'updated_at' => Carbon::now(),
+                        'created_at'     => $created_at->year < 0 ? Carbon::create(2016, 03, 22) : $created_at,
+                        'updated_at'     => Carbon::now(),
                     ];
                     /** @var Post $post */
                     $post = Post::create($post_data);
