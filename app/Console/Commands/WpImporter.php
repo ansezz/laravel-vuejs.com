@@ -115,7 +115,7 @@ class WpImporter extends Command
                         'excerpt'        => iconv(mb_detect_encoding($excerpt, mb_detect_order(), true), 'UTF-8',
                             $excerpt),
                         'content'        => $content,
-                        'views'          => $wp_postmeta['tie_views'] ? ((int)$wp_postmeta['tie_views'] + 8000) : random_int(500,
+                        'views'          => array_key_exists('post_views_count',$wp_postmeta) ? ((int)$wp_postmeta['post_views_count'] + 8000) : random_int(500,
                             8000),
                         'source'         => $wp_postmeta['original_link'] ?? null,
                         'type'           => 1,
