@@ -45,7 +45,7 @@
     "graphql": "^14.1.1",
     "graphql-tag": "^2.10.1",
     "ionicons": "^4.5.5",
-    "node-fetch": "^2.3.0",
+    "node-fetch": "^2.6.1",
     "nuxt": "^2.8.1",
     "nuxt-device-detect": "^1.1.1",
     "nuxt-google-optimize": "^0.5.3",
