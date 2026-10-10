@@ -4360,3 +4360,9 @@ label.chip {
     margin: 0 0 16px 3.4rem;
   }
 }
+
+/* Consent checkbox (newsletter) */
+.consent { display: flex; gap: 10px; align-items: flex-start; font-size: .88rem; line-height: 1.5; color: var(--muted); text-align: left }
+.consent input { flex: none; width: 18px; height: 18px; margin-top: 2px; accent-color: var(--brand) }
+.consent a { color: inherit; text-decoration: underline }
+.band .consent { color: rgb(255 255 255 / .82); margin-top: 14px; max-width: 560px; margin-inline: auto }

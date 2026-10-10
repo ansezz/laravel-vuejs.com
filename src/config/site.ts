@@ -126,6 +126,7 @@ export const FOOTER = [
       { label: "Privacy policy", href: "/page/privacy-policy" },
       { label: "Terms", href: "/page/terms-and-conditions" },
       { label: "DMCA policy", href: "/page/dmca-policy" },
+      { label: "Accessibility", href: "/page/accessibility" },
       { label: "RSS feed", href: "/feed.xml" },
     ],
   },
