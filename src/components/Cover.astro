@@ -6,13 +6,13 @@ import { postArt } from '../lib/art'
 interface Props { post: Post; sizes?: string; eager?: boolean }
 const { post, sizes = '(max-width: 640px) 100vw, (max-width: 1000px) 50vw, 400px', eager = false } = Astro.props
 const x = 8 + (post.id * 37) % 70, y = 5 + (post.id * 29) % 60
-const file = `${post.categories[0]?.slug ?? 'notes'}/${post.slug}.md`
 const img = postArt(post.slug)
 ---
 <div class={`cover ${img ? 'has-art' : ''}`} style={`--x:${x}%;--y:${y}%`} aria-hidden="true">
   {img && <Art src={img} sizes={sizes} eager={eager} />}
-  <div class="cover-inner">
-    <span class="cover-file">{file}</span>
-    {post.snippet && <span class="cover-cmd"><b>$</b> {post.snippet}<i></i></span>}
-  </div>
+  {post.snippet && (
+    <div class="cover-inner">
+      <span class="cover-cmd"><b>$</b> {post.snippet}<i></i></span>
+    </div>
+  )}
 </div>

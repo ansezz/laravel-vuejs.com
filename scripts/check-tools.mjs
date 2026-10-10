@@ -6,12 +6,17 @@ import {
   ERA_ROWS,
   FILE_ROWS,
   SHIPPED_ROWS,
+  START_CHECKS,
+  START_STEPS,
+  GUIDE_SAMPLES,
   defaultJobIds,
   recipeFromJobs,
   compatibilityMarkdown,
   nowMarkdown,
   filesMarkdown,
   shippedMarkdown,
+  startMarkdown,
+  samplesMarkdown,
   agentsMarkdown,
 } from "../src/data/dev-tools.ts";
 
@@ -295,6 +300,155 @@ if (!shipped.includes("only for your own origin")) {
 }
 if (shipped.includes("3.9.0") && shipped.includes("Install 3.9.0")) {
   fail("shipped markdown tells assistants to install 3.9.0");
+}
+
+const allowedStartSources = new Set(["/requirements", "/application-setup"]);
+for (const row of START_CHECKS) {
+  if (row.sourcePath !== "/requirements") {
+    fail(`start check ${row.id} cites ${row.sourcePath}`);
+  }
+  if (!row.command) fail(`start check ${row.id} has no command`);
+}
+for (const row of START_STEPS) {
+  if (!allowedStartSources.has(row.sourcePath)) {
+    fail(`start step ${row.id} cites ${row.sourcePath}`);
+  }
+}
+const openStep = START_STEPS.find((row) => row.id === "open");
+if (openStep?.command) fail("the browser step has a shell command");
+const start = startMarkdown();
+const startOrder = [
+  "`php -v`",
+  "`composer -V`",
+  "`php -m`",
+  "`node -v`",
+  "`npm -v`",
+  "`composer global require laravel/installer`",
+  "`laravel new blog`",
+  "`cd blog`",
+  "`composer run dev`",
+  "`php artisan make:model Post -mfs`",
+  "`php artisan migrate`",
+  "`php artisan db:seed --class=PostSeeder`",
+  "`php artisan make:controller PostController`",
+  "| Open in the browser |",
+  "`php artisan test`",
+  "`npm run build`",
+  "`npm run build:ssr`",
+];
+let startAt = -1;
+for (const phrase of startOrder) {
+  const next = start.indexOf(phrase);
+  if (next <= startAt) fail(`start markdown order broke at ${phrase}`);
+  startAt = next;
+}
+for (const phrase of [
+  "PHP 8.3 to 8.5",
+  "March 17, 2026",
+  "Composer 2.",
+  "Ctype, cURL, DOM, Fileinfo, Filter, Hash, Mbstring, OpenSSL, PCRE, PDO, Session, Tokenizer, and XML.",
+  "v22.12+ or v24",
+  "does not pin an npm version",
+  "does not pass flags",
+  "built-in authentication",
+  "Pest",
+  "SQLite",
+  "http://localhost:8000",
+  "http://localhost:8000/posts",
+  "12 posts",
+  "Composer's global bin",
+  "posts/Index",
+  "resources/js/pages/posts/Index.vue",
+  "no API route",
+  "not in the download chart",
+  "July 31, 2026",
+  "https://herd.laravel.com",
+  "https://php.new",
+  "https://laravel.com/docs/sail",
+  "Do not start a new app with composer require laravel/framework.",
+  "useForm",
+  "https://laravel-vuejs.space/requirements",
+  "https://laravel-vuejs.space/application-setup",
+]) {
+  if (!start.includes(phrase)) fail(`start markdown is missing ${phrase}`);
+}
+if (
+  /laravel new blog --/.test(start) ||
+  start.includes("`Open in the browser`") ||
+  start.includes("upgrade-inertia") ||
+  start.includes("Pest 4") ||
+  start.includes("resources/js/Pages") ||
+  /\b\d{7,}\b/.test(start)
+) {
+  fail("start markdown invented a flag, a count, or an unpublished post");
+}
+if (start.includes("Vite at http://localhost:8000")) {
+  fail("start markdown puts Vite on the PHP URL");
+}
+
+for (const sample of GUIDE_SAMPLES) {
+  if (sample.sourcePath !== "/application-setup") {
+    fail(`sample ${sample.id} cites ${sample.sourcePath}`);
+  }
+  const file = FILE_ROWS.find((row) => row.id === sample.id);
+  if (!file) fail(`sample ${sample.id} has no file-map row`);
+  if (file.path !== sample.path) {
+    fail(`sample ${sample.id} path ${sample.path} != file map ${file.path}`);
+  }
+  if (sample.code.includes("<?php") || sample.code.includes("namespace ")) {
+    fail(`sample ${sample.id} invented a file header`);
+  }
+}
+const samples = samplesMarkdown();
+const sampleOrder = [
+  "public function up(): void",
+  "class Post extends Model",
+  "public function definition(): array",
+  "Post::factory()->count(12)->create()",
+  "Inertia::render('posts/Index'",
+  "Route::get('/posts', [PostController::class, 'index'])->name('posts.index')",
+  "defineProps<{ posts: Post[] }>()",
+  "->component('posts/Index')",
+];
+let sampleAt = -1;
+for (const phrase of sampleOrder) {
+  const next = samples.indexOf(phrase);
+  if (next <= sampleAt) fail(`samples markdown order broke at ${phrase}`);
+  sampleAt = next;
+}
+for (const phrase of [
+  "not a whole file",
+  "Do not replace a generated file with a partial sample",
+  "full component the guide shows",
+  "use App\\Models\\Post",
+  "use Inertia\\Inertia",
+  "use Inertia\\Response",
+  "The Controller import is not in the sample",
+  "protected $fillable = ['title', 'slug', 'excerpt', 'published_at']",
+  "$table->string('slug')->unique()",
+  "$table->timestamp('published_at')->nullable()",
+  "Hello Laravel 13",
+  "resources/js/pages/posts/Index.vue",
+  "posts/Index",
+  "does not add an API route",
+  'script setup lang="ts"',
+  "https://laravel-vuejs.space/application-setup",
+]) {
+  if (!samples.includes(phrase)) fail(`samples markdown is missing ${phrase}`);
+}
+if (
+  samples.includes("<?php") ||
+  samples.includes("namespace ") ||
+  samples.includes("resources/js/Pages") ||
+  samples.includes("/api/posts") ||
+  samples.includes("upgrade-inertia") ||
+  samples.includes("Pest 4") ||
+  /laravel new blog --/.test(samples) ||
+  /\b\d{7,}\b/.test(samples)
+) {
+  fail(
+    "samples markdown invented a file, a flag, a count, or an unpublished post",
+  );
 }
 
 console.log("tools ok");

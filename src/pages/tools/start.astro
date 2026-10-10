@@ -1,0 +1,55 @@
+---
+import ToolPage from '../../components/ToolPage.astro'
+import { START_CHECKS, START_STEPS } from '../../data/dev-tools'
+const lead = 'Machine checks from the requirements article, then the commands in the order the setup guide runs them. The guide does not pass flags to laravel new. Answer the installer.'
+---
+<ToolPage title="Start here" lead={lead}>
+  <p class="pkg-set-note">{lead}</p>
+  <div class="tool-table-wrap">
+    <table class="tool-table">
+      <thead>
+        <tr>
+          <th scope="col">Check</th>
+          <th scope="col">Command</th>
+          <th scope="col">Pass</th>
+        </tr>
+      </thead>
+      <tbody>
+        {START_CHECKS.map(row => (
+          <tr>
+            <th scope="row">{row.check}</th>
+            <td><span class="tool-chart">{row.command}</span></td>
+            <td>{row.pass} <a href={row.sourcePath}>Source</a></td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+  <p class="pkg-set-note">New apps use SQLite. MySQL, MariaDB, PostgreSQL, and SQL Server are supported for production. Herd, php.new, or Sail can install the PHP side. Vue 3.5, Vite 8, and Inertia 3 are the front-end versions that article names. Vue 3.6 Vapor mode was a release candidate as of October 2026, not the default.</p>
+  <div class="tool-table-wrap">
+    <table class="tool-table">
+      <thead>
+        <tr>
+          <th scope="col">Step</th>
+          <th scope="col">Command</th>
+          <th scope="col">Rule</th>
+        </tr>
+      </thead>
+      <tbody>
+        {START_STEPS.map((row, index) => (
+          <tr>
+            <th scope="row">{index + 1}</th>
+            <td>{row.command ? <span class="tool-chart">{row.command}</span> : <span class="pkg-set-note">Open in the browser</span>}</td>
+            <td>{row.rule} <a href={row.sourcePath}>Source</a></td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+  <p class="pkg-set-note">Do not start a new app with composer require laravel/framework. Use laravel new blog and answer the installer. Tailwind CSS 4 and shadcn-vue ship with the Vue starter kit and are not in the download chart. <a href="/tools/samples">The lines to paste are in the samples.</a></p>
+  <p class="pkg-actions">
+    <a class="btn" href="/requirements">Requirements article</a>
+    <a class="btn" href="/application-setup">Setup guide</a>
+    <a class="btn" href="/tools/start.md">Markdown for assistants</a>
+  </p>
+</ToolPage>

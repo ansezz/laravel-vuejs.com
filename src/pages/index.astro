@@ -6,8 +6,7 @@ import NewsletterBand from '../components/NewsletterBand.astro'
 import { allPosts, categories } from '../lib/content'
 import Art from '../components/Art.astro'
 import { SOCIALS, GROUPS } from '../config/site'
-import { getArt, categoryArt } from '../lib/art'
-const hero = getArt('hero')!
+import { categoryArt } from '../lib/art'
 const jobsArt = categoryArt('jobs')!
 
 const posts = await allPosts()
@@ -18,30 +17,37 @@ const stack = ['Laravel 13', 'PHP 8.3+', 'Vue 3.5', 'Inertia 3', 'TypeScript', '
 ---
 <Base description="Practical guides, tutorials and a friendly community for developers building modern apps with Laravel and Vue.">
   <section class="hero">
-    <div class="hero-bg"><span class="orb orb-a"></span><span class="orb orb-b"></span></div>
-    <div class="container hero-grid">
-      <div>
-        <a class="eyebrow" href="/laravel-vuejs-open-source-cms"><b>NEW</b> We moved to laravel-vuejs.space <Icon name="arrow" size={14} /></a>
-        <h1>Build modern apps with <span class="grad-text">Laravel&nbsp;&amp;&nbsp;Vue</span>.</h1>
-        <p class="lead">Clear, up-to-date guides for the stack you love: Laravel 13 on the back end, Vue 3 on the front end, and everything in between. Written by developers, for developers.</p>
-        <div class="hero-cta">
-          <a class="btn btn-primary" href="/posts">Read the guides <Icon name="arrow" size={18} class="icon-arrow" /></a>
-          <a class="btn" href="/page/about-us"><Icon name="users" size={18} /> Join the community</a>
+    <div class="hero-bg" aria-hidden="true"></div>
+    <div class="container poster">
+      <a class="eyebrow" href="/laravel-vuejs-open-source-cms"><b>NEW</b> We moved to laravel-vuejs.space <Icon name="arrow" size={14} /></a>
+      <div class="poster-stage">
+        <div class="poster-copy">
+          <h1>
+            <span class="poster-kicker">Build modern apps with</span>
+            <span class="poster-stack">
+              <span class="ink-laravel">Laravel</span>
+              <span class="ink-row">
+                <span class="ink-amp">&amp;</span>
+                <span class="ink-vue">Vue.</span>
+              </span>
+            </span>
+          </h1>
+          <p class="lead">Clear, up-to-date guides for the stack you love: Laravel 13 on the back end, Vue 3 on the front end, and everything in between. Written by developers, for developers.</p>
+          <div class="hero-cta">
+            <a class="btn btn-primary" href="/posts">Read the guides <Icon name="arrow" size={18} class="icon-arrow" /></a>
+            <a class="btn" href="/page/about-us"><Icon name="users" size={18} /> Join the community</a>
+          </div>
+          <div class="hero-meta">
+            <span><Icon name="zap" size={16} /> Free and open source</span>
+            <span><Icon name="code" size={16} /> Real code you can copy</span>
+            <span><Icon name="globe" size={16} /> 8 community channels</span>
+          </div>
         </div>
-        <div class="hero-meta">
-          <span><Icon name="zap" size={16} /> Free and open source</span>
-          <span><Icon name="code" size={16} /> Real code you can copy</span>
-          <span><Icon name="globe" size={16} /> 8 community channels</span>
-        </div>
-      </div>
-      <div class="showcase">
-      <Art src={hero} class="showcase-art" sizes="(max-width: 960px) 100vw, 640px" widths={[480, 720, 960, 1400]} eager />
-      <span class="float-chip chip-a" aria-hidden="true"><i class="dot"></i> 42 tests passed</span>
-      <span class="float-chip chip-b" aria-hidden="true"><b>SSR</b> Inertia 3 + Vue 3.5</span>
-      <div class="window" aria-label="Code example: a Laravel route rendering a Vue page with Inertia">
-        <div class="window-bar"><i></i><i></i><i></i>
-          <div class="window-tabs"><span class="on">routes/web.php</span><span>Posts.vue</span></div>
-        </div>
+        <div class="showcase">
+          <div class="window" aria-label="Code example: a Laravel route rendering a Vue page with Inertia">
+            <div class="window-bar"><i></i><i></i><i></i>
+              <div class="window-tabs"><span class="on">routes/web.php</span><span>Posts.vue</span></div>
+            </div>
 <pre><code><span class="c">// Laravel 13 + Inertia 3</span>
 <span class="t">Route</span>::<span class="f">get</span>(<span class="s">'/posts'</span>, <span class="k">fn</span> () =&gt; <span class="t">Inertia</span>::<span class="f">render</span>(<span class="s">'Posts'</span>, [
     <span class="s">'posts'</span> =&gt; <span class="t">Post</span>::<span class="f">latest</span>()-&gt;<span class="f">paginate</span>(),
@@ -55,7 +61,12 @@ const stack = ['Laravel 13', 'PHP 8.3+', 'Vue 3.5', 'Inertia 3', 'TypeScript', '
 &lt;<span class="k">template</span>&gt;
   &lt;<span class="t">PostCard</span> <span class="f">v-for</span>=<span class="s">"post in posts.data"</span> <span class="f">:post</span>=<span class="s">"post"</span> /&gt;
 &lt;/<span class="k">template</span>&gt;</code></pre>
-      </div>
+            <div class="poster-notes">
+              <span class="float-chip chip-a" aria-hidden="true"><i class="dot"></i> 42 tests passed</span>
+              <span class="float-chip chip-b" aria-hidden="true"><b>SSR</b> Inertia 3 + Vue 3.5</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -100,7 +111,7 @@ const stack = ['Laravel 13', 'PHP 8.3+', 'Vue 3.5', 'Inertia 3', 'TypeScript', '
   <section class="container section-tight" aria-label="The stack we write about">
     <p class="kicker" style="text-align:center;margin-bottom:20px">The stack we write about</p>
     <div class="stack">{stack.map(s => <span class="chip"><i></i>{s}</span>)}</div>
-    <p class="muted" style="text-align:center;margin-top:18px">The same stack, compared with 2019, is on the <a href="/tools#now">tools page</a>. Where each file goes in a new Vue starter kit is <a href="/tools#files">there too</a>. The October 2026 release notes are <a href="/tools#shipped">there as well</a>.</p>
+    <p class="muted" style="text-align:center;margin-top:18px">The same stack, compared with 2019, is on <a href="/tools/now">Then and now</a>. Where each file goes in a new Vue starter kit is on <a href="/tools/files">Where it goes</a>. The October 2026 release notes are on <a href="/tools/shipped">What shipped</a>. The machine checks and the commands in order are on <a href="/tools/start">Start here</a>. The lines the setup guide shows are on <a href="/tools/samples">Samples</a>.</p>
   </section>
 
   <section class="container section-tight" aria-labelledby="jobs">

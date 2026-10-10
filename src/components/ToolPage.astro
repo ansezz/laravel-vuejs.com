@@ -1,0 +1,17 @@
+---
+import Base from '../layouts/Base.astro'
+import PageHero from './PageHero.astro'
+interface Props { title: string; lead: string; description?: string }
+const { title, lead, description = lead } = Astro.props
+---
+<Base title={title} description={description}>
+  <PageHero
+    kicker="Tools"
+    title={title}
+    lead={lead}
+    crumbs={[{ label: 'Tools', href: '/tools' }, { label: title }]}
+  />
+  <section class="container section-tight tool-block">
+    <slot />
+  </section>
+</Base>

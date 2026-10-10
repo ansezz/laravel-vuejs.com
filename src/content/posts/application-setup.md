@@ -154,17 +154,17 @@ Inertia passes the controller's data to the page as props. With `<script setup>`
 ```vue
 <!-- resources/js/pages/posts/Index.vue -->
 <script setup lang="ts">
-import { Head } from '@inertiajs/vue3'
+import { Head } from "@inertiajs/vue3";
 
 interface Post {
-  id: number
-  title: string
-  slug: string
-  excerpt: string
-  published_at: string
+  id: number;
+  title: string;
+  slug: string;
+  excerpt: string;
+  published_at: string;
 }
 
-defineProps<{ posts: Post[] }>()
+defineProps<{ posts: Post[] }>();
 </script>
 
 <template>
@@ -182,6 +182,8 @@ defineProps<{ posts: Post[] }>()
 ```
 
 Visit `http://localhost:8000/posts`. Vite reloads the page as you edit, and Laravel serves the data. There is no separate API to build.
+
+The Vue starter kit already shares the logged-in user from `HandleInertiaRequests.php` as `auth.user`. A layout reads it with `usePage().props.auth.user`. The default `User` model hides `password`. A secret column you add later needs the same `$hidden` entry, or you share `only(['id', 'name', 'email'])` instead of the whole model. The title template and a meta description are the [document title guide](/inertia-vue-document-title). The shell that stays mounted between those pages is the [persistent layout guide](/inertia-vue-persistent-layout).
 
 ## 7. Test it
 
@@ -207,8 +209,9 @@ php artisan test
 
 ## Where to go next
 
-- Add a `show` page for a single post, with route model binding on `slug`.
-- Use [Inertia forms](https://inertiajs.com/forms) (`useForm`) to create and edit posts.
-- Run `npm run build` for production. With Inertia 3, server-side rendering already works in `npm run dev`; build the SSR bundle with `npm run build:ssr` when you deploy.
+- Add create, edit, delete, search, and pagination in the [CRUD guide](/laravel-inertia-vue-crud).
+- Upload a cover image in the [file upload guide](/laravel-vue-file-upload).
+- Choose Inertia, a separate Vue SPA, or Nuxt in [which Laravel and Vue stack to use](/laravel-vue-in-2026).
+- Run `npm run build` for production. The [deploy guide](/deploy-laravel-vue) covers the SSR build, the queue, and the `public/hot` file.
 
 > Looking for the original Laravel 5 + Nuxt 2 setup of this site? It is in the repository's Git history, from before the Astro migration.

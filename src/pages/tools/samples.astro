@@ -1,0 +1,21 @@
+---
+import ToolPage from '../../components/ToolPage.astro'
+import CodeSample from '../../components/CodeSample.astro'
+import { GUIDE_SAMPLES } from '../../data/dev-tools'
+const lead = 'Lines the setup guide prints. A method or a class body is not a whole file. Do not replace a generated file with a partial sample. The Vue page is the full component the guide shows.'
+---
+<ToolPage title="Samples" lead={lead}>
+  <p class="pkg-set-note">{lead}</p>
+  {GUIDE_SAMPLES.map(sample => (
+    <div class="sample-card">
+      <h3>{sample.thing}</h3>
+      <p class="pkg-set-note"><span class="sample-path">{sample.path}</span>. {sample.extent} <a href={sample.sourcePath}>Source</a></p>
+      <CodeSample lang={sample.lang} code={sample.code} label={`Copy ${sample.thing}`} />
+    </div>
+  ))}
+  <p class="pkg-set-note">Artisan already writes the surrounding class, the namespace, and the imports. Paste a method into that file. Paste the Vue sample as the whole page.</p>
+  <p class="pkg-actions">
+    <a class="btn" href="/application-setup">Setup guide</a>
+    <a class="btn" href="/tools/samples.md">Markdown for assistants</a>
+  </p>
+</ToolPage>

@@ -1,7 +1,7 @@
 {
   "name": "laravel-vuejs",
   "version": "3.0.0",
-  "description": "Laravel & VueJs blog \u2014 static Astro build of laravel-vuejs.space",
+  "description": "Laravel & VueJs blog — static Astro build of laravel-vuejs.space",
   "author": "Anass EZ-ZOUAINE <ansezzouaine@gmail.com>",
   "private": true,
   "license": "MIT",
@@ -27,6 +27,7 @@
     "@astrojs/rss": "^4.0.19",
     "@fontsource-variable/geist": "^5.3.0",
     "@fontsource-variable/geist-mono": "^5.3.0",
+    "@fontsource-variable/newsreader": "^5.3.0",
     "astro": "^7.3.8"
   },
   "devDependencies": {

@@ -46,7 +46,7 @@ php -m          # lists the loaded extensions
 ## The front-end side
 
 - **Node.js 22.12+ or 24 LTS**, with npm, pnpm or Bun
-- **Vue 3.5**, the current stable line. Vue 3.6, with the opt-in *Vapor mode* that skips the virtual DOM, is in release candidate as of October 2026.
+- **Vue 3.5**, the current stable line. Vue 3.6, with the opt-in _Vapor mode_ that skips the virtual DOM, is in release candidate as of October 2026.
 - **Vite 8**, which Laravel uses to build front-end assets (it now bundles with Rolldown)
 - **Inertia 3**, the glue between Laravel and Vue in the official starter kits (Inertia 2 stopped getting bug fixes on September 26, 2026)
 - **Tailwind CSS 4** for styling, and **Nuxt 4** if you want a standalone Vue front end (Nuxt 3 reached end of life on July 31, 2026)
@@ -60,19 +60,19 @@ npm -v
 
 Here is the stack this blog started with, next to what we would pick for a new project today:
 
-| Job | Then (2019) | Now (2026) |
-| --- | --- | --- |
-| Framework | Laravel 5.8 | Laravel 13 |
-| Admin panel | Nova | Nova 5 or Filament |
-| API | GraphQL with Lighthouse | Inertia 3 for app pages; JSON:API resources or Lighthouse for public APIs |
-| Front end | Nuxt 2, Vue 2, Options API | Vue 3.5 with `<script setup>` and TypeScript, via Inertia or Nuxt 4 |
-| State | Vuex | Pinia, or Inertia page props |
-| Styling | Bootstrap 3, Stylus | Tailwind CSS 4 |
-| Auth | Passport, Socialite | Starter kit auth or WorkOS AuthKit; Sanctum for SPA and mobile tokens; Socialite for OAuth |
-| Search | Scout + Algolia | Scout (Algolia, Meilisearch or Typesense), or vector search with pgvector |
-| Debugging | Telescope | Telescope, Pail, and Pulse or Nightwatch in production |
-| Testing | PHPUnit | Pest, plus Vitest for components |
+| Job         | Then (2019)                | Now (2026)                                                                                 |
+| ----------- | -------------------------- | ------------------------------------------------------------------------------------------ |
+| Framework   | Laravel 5.8                | Laravel 13                                                                                 |
+| Admin panel | Nova                       | Nova 5 or Filament                                                                         |
+| API         | GraphQL with Lighthouse    | Inertia 3 for app pages; JSON:API resources or Lighthouse for public APIs                  |
+| Front end   | Nuxt 2, Vue 2, Options API | Vue 3.5 with `<script setup>` and TypeScript, via Inertia or Nuxt 4                        |
+| State       | Vuex                       | Pinia, or Inertia page props                                                               |
+| Styling     | Bootstrap 3, Stylus        | Tailwind CSS 4                                                                             |
+| Auth        | Passport, Socialite        | Starter kit auth or WorkOS AuthKit; Sanctum for SPA and mobile tokens; Socialite for OAuth |
+| Search      | Scout + Algolia            | Scout (Algolia, Meilisearch or Typesense), or vector search with pgvector                  |
+| Debugging   | Telescope                  | Telescope, Pail, and Pulse or Nightwatch in production                                     |
+| Testing     | PHPUnit                    | Pest, plus Vitest for components                                                           |
 
 ## A good default
 
-If you are not sure where to start, use the official **Laravel + Vue starter kit**. You get Laravel 13, Inertia 3, Vue 3 with TypeScript, Tailwind and shadcn-vue, plus login, registration and email verification already wired up. Our [setup guide](/application-setup) walks you through it.
+If you are not sure where to start, use the official **Laravel + Vue starter kit**. You get Laravel 13, Inertia 3, Vue 3 with TypeScript, Tailwind and shadcn-vue, plus login, registration and email verification already wired up. Our [setup guide](/application-setup) walks you through it. If you are choosing between Inertia, a separate Vue SPA, and Nuxt, read [which stack to use](/laravel-vue-in-2026).

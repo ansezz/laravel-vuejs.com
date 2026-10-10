@@ -1,0 +1,35 @@
+---
+import ToolPage from '../../components/ToolPage.astro'
+import { SHIPPED_ROWS } from '../../data/dev-tools'
+const lead = 'New opt-in APIs from the two release articles published here on October 10, 2026. Laravel 13.35.0 was tagged on October 6. Inertia 3.9.0 came out on October 9, and 3.9.1 followed the same day. Install 3.9.1. The articles also list bug fixes.'
+---
+<ToolPage title="What shipped" lead={lead}>
+  <p class="pkg-set-note">{lead}</p>
+  <div class="tool-table-wrap">
+    <table class="tool-table">
+      <thead>
+        <tr>
+          <th scope="col">Release</th>
+          <th scope="col">Change</th>
+          <th scope="col">Use</th>
+          <th scope="col">Watch</th>
+        </tr>
+      </thead>
+      <tbody>
+        {SHIPPED_ROWS.map(row => (
+          <tr>
+            <th scope="row">{row.release}</th>
+            <td>{row.change}</td>
+            <td>{row.use}</td>
+            <td>{row.watch} <a href={row.sourcePath}>Source</a></td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+  <p class="pkg-actions">
+    <a class="btn" href="/laravel-13-35-query-routes-markdown-responses">Laravel 13.35</a>
+    <a class="btn" href="/inertia-3-9-background-polling-navigate-type">Inertia 3.9</a>
+    <a class="btn" href="/tools/shipped.md">Markdown for assistants</a>
+  </p>
+</ToolPage>

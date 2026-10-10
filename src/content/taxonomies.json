@@ -105,6 +105,46 @@
       "id": "16",
       "slug": "release",
       "name": "Releases"
+    },
+    {
+      "id": "17",
+      "slug": "sanctum",
+      "name": "Sanctum"
+    },
+    {
+      "id": "18",
+      "slug": "pinia",
+      "name": "Pinia"
+    },
+    {
+      "id": "19",
+      "slug": "testing",
+      "name": "Testing"
+    },
+    {
+      "id": "20",
+      "slug": "i18n",
+      "name": "i18n"
+    },
+    {
+      "id": "21",
+      "slug": "permissions",
+      "name": "Permissions"
+    },
+    {
+      "id": "22",
+      "slug": "typescript",
+      "name": "TypeScript"
+    },
+    {
+      "id": "23",
+      "slug": "socialite",
+      "name": "Socialite"
+    },
+    {
+      "id": "24",
+      "slug": "passport",
+      "name": "Passport"
     }
   ]
 }

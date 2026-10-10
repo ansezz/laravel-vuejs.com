@@ -420,7 +420,7 @@ export function nowMarkdown(): string {
     `Setup guide: ${SITE_URL}/application-setup`,
     `Requirements article: ${SITE_URL}/requirements`,
     `Package chart: ${SITE_URL}/packages`,
-    `HTML table: ${SITE_URL}/tools#now`,
+    `HTML table: ${SITE_URL}/tools/now`,
   );
   return lines.join("\n");
 }
@@ -565,10 +565,15 @@ export function filesMarkdown(): string {
     "The Vue starter kit in that guide includes Inertia 3, Vue 3, TypeScript, Tailwind CSS 4, and shadcn-vue. Tailwind CSS 4 and shadcn-vue are not in the download chart.",
     `Setup guide: ${SITE_URL}/application-setup`,
     `Inertia 3.9 article: ${SITE_URL}/inertia-3-9-background-polling-navigate-type`,
-    `HTML table: ${SITE_URL}/tools#files`,
+    `HTML table: ${SITE_URL}/tools/files`,
   );
   return lines.join("\n");
 }
+
+export { START_CHECKS, START_STEPS, startMarkdown } from "./start-sheet.ts";
+export type { StartCheck, StartStep } from "./start-sheet.ts";
+export { GUIDE_SAMPLES, samplesMarkdown } from "./guide-samples.ts";
+export type { GuideSample } from "./guide-samples.ts";
 
 export type ShippedRow = {
   id: string;
@@ -689,7 +694,7 @@ export function shippedMarkdown(): string {
     "",
     `Laravel 13.35 article: ${SITE_URL}/laravel-13-35-query-routes-markdown-responses`,
     `Inertia 3.9 article: ${SITE_URL}/inertia-3-9-background-polling-navigate-type`,
-    `HTML table: ${SITE_URL}/tools#shipped`,
+    `HTML table: ${SITE_URL}/tools/shipped`,
   );
   return lines.join("\n");
 }
@@ -710,7 +715,7 @@ export function compatibilityMarkdown(): string {
   }
   lines.push(
     "",
-    `HTML table: ${SITE_URL}/tools#compatibility`,
+    `HTML table: ${SITE_URL}/tools/compatibility`,
     `Package chart: ${SITE_URL}/packages`,
   );
   return lines.join("\n");
