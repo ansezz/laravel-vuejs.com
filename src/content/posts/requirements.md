@@ -45,14 +45,14 @@ php -m          # lists the loaded extensions
 
 ## The front-end side
 
-- **Node.js 22.12+ or 24 LTS**, with npm, pnpm or Bun
+- **Node.js 20.19+ or 22.12+**, with npm, pnpm or Bun. Node 24 LTS is inside that second range. Vite 8 rejects Node 18 and Node 20 below 20.19.
 - **Vue 3.5**, the current stable line. Vue 3.6, with the opt-in _Vapor mode_ that skips the virtual DOM, is in release candidate as of October 2026.
 - **Vite 8**, which Laravel uses to build front-end assets (it now bundles with Rolldown)
 - **Inertia 3**, the glue between Laravel and Vue in the official starter kits (Inertia 2 stopped getting bug fixes on September 26, 2026)
 - **Tailwind CSS 4** for styling, and **Nuxt 4** if you want a standalone Vue front end (Nuxt 3 reached end of life on July 31, 2026)
 
 ```bash
-node -v   # v22.12+ or v24
+node -v   # v20.19+ or v22.12+
 npm -v
 ```
 

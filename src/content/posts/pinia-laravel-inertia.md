@@ -30,16 +30,15 @@ A draft title the author typed on `/posts/create`, then lost by opening the list
 npm install pinia
 ```
 
-The Vue starter kit mounts Inertia in `resources/js/app.ts`. Add Pinia inside the existing `setup` callback, and create the instance there, so a server render does not reuse another request's state:
+The Vue starter kit mounts Inertia in `resources/js/app.ts` with `withApp`. Add Pinia inside that callback, and create the instance there, so a server render does not reuse another request's state. Keep the `title`, `layout`, `progress`, and focus directive the file already has. A manual `setup` callback turns off the Vite plugin's SSR wiring.
 
 ```ts
 import { createPinia } from "pinia";
 
-// inside the starter kit's setup({ el, App, props, plugin })
-createApp({ render: () => h(App, props) })
-  .use(plugin)
-  .use(createPinia())
-  .mount(el);
+// inside the withApp callback resources/js/app.ts already has
+withApp(app) {
+  app.use(createPinia());
+},
 ```
 
 ```ts

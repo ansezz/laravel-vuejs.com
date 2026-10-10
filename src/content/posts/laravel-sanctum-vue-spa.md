@@ -142,7 +142,7 @@ export async function currentUser() {
 
 Call `/sanctum/csrf-cookie` before the first POST. Laravel sets the cookie on that response. A later POST without it returns **419**. A POST with a valid cookie but no session returns **401** from `auth:sanctum`. Send the user back to the login page on either of those.
 
-A 419 after a deploy is often `SESSION_DOMAIN`, `SANCTUM_STATEFUL_DOMAINS`, or a missing `supports_credentials`. It is rarely "Sanctum is broken."
+A 419 after a deploy is a CSRF mismatch. `SESSION_DOMAIN` or a missing `supports_credentials` often causes it, because the cookie is not stored. `SANCTUM_STATEFUL_DOMAINS` decides whether `/api/*` gets the session middleware. If the SPA origin is missing there, `auth:sanctum` returns 401, not 419. `/login` is on the `web` group either way. It is rarely "Sanctum is broken."
 
 ## Tokens, only for the other clients
 
@@ -180,7 +180,11 @@ Route::post('/sanctum/token', function (Request $request) {
 });
 ```
 
-Show `plainTextToken` once. Sanctum stores the hash. Revoke a lost device with `$user->tokens()->where('id', $id)->delete()`.
+Show `plainTextToken` once. Sanctum stores the hash. Revoke a lost device by deleting that token row:
+
+```php
+$user->tokens()->where('id', $id)->delete();
+```
 
 Do not put that token in `localStorage` for the Vue app that shares your domain. Any script that can read the page can read the token. The session cookie can be `HttpOnly`. That is the point of the SPA flow.
 

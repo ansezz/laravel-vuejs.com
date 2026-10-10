@@ -18,7 +18,7 @@ The Inertia starter kit is same-origin. You open the Laravel URL, and `@vite` lo
 
 A separate Vue app on `http://localhost:5173` calling `http://localhost:8000` is a different origin. The port counts. A POST with `Content-Type: application/json`, or with `X-XSRF-TOKEN`, triggers an OPTIONS preflight before the real request. If that OPTIONS response has no `Access-Control-Allow-Origin` for the Vue origin, the browser reports a CORS error and your Vue `catch` never sees the body.
 
-Publish the config and turn credentials on. Sanctum's cookie flow needs credentials. A wildcard origin cannot be combined with credentials. The browser rejects `Access-Control-Allow-Origin: *` on a credentialed request.
+Publish the config and turn credentials on. Sanctum's cookie flow needs credentials. List the SPA origin. Do not leave `allowed_origins` as `['*']` once credentials are on. The browser rejects a literal `Access-Control-Allow-Origin: *` on a credentialed response, but Laravel's CORS library does not send that star in this case. It reflects the request origin and then allows every caller.
 
 ```bash
 php artisan config:publish cors

@@ -50,19 +50,20 @@ The host that serves this SPA has to answer unknown paths with `index.html`. Oth
 
 ## Load the user first
 
-`router.beforeEach` that runs before you know who is logged in sends a valid session to `/login` on the first paint. Call `GET /api/user` and wait. A 401 means there is no session, so the store user stays null. Any other error is a failed API, not a logged-out user.
+`router.beforeEach` that runs before you know who is logged in sends a valid session to `/login` on the first paint. Call `GET /api/user` on the credentialed `api` client from the Sanctum guide and wait. A plain Axios import does not send the session cookie to another origin. A 401 means there is no session, so the store user stays null. Any other error is a failed API, not a logged-out user.
 
 ```ts
 import { defineStore } from "pinia";
 import { ref } from "vue";
 import axios from "axios";
+import { api } from "../api";
 
 export const useAuth = defineStore("auth", () => {
   const user = ref(null);
 
   async function load() {
     try {
-      user.value = (await axios.get("/api/user")).data;
+      user.value = (await api.get("/api/user")).data;
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 401) {
         user.value = null;
@@ -113,19 +114,20 @@ boot();
 
 ## After login
 
-The login POST itself is the Sanctum article: CSRF cookie, then credentials, with credentials included. When that POST returns the user, write it into the store and move. Do not `window.location` assign. The router is the reason this page exists.
+The login POST itself is the Sanctum article: CSRF cookie, then credentials, with credentials included. That POST returns no content. Load the account with `currentUser()` from that same client, write it into the store, and move. Do not `window.location` assign. The router is the reason this page exists.
 
 ```ts
 import { useRouter } from "vue-router";
 import { useAuth } from "../stores/auth";
+import { currentUser } from "../api";
 
 const router = useRouter();
 const auth = useAuth();
 
-auth.user = response.data;
+auth.user = await currentUser();
 await router.push({ name: "posts" });
 ```
 
-`response` is the Axios response from that login POST. Logging out clears `auth.user` and pushes `{ name: "login" }` after Laravel's logout endpoint returns.
+`currentUser()` is `GET /api/user` on the credentialed client. A plain `axios.get` does not send the session cookie to another origin. Logging out clears `auth.user` and pushes `{ name: "login" }` after Laravel's logout endpoint returns.
 
 A third party with its own client id is not this router. That decision is [Sanctum or Passport](/laravel-sanctum-vs-passport). OAuth's redirect lives on the other product's server. Your first-party SPA keeps the cookie and these two routes.

@@ -36,7 +36,7 @@ export const START_CHECKS: readonly StartCheck[] = [
     id: "node",
     check: "Node.js",
     command: "node -v",
-    pass: "v22.12+ or v24.",
+    pass: "v20.19+ or v22.12+. Node 24 LTS is included.",
     sourcePath: "/requirements",
   },
   {
@@ -67,7 +67,7 @@ export const START_STEPS: readonly StartStep[] = [
   {
     id: "create",
     command: "laravel new blog",
-    rule: "Pick starter kit Vue, Laravel's built-in authentication, and Pest. The installer then installs Composer and npm dependencies, creates a SQLite database, and runs the first migrations. The Vue kit includes Inertia 3, Vue 3, TypeScript, Tailwind CSS 4, and shadcn-vue.",
+    rule: "Answer yes to a starter kit (the default is no), then Vue (the default stack is React), then Laravel's built-in authentication. Teams is no unless you want them. Pest is installed unless you pass --phpunit. The installer then installs Composer and npm dependencies, creates a SQLite database, and runs the first migrations. The Vue kit includes Inertia 3, Vue 3, TypeScript, Tailwind CSS 4, and shadcn-vue.",
     sourcePath: "/application-setup",
   },
   {

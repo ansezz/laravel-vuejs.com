@@ -86,7 +86,7 @@ defineProps<{
 
 `permissions` on that page is still a prop. `<Deferred>` does not fetch a URL you invent. It waits for the prop named in `data`.
 
-`->once()` on a deferred prop keeps the value across later visits until you explicitly reload it. Inertia also ships `WhenVisible` for a deferred prop that should wait until the block scrolls into view. The prop name is the same contract. Use it for a block below the fold, not for the main list.
+`->once()` on a deferred prop is remembered only while later pages still include that prop. A visit that leaves it out forgets the value, and the next page that includes it resolves the callback again. Reload that one prop when you need a fresh value sooner. Inertia also ships `WhenVisible` for a deferred prop that should wait until the block scrolls into view. The prop name is the same contract. Use it for a block below the fold, not for the main list.
 
 ## Load more
 

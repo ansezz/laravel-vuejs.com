@@ -33,7 +33,7 @@ class User extends Authenticatable
 }
 ```
 
-`HasRoles` is the trait that also provides `givePermissionTo` and `can`. Give the permission from a seeder or a one-off command, not from the Vue page.
+`HasRoles` is the trait that provides `givePermissionTo`. `$user->can('posts.update')` is Laravel's own `can`, which passes for that permission once the package's gate hook is registered. Give the permission from a seeder or a one-off command, not from the Vue page.
 
 ```php
 $user->givePermissionTo('posts.update');

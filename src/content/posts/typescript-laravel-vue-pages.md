@@ -52,7 +52,7 @@ defineProps<{
 
 `published_at` is a string in the props because Inertia serializes dates to JSON. Typing it as `Date` will not make it a `Date`. Format it as a string, or parse it on purpose.
 
-`posts.data` is the row list. `v-for="post in posts"` iterates the paginator's keys (`data`, `current_page`, and the rest) and the heading comes out blank. The type above makes that mistake a type error if you annotate the `v-for` source as `Post[]` and then pass `posts` instead of `posts.data`.
+`posts.data` is the row list. `v-for="post in posts"` walks the paginator's values, the `data` array and then `current_page` and the rest, so `post.title` comes out blank. The key is the second alias, `(value, key)`. The type above makes that mistake a type error if you annotate the `v-for` source as `Post[]` and then pass `posts` instead of `posts.data`.
 
 A simple paginator or a cursor paginator has no `last_page`. Drop that field from `Page` when the controller uses those methods. The differences are [pagination](/laravel-vue-pagination).
 

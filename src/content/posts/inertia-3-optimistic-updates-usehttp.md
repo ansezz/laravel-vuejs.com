@@ -16,7 +16,7 @@ Users notice waiting. A like button that takes 300 ms to react feels broken, eve
 
 In this post we build both into one page: a **like button** and a **live search**. Every snippet comes from a working Laravel 13 app that we tested in the browser, with a slow server and with a failing one.
 
-> **Tested with:** Laravel 13.35, `inertiajs/inertia-laravel` 3.5, `@inertiajs/vue3` 3.9, Vue 3.5, TypeScript, Pest 4. Still on Inertia 2? Start with our [upgrade checklist](/upgrade-inertia-2-to-3).
+> **Tested with:** Laravel 13.35, `inertiajs/inertia-laravel` 3.5, `@inertiajs/vue3` 3.9, Vue 3.5, TypeScript, Pest. Still on Inertia 2? Start with our [upgrade checklist](/upgrade-inertia-2-to-3).
 
 ## The back end
 

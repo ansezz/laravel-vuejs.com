@@ -13,14 +13,14 @@ Laravel **13.35.0** was tagged on **October 6, 2026**. Most of its 60-plus chang
 
 1. `Route::query()` for the HTTP **QUERY** method
 2. `response()->markdown()`
-3. `Schedule::alwaysOnOneServer()`
+3. `alwaysOnOneServer()` on the scheduler
 4. `queue:work --memory=60%`
 5. **Array** checks in `Queue::assertPushed()` and friends
 6. An opt-in **`defaults()`** method on Eloquent models
 
 Here is each one, with before and after code.
 
-> **Update:** `composer update laravel/framework` (13.35.0 or later). None of these features are breaking changes; they are all opt-in.
+> **Update:** `composer update laravel/framework` (13.35.0 or later). `Route::query()`, `response()->markdown()`, `defaults()`, and the new flags are opt-in. `QUERY` is also added to `Router::$verbs`, so an existing `Route::any()` or `Route::redirect()` matches it without a new route.
 
 ## 1. QUERY routes
 
@@ -66,11 +66,11 @@ class SearchProductsController
 HTML forms can't send QUERY, but `fetch` can. From a Vue component:
 
 ```ts
-const response = await fetch('/products/search', {
-    method: 'QUERY',
-    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-    body: JSON.stringify({ categories: [3, 7], min: 10, max: 250 }),
-})
+const response = await fetch("/products/search", {
+  method: "QUERY",
+  headers: { "Content-Type": "application/json", Accept: "application/json" },
+  body: JSON.stringify({ categories: [3, 7], min: 10, max: 250 }),
+});
 ```
 
 Testing helpers already exist:
@@ -119,7 +119,7 @@ public function show(Request $request, Post $post): Response|InertiaResponse
 
 Status codes and extra headers work like `response()->make()`. The `Content-Type` is always `text/markdown`, even if you pass another one in `$headers`.
 
-## 3. `Schedule::alwaysOnOneServer()`
+## 3. `alwaysOnOneServer()`
 
 When you run the scheduler on several servers or containers, every task runs on every one of them unless you add `->onOneServer()`. Forget it once and your users get the same report email three times.
 
@@ -270,7 +270,7 @@ A few bug fixes in this release that may affect real apps:
 - [Laravel v13.35.0 release notes](https://github.com/laravel/framework/releases/tag/v13.35.0)
 - [PR #61797: QUERY route method](https://github.com/laravel/framework/pull/61797)
 - [PR #61800: `response()->markdown()`](https://github.com/laravel/framework/pull/61800)
-- [PR #61789: `Schedule::alwaysOnOneServer()`](https://github.com/laravel/framework/pull/61789)
+- [PR #61789: `alwaysOnOneServer()`](https://github.com/laravel/framework/pull/61789)
 - [PR #61753: percentage `--memory` for `queue:work`](https://github.com/laravel/framework/pull/61753)
 - [PR #61770: array properties in fake assertions](https://github.com/laravel/framework/pull/61770)
 - [PR #61813: opt-in `defaults()` trait](https://github.com/laravel/framework/pull/61813)

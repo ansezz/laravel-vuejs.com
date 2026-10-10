@@ -98,7 +98,7 @@ Import `Form` from `@inertiajs/vue3`, the same component the CRUD guide uses. Su
 
 ## Files and expensive rules
 
-Precognition does not upload files. A rule that says `cover` is required will fail every live check, because the file is not in that request. Skip the required rule while the request is precognitive, and keep the image rules for the real submit. The field itself is the [upload guide](/laravel-vue-file-upload).
+Precognition leaves files out of the live request unless you set `validate-files` on `<Form>`, or call `validateFiles()` on `useForm`. With the default, a rule that says `cover` is required fails every live check, because the file is not in that request. Skip the required rule while the request is precognitive, and keep the image rules for the real submit. The field itself is the [upload guide](/laravel-vue-file-upload).
 
 ```php
 'cover' => [

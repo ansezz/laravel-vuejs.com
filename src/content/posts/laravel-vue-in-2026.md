@@ -54,7 +54,7 @@ Livewire is not a Vue setup. Do not install both to render the same page.
 | Live updates         | [Reverb and Echo](/laravel-reverb-vue)          | Same, with the SPA auth header   |
 | Production           | [Vite build and SSR](/deploy-laravel-vue)       | SPA host plus Laravel            |
 
-PHP is still 8.3 to 8.5. Node is still 22.12+ or 24. New apps still start on SQLite and move to MySQL, MariaDB, or PostgreSQL when production needs it.
+PHP is still 8.3 to 8.5. Node is 20.19+ or 22.12+, which includes 24 LTS. New apps still start on SQLite and move to MySQL, MariaDB, or PostgreSQL when production needs it.
 
 ## A rule for the first week
 

@@ -19,7 +19,7 @@ If you are still choosing Inertia, a separate SPA, or Nuxt, start with [the stac
 
 `simplePaginate(10)` skips the count. You get `current_page` and the previous and next URLs. There is no `total` and no `last_page`. Use it when the table is large and the footer only needs Previous and Next.
 
-`cursorPaginate(10)` also skips the count. Instead of `?page=2` it uses a `cursor` string and returns `next_page_url` and `prev_page_url`. There is no `last_page`. Use it when you order by a unique column, usually `id`, and people mostly move forward. Two rows with the same `published_at` can make an offset cursor skip or repeat a row. Order by `id` unless you have a reason not to.
+`cursorPaginate(10)` also skips the count. Instead of `?page=2` it uses a `cursor` string and returns `next_page_url` and `prev_page_url`. There is no `last_page`. It needs a unique order column, or a unique combination of columns. Two rows with the same `published_at` do not give the cursor a stable bound, so order by `id`. Skip and repeat when rows are inserted or deleted between pages is the offset case, `paginate` and `simplePaginate`.
 
 ```php
 // app/Http/Controllers/PostController.php
@@ -42,7 +42,7 @@ Read `posts.data` for the rows, the same as the CRUD page. Stop reading `last_pa
 </nav>
 ```
 
-`prev_page_url` and `next_page_url` are `null` on the ends. The `v-if` is the whole empty state. A cursor page and a simple page can share this footer. A counted page can add `Page {{ posts.current_page }} of {{ posts.last_page }}` beside it.
+`prev_page_url` and `next_page_url` are `null` on the ends. The `v-if` is the whole empty state. A cursor page and a simple page can share this footer. A counted page can add the current page and `last_page` beside it.
 
 `withQueryString()` still matters once the list has a search box. Without it, Next drops `?search=` and the second page is the unfiltered table.
 

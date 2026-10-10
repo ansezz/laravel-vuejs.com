@@ -1,8 +1,8 @@
 ---
 id: 13
 title: "Listen for Laravel events in Vue with Reverb"
-excerpt: "Install Reverb, broadcast a public event through the queue, and subscribe from a Vue page with useEcho."
-description: "Laravel Reverb and Vue: install broadcasting, fire a ShouldBroadcast event, and listen with the useEcho hook from Echo Vue."
+excerpt: "Install Reverb, broadcast a public event through the queue, and subscribe from a Vue page with useEchoPublic."
+description: "Laravel Reverb and Vue: install broadcasting, fire a ShouldBroadcast event, and listen with useEchoPublic from Echo Vue."
 seoTitle: "Laravel Reverb and Vue Echo"
 date: 2026-10-10T04:20:00Z
 snippet: "php artisan install:broadcasting --reverb"
@@ -10,7 +10,7 @@ categories: [laravel, vuejs]
 tags: [laravel, vuejs]
 ---
 
-Polling the [posts list](/laravel-inertia-vue-crud) every few seconds works until it does not. Reverb is Laravel's WebSocket server. Echo is the client. A Vue page can subscribe with `useEcho` from `@laravel/echo-vue` and update when a PHP event fires.
+Polling the [posts list](/laravel-inertia-vue-crud) every few seconds works until it does not. Reverb is Laravel's WebSocket server. Echo is the client. A Vue page can subscribe with `useEchoPublic` from `@laravel/echo-vue` and update when a PHP event fires.
 
 The official write-up is the [broadcasting docs](https://laravel.com/docs/13.x/broadcasting). This page is the short path for a Vue starter kit.
 
@@ -74,13 +74,17 @@ Put that in `store` after `Post::create()`. The queued job serializes the model.
 ```vue
 <script setup lang="ts">
 import { ref } from "vue";
-import { useEcho } from "@laravel/echo-vue";
+import { useEchoPublic } from "@laravel/echo-vue";
 
 const titles = ref<string[]>([]);
 
-useEcho("posts", "PostPublished", (event: { post: { title: string } }) => {
-  titles.value.unshift(event.post.title);
-});
+useEchoPublic(
+  "posts",
+  "PostPublished",
+  (event: { post: { title: string } }) => {
+    titles.value.unshift(event.post.title);
+  },
+);
 </script>
 
 <template>
@@ -90,7 +94,7 @@ useEcho("posts", "PostPublished", (event: { post: { title: string } }) => {
 </template>
 ```
 
-`useEcho` subscribes when the component is set up and leaves the channel when the component goes away. The event name matches the class name, `PostPublished`, unless you set `broadcastAs()`.
+`useEchoPublic` subscribes to the public channel when the component is set up and leaves it when the component goes away. `useEcho` is the private-channel hook, so it would listen on `private-posts` and miss this event. The event name matches the class name, `PostPublished`, unless you set `broadcastAs()`.
 
 Create a post from another window. The title should appear without a reload. If it does not, check the queue worker, then Reverb, then the browser console for a failed WebSocket. A missing `VITE_REVERB_APP_KEY` fails quietly until you look.
 

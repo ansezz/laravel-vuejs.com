@@ -41,4 +41,4 @@ You can still change your mind before the first feature. You cannot cheaply chan
 
 ## Where this stops
 
-Requirements that apply to both, including PHP 8.3 and Node when you are on the Vue kit, are [what you need](/requirements). Deploying the Vue build is [deploy](/deploy-laravel-vue). Livewire does not produce `public/hot`. The Vue kit does.
+Requirements that apply to both, including PHP 8.3 and Node when you are on the Vue kit, are [what you need](/requirements). Deploying the Vue build is [deploy](/deploy-laravel-vue). The Livewire starter kit also runs Vite, so `npm run dev` writes `public/hot` there too. Do not deploy that file from either kit.

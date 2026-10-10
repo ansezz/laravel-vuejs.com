@@ -22,7 +22,7 @@ The Vite plugin in the kit regenerates the files while `npm run dev` is running.
 php artisan wayfinder:generate
 ```
 
-The files land in `resources/js/actions` and `resources/js/routes`. You can gitignore both. They are rebuilt. On deploy, generate against the routes you are shipping. A stale `route:cache` from the previous release makes Wayfinder skip new routes, and Vite then fails looking for a file that was never written. Clear that cache before generating. The rest of the build is the [deploy guide](/deploy-laravel-vue).
+The files land in `resources/js/wayfinder`, `resources/js/actions`, and `resources/js/routes`. You can gitignore all three. They are rebuilt. On deploy, generate against the routes you are shipping. A stale `route:cache` from the previous release makes Wayfinder skip new routes, and Vite then fails looking for a file that was never written. Clear that cache before generating. The rest of the build is the [deploy guide](/deploy-laravel-vue).
 
 ## The form
 
@@ -45,7 +45,7 @@ import { store } from "@/actions/App/Http/Controllers/PostController";
 
 Inertia reads the URL and the HTTP method from the Wayfinder object. You do not also pass `method="post"` unless you are posting to a plain string, which is what the [CRUD guide](/laravel-inertia-vue-crud) does before this page. `store()` with no arguments matches `POST /posts`. An update action that needs the id is `update(post.id)` from the same generated module. Use the function the generator named after the controller method.
 
-A `<Link>` uses the same object when you need an href: `:href="store.url()"`. Check the generated file for that helper before you invent `.url` on your own. The generator is the API. This page does not describe a second one.
+A `<Link>` infers the method from that same object: `:href="store()"`. `store()` is a POST, so the link is a POST. `store.url()` is only the URL string, and a string href is a GET. Check the generated file before you invent a helper. The generator is the API. This page does not describe a second one.
 
 ## Where this stops
 

@@ -258,7 +258,7 @@ defineProps<{
 </template>
 ```
 
-A failed `validate()` call comes back as a 422 with the same page. `errors.title` is the first message for that field. Fix the copy in a `FormRequest` later if you want custom sentences. The rules above are enough to prove the round trip.
+A failed `validate()` call redirects back to this page with the errors in the session. Inertia follows that redirect. It does not show you a 422. `errors.title` is the first message for that field. Fix the copy in a `FormRequest` later if you want custom sentences. The rules above are enough to prove the round trip.
 
 `useForm` is still there for screens that build the payload in code. The `<Form>` component is the one to reach for when the fields are inputs. File fields are covered in the [upload guide](/laravel-vue-file-upload).
 

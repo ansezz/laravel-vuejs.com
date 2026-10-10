@@ -22,7 +22,7 @@ php artisan sail:install
 ./vendor/bin/sail npm run dev
 ```
 
-`sail:install` writes `compose.yaml` and a Dockerfile. `up -d` starts the containers in the background. `artisan` and `npm` inside `./vendor/bin/sail` run in the `laravel.test` container, so the PHP version on your laptop is not the PHP version of the app.
+`sail:install` writes `compose.yaml` and updates `.env`. It does not write a Dockerfile. `sail artisan sail:publish` copies the Dockerfiles into `docker/` when you need to edit them. `up -d` starts the containers in the background. `artisan` and `npm` inside `./vendor/bin/sail` run in the `laravel.test` container, so the PHP version on your laptop is not the PHP version of the app.
 
 The site is `http://localhost` unless you changed `APP_PORT`. That is port 80 in the compose file, not the `localhost:8000` you get from `php artisan serve` on the host.
 
@@ -38,7 +38,7 @@ The [setup guide](/application-setup) still applies: a `Post` model, a factory, 
 
 `npm run dev` has to stay running for hot reload. Start it with Sail so the Vite process is on the Docker network the compose file publishes. A host `npm run dev` next to a Sail PHP container is how the page loads HTML from Docker and JavaScript from a server the browser cannot reach.
 
-Stop the stack with `./vendor/bin/sail stop`. `down` removes containers. Use `stop` when you want the database volume to stay.
+Stop the stack with `./vendor/bin/sail stop`. `./vendor/bin/sail down` removes the containers and keeps the database volume. `down -v` deletes that volume.
 
 ## When the page loads and edits do not
 

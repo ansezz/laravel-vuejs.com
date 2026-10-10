@@ -10,7 +10,7 @@ categories: [laravel, vuejs]
 tags: [laravel, vuejs, nuxtjs, sanctum]
 ---
 
-Use Nuxt when the public site is the product and Laravel is the API behind it. Nuxt 3 stopped receiving updates on 31 July 2026, so a new front end starts on Nuxt 4. Node is 22.12 or newer, or 24, the same floor as [the requirements](/requirements). Do not start here for an internal tool. The Vue starter kit already has login and routing. That choice is [Inertia, a SPA, or Nuxt](/laravel-vue-in-2026).
+Use Nuxt when the public site is the product and Laravel is the API behind it. Nuxt 3 stopped receiving updates on 31 July 2026, so a new front end starts on Nuxt 4. Nuxt 4.6 requires Node 22.22.3 or newer, Node 24.15.0 or newer, or Node 26. That is stricter than the Vite floor in [the requirements](/requirements). Do not start here for an internal tool. The Vue starter kit already has login and routing. That choice is [Inertia, a SPA, or Nuxt](/laravel-vue-in-2026).
 
 ## The API URL
 
@@ -35,7 +35,7 @@ Set `NUXT_PUBLIC_API_URL` in the Nuxt environment when the host changes. Nuxt ma
 
 ## The request
 
-`useFetch` with `credentials: 'include'` sends the session cookie. The cookie only exists after the Sanctum flow: stateful domains, `supports_credentials`, `GET /sanctum/csrf-cookie`, then `POST /login`. Those steps are [Sanctum for a Vue SPA](/laravel-sanctum-vue-spa). Nuxt's dev server is usually port 3000, so that origin is the one you add. CORS for that port is [the CORS guide](/laravel-vue-cors). This page does not copy either setup.
+`credentials: 'include'` sends the session cookie from the browser. It does not attach that cookie when Nuxt server-renders an absolute Laravel URL, because the Nuxt server never received a cookie that lives on the Laravel origin. A logged-in list has to load in the browser, or through a relative proxy that forwards the cookie. The cookie only exists after the Sanctum flow: stateful domains, `supports_credentials`, `GET /sanctum/csrf-cookie`, then `POST /login`. Those steps are [Sanctum for a Vue SPA](/laravel-sanctum-vue-spa). Nuxt's dev server is usually port 3000, so that origin is the one you add. CORS for that port is [the CORS guide](/laravel-vue-cors). This page does not copy either setup.
 
 ```vue
 <script setup lang="ts">

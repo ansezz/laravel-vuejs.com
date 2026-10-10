@@ -16,17 +16,13 @@ The host process that keeps SSR running is the [deploy guide](/deploy-laravel-vu
 
 ## The commands
 
-Build the SSR bundle instead of the client-only build. Running `npm run build` afterwards replaces the server bundle.
+Production SSR is a second bundle. `npm run build` writes only the browser files in `public/build`. It does not refresh `bootstrap/ssr`. Ship this instead:
 
 ```bash
 npm run build:ssr
 ```
 
-Locally, the starter kit boots that server next to `artisan serve`:
-
-```bash
-composer dev:ssr
-```
+Locally, `npm run dev` and `composer run dev` already server-render through the Inertia Vite plugin. The current Vue starter kit has no `dev:ssr` script, and you do not run `inertia:start-ssr` during development.
 
 In production the process has to stay up:
 
@@ -42,7 +38,7 @@ php artisan inertia:stop-ssr
 
 ## window is not there
 
-The first render has no `document` and no `window`. A line in `<script setup>` that reads `window.innerWidth` throws, the SSR process returns an error, and the visitor gets the client-only page or a 500, depending on the failure. Read the browser inside `onMounted`, or guard it.
+The first render has no `document` and no `window`. A line in `<script setup>` that reads `window.innerWidth` throws during that render. Inertia then falls back to the client-only page. Read the browser inside `onMounted`, or guard it.
 
 ```ts
 import { onMounted, ref } from "vue";
@@ -54,7 +50,7 @@ onMounted(() => {
 });
 ```
 
-Pinia has the same constraint. Create the store inside Inertia's `setup` callback so two SSR requests do not share one store. That callback is the [Pinia guide](/pinia-laravel-inertia). Do not move `createPinia()` to module scope to "make SSR faster".
+Pinia has the same constraint. Create the store inside the existing `withApp` callback, not at module scope, so two SSR requests do not share one store. That callback is the [Pinia guide](/pinia-laravel-inertia). A manual `setup` callback turns off the Vite plugin's SSR wiring.
 
 ## What to render
 

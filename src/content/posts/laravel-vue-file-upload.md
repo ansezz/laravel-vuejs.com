@@ -64,7 +64,7 @@ Pass the current path to the page:
 
 ## The Vue form
 
-The `<Form>` component from `@inertiajs/vue3` sends a file field as `multipart/form-data`. Keep the `name` attribute. That is the key Laravel validates.
+The `<Form>` component from `@inertiajs/vue3` sends a file field as `multipart/form-data`. PHP does not fill that file on a real `PUT`, `PATCH`, or `DELETE`. Post the form and send `_method` of `put`, which is the spoof Laravel documents. Keep the `name` attribute. That is the key Laravel validates.
 
 ```vue
 <script setup lang="ts">
@@ -83,10 +83,11 @@ defineProps<{
 <template>
   <Form
     :action="`/posts/${post.id}`"
-    method="put"
+    method="post"
     #default="{ errors, processing, progress }"
     class="space-y-4"
   >
+    <input type="hidden" name="_method" value="put" />
     <input name="title" :defaultValue="post.title" />
     <p v-if="errors.title">{{ errors.title }}</p>
 
@@ -135,4 +136,4 @@ Do this in the same request as the database update. A queue is the wrong place f
 
 The `public` disk is fine for images you are happy to serve from the app server. For anything private, use a non-public disk and a temporary URL. For more than one server, the local disk is the wrong place: the next request may hit a machine that does not have the file. Point the disk at S3-compatible storage then. The Vue form does not change.
 
-`php artisan storage:link` is part of deploy, once per machine. The [deploy guide](/deploy-laravel-vue) is the rest of that list. It will not create the `covers` directory for you. `store()` does that on first upload.
+`php artisan storage:link` is once per machine when that machine serves the `public` disk. Laravel Cloud resets the app disk on each deploy, so do not rely on the symlink there. The [deploy guide](/deploy-laravel-vue) is the rest of that list. It will not create the `covers` directory for you. `store()` does that on first upload.

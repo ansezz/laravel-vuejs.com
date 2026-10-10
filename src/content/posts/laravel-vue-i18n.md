@@ -72,27 +72,23 @@ The allow-list is the point. Do not write `$request->string('locale')` straight 
 npm install vue-i18n
 ```
 
-Register it beside Pinia, inside the starter kit's `setup` callback. `legacy: false` is the Composition API mode. The `props` argument here is Inertia's setup props, so the first page's data is `props.initialPage.props`.
+Register it in the starter kit's `withApp` callback in `resources/js/app.ts`. Keep the `title`, `layout`, and `progress` options the kit already passes. A manual `setup` callback turns off the Vite plugin's SSR wiring. `legacy: false` is the Composition API mode. The shared props are `page.props`.
 
 ```ts
 import { createI18n } from "vue-i18n";
-import { createPinia } from "pinia";
 
-// inside setup({ el, App, props, plugin })
-const page = props.initialPage.props;
-const i18n = createI18n({
-  legacy: false,
-  locale: page.i18n.locale,
-  messages: {
-    [page.i18n.locale]: page.i18n.messages,
-  },
-});
+// inside the existing createInertiaApp({ ... }) call
+withApp(app, { page }) {
+  const i18n = createI18n({
+    legacy: false,
+    locale: page.props.i18n.locale,
+    messages: {
+      [page.props.i18n.locale]: page.props.i18n.messages,
+    },
+  });
 
-createApp({ render: () => h(App, props) })
-  .use(plugin)
-  .use(createPinia())
-  .use(i18n)
-  .mount(el);
+  app.use(i18n);
+},
 ```
 
 That instance is created once. A later visit can change `page.props.i18n` without rebuilding it. Update the instance when the shared prop changes. A layout that is always mounted is the right place.

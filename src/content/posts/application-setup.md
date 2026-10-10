@@ -26,11 +26,15 @@ Make sure Composer's global `bin` directory is on your `PATH`, so the `laravel` 
 laravel new blog
 ```
 
-The installer asks a few questions. Pick:
+The installer asks a few questions. Answer **yes** to a starter kit. The default is no. Saying no, then picking Vue, installs Vue with no login.
 
-- **Starter kit:** Vue
+Then pick:
+
+- **Starter kit stack:** Vue. The default on that question is React.
 - **Authentication:** Laravel's built-in authentication
-- **Testing framework:** Pest
+- **Teams:** no, unless you want them
+
+Pest is installed for you. Pass `--phpunit` if you want PHPUnit instead. The installer does not show a testing-framework question.
 
 It then installs Composer and npm dependencies, creates a SQLite database and runs the first migrations. The Vue kit ships with **Inertia 3**, Vue 3, TypeScript, Tailwind CSS 4 and shadcn-vue.
 
@@ -183,7 +187,7 @@ defineProps<{ posts: Post[] }>();
 
 Visit `http://localhost:8000/posts`. Vite reloads the page as you edit, and Laravel serves the data. There is no separate API to build.
 
-The Vue starter kit already shares the logged-in user from `HandleInertiaRequests.php` as `auth.user`. A layout reads it with `usePage().props.auth.user`. The default `User` model hides `password`. A secret column you add later needs the same `$hidden` entry, or you share `only(['id', 'name', 'email'])` instead of the whole model. The title template and a meta description are the [document title guide](/inertia-vue-document-title). The shell that stays mounted between those pages is the [persistent layout guide](/inertia-vue-persistent-layout).
+The Vue starter kit already shares the logged-in user from `HandleInertiaRequests.php` as `auth.user`. A layout reads it with `usePage().props.auth.user`. The default `User` model hides `password`, `two_factor_secret`, `two_factor_recovery_codes`, and `remember_token` with the `Hidden` attribute. A secret column you add later goes on that same attribute, or you share `only(['id', 'name', 'email'])` instead of the whole model. The title template and a meta description are the [document title guide](/inertia-vue-document-title). The shell that stays mounted between those pages is the [persistent layout guide](/inertia-vue-persistent-layout).
 
 ## 7. Test it
 

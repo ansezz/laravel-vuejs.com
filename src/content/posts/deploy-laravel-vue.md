@@ -33,10 +33,9 @@ Then:
 
 ```bash
 php artisan migrate --force
-php artisan storage:link
 ```
 
-`--force` is required when `APP_ENV` is production. `storage:link` is once per machine, and you need it if you followed the [file upload guide](/laravel-vue-file-upload).
+`--force` is required when `APP_ENV` is production. Do not add `storage:link` to a Cloud deploy. Cloud's disk resets on every deploy, so the symlink does not survive, and Cloud's own guide says to skip that command. User uploads on Cloud belong in the object storage bucket Cloud attaches. On a VPS, `storage:link` is once per machine when that machine serves the `public` disk from the [file upload guide](/laravel-vue-file-upload).
 
 ## Do not deploy the dev server
 
@@ -52,7 +51,7 @@ The Vue starter kit can render the first HTML on the server. Laravel Cloud says 
 npm run build:ssr
 ```
 
-Use it instead of `npm run build`, not after it. Locally, `composer dev:ssr` builds that bundle and boots the SSR server next to `artisan serve`. In production the SSR process has to stay up, the same way a queue worker stays up. Laravel Cloud and Forge both know how to keep that process running. On a VPS you supervise `php artisan inertia:start-ssr` (the starter kit's SSR command) yourself.
+Use it instead of `npm run build` when those pages need server HTML. `npm run build` writes only the browser bundle and leaves `bootstrap/ssr` stale. Locally, `composer run dev` already server-renders. The current starter kit has no `dev:ssr` script. In production the SSR process has to stay up, the same way a queue worker stays up. Laravel Cloud and Forge both know how to keep that process running. On a VPS you supervise `php artisan inertia:start-ssr` yourself.
 
 SSR is how a public Inertia page has HTML for a crawler before Vue boots. A logged-in app can ship the client bundle only. Pick that in [the stack guide](/laravel-vue-in-2026), not at the end of a deploy.
 
@@ -64,7 +63,7 @@ Mail, broadcasts, and any `ShouldQueue` listener do nothing without a worker:
 php artisan queue:work
 ```
 
-`composer run dev` started one on your machine. Production does not. Cloud and Forge run it as a daemon. Restart the worker on every deploy so it loads the new code. `queue:restart` is the usual signal.
+`composer run dev` started one on your machine. Production does not. On a VPS, supervise `php artisan queue:work` and signal it with `queue:restart` after each deploy so it loads the new code. Cloud restarts its workers itself, so `queue:restart` is not a Cloud deploy command.
 
 If you broadcast with Reverb, that is a second long-running process. The asset build does not include it.
 
