@@ -1,17 +1,15 @@
 ---
-import { SITE_URL } from '../config/site'
-import type { AgentTask } from '../data/agent-tasks'
+import { agentPrompt, type AgentTask } from '../data/agent-tasks'
 
 interface Props { task: AgentTask; compact?: boolean }
 const { task, compact = false } = Astro.props
-const prompt = [
-  `Read ${SITE_URL}/${task.slug}.md`,
+const prompt = agentPrompt(task)
+const preview = [
+  prompt.split('\n')[0],
   task.intent,
-  ...task.steps,
-  ...task.avoid,
+  ...task.avoid.slice(0, 3),
   'Show the diff. Do not commit.',
 ].join('\n')
-const preview = [`Read ${SITE_URL}/${task.slug}.md`, task.intent, 'Show the diff. Do not commit.'].join('\n')
 ---
 <section class:list={['ask-handoff', { compact, card: compact }]} aria-label={compact ? undefined : 'For your AI agent'}>
   <div class="ask-step">

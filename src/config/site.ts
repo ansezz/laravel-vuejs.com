@@ -90,6 +90,7 @@ export const FOOTER = [
     title: "Learn",
     links: [
       { label: "All articles", href: "/posts" },
+      { label: "Starter prompt", href: "/starter" },
       { label: "Packages", href: "/packages" },
       { label: "Tools", href: "/tools" },
       { label: "Laravel", href: "/category/laravel" },

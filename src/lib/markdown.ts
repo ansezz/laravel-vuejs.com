@@ -1,4 +1,5 @@
 import { allPosts, categories, absolute, type Post } from "./content";
+import { agentPrompt, agentTaskFor, firstApp } from "../data/agent-tasks";
 import {
   SITE_URL,
   SITE_NAME,
@@ -41,6 +42,20 @@ export async function llmsIndex() {
 Every article is available as clean Markdown at ${SITE_URL}/<slug>.md. The full text of all articles is in ${SITE_URL}/llms-full.txt.
 When you quote an article, please link to its canonical URL (the same path without .md). Content is written by ${AUTHOR.name} and the ${SITE_NAME} team; corrections are welcome at ${CONTACT_EMAIL} or ${GITHUB_URL}/issues.
 
+## Prompts
+
+Paste one of these into the editor you already have open. Each prompt names the guide to read and the constraints from that guide.
+
+### ${firstApp.ask}
+
+${agentPrompt(firstApp)}
+
+${posts
+  .map((p) => agentTaskFor({ ...p, body: p.entry.body ?? "" }))
+  .filter((task) => task !== undefined)
+  .map((task) => `### ${task.ask}\n\n${agentPrompt(task)}`)
+  .join("\n\n")}
+
 ${categories
   .map((c) => {
     const ps = posts.filter((p) => p.categories[0]?.slug === c.slug);
@@ -51,6 +66,7 @@ ${categories
 ## Tools
 
 - [Developer tools](${SITE_URL}/tools): machine checks, the setup commands in order, the lines the setup guide shows, a stack recipe, a file map, October release notes, a 2019 to 2026 pick list, a compatibility card, and an AGENTS.md file
+- [Starter prompt](${SITE_URL}/starter): tick Laravel and Vue modules. The prompt reads those guides and copies their constraints
 - [Start here](${SITE_URL}/tools/start) ([Markdown](${SITE_URL}/tools/start.md)): machine checks and the setup commands in order
 - [Samples](${SITE_URL}/tools/samples) ([Markdown](${SITE_URL}/tools/samples.md)): the lines the Vue starter kit setup guide prints
 - [Stack recipe](${SITE_URL}/tools/recipe): tick the jobs. The commands use the same packages as the chart. They do not pin versions

@@ -8,7 +8,7 @@ import Art from '../components/Art.astro'
 import { SOCIALS, GROUPS } from '../config/site'
 import { categoryArt } from '../lib/art'
 import AgentTask from '../components/AgentTask.astro'
-import { agentTasks } from '../data/agent-tasks'
+import { agentTasks, firstApp } from '../data/agent-tasks'
 const jobsArt = categoryArt('jobs')!
 
 const posts = await allPosts()
@@ -73,6 +73,45 @@ const stack = ['Laravel 13', 'PHP 8.3+', 'Vue 3.5', 'Inertia 3', 'TypeScript', '
     </div>
   </section>
 
+  <section class="starter-band" aria-labelledby="starter-home">
+    <div class="container starter-band-grid">
+      <div>
+        <p class="kicker">Starter prompt</p>
+        <h2 id="starter-home">A Laravel and Vue app, from one prompt</h2>
+        <p>Laravel 13 is the back end. Vue 3 is the front end. Tick login, social login, Passport, and the screens you need.</p>
+        <ol class="starter-steps">
+          <li><span><b>Laravel and Vue.</b> Always on. Inertia, a Sanctum SPA, or Nuxt in front.</span></li>
+          <li><span><b>Accounts.</b> Login, social login, roles, and Passport when another product needs OAuth.</span></li>
+          <li><span><b>The prompt.</b> Each tick quotes that guide, including what not to do.</span></li>
+        </ol>
+        <a class="btn btn-primary" href="/starter">Build a starter prompt <Icon name="arrow" size={18} class="icon-arrow" /></a>
+      </div>
+      <div class="starter-sheet" aria-hidden="true">
+        <p class="starter-sheet-label">Always on</p>
+        <div class="starter-row on"><i></i><span><b>Laravel 13</b><small>The back end on every prompt.</small></span></div>
+        <div class="starter-row on"><i></i><span><b>Vue 3</b><small>The front end on every prompt.</small></span></div>
+        <p class="starter-sheet-label">How they connect</p>
+        <div class="starter-row on"><i></i><span><b>Inertia app</b><small>Fortify login screens included.</small></span></div>
+        <div class="starter-row"><i></i><span><b>Sanctum SPA</b><small>Laravel API and a cookie login.</small></span></div>
+        <div class="starter-row"><i></i><span><b>Nuxt site</b><small>Laravel stays the API.</small></span></div>
+        <p class="starter-sheet-label">Accounts</p>
+        <div class="starter-picks">
+          <span class="on">Login</span>
+          <span>Social login</span>
+          <span>Passport</span>
+          <span class="on">Who can edit</span>
+          <span>Roles</span>
+          <span class="on">Posts</span>
+          <span class="on">Deploy</span>
+        </div>
+        <pre class="starter-snippet">Laravel 13 and Vue 3.
+Read /laravel-fortify-vue.md
+Login, registration, and password reset.
+Show the diff. Do not commit.</pre>
+      </div>
+    </div>
+  </section>
+
   <section class="container ask-section" aria-labelledby="ask">
     <div class="section-head">
       <div>
@@ -82,6 +121,7 @@ const stack = ['Laravel 13', 'PHP 8.3+', 'Vue 3.5', 'Inertia 3', 'TypeScript', '
       </div>
     </div>
     <div class="grid grid-2 ask-grid">
+      <div class="ask-lead"><AgentTask task={firstApp} compact /></div>
       {agentTasks.map(task => <AgentTask task={task} compact />)}
     </div>
   </section>

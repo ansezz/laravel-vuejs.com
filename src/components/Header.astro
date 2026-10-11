@@ -20,12 +20,14 @@ const isActive = (href: string) => path === href || (href !== '/' && path.starts
       <button class="icon-btn theme-toggle" type="button" aria-label="Toggle dark mode" data-theme-toggle>
         <Icon name="sun" size={18} class="sun" /><Icon name="moon" size={18} class="moon" />
       </button>
+      <a class="btn btn-sm nav-starter hide-sm" href="/starter" aria-current={path === '/starter' ? 'page' : undefined}>Starter prompt</a>
       <a class="btn btn-primary btn-sm hide-sm" href="/page/newsletter">Subscribe</a>
       <details class="mobile-nav">
         <summary class="icon-btn" aria-label="Menu"><Icon name="menu" size={18} class="i-menu" /><Icon name="close" size={18} class="i-close" /></summary>
         <div class="mobile-panel">
           {NAV.map(l => <a href={l.href}>{l.label}<Icon name="arrow" size={18} /></a>)}
           <a href="/search">Search<Icon name="search" size={18} /></a>
+          <a class="btn" href="/starter">Build a starter prompt</a>
           <a class="btn btn-primary" href="/page/newsletter">Subscribe to the newsletter</a>
         </div>
       </details>
