@@ -106,10 +106,17 @@ export function initUi() {
 
   document.querySelectorAll<HTMLButtonElement>(".copy-btn").forEach((btn) =>
     btn.addEventListener("click", async () => {
+      // Copy the "after" state: lines marked as removed in diff-style blocks are skipped.
+      const pre = btn.closest(".code")?.querySelector("pre");
+      const lines = [...(pre?.querySelectorAll<HTMLElement>(".line") ?? [])];
       const code =
         btn.dataset.copy ??
-        btn.closest(".code")?.querySelector("pre")?.innerText ??
-        "";
+        (lines.length
+          ? lines
+              .filter((l) => !l.classList.contains("remove"))
+              .map((l) => l.textContent ?? "")
+              .join("\n")
+          : (pre?.innerText ?? ""));
       try {
         await navigator.clipboard.writeText(code.replace(/\n$/, ""));
       } catch {

@@ -4,7 +4,18 @@ import Cover from '../components/Cover.astro'
 import PostCard from '../components/PostCard.astro'
 import Icon from '../components/Icon.astro'
 import NewsletterBand from '../components/NewsletterBand.astro'
-import { allPosts, related, enhanceHtml, fmtDate, absolute, type Post } from '../lib/content'
+import { render } from 'astro:content'
+import { allPosts, related, fmtDate, absolute, type Post } from '../lib/content'
+import CommunityCTA from '../components/post/CommunityCTA.astro'
+import TLDR from '../components/post/TLDR.astro'
+import Callout from '../components/post/Callout.astro'
+import CodeCompare from '../components/post/CodeCompare.astro'
+import Steps from '../components/post/Steps.astro'
+import TryIt from '../components/post/TryIt.astro'
+import FAQ from '../components/post/FAQ.astro'
+import Diagram from '../components/post/Diagram.astro'
+// Building blocks available in every .mdx post without imports (see docs/POST-STYLE.md).
+const components = { TLDR, Callout, CodeCompare, Steps, TryIt, FAQ, Diagram }
 import { SITE_NAME, SITE_URL, DISQUS_SHORTNAME, GITHUB_URL, AUTHOR } from '../config/site'
 import AgentTask from '../components/AgentTask.astro'
 import { agentTaskFor, nextStation } from '../data/agent-tasks'
@@ -20,8 +31,8 @@ const posts = await allPosts()
 const next = nextStation(post.slug, posts.map((item) => ({
   slug: item.slug, title: item.title, excerpt: item.excerpt, tags: item.tags, body: item.entry.body ?? '',
 })))
-const html = enhanceHtml(post.entry.rendered?.html ?? '')
-const headings = ((post.entry.rendered?.metadata?.headings ?? []) as { depth: number; slug: string; text: string }[]).filter(h => h.depth === 2 || h.depth === 3)
+const { Content, headings: allHeadings } = await render(post.entry)
+const headings = allHeadings.filter(h => h.depth === 2 || h.depth === 3)
 const url = absolute(post.url)
 const enc = encodeURIComponent
 const share = [
@@ -86,7 +97,14 @@ const jsonld = [{
 
     <div class="container post-layout">
       <div>
-        <div class="prose" id="article" set:html={html} />
+        {headings.length > 0 && (
+          <details class="toc-mobile">
+            <summary>On this page <span class="muted">· {headings.filter(h => h.depth === 2).length} sections</span></summary>
+            <ol>{headings.map(h => <li class={`d${h.depth}`}><a href={`#${h.slug}`}>{h.text}</a></li>)}</ol>
+          </details>
+        )}
+        <div class="prose post-body" id="article"><Content components={components} /></div>
+        <CommunityCTA />
         <footer class="post-foot">
           <div class="card-cats">
             {post.tags.map(t => <a class="chip" href={`/tag/${t.slug}`}><Icon name="tag" size={13} />{t.name}</a>)}
