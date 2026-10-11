@@ -106,18 +106,22 @@ export function initUi() {
 
   document.querySelectorAll<HTMLButtonElement>(".copy-btn").forEach((btn) =>
     btn.addEventListener("click", async () => {
-      const code = btn.closest(".code")?.querySelector("pre")?.innerText ?? "";
+      const code =
+        btn.dataset.copy ??
+        btn.closest(".code")?.querySelector("pre")?.innerText ??
+        "";
       try {
         await navigator.clipboard.writeText(code.replace(/\n$/, ""));
       } catch {
         return;
       }
       const label = btn.querySelector(".copy-label");
+      const original = label?.textContent ?? "Copy";
       btn.classList.add("done");
       if (label) label.textContent = "Copied";
       setTimeout(() => {
         btn.classList.remove("done");
-        if (label) label.textContent = "Copy";
+        if (label) label.textContent = original;
       }, 1600);
     }),
   );
@@ -169,12 +173,10 @@ export function initUi() {
           body: new FormData(f),
           headers: { Accept: "application/json" },
         });
-        const out = await res
-          .json()
-          .catch(() => ({
-            ok: false,
-            error: "Something went wrong. Please try again.",
-          }));
+        const out = await res.json().catch(() => ({
+          ok: false,
+          error: "Something went wrong. Please try again.",
+        }));
         if (out.ok) {
           f.reset();
           f.classList.add("sent");

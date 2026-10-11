@@ -1,0 +1,32 @@
+---
+import ToolPage from '../../components/ToolPage.astro'
+import { COMPAT_ROWS, compatibilityMarkdown } from '../../data/dev-tools'
+const lead = 'Copied from published articles on this site. Not a live compatibility API.'
+---
+<ToolPage title="Compatibility" lead={lead}>
+  <p class="pkg-set-note">{lead}</p>
+  <div class="tool-table-wrap">
+    <table class="tool-table">
+      <thead>
+        <tr>
+          <th scope="col">Pair</th>
+          <th scope="col">Use</th>
+          <th scope="col">Avoid</th>
+          <th scope="col">Source</th>
+        </tr>
+      </thead>
+      <tbody>
+        {COMPAT_ROWS.map(row => (
+          <tr>
+            <th scope="row">{row.pair}</th>
+            <td>{row.use}</td>
+            <td>{row.avoid}</td>
+            <td><a href={row.sourcePath}>{row.sourceTitle}</a></td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+  <p class="pkg-actions"><a class="btn" href="/tools/compatibility.md">Markdown for assistants</a></p>
+  <pre class="sr-only" data-compatibility-md>{compatibilityMarkdown()}</pre>
+</ToolPage>

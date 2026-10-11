@@ -204,11 +204,22 @@ createInertiaApp({
 
 Your old `resolve` and `setup` still work in v3. In our test, the app ran fine before we touched `app.ts`, so you can do this step later. The Laravel team made exactly this change in the starter kit ([commit 290aba0](https://github.com/laravel/vue-starter-kit/commit/290aba0dc11900cc1ac8a433229583b644699b48)).
 
-**Optional: default layouts.** The starter kit also moved page layouts out of each page and into one place, with the new `layout` option:
+**Optional: default layouts.** The starter kit also moved page layouts out of each page and into one place. This is the callback in the Vue kit's `app.ts`. `Welcome` has no layout. `auth/` uses `AuthLayout`. `settings/` nests `SettingsLayout` inside `AppLayout`. Everything else uses `AppLayout`.
 
 ```ts
 createInertiaApp({
-    layout: (name) => (name.startsWith('auth/') ? AuthLayout : AppLayout),
+    layout: (name) => {
+        switch (true) {
+            case name === 'Welcome':
+                return null
+            case name.startsWith('auth/'):
+                return AuthLayout
+            case name.startsWith('settings/'):
+                return [AppLayout, SettingsLayout]
+            default:
+                return AppLayout
+        }
+    },
 })
 ```
 

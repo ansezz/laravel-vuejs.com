@@ -6,17 +6,19 @@ interface Props { post: Post; feature?: boolean; headingLevel?: 'h2' | 'h3'; eag
 const { post, feature = false, headingLevel: H = 'h3', eager = false } = Astro.props
 ---
 <article class={`card reveal ${feature ? 'card-feature' : ''}`}>
-  <Cover post={post} sizes={feature ? '(max-width: 860px) 100vw, 640px' : undefined} eager={eager} />
-  <div class="card-body">
-    <div class="card-cats">
-      {post.categories.map(c => <a class="chip chip-brand" href={`/category/${c.slug}`}>{c.name}</a>)}
+  <a class="card-link" href={post.url}>
+    <Cover post={post} sizes={feature ? '(max-width: 860px) 100vw, 640px' : undefined} eager={eager} />
+    <div class="card-body">
+      <div class="card-cats">
+        {post.categories.map(c => <span class="chip chip-brand">{c.name}</span>)}
+      </div>
+      <H>{post.title}</H>
+      <p>{post.excerpt}</p>
+      <div class="card-meta">
+        <span><Icon name="calendar" size={14} /><time datetime={(post.updated ?? post.date).toISOString()}>{fmtDate(post.updated ?? post.date)}</time></span>
+        <span><Icon name="clock" size={14} />{post.readingMinutes} min read</span>
+        {feature && <span class="link-arrow" style="margin-left:auto">Read <Icon name="arrow" size={16} /></span>}
+      </div>
     </div>
-    <H><a href={post.url}>{post.title}</a></H>
-    <p>{post.excerpt}</p>
-    <div class="card-meta">
-      <span><Icon name="calendar" size={14} /><time datetime={(post.updated ?? post.date).toISOString()}>{fmtDate(post.updated ?? post.date)}</time></span>
-      <span><Icon name="clock" size={14} />{post.readingMinutes} min read</span>
-      {feature && <span class="link-arrow" style="margin-left:auto">Read <Icon name="arrow" size={16} /></span>}
-    </div>
-  </div>
+  </a>
 </article>

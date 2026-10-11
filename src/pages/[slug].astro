@@ -6,6 +6,8 @@ import Icon from '../components/Icon.astro'
 import NewsletterBand from '../components/NewsletterBand.astro'
 import { allPosts, related, enhanceHtml, fmtDate, absolute, type Post } from '../lib/content'
 import { SITE_NAME, SITE_URL, DISQUS_SHORTNAME, GITHUB_URL, AUTHOR } from '../config/site'
+import AgentTask from '../components/AgentTask.astro'
+import { agentTaskFor } from '../data/agent-tasks'
 
 export async function getStaticPaths() {
   const posts = await allPosts()
@@ -13,6 +15,7 @@ export async function getStaticPaths() {
 }
 interface Props { post: Post; newer?: Post; older?: Post }
 const { post, newer, older } = Astro.props
+const task = agentTaskFor(post)
 const posts = await allPosts()
 const html = enhanceHtml(post.entry.rendered?.html ?? '')
 const headings = ((post.entry.rendered?.metadata?.headings ?? []) as { depth: number; slug: string; text: string }[]).filter(h => h.depth === 2 || h.depth === 3)
@@ -72,9 +75,15 @@ const jsonld = [{
       </div>
     </header>
 
+    {task && (
+      <div class="container">
+        <AgentTask task={task} />
+      </div>
+    )}
+
     <div class="container post-layout">
       <div>
-        <div class="prose" set:html={html} />
+        <div class="prose" id="article" set:html={html} />
         <footer class="post-foot">
           <div class="card-cats">
             {post.tags.map(t => <a class="chip" href={`/tag/${t.slug}`}><Icon name="tag" size={13} />{t.name}</a>)}

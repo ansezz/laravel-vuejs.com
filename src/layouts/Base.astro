@@ -2,6 +2,7 @@
 import '../styles/global.css'
 import geistSans from '@fontsource-variable/geist/files/geist-latin-wght-normal.woff2?url'
 import geistMono from '@fontsource-variable/geist-mono/files/geist-mono-latin-wght-normal.woff2?url'
+import newsreader from '@fontsource-variable/newsreader/files/newsreader-latin-wght-normal.woff2?url'
 import Header from '../components/Header.astro'
 import Footer from '../components/Footer.astro'
 import { SITE_URL, SITE_NAME, SITE_DESCRIPTION, TWITTER_HANDLE, SOCIALS, CONTACT_EMAIL, GOOGLE_SITE_VERIFICATION, BING_SITE_VERIFICATION } from '../config/site'
@@ -45,6 +46,7 @@ const graph = { '@context': 'https://schema.org', '@graph': [org, website, ...js
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="preload" href={geistSans} as="font" type="font/woff2" crossorigin>
   <link rel="preload" href={geistMono} as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href={newsreader} as="font" type="font/woff2" crossorigin>
   <title>{fullTitle}</title>
   <meta name="description" content={description}>
   <link rel="canonical" href={canonical}>

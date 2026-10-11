@@ -8,6 +8,8 @@ const body = `# robots.txt for ${SITE_URL}
 # Articles are also available as Markdown (/<slug>.md) and as one file for language models: ${SITE_URL}/llms.txt
 # Compatibility notes for assistants: ${SITE_URL}/tools/compatibility.md
 # Then and now for assistants: ${SITE_URL}/tools/now.md
+# Start here, for assistants: ${SITE_URL}/tools/start.md
+# Samples for assistants: ${SITE_URL}/tools/samples.md
 # Where a file goes, for assistants: ${SITE_URL}/tools/files.md
 # What just shipped, for assistants: ${SITE_URL}/tools/shipped.md
 

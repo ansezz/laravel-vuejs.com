@@ -246,8 +246,8 @@ export const COMPAT_ROWS: readonly CompatRow[] = [
   {
     id: "node",
     pair: "Node.js",
-    use: "22.12 or newer, or 24 LTS",
-    avoid: "Node 18 or 20 for a new Laravel 13 front end",
+    use: "20.19+ or 22.12+. Node 24 LTS is included.",
+    avoid: "Node 18, or Node 20 below 20.19",
     sourcePath: "/requirements",
     sourceTitle: "What you need to build with Laravel 13 and Vue 3 in 2026",
   },
@@ -420,7 +420,7 @@ export function nowMarkdown(): string {
     `Setup guide: ${SITE_URL}/application-setup`,
     `Requirements article: ${SITE_URL}/requirements`,
     `Package chart: ${SITE_URL}/packages`,
-    `HTML table: ${SITE_URL}/tools#now`,
+    `HTML table: ${SITE_URL}/tools/now`,
   );
   return lines.join("\n");
 }
@@ -442,7 +442,7 @@ export const FILE_ROWS: readonly FileRow[] = [
     thing: "New app",
     path: "blog/",
     command: "laravel new blog",
-    rule: "Starter kit Vue, built-in authentication, and Pest.",
+    rule: "Yes to a starter kit, then Vue and built-in authentication. Pest installs unless you pass --phpunit.",
     sourcePath: "/application-setup",
   },
   {
@@ -561,14 +561,19 @@ export function filesMarkdown(): string {
     "The list is an Inertia page on a web route. The setup guide does not add an API route for it.",
     "The first test is Pest in `tests/Feature/PostsTest.php`, run with `php artisan test`.",
     "Dev servers start with `composer run dev`. The app is at http://localhost:8000.",
-    "Create the app with `laravel new blog`. Pick the Vue starter kit, Laravel's built-in authentication, and Pest.",
+    "Create the app with `laravel new blog`. Answer yes to a starter kit, then Vue, then Laravel's built-in authentication. Pest is installed unless you pass --phpunit.",
     "The Vue starter kit in that guide includes Inertia 3, Vue 3, TypeScript, Tailwind CSS 4, and shadcn-vue. Tailwind CSS 4 and shadcn-vue are not in the download chart.",
     `Setup guide: ${SITE_URL}/application-setup`,
     `Inertia 3.9 article: ${SITE_URL}/inertia-3-9-background-polling-navigate-type`,
-    `HTML table: ${SITE_URL}/tools#files`,
+    `HTML table: ${SITE_URL}/tools/files`,
   );
   return lines.join("\n");
 }
+
+export { START_CHECKS, START_STEPS, startMarkdown } from "./start-sheet.ts";
+export type { StartCheck, StartStep } from "./start-sheet.ts";
+export { GUIDE_SAMPLES, samplesMarkdown } from "./guide-samples.ts";
+export type { GuideSample } from "./guide-samples.ts";
 
 export type ShippedRow = {
   id: string;
@@ -669,7 +674,7 @@ export function shippedMarkdown(): string {
   const lines = [
     "# What just shipped for Laravel and Vue",
     "",
-    `Copied from the two release articles on ${SITE_URL}. Laravel 13.35.0 was tagged on October 6, 2026. Inertia 3.9.0 came out on October 9, 2026, and 3.9.1 followed the same day. Install 3.9.1. These rows are the new opt-in APIs. The articles also list bug fixes.`,
+    `Copied from the two release articles on ${SITE_URL}. Laravel 13.35.0 was tagged on October 6, 2026. Inertia 3.9.0 came out on October 9, 2026, and 3.9.1 followed the same day. Install 3.9.1. These rows are the new APIs. QUERY also matches existing Route::any() and Route::redirect() routes. The articles also list bug fixes.`,
     "",
     "Update Laravel with `composer update laravel/framework` for 13.35.0 or later. Update the Vue adapter with `npm install @inertiajs/vue3@^3.9.1`.",
     "",
@@ -689,7 +694,7 @@ export function shippedMarkdown(): string {
     "",
     `Laravel 13.35 article: ${SITE_URL}/laravel-13-35-query-routes-markdown-responses`,
     `Inertia 3.9 article: ${SITE_URL}/inertia-3-9-background-polling-navigate-type`,
-    `HTML table: ${SITE_URL}/tools#shipped`,
+    `HTML table: ${SITE_URL}/tools/shipped`,
   );
   return lines.join("\n");
 }
@@ -710,7 +715,7 @@ export function compatibilityMarkdown(): string {
   }
   lines.push(
     "",
-    `HTML table: ${SITE_URL}/tools#compatibility`,
+    `HTML table: ${SITE_URL}/tools/compatibility`,
     `Package chart: ${SITE_URL}/packages`,
   );
   return lines.join("\n");

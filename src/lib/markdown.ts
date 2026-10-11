@@ -50,12 +50,15 @@ ${categories
   .join("\n")}
 ## Tools
 
-- [Developer tools](${SITE_URL}/tools): a stack recipe, a file map, October release notes, a 2019 to 2026 pick list, a compatibility card, and an AGENTS.md file
-- [Where it goes](${SITE_URL}/tools/files.md): paths from the Vue starter kit setup guide
-- [What shipped](${SITE_URL}/tools/shipped.md): Laravel 13.35 and Inertia 3.9 APIs from the published release notes
-- [Then and now](${SITE_URL}/tools/now.md): the 2019 stack and the 2026 pick, with chart links where a package was counted
-- [Compatibility card](${SITE_URL}/tools/compatibility.md): version pairs copied from published articles
-- [Default AGENTS.md](${SITE_URL}/tools/agents.md): Laravel 13, Vue 3.5, Inertia, Pest, and Pinia
+- [Developer tools](${SITE_URL}/tools): machine checks, the setup commands in order, the lines the setup guide shows, a stack recipe, a file map, October release notes, a 2019 to 2026 pick list, a compatibility card, and an AGENTS.md file
+- [Start here](${SITE_URL}/tools/start) ([Markdown](${SITE_URL}/tools/start.md)): machine checks and the setup commands in order
+- [Samples](${SITE_URL}/tools/samples) ([Markdown](${SITE_URL}/tools/samples.md)): the lines the Vue starter kit setup guide prints
+- [Stack recipe](${SITE_URL}/tools/recipe): tick the jobs. The commands use the same packages as the chart. They do not pin versions
+- [Where it goes](${SITE_URL}/tools/files) ([Markdown](${SITE_URL}/tools/files.md)): paths from the Vue starter kit setup guide
+- [What shipped](${SITE_URL}/tools/shipped) ([Markdown](${SITE_URL}/tools/shipped.md)): Laravel 13.35 and Inertia 3.9 APIs from the published release notes
+- [Then and now](${SITE_URL}/tools/now) ([Markdown](${SITE_URL}/tools/now.md)): the 2019 stack and the 2026 pick, with chart links where a package was counted
+- [Compatibility card](${SITE_URL}/tools/compatibility) ([Markdown](${SITE_URL}/tools/compatibility.md)): version pairs copied from published articles
+- [AGENTS.md](${SITE_URL}/tools/agents) ([default file](${SITE_URL}/tools/agents.md)): Laravel 13, Vue 3.5, Inertia, Pest, and Pinia
 - [Package chart](${SITE_URL}/packages): download snapshot used by the recipe
 
 ## About

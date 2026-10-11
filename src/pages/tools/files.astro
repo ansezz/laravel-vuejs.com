@@ -1,0 +1,34 @@
+---
+import ToolPage from '../../components/ToolPage.astro'
+import { FILE_ROWS } from '../../data/dev-tools'
+const lead = 'Paths the setup guide names for the official Vue starter kit. The app entry row is from the Inertia 3.9 article. Tailwind CSS 4 and shadcn-vue ship with that kit and are not in the download chart.'
+---
+<ToolPage title="Where it goes" lead={lead}>
+  <p class="pkg-set-note">{lead} <a href="/tools/samples">The lines the guide prints are in the samples.</a></p>
+  <div class="tool-table-wrap">
+    <table class="tool-table">
+      <thead>
+        <tr>
+          <th scope="col">Thing</th>
+          <th scope="col">Path</th>
+          <th scope="col">Command</th>
+          <th scope="col">Rule</th>
+        </tr>
+      </thead>
+      <tbody>
+        {FILE_ROWS.map(row => (
+          <tr>
+            <th scope="row">{row.thing}</th>
+            <td>{row.path ? <span class="tool-chart">{row.path}</span> : <span class="pkg-set-note">Command only</span>}</td>
+            <td>{row.command ? <span class="tool-chart">{row.command}</span> : <span class="pkg-set-note">Edit the file</span>}</td>
+            <td>{row.rule} <a href={row.sourcePath}>Source</a></td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+  <p class="pkg-actions">
+    <a class="btn" href="/application-setup">Setup guide</a>
+    <a class="btn" href="/tools/files.md">Markdown for assistants</a>
+  </p>
+</ToolPage>

@@ -1,0 +1,29 @@
+---
+import { SITE_URL } from '../config/site'
+import type { AgentTask } from '../data/agent-tasks'
+
+interface Props { task: AgentTask; compact?: boolean }
+const { task, compact = false } = Astro.props
+const prompt = [
+  `Read ${SITE_URL}/${task.slug}.md`,
+  task.intent,
+  ...task.steps,
+  ...task.avoid,
+  'Show the diff. Do not commit.',
+].join('\n')
+const preview = [`Read ${SITE_URL}/${task.slug}.md`, task.intent, 'Show the diff. Do not commit.'].join('\n')
+---
+<section class:list={['ask-handoff', { compact, card: compact }]} aria-label={compact ? undefined : 'For your AI agent'}>
+  <div class="ask-step">
+    {compact ? <p class="kicker">For your AI agent</p> : <h2 class="ask-title">For your AI agent</h2>}
+    {compact && <h3>{task.ask}</h3>}
+    <p class="ask-intent">Copies a prompt. Paste it into the AI agent you already have open.</p>
+    {!compact && <pre class="ask-preview"><code>{preview}</code></pre>}
+    <button type="button" class="copy-btn ask-copy" data-copy={prompt} aria-label={`Copy the prompt for ${task.ask}`}>
+      <svg class="i-copy" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+      <svg class="i-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+      <span class="copy-label">Copy the prompt</span>
+    </button>
+    {compact && <a class="link-arrow" href={`/${task.slug}#article`}>Read the article</a>}
+  </div>
+</section>

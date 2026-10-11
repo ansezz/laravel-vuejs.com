@@ -1,0 +1,41 @@
+---
+import ToolPage from '../../components/ToolPage.astro'
+import { ERA_ROWS, eraChart } from '../../data/dev-tools'
+const lead = 'The 2019 stack next to the 2026 pick, from the requirements article. Chart links are packages we counted. Anything else has no download number.'
+---
+<ToolPage title="Then and now" lead={lead}>
+  <p class="pkg-set-note">{lead}</p>
+  <div class="tool-table-wrap">
+    <table class="tool-table">
+      <thead>
+        <tr>
+          <th scope="col">Job</th>
+          <th scope="col">Then (2019)</th>
+          <th scope="col">Now (2026)</th>
+          <th scope="col">On the chart</th>
+        </tr>
+      </thead>
+      <tbody>
+        {ERA_ROWS.map(row => (
+          <tr>
+            <th scope="row">{row.job}</th>
+            <td>{row.then}</td>
+            <td>{row.now}</td>
+            <td>
+              <span class="tool-chart">
+                {eraChart(row).map(pkg => <a href={`/packages/${pkg.slug}`}>{pkg.name}</a>)}
+                {row.absent && <span>{row.absent}</span>}
+              </span>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+  <p class="pkg-set-note">A new project starts from the official Laravel and Vue starter kit. The setup guide walks through it.</p>
+  <p class="pkg-actions">
+    <a class="btn" href="/requirements">Requirements article</a>
+    <a class="btn" href="/application-setup">Setup guide</a>
+    <a class="btn" href="/tools/now.md">Markdown for assistants</a>
+  </p>
+</ToolPage>

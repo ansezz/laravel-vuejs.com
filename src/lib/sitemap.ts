@@ -43,6 +43,16 @@ export async function sitemapUrls(): Promise<
       { loc: AUTHOR.url, lastmod: latest },
       { loc: "/packages", lastmod: PACKAGE_UPDATED },
       { loc: "/tools", lastmod: PACKAGE_UPDATED },
+      ...[
+        "/tools/start",
+        "/tools/samples",
+        "/tools/recipe",
+        "/tools/files",
+        "/tools/shipped",
+        "/tools/now",
+        "/tools/compatibility",
+        "/tools/agents",
+      ].map((loc) => ({ loc, lastmod: PACKAGE_UPDATED })),
       ...PACKAGES.map((pkg) => ({
         loc: `/packages/${pkg.slug}`,
         lastmod: PACKAGE_UPDATED,

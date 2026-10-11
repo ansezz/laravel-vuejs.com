@@ -1,0 +1,75 @@
+---
+id: 50
+title: "Laravel and Vue in 2026: Inertia, a SPA, or Nuxt"
+excerpt: "Three ways to put Vue on a Laravel 13 app, and the one to pick when the team, the API, and the first feature are still small."
+description: "Choose Inertia, a Vue SPA with Sanctum, or Nuxt for a Laravel 13 app in 2026, and see which one matches the app you are building."
+seoTitle: "Laravel and Vue in 2026"
+date: 2026-10-10T05:00:00Z
+snippet: "laravel new blog"
+categories: [laravel, vuejs]
+tags: [laravel, vuejs, inertia]
+---
+
+People search for "Laravel Vue" and land on three different architectures. They are not interchangeable. Pick one before you install packages, because Vue Router next to Inertia, or Sanctum tokens inside a starter kit, creates work you have to undo.
+
+The versions below are the ones we would start with in October 2026. The checklist is in [what you need](/requirements).
+
+## Inertia and the Vue starter kit
+
+This is the default. `laravel new` with the Vue starter kit gives you Laravel 13, Inertia 3, Vue 3.5, TypeScript, Vite 8, Tailwind CSS 4, and shadcn-vue. Login already works. Routes stay in `routes/web.php`. A controller returns `Inertia::render()` and the Vue page receives props. There is no API to design for the screens you render yourself.
+
+Use this when one team owns the product, the UI is a logged-in application, and you do not need a public API on day one. The [setup guide](/application-setup) gets the first page on screen. The [CRUD guide](/laravel-inertia-vue-crud) adds create, edit, delete, search, and pagination.
+
+Do not add Vue Router for those pages. Inertia already navigates. A second router fights it. Client-only state, such as a draft that should survive a visit to another page, belongs in [Pinia](/pinia-laravel-inertia). Server state stays in the props.
+
+## A Vue SPA with Sanctum
+
+Use a separate Vue app when the browser is one of several clients. A mobile app, a partner, or a second front end needs an HTTP API. Laravel owns JSON. Vue owns the URL, with Vue Router.
+
+Authentication for that first-party SPA is a session cookie, not a bearer token. Sanctum's own docs say not to use API tokens for your own SPA. The cookie flow, the CSRF call, and the CORS settings are in [Authenticate a Vue SPA with Laravel Sanctum](/laravel-sanctum-vue-spa).
+
+This split costs more at the start. You design resources, pagination, and errors twice, once in JSON and once in the client. You also deploy two things, or you proxy the SPA through Laravel. Take that cost when the API is the product.
+
+## Nuxt in front of Laravel
+
+[Nuxt 4](https://nuxt.com) is the right Vue front end when the public site is the product: marketing pages, a content site, or a storefront that must be fast and indexable without you running Inertia's SSR process. Laravel stays the API and the admin. Nuxt talks to it over HTTP, usually with Sanctum cookies if the two apps share a parent domain.
+
+Do not start here for an internal tool. You would rebuild routing, auth, and data loading that the Vue starter kit already ships.
+
+## Livewire, when the team is not a Vue team
+
+Laravel's other official starter kit is Livewire. The UI is Blade, rendered on the server. Choose it when the people writing the screens are PHP developers and the interactions fit server-round-trips. Choose Vue when the screen is a dense client: a builder, a large table with local state, or a component library you already have in Vue.
+
+Livewire is not a Vue setup. Do not install both to render the same page.
+
+## What stays the same
+
+| Job                  | Inertia + Vue                                   | Vue SPA or Nuxt                  |
+| -------------------- | ----------------------------------------------- | -------------------------------- |
+| Routing              | Laravel                                         | Vue Router or Nuxt               |
+| Auth for the browser | Starter kit session                             | Sanctum cookie session           |
+| Auth for a phone app | Sanctum token, separate routes                  | Sanctum token                    |
+| Page data            | Inertia props                                   | JSON                             |
+| Files                | [Inertia form upload](/laravel-vue-file-upload) | `multipart/form-data` to the API |
+| Live updates         | [Reverb and Echo](/laravel-reverb-vue)          | Same, with the SPA auth header   |
+| Production           | [Vite build and SSR](/deploy-laravel-vue)       | SPA host plus Laravel            |
+
+PHP is still 8.3 to 8.5. Node is 20.19+ or 22.12+, which includes 24 LTS. New apps still start on SQLite and move to MySQL, MariaDB, or PostgreSQL when production needs it.
+
+## A rule for the first week
+
+If you cannot name a second client that will call the API this quarter, use the Vue starter kit. Ship the [first CRUD](/laravel-inertia-vue-crud). Add a JSON API later for the clients that actually exist. The package chart on [/packages](/packages) is the same list either way. The install recipe on [/tools/recipe](/tools/recipe) only helps after this choice, because it will not stop you installing Vue Router beside Inertia.
+
+## Where to go next
+
+Read down this list. Each link is a different job, and they link back here so the stack choice stays in one place.
+
+**Setup.** [What you need](/requirements), then the [first page](/application-setup). If a tutorial still says Breeze or Jetstream, read [that map](/laravel-breeze-jetstream-vue) before you install either package.
+
+**The first feature.** [Create, edit, delete, and search](/laravel-inertia-vue-crud), then a [saved message](/laravel-vue-flash), [pagination](/laravel-vue-pagination), and a [sortable table](/laravel-vue-datatable). [Live validation](/laravel-precognition-vue) and [file uploads](/laravel-vue-file-upload) sit on that form.
+
+**Auth.** [Sanctum cookies](/laravel-sanctum-vue-spa), [CORS errors](/laravel-vue-cors), [Fortify](/laravel-fortify-vue), and [GitHub login](/laravel-socialite-vue). [Sanctum or Passport](/laravel-sanctum-vs-passport) is the OAuth decision. [Vue Router](/vue-router-laravel-spa) is only for the separate SPA.
+
+**The rest of the app.** [Nuxt in front of the API](/nuxt-laravel-api) and [JSON resources](/laravel-api-resources-vue). [Permissions](/laravel-vue-permissions) and [policies](/laravel-vue-policies). [Pinia](/pinia-laravel-inertia), [partial reloads](/inertia-partial-reloads), and [typed routes](/laravel-wayfinder-vue). Older tutorials still say [Ziggy](/laravel-ziggy-vue). [TypeScript props](/typescript-laravel-vue-pages), a [document title](/inertia-vue-document-title), a [persistent layout](/inertia-vue-persistent-layout), and [translations](/laravel-vue-i18n). [Reverb](/laravel-reverb-vue), [database notifications](/laravel-vue-notifications), and a [queued job on the page](/laravel-vue-queued-job).
+
+**Production.** [Sail](/laravel-sail-vue), [Vite](/laravel-vite-vue), and [tests](/test-laravel-vue). Then [server rendering](/inertia-ssr), [deploy](/deploy-laravel-vue), and [Livewire or Inertia](/livewire-vs-inertia).

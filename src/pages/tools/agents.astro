@@ -1,0 +1,68 @@
+---
+import ToolPage from '../../components/ToolPage.astro'
+import { AGENTS_DEFAULT, agentsMarkdown } from '../../data/dev-tools'
+const agents = agentsMarkdown(AGENTS_DEFAULT)
+const lead = 'Pick the stack. Download a rules file, or fetch the default one.'
+---
+<ToolPage title="AGENTS.md" lead={lead}>
+  <p class="pkg-set-note">{lead}</p>
+  <form class="tool-layout" data-agents>
+    <fieldset class="tool-choices tool-selects">
+      <legend class="sr-only">Project choices</legend>
+      <label class="tool-select">
+        <span>Laravel</span>
+        <select data-choice="laravel">
+          <option value="13" selected={AGENTS_DEFAULT.laravel === '13'}>13</option>
+          <option value="12" selected={AGENTS_DEFAULT.laravel === '12'}>12</option>
+        </select>
+      </label>
+      <label class="tool-select">
+        <span>Vue</span>
+        <select data-choice="vue">
+          <option value="3.5" selected={AGENTS_DEFAULT.vue === '3.5'}>3.5 stable</option>
+          <option value="3.6" selected={AGENTS_DEFAULT.vue === '3.6'}>3.6</option>
+        </select>
+      </label>
+      <label class="tool-select">
+        <span>UI bridge</span>
+        <select data-choice="bridge">
+          <option value="inertia" selected={AGENTS_DEFAULT.bridge === 'inertia'}>Inertia</option>
+          <option value="livewire" selected={AGENTS_DEFAULT.bridge === 'livewire'}>Livewire</option>
+          <option value="api" selected={AGENTS_DEFAULT.bridge === 'api'}>API only</option>
+        </select>
+      </label>
+      <label class="tool-select">
+        <span>Tests</span>
+        <select data-choice="tests">
+          <option value="pest" selected={AGENTS_DEFAULT.tests === 'pest'}>Pest</option>
+          <option value="phpunit" selected={AGENTS_DEFAULT.tests === 'phpunit'}>PHPUnit</option>
+        </select>
+      </label>
+      <label class="tool-select">
+        <span>State</span>
+        <select data-choice="state">
+          <option value="pinia" selected={AGENTS_DEFAULT.state === 'pinia'}>Pinia</option>
+          <option value="props" selected={AGENTS_DEFAULT.state === 'props'}>Page props</option>
+          <option value="vuex" selected={AGENTS_DEFAULT.state === 'vuex'}>Vuex</option>
+        </select>
+      </label>
+    </fieldset>
+    <div class="tool-output">
+      <div class="code pkg-install">
+        <div class="code-head">
+          <span class="code-lang">markdown</span>
+          <button type="button" class="copy-btn" aria-label="Copy AGENTS.md">
+            <svg class="i-copy" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            <svg class="i-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+            <span class="copy-label">Copy</span>
+          </button>
+        </div>
+        <pre><code data-agents-body>{agents}</code></pre>
+      </div>
+      <div class="pkg-actions">
+        <button class="btn btn-primary" type="button" data-agents-download>Download AGENTS.md</button>
+        <a class="btn" href="/tools/agents.md">Default file</a>
+      </div>
+    </div>
+  </form>
+</ToolPage>
