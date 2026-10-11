@@ -10,7 +10,8 @@ const meta: Record<Kind, { label: string; icon: string }> = {
 }
 const m = meta[type]
 ---
-<aside class={`callout callout-${type}`} aria-label={m.label}>
+<!-- role="note", not <aside>: several callouts on one page must not become duplicate landmarks (axe landmark-unique). -->
+<div class={`callout callout-${type}`} role="note" aria-label={title ? `${m.label}: ${title}` : m.label}>
   <p class="callout-title"><Icon name={m.icon} size={16} /> <strong>{title ? `${m.label}: ${title}` : m.label}</strong></p>
   <div class="callout-body"><slot /></div>
-</aside>
+</div>
