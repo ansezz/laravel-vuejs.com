@@ -577,6 +577,14 @@ label.chip:hover {
   align-items: center;
   gap: 8px;
 }
+.nav-starter {
+  height: 38px;
+  padding-inline: 12px;
+}
+.nav-starter[aria-current="page"] {
+  color: var(--brand);
+  border-color: var(--brand);
+}
 .nav .btn-primary {
   color: #140c28;
   background: #63f9e6;
@@ -647,6 +655,17 @@ label.chip:hover {
   margin-top: 24px;
   width: 100%;
   justify-content: center;
+}
+.mobile-panel a[href="/starter"].btn {
+  color: #fff;
+  background: #5420d8;
+  border-right: 2px solid #140c28;
+  border-bottom: 2px solid #140c28;
+  box-shadow: 3px 3px 0 #63f9e6;
+}
+.mobile-panel a[href="/starter"].btn:hover {
+  color: #fff;
+  background: #6428ee;
 }
 @keyframes drop {
   from {
@@ -2128,6 +2147,33 @@ mark {
   border-top: 1px solid var(--border);
   background: var(--bg-elev);
 }
+.footer-starter {
+  border-bottom: 1px solid var(--border);
+  background: color-mix(in srgb, var(--brand) 8%, var(--bg-elev));
+}
+.footer-starter-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding-block: 18px;
+}
+.footer-starter .kicker {
+  margin-bottom: 6px;
+}
+.footer-starter p {
+  margin: 0;
+  max-width: 52ch;
+}
+.footer-starter .btn {
+  flex: none;
+}
+@media (max-width: 720px) {
+  .footer-starter-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
 .footer-grid {
   display: grid;
   grid-template-columns: 1.4fr repeat(4, 1fr);
@@ -3265,11 +3311,164 @@ label.chip {
   }
 }
 /* Task handoff: a short step for the agent, then the article. */
+.starter-band {
+  padding-block: clamp(36px, 5vw, 64px);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--brand) 8%, var(--bg)),
+    var(--bg) 72%
+  );
+  border-bottom: 1px solid var(--border);
+}
+.starter-band-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(280px, 440px);
+  gap: clamp(24px, 4vw, 48px);
+  align-items: center;
+}
+.starter-band h2 {
+  margin-top: 12px;
+  font-size: clamp(1.8rem, 3.4vw, 2.6rem);
+}
+.starter-band > .container > div > p {
+  margin-top: 12px;
+  max-width: 46ch;
+  color: var(--muted);
+}
+.starter-steps {
+  counter-reset: starter;
+  display: grid;
+  gap: 12px;
+  margin: 22px 0 24px;
+  padding: 0;
+  list-style: none;
+}
+.starter-steps li {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+.starter-steps li::before {
+  content: counter(starter);
+  counter-increment: starter;
+  width: 28px;
+  height: 28px;
+  font: 600 0.8rem/28px var(--font-mono);
+  text-align: center;
+  color: var(--bg);
+  background: var(--text);
+}
+.starter-steps b {
+  font-weight: 650;
+  color: var(--text);
+}
+.starter-sheet {
+  position: relative;
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 16px 16px 14px;
+  background: var(--bg-elev);
+  border-right: 2px solid var(--text);
+  border-bottom: 2px solid var(--text);
+}
+.starter-sheet::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 14px;
+  height: 14px;
+  background: linear-gradient(
+    to bottom left,
+    var(--brand) 50%,
+    transparent 50%
+  );
+  pointer-events: none;
+}
+.starter-sheet-label {
+  margin: 4px 0 0;
+  font: 600 0.72rem/1 var(--font-mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--warm);
+}
+.starter-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  min-width: 0;
+  padding: 8px 10px;
+  border-right: 2px solid transparent;
+  border-bottom: 1px solid var(--border);
+}
+.starter-row.on {
+  background: color-mix(in srgb, var(--brand) 10%, var(--bg-elev));
+  border-right-color: var(--brand);
+}
+.starter-row i {
+  width: 12px;
+  height: 12px;
+  margin-top: 3px;
+  flex: none;
+  border: 2px solid var(--text);
+}
+.starter-row.on i {
+  border-color: var(--brand);
+  background: var(--brand);
+}
+.starter-row span {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.starter-row small {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+.starter-picks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.starter-picks span {
+  padding: 6px 8px;
+  font: 500 0.75rem/1 var(--font-mono);
+  color: var(--muted);
+  background: var(--bg);
+  border-right: 2px solid var(--text);
+  border-bottom: 2px solid var(--text);
+}
+.starter-picks span.on {
+  color: var(--text);
+  background: color-mix(in srgb, var(--brand) 12%, var(--bg));
+  border-color: color-mix(in srgb, var(--brand) 55%, var(--text));
+}
+.starter-snippet {
+  margin: 4px 0 0;
+  padding: 10px 12px;
+  overflow: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font: 500 0.78rem/1.45 var(--font-mono);
+  color: var(--text);
+  background: var(--code-bg);
+  border-bottom: 2px solid var(--brand);
+}
+@media (max-width: 860px) {
+  .starter-band-grid {
+    grid-template-columns: 1fr;
+  }
+}
 .ask-section {
   padding-block: 28px 8px;
 }
 .ask-grid {
   align-items: stretch;
+}
+.ask-lead {
+  grid-column: 1 / -1;
 }
 .ask-handoff {
   margin-top: 22px;
@@ -3554,6 +3753,73 @@ label.chip {
 }
 .tool-output .pkg-actions {
   margin-top: 4px;
+}
+.starter-stack {
+  margin-bottom: 8px;
+}
+.starter-locked {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0 8px;
+}
+.starter-locked span {
+  padding: 8px 10px;
+  font-weight: 650;
+  background: color-mix(in srgb, var(--brand) 12%, var(--bg-elev));
+  border-right: 2px solid var(--brand);
+  border-bottom: 2px solid var(--brand);
+}
+.starter-groups {
+  display: grid;
+  gap: 22px;
+  min-width: 0;
+}
+.starter-group {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+.starter-group legend {
+  margin-bottom: 4px;
+  padding: 0;
+}
+.starter-output .code {
+  margin-top: 0;
+}
+.starter-output pre {
+  margin: 0;
+  padding: 18px 20px;
+  max-height: 32rem;
+  overflow: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  background: transparent;
+}
+.starter-output .copy-btn {
+  height: 40px;
+  padding: 0 14px;
+  border-right: 2px solid var(--text);
+  border-bottom: 2px solid var(--text);
+  background: var(--text);
+  color: var(--bg);
+  font: 550 0.92rem/1 var(--font-sans);
+}
+.starter-output .copy-btn:hover {
+  background: var(--brand);
+  border-color: var(--brand);
+  color: #fff;
+}
+@media (min-width: 721px) {
+  .starter-output {
+    position: sticky;
+    top: 88px;
+  }
 }
 @media (max-width: 720px) {
   .tool-layout {

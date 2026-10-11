@@ -1,0 +1,132 @@
+---
+import ToolPage from '../components/ToolPage.astro'
+import { allPosts } from '../lib/content'
+import { agentTaskFor } from '../data/agent-tasks'
+import { GROUPS, MODULES, SHAPES, defaultModuleIds, starterPrompt, type GuideBrief } from '../data/prompt-builder'
+
+const posts = await allPosts()
+const needed = new Set([...SHAPES.flatMap(shape => shape.reads), ...MODULES.map(mod => mod.slug)])
+const guides: Record<string, GuideBrief> = {}
+for (const post of posts) {
+  if (!needed.has(post.slug)) continue
+  const task = agentTaskFor({ ...post, body: post.entry.body ?? '' })
+  if (!task) continue
+  guides[post.slug] = { intent: task.intent, steps: task.steps, avoid: task.avoid }
+}
+const modules = MODULES.filter(mod => guides[mod.slug])
+const shape = 'inertia' as const
+const built = starterPrompt(shape, defaultModuleIds(shape), guides)
+const guideJson = JSON.stringify(guides).replace(/</g, '\\u003c')
+const description = 'Laravel and Vue are the base. Tick login, social login, Passport, and the other modules, then copy one prompt.'
+const inertiaNote = SHAPES.find(item => item.id === shape)?.note ?? ''
+---
+<ToolPage title="Laravel and Vue starter" lead={description} description={description}>
+  <div class="starter-stack">
+    <p class="kicker">Always in the prompt</p>
+    <div class="starter-locked">
+      <span>Laravel 13</span>
+      <span>Vue 3</span>
+    </div>
+    <p class="pkg-set-note" data-starter-note>{inertiaNote}</p>
+  </div>
+  <form class="tool-layout" data-starter>
+    <div class="starter-groups">
+      <fieldset class="starter-group">
+        <legend class="kicker">How Vue talks to Laravel</legend>
+        {SHAPES.map(item => (
+          <label class="tool-choice">
+            <input type="radio" name="shape" value={item.id} data-note={item.note} checked={item.id === shape} />
+            <span>
+              <strong>{item.label}</strong>
+              <span>{item.detail}</span>
+            </span>
+          </label>
+        ))}
+      </fieldset>
+      {GROUPS.map(group => (
+        <fieldset class="starter-group" data-starter-group={group.id}>
+          <legend class="kicker">{group.label}</legend>
+          {modules.filter(mod => mod.group === group.id).map(mod => (
+            <label class="tool-choice" hidden={!mod.shapes.includes(shape)}>
+              <input
+                type="checkbox"
+                data-module={mod.id}
+                data-shapes={mod.shapes.join(',')}
+                data-default={mod.defaults.join(',')}
+                checked={mod.defaults.includes(shape)}
+              />
+              <span>
+                <strong>{mod.label}</strong>
+                <span>{mod.detail}</span>
+              </span>
+            </label>
+          ))}
+          {group.id === 'accounts' && (
+            <p class="pkg-set-note">Your own users sign in with Fortify or Sanctum. Passport is only for another product that brings its own client id. A page that lists every user is not a separate guide yet, so it is not a tick.</p>
+          )}
+        </fieldset>
+      ))}
+    </div>
+    <div class="tool-output starter-output">
+      <h3>The prompt</h3>
+      <p class="pkg-set-note" data-starter-count>{built.count} guides in this prompt. Paste it into the AI agent you already have open.</p>
+      <div class="code">
+        <div class="code-head">
+          <span class="code-lang">prompt</span>
+          <button type="button" class="copy-btn" aria-label="Copy the prompt">
+            <svg class="i-copy" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            <svg class="i-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+            <span class="copy-label">Copy the prompt</span>
+          </button>
+        </div>
+        <pre><code data-starter-prompt>{built.prompt}</code></pre>
+      </div>
+    </div>
+  </form>
+  <script type="application/json" id="starter-guides" set:html={guideJson} />
+  <script>
+    import { starterPrompt, type GuideBrief, type ShapeId } from '../data/prompt-builder'
+
+    const guides = JSON.parse(document.getElementById('starter-guides')?.textContent || '{}') as Record<string, GuideBrief>
+    const form = document.querySelector<HTMLFormElement>('[data-starter]')
+    const out = document.querySelector<HTMLElement>('[data-starter-prompt]')
+    const count = document.querySelector<HTMLElement>('[data-starter-count]')
+    const note = document.querySelector<HTMLElement>('[data-starter-note]')
+    if (form && out) {
+      const shapeOf = () => (form.querySelector<HTMLInputElement>('input[name="shape"]:checked')?.value ?? 'inertia') as ShapeId
+      const applyShape = (next: string) => {
+        form.querySelectorAll<HTMLInputElement>('[data-module]').forEach((input) => {
+          const shapes = (input.dataset.shapes ?? '').split(',')
+          const fit = shapes.includes(next)
+          input.closest('.tool-choice')?.toggleAttribute('hidden', !fit)
+          const defaults = (input.dataset.default ?? '').split(',').filter(Boolean)
+          input.checked = fit && defaults.includes(next)
+        })
+        form.querySelectorAll<HTMLElement>('[data-starter-group]').forEach((group) => {
+          const visible = [...group.querySelectorAll<HTMLElement>('.tool-choice')].some((choice) => !choice.hidden)
+          group.toggleAttribute('hidden', !visible)
+        })
+        const picked = form.querySelector<HTMLInputElement>('input[name="shape"]:checked')
+        if (note && picked?.dataset.note) note.textContent = picked.dataset.note
+      }
+      const ids = () => [...form.querySelectorAll<HTMLInputElement>('[data-module]')].flatMap((input) => {
+        if (!input.checked || input.closest('.tool-choice')?.hasAttribute('hidden')) return []
+        return input.dataset.module ? [input.dataset.module] : []
+      })
+      const write = () => {
+        const built = starterPrompt(shapeOf(), ids(), guides)
+        out.textContent = built.prompt
+        if (count) {
+          const noun = built.count === 1 ? 'guide' : 'guides'
+          count.textContent = `${built.count} ${noun} in this prompt. Paste it into the AI agent you already have open.`
+        }
+      }
+      form.addEventListener('change', (event) => {
+        const target = event.target
+        if (!(target instanceof HTMLInputElement)) return
+        if (target.name === 'shape') applyShape(target.value)
+        write()
+      })
+    }
+  </script>
+</ToolPage>

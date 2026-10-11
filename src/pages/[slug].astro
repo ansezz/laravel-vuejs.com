@@ -15,7 +15,7 @@ export async function getStaticPaths() {
 }
 interface Props { post: Post; newer?: Post; older?: Post }
 const { post, newer, older } = Astro.props
-const task = agentTaskFor(post)
+const task = agentTaskFor({ ...post, body: post.entry.body ?? '' })
 const posts = await allPosts()
 const html = enhanceHtml(post.entry.rendered?.html ?? '')
 const headings = ((post.entry.rendered?.metadata?.headings ?? []) as { depth: number; slug: string; text: string }[]).filter(h => h.depth === 2 || h.depth === 3)

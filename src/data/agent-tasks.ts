@@ -1,3 +1,5 @@
+import { SITE_URL } from "../config/site";
+
 export type AgentTask = {
   slug: string;
   ask: string;
@@ -6,6 +8,8 @@ export type AgentTask = {
   files: string[];
   steps: string[];
   avoid: string[];
+  /** When set, the prompt reads these guides in order instead of only `slug`. */
+  reads?: string[];
 };
 
 export const agentTasks: AgentTask[] = [
@@ -99,12 +103,73 @@ const editorial = new Set([
   "laravel-vuejs-open-source-cms",
 ]);
 
-/** Rich prompts stay as written. Every other practical guide gets the same block from its own excerpt. */
+/** The first thing someone with an empty app can paste. The three guides already exist. */
+export const firstApp: AgentTask = {
+  slug: "application-setup",
+  ask: "Build the first app",
+  intent:
+    "Set up the Vue starter kit, then add the posts screens, then deploy.",
+  command: "",
+  files: [],
+  reads: [
+    "application-setup",
+    "laravel-inertia-vue-crud",
+    "deploy-laravel-vue",
+  ],
+  steps: [
+    "Follow the guides in that order. Finish setup before adding screens.",
+  ],
+  avoid: [
+    "Do not add Vue Router on the Inertia kit.",
+    "Do not install Breeze or Jetstream on the Vue starter kit.",
+    "Do not deploy public/hot.",
+  ],
+};
+
+const cleanLine = (line: string) =>
+  line
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+    .replace(/`([^`]*)`/g, "$1")
+    .replace(/^>\s*/, "")
+    .replace(/[#*_]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+/** "Do not ..." sentences already written in a guide. Code fences are skipped. */
+export function constraintsFrom(body: string): string[] {
+  const prose = body.replace(/```[\s\S]*?```/g, "\n");
+  const hits: string[] = [];
+  for (const part of prose.split(/(?<=[.!?])\s+|\n+/)) {
+    const clean = cleanLine(part);
+    const at = clean.search(/\bDo not\b/);
+    if (at < 0) continue;
+    let line = clean.slice(at);
+    if (!/[.!?]$/.test(line)) line += ".";
+    if (line.split(" ").length < 6 || line.length > 280) continue;
+    if (!hits.includes(line)) hits.push(line);
+    if (hits.length === 6) break;
+  }
+  return hits;
+}
+
+export function agentPrompt(task: AgentTask): string {
+  const slugs = task.reads?.length ? task.reads : [task.slug];
+  return [
+    ...slugs.map((slug) => `Read ${SITE_URL}/${slug}.md`),
+    task.intent,
+    ...task.steps,
+    ...task.avoid,
+    "Show the diff. Do not commit.",
+  ].join("\n");
+}
+
+/** Written prompts stay as written. Every other practical guide adds the constraints from its own text. */
 export function agentTaskFor(post: {
   slug: string;
   title: string;
   excerpt: string;
   tags: { slug: string }[];
+  body?: string;
 }): AgentTask | undefined {
   const written = agentTasks.find((task) => task.slug === post.slug);
   if (written) return written;
@@ -123,6 +188,6 @@ export function agentTaskFor(post: {
     command: "",
     files: [],
     steps: [],
-    avoid: [],
+    avoid: post.body ? constraintsFrom(post.body) : [],
   };
 }
