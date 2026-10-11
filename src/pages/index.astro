@@ -7,6 +7,8 @@ import { allPosts, categories } from '../lib/content'
 import Art from '../components/Art.astro'
 import { SOCIALS, GROUPS } from '../config/site'
 import { categoryArt } from '../lib/art'
+import AgentTask from '../components/AgentTask.astro'
+import { agentTasks } from '../data/agent-tasks'
 const jobsArt = categoryArt('jobs')!
 
 const posts = await allPosts()
@@ -68,6 +70,19 @@ const stack = ['Laravel 13', 'PHP 8.3+', 'Vue 3.5', 'Inertia 3', 'TypeScript', '
           </div>
         </div>
       </div>
+    </div>
+  </section>
+
+  <section class="container ask-section" aria-labelledby="ask">
+    <div class="section-head">
+      <div>
+        <p class="kicker">For your AI agent</p>
+        <h2 id="ask">What are you about to ask?</h2>
+        <p>Copy a prompt into the AI agent you already have open. Read the article when you want the reason.</p>
+      </div>
+    </div>
+    <div class="grid grid-2 ask-grid">
+      {agentTasks.map(task => <AgentTask task={task} compact />)}
     </div>
   </section>
 

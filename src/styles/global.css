@@ -1559,7 +1559,10 @@ textarea.input {
 }
 .post-hero h1 {
   font-size: clamp(2.1rem, 4.8vw, 3.5rem);
-  max-width: 22ch;
+  max-width: none;
+}
+.post-hero .lead {
+  max-width: none;
 }
 .post-meta {
   display: flex;
@@ -3261,6 +3264,101 @@ label.chip {
     gap: 4px;
   }
 }
+/* Task handoff: a short step for the agent, then the article. */
+.ask-section {
+  padding-block: 28px 8px;
+}
+.ask-grid {
+  align-items: stretch;
+}
+.ask-handoff {
+  margin-top: 22px;
+  background: var(--bg-elev);
+  border-right: 2px solid var(--text);
+  border-bottom: 2px solid var(--text);
+  position: relative;
+}
+.ask-handoff::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 2;
+  width: 14px;
+  height: 14px;
+  background: linear-gradient(
+    to bottom left,
+    var(--brand) 50%,
+    transparent 50%
+  );
+  pointer-events: none;
+}
+.ask-handoff.compact {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 0;
+  padding: 14px 16px 12px;
+}
+.ask-handoff.compact::before {
+  background: linear-gradient(to bottom left, var(--ink) 50%, transparent 50%);
+}
+.ask-step {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  padding: 14px 18px 12px;
+}
+.ask-handoff.compact .ask-step {
+  gap: 6px;
+  padding: 0;
+}
+.ask-title,
+.ask-handoff h3 {
+  margin: 0;
+  font-size: clamp(1.2rem, 2vw, 1.45rem);
+  letter-spacing: -0.03em;
+}
+.ask-intent {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+.ask-preview {
+  margin: 0;
+  padding: 10px 12px;
+  overflow: hidden;
+  white-space: pre-wrap;
+  font: 500 0.8rem/1.45 var(--font-mono);
+  color: var(--text);
+  background: var(--code-bg);
+  border-bottom: 2px solid var(--brand);
+}
+.ask-handoff .ask-copy {
+  align-self: flex-start;
+  height: 40px;
+  padding: 0 14px;
+  border-right: 2px solid var(--text);
+  border-bottom: 2px solid var(--text);
+  background: var(--text);
+  color: var(--bg);
+  font: 550 0.92rem/1 var(--font-sans);
+}
+.ask-handoff .ask-copy:hover {
+  background: var(--brand);
+  border-color: var(--brand);
+  color: #fff;
+}
+.ask-handoff .link-arrow,
+.ask-handoff .btn {
+  align-self: flex-start;
+}
+#article {
+  scroll-margin-top: 88px;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .pkg-bar > span {
     animation: pkg-grow 0.55s var(--ease) both;
