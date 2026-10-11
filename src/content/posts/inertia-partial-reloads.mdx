@@ -8,23 +8,49 @@ date: 2026-10-10T06:40:00Z
 categories: [laravel, vuejs]
 tags: [laravel, vuejs, inertia]
 ---
+Your filter dropdown re-runs the expensive category query on every click. Your "load more" button replaces the list instead of growing it. Partial reloads fix both: ask Laravel for one prop, defer the slow ones, and append rows on demand.
+
+<TLDR
+  audience="Laravel + Vue developers using Inertia 3"
+  learn={['`only` and `except` on `router.reload` and `<Link>`', 'Deferred props with the `<Deferred>` component', 'Load more with `Inertia::merge()`']}
+  applies="Laravel 13 · inertia-laravel 3 · @inertiajs/vue3 3.9 · Vue 3.5"
+>
+
+- Wrap props in a closure, then `router.reload({ only: ['posts'] })` evaluates just that one.
+- `Inertia::defer()` leaves a prop out of the first response and fetches it right after the first paint.
+- `Inertia::merge()->append('data')` appends paginator rows, but only on partial reloads.
+
+</TLDR>
 
 A normal Inertia visit runs every prop on the page. Partial reloads exist so a filter, a poll, or a "load more" button does not redo the expensive ones. The visit has to target the page you are already on. A link to a different component always loads the full page.
 
 The list those props come from is the [CRUD guide](/laravel-inertia-vue-crud). Counted pages versus cursors are [pagination](/laravel-vue-pagination). The app is [Inertia, a SPA, or Nuxt](/laravel-vue-in-2026).
 
-## only and except
+## Reload one prop with only and except
 
 Wrap props you can skip in a closure. Inertia evaluates the closure when that key is needed. A value computed before `Inertia::render` runs on every visit, including a partial one.
 
-```php
+<CodeCompare before="Runs every visit" after="Runs when asked">
+
+```php title="app/Http/Controllers/PostController.php"
+return Inertia::render('posts/Index', [
+    'posts' => Post::query()->latest('id')->paginate(10)->withQueryString(),
+    'categories' => Category::query()->orderBy('name')->get(['id', 'name']),
+]);
+```
+
+```php title="app/Http/Controllers/PostController.php"
 return Inertia::render('posts/Index', [
     'posts' => fn () => Post::query()->latest('id')->paginate(10)->withQueryString(),
     'categories' => fn () => Category::query()->orderBy('name')->get(['id', 'name']),
 ]);
 ```
 
-```vue
+</CodeCompare>
+
+Then ask for the one you need:
+
+```vue title="resources/js/pages/posts/Index.vue"
 <script setup lang="ts">
 import { router } from "@inertiajs/vue3";
 
@@ -34,23 +60,29 @@ function refreshPosts() {
 </script>
 ```
 
-`only: ['posts']` tells Laravel to skip `categories`. `except: ['categories']` is the same idea written the other way. A `<Link>` can do it without a function. `:only` is a partial reload, not a partial form post.
+`only: ['posts']` tells Laravel to skip `categories`. `except: ['categories']` is the same idea written the other way. A `<Link>` can do it without a function.
 
-```vue
+```vue title="resources/js/pages/posts/Index.vue"
 <Link href="/posts?published=1" :only="['posts']">Published</Link>
 ```
 
+<Callout type="heads-up" title="reloads, not form posts">
+
+`:only` is a partial reload, not a partial form post.
+
+</Callout>
+
 Dot keys work for nested props. `only: ['auth.notifications']` reloads that nested value and leaves the rest of `auth` alone.
 
-## Deferred props
+## Defer slow props until after the first paint
 
 `Inertia::defer` leaves the prop out of the first response and fetches it immediately after the first paint. The Vue `<Deferred>` component renders the fallback until the key arrives. `#default="{ reloading }"` is how you dim the list during a later reload. `#rescue` renders when you passed `rescue: true` and the callback threw.
 
-```php
+```php title="app/Http/Controllers/RoleController.php"
 'permissions' => Inertia::defer(fn () => Permission::query()->orderBy('name')->get(), rescue: true),
 ```
 
-```vue
+```vue title="resources/js/pages/roles/Edit.vue"
 <script setup lang="ts">
 import { Deferred, router } from "@inertiajs/vue3";
 
@@ -84,29 +116,100 @@ defineProps<{
 </template>
 ```
 
+<Callout type="gotcha" title="Deferred waits for a prop, not a URL">
+
 `permissions` on that page is still a prop. `<Deferred>` does not fetch a URL you invent. It waits for the prop named in `data`.
 
-`->once()` on a deferred prop is remembered only while later pages still include that prop. A visit that leaves it out forgets the value, and the next page that includes it resolves the callback again. Reload that one prop when you need a fresh value sooner. Inertia also ships `WhenVisible` for a deferred prop that should wait until the block scrolls into view. The prop name is the same contract. Use it for a block below the fold, not for the main list.
+</Callout>
 
-## Load more
+### once() and WhenVisible
 
-`Inertia::merge()` appends on a partial reload. A full visit replaces the prop even if you marked it for merging. The documented way to append a paginator's rows is `append('data')`. Reset the prop when the search changes, or page two of a new query sticks to the end of the old rows.
+`->once()` on a deferred prop is remembered only while later pages still include that prop. A visit that leaves it out forgets the value, and the next page that includes it resolves the callback again. Reload that one prop when you need a fresh value sooner.
 
-```php
+Inertia also ships `WhenVisible` for a deferred prop that should wait until the block scrolls into view. The prop name is the same contract. Use it for a block below the fold, not for the main list.
+
+## Load more with Inertia::merge()
+
+`Inertia::merge()` appends on a partial reload. A full visit replaces the prop even if you marked it for merging. The documented way to append a paginator's rows is `append('data')`.
+
+```php title="app/Http/Controllers/PostController.php"
 'posts' => Inertia::merge(
     fn () => Post::query()->latest('id')->paginate(10)
 )->append('data'),
 ```
 
-```vue
-function more() { router.reload({ only: ["posts"], data: { page:
-props.posts.current_page + 1 }, }); } function search(value: string) {
-router.reload({ only: ["posts"], data: { search: value, page: 1 }, reset:
-["posts"], }); }
+```ts title="resources/js/pages/posts/Index.vue"
+function more() {
+  router.reload({
+    only: ["posts"],
+    data: { page: props.posts.current_page + 1 },
+  });
+}
+
+function search(value: string) {
+  router.reload({
+    only: ["posts"],
+    data: { search: value, page: 1 },
+    reset: ["posts"], // [!code highlight]
+  });
+}
 ```
 
+<Callout type="gotcha" title="reset when the query changes">
+
+Reset the prop when the search changes, or page two of a new query sticks to the end of the old rows.
+
+</Callout>
+
 Previous and Next links that replace the list, instead of appending, stay on the pagination page. `simplePaginate` is the right object when you do not want a total. Merge is the wrong tool for that footer.
+
+<TryIt title="See what a partial reload sends">
+
+Open the Network tab, click a link with `:only="['posts']"`, and look at the request headers: `X-Inertia-Partial-Data: posts` and `X-Inertia-Partial-Component` name the prop and the page. The JSON response holds only `posts`.
+
+</TryIt>
+
+## Which tool for which job
+
+| You want | Use |
+|---|---|
+| Refresh one prop (filter, poll) | Closure prop + `router.reload({ only })` or `<Link :only>` |
+| Show the page fast, load a slow prop after | `Inertia::defer()` + `<Deferred>` |
+| Load a block when it scrolls into view | `WhenVisible` |
+| Append the next page of rows | `Inertia::merge()->append('data')` + `reset` on new searches |
+| Replace the list with Previous/Next | Plain [pagination](/laravel-vue-pagination) |
+| Push changes from the server | [Reverb](/laravel-reverb-vue) |
 
 ## Where this stops
 
 Live updates from the server are [Reverb](/laravel-reverb-vue), not a timer that calls `router.reload`. A reload still asks Laravel. A broadcast pushes.
+
+## Recap
+
+- Closures make props lazy; `only`/`except` pick which ones run on a partial reload.
+- Partial reloads only work on the page you are on.
+- `Inertia::defer()` + `<Deferred>` shows a fallback, then the prop; `rescue: true` adds a retry slot.
+- `Inertia::merge()` appends on partial reloads only; pass `reset` when the query changes.
+
+## FAQ
+
+<FAQ items={[
+  { q: 'Why does my partial reload still run every query?', a: 'Props computed before `Inertia::render` always run. Wrap each optional prop in a closure (`fn () => ...`) so Inertia only evaluates the ones you ask for.' },
+  { q: 'Can a partial reload load a different page?', a: 'No. The visit must target the component you are on. A link to another component always loads the full page.' },
+  { q: 'Does Inertia::merge() append on a normal visit?', a: 'No. Merge appends only on partial reloads. A full visit replaces the prop.' },
+  { q: 'What is the difference between Deferred and WhenVisible?', a: '`<Deferred>` fetches the prop right after the first paint. `WhenVisible` waits until the block scrolls into view, which suits content below the fold.' },
+]} />
+
+## Next steps
+
+- [Paginate a Laravel list in Vue](/laravel-vue-pagination): counted pages, simple pages and cursors.
+- [Inertia 3.9: background polling](/inertia-3-9-background-polling-navigate-type): pair `usePoll` with `only`.
+- [Server-render an Inertia app](/inertia-ssr): deferred props and the first HTML.
+- [Inertia docs: partial reloads](https://inertiajs.com/docs/v3/data-props/partial-reloads)
+
+## Sources
+
+- [Inertia v3: Partial reloads](https://inertiajs.com/docs/v3/data-props/partial-reloads)
+- [Inertia v3: Deferred props](https://inertiajs.com/docs/v3/data-props/deferred-props)
+- [Inertia v3: Merging props](https://inertiajs.com/docs/v3/data-props/merging-props)
+- [Inertia v3: Load when visible](https://inertiajs.com/docs/v3/data-props/load-when-visible)

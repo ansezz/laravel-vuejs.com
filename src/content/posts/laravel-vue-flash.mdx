@@ -9,6 +9,20 @@ snippet: "Inertia::flash('toast', ...)"
 categories: [laravel, vuejs]
 tags: [laravel, vuejs, inertia]
 ---
+You save a post, Laravel redirects to the list, and the list looks exactly like before. Did it work? Give the reader a one-time "Saved." toast with Inertia 3's flash data, and skip the session key the starter kit never reads.
+
+<TLDR
+  audience="Laravel + Vue developers on the Inertia 3 starter kit"
+  learn={['How to flash a toast the starter kit already shows', 'Why `->with()` stays silent', 'How to show a flash line without the kit, and how to test it']}
+  applies="Laravel 13 · Vue starter kit · inertia-laravel 3 · @inertiajs/vue3 3.9 · Pest"
+>
+
+- Call `Inertia::flash('toast', ['type' => 'success', 'message' => 'Saved.'])` before the redirect.
+- The kit's `initializeFlashToast()` already displays it. Don't add another toast package.
+- `->with('success', ...)` writes Laravel's session, which the kit's toast doesn't read.
+- Test it with `assertInertiaFlash('toast.message', 'Saved.')`.
+
+</TLDR>
 
 The [CRUD guide](/laravel-inertia-vue-crud) saves a post and redirects to the list. The list looks the same as it did before the save. The reader has no signal that the write worked.
 
@@ -20,7 +34,13 @@ The kit already listens. `resources/js/app.ts` calls `initializeFlashToast()`, a
 
 Flash this shape before the redirect the CRUD `store` method already returns:
 
-```php
+<CodeCompare before="Silent" after="Shows the toast">
+
+```php title="app/Http/Controllers/PostController.php"
+return to_route('posts.index')->with('success', 'Saved.');
+```
+
+```php title="app/Http/Controllers/PostController.php"
 use Inertia\Inertia;
 
 Inertia::flash('toast', [
@@ -31,25 +51,27 @@ Inertia::flash('toast', [
 return to_route('posts.index');
 ```
 
+</CodeCompare>
+
 `type` is `success`, `info`, `warning`, or `error`. The kit's profile controller uses the same array when it updates the account. Match it. A plain string under another key will not reach that listener.
+
+<Callout type="gotcha" title="with() is a different flash">
 
 A `with()` call on that redirect writes Laravel's session. The kit is not reading that key. The toast stays quiet.
 
-```php
-return to_route('posts.index')->with('success', 'Saved.');
-```
+</Callout>
 
 ## A line in the layout
 
 Use this when the app does not call `initializeFlashToast()`. Flash a string and print it once. On the starter kit, prefer the `toast` array above so you do not show the same sentence twice.
 
-```php
+```php title="app/Http/Controllers/PostController.php"
 Inertia::flash('success', 'Saved.');
 
 return to_route('posts.index');
 ```
 
-```vue
+```vue title="resources/js/layouts/AppLayout.vue"
 <script setup lang="ts">
 import { usePage } from "@inertiajs/vue3";
 
@@ -62,13 +84,17 @@ const page = usePage();
 </template>
 ```
 
+<Callout type="tip" title="put it in the layout">
+
 Put that `p` in the layout that wraps the pages, not in one form. The next visit clears it. You do not delete it yourself.
+
+</Callout>
 
 ## A test
 
 `assertInertiaFlash` reads the flash on the redirect. It does not need the Vue page to render.
 
-```php
+```php title="tests/Feature/PostTest.php"
 $this->post('/posts', [
     'title' => 'Hello Laravel 13',
     'excerpt' => 'A short excerpt.',
@@ -77,3 +103,38 @@ $this->post('/posts', [
 ```
 
 A banner that flashes `success` asserts that key with the same method. The rest of the create test stays in the CRUD guide.
+
+<TryIt title="Run it">
+
+```bash
+php artisan test --filter=PostTest
+```
+
+</TryIt>
+
+## Recap
+
+- Inertia flash data lives for one response and never comes back with the back button.
+- On the starter kit, flash a `toast` array with `type` and `message`.
+- `->with()` writes Laravel's session flash, a different channel.
+- Assert it with `assertInertiaFlash`.
+
+## FAQ
+
+<FAQ items={[
+  { q: 'Why does my Laravel with() message not show in Vue?', a: 'The starter kit’s toast reads Inertia flash data (`flash.toast`), not the Laravel session key that `with()` writes. Use `Inertia::flash()` instead.' },
+  { q: 'Does the flash message come back when I press the back button?', a: 'No. Inertia flash data is not stored in the history entry, so it only shows on the response that set it.' },
+  { q: 'Which toast types does the starter kit support?', a: '`success`, `info`, `warning` and `error`.' },
+]} />
+
+## Next steps
+
+- [Build a CRUD with Laravel, Inertia and Vue](/laravel-inertia-vue-crud): the save this toast confirms.
+- [Database notifications in Vue](/laravel-vue-notifications): messages that persist.
+- [Keep the layout between Inertia visits](/inertia-vue-persistent-layout): where the flash line lives.
+- [Inertia docs: flash data](https://inertiajs.com/docs/v3/data-props/flash-data)
+
+## Sources
+
+- [Inertia v3: Flash data](https://inertiajs.com/docs/v3/data-props/flash-data)
+- [Laravel Vue starter kit](https://github.com/laravel/vue-starter-kit)

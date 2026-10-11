@@ -9,6 +9,19 @@ snippet: "layout: AppLayout"
 categories: [laravel, vuejs]
 tags: [laravel, vuejs, inertia]
 ---
+Click from one page to the next and your sidebar scroll jumps back to the top, an open menu snaps shut, and an audio player stops. That is a layout being rebuilt on every visit. The Vue starter kit already avoids it; here is how, and how to fix an older app.
+
+<TLDR
+  audience="Laravel + Vue developers on Inertia"
+  learn={['How the starter kit picks a layout per page', 'How to pass breadcrumbs to the layout', 'How to move an old template wrapper into a persistent layout']}
+  applies="Laravel 13 · Vue starter kit · @inertiajs/vue3 3.9 · Vue 3.5"
+>
+
+- Wrapping each page in `<AppLayout>` inside the template remounts the shell on every visit.
+- The kit names the layout once, in the `layout` callback of `createInertiaApp`, and Inertia keeps that instance.
+- Pass data with `defineOptions({ layout: { breadcrumbs } })`; that object is merged onto the default layout.
+
+</TLDR>
 
 An older Vue tutorial wraps every page in `<AppLayout>` inside the template. Inertia destroys that component on the next visit and creates another one. The sidebar scroll jumps back to the top. The Vue starter kit does not wrap the page. It names the layout once, and Inertia keeps that instance.
 
@@ -18,7 +31,7 @@ Do not add a second `createInertiaApp`. Do not wrap the page as well. The inner 
 
 `resources/js/app.ts` already passes a `layout` function. Leave it.
 
-```ts
+```ts title="resources/js/app.ts"
 layout: (name) => {
     switch (true) {
         case name === "Welcome":
@@ -33,24 +46,52 @@ layout: (name) => {
 },
 ```
 
-`Welcome` has no shell. Sign-in pages use `AuthLayout`. Settings pages nest `SettingsLayout` inside `AppLayout`. Every other page uses `AppLayout`. A component returned from the page replaces this function for that page only. The kit pages do not return one.
+| Page | Layout |
+|---|---|
+| `Welcome` | none |
+| `auth/*` | `AuthLayout` |
+| `settings/*` | `SettingsLayout` inside `AppLayout` |
+| everything else | `AppLayout` |
+
+A component returned from the page replaces this function for that page only. The kit pages do not return one.
 
 ## Breadcrumbs are props
 
 `AppLayout` already accepts `breadcrumbs`. A page can pass them and still use the function above:
 
-```vue
-defineOptions({ layout: { breadcrumbs: [{ title: "Posts", href: "/posts" }], },
+```ts title="resources/js/pages/posts/Index.vue"
+defineOptions({
+  layout: { breadcrumbs: [{ title: "Posts", href: "/posts" }] },
 });
 ```
 
-That object is not a component. Inertia merges it onto the default layout. The dashboard page in the kit does the same thing with its own crumbs. Putting `AppLayout` in that option would replace the function in `app.ts`.
+That object is not a component. Inertia merges it onto the default layout. The dashboard page in the kit does the same thing with its own crumbs.
+
+<Callout type="gotcha" title="props, not a component">
+
+Putting `AppLayout` in that option would replace the function in `app.ts`. Pass the props object only.
+
+</Callout>
 
 ## When the template still wraps the page
 
 Use this only on an app that does not already have the function above. Move the component out of the template.
 
-```vue
+<CodeCompare before="Remounts every visit" after="Persists">
+
+```vue title="resources/js/pages/posts/Index.vue"
+<script setup lang="ts">
+import AppLayout from "@/layouts/AppLayout.vue";
+</script>
+
+<template>
+  <AppLayout>
+    <h1>Posts</h1>
+  </AppLayout>
+</template>
+```
+
+```vue title="resources/js/pages/posts/Index.vue"
 <script setup lang="ts">
 import AppLayout from "@/layouts/AppLayout.vue";
 
@@ -62,8 +103,43 @@ defineOptions({ layout: AppLayout });
 </template>
 ```
 
+</CodeCompare>
+
 Delete the `<AppLayout>` tags around the page. The template is only the slot. On the starter kit, skip this. The function in `app.ts` already selected the component.
+
+<TryIt title="Prove the layout persists">
+
+Scroll the sidebar halfway down, then click to another page that uses `AppLayout`. With a persistent layout, the sidebar stays where you left it.
+
+</TryIt>
 
 ## Where this stops
 
 This page does not draw the sidebar, and it does not add a layout package. Settings already nest two layouts in the array above. The logged-in user inside that shell is the [setup guide](/application-setup).
+
+## Recap
+
+- A layout in the page template is rebuilt on every visit; a layout chosen by Inertia persists.
+- The starter kit picks layouts in one `layout` callback; keep it.
+- Pass breadcrumbs with `defineOptions({ layout: { breadcrumbs } })`.
+- On older apps, move the wrapper into `defineOptions({ layout: AppLayout })`.
+
+## FAQ
+
+<FAQ items={[
+  { q: 'Why does my sidebar scroll reset on every Inertia visit?', a: 'The page wraps itself in the layout inside its template, so Inertia destroys and recreates it. Use a persistent layout instead.' },
+  { q: 'Can a page use two layouts?', a: 'Yes. Return an array, like the kit does for settings: `[AppLayout, SettingsLayout]`.' },
+  { q: 'How do I pass breadcrumbs to the layout?', a: 'Use `defineOptions({ layout: { breadcrumbs: [...] } })`. Inertia merges that object onto the default layout as props.' },
+]} />
+
+## Next steps
+
+- [Set the Inertia document title in Vue](/inertia-vue-document-title): the other callback in the same `createInertiaApp`.
+- [Set up a Laravel + Vue app](/application-setup): the starter kit this builds on.
+- [Show a saved message in Vue](/laravel-vue-flash): a toast that lives in the layout.
+- [Inertia docs: layouts](https://inertiajs.com/docs/v3/the-basics/layouts)
+
+## Sources
+
+- [Inertia v3: Layouts](https://inertiajs.com/docs/v3/the-basics/layouts)
+- [Laravel Vue starter kit](https://github.com/laravel/vue-starter-kit)

@@ -8,6 +8,20 @@ date: 2026-10-10T07:30:00Z
 categories: [laravel, vuejs]
 tags: [laravel, vuejs, typescript, inertia]
 ---
+Your Inertia page renders an empty list and the console is silent. The controller sent `posts.data`, the template looped over `posts`. One `defineProps` type turns that silent bug into a red line before you open the browser.
+
+<TLDR
+  audience="Laravel + Vue developers on the TypeScript starter kit"
+  learn={['How to type an Inertia page with `defineProps`', 'The shape a Laravel paginator sends', 'Why dates arrive as strings', 'Where to keep the types']}
+  applies="Laravel 13 · Vue starter kit · Vue 3.5 · TypeScript · vue-tsc"
+>
+
+- Type the props in the page with `defineProps<{ posts: Page }>()`, matching what the controller actually returns.
+- A paginator wraps rows in `data`; loop over `posts.data`, not `posts`.
+- Dates are JSON strings, so type them as `string | null`.
+- Keep the interface next to the page; run the kit's `vue-tsc` check.
+
+</TLDR>
 
 The Vue starter kit is already TypeScript. The page is untyped until you say what the controller sends. `defineProps` on that single file is enough. You do not need a shared types package, and you do not need Vue Router. Routing stays in Laravel, which is the setup in [Inertia, a SPA, or Nuxt](/laravel-vue-in-2026).
 
@@ -15,8 +29,7 @@ The list this types is the [CRUD guide](/laravel-inertia-vue-crud). The first se
 
 ## The page
 
-```vue
-<!-- resources/js/pages/posts/Index.vue -->
+```vue title="resources/js/pages/posts/Index.vue" {4-20}
 <script setup lang="ts">
 import { Head, Link } from "@inertiajs/vue3";
 
@@ -50,9 +63,35 @@ defineProps<{
 </template>
 ```
 
+<Callout type="gotcha" title="dates are strings">
+
 `published_at` is a string in the props because Inertia serializes dates to JSON. Typing it as `Date` will not make it a `Date`. Format it as a string, or parse it on purpose.
 
+</Callout>
+
+## The posts.data trap
+
 `posts.data` is the row list. `v-for="post in posts"` walks the paginator's values, the `data` array and then `current_page` and the rest, so `post.title` comes out blank. The key is the second alias, `(value, key)`. The type above makes that mistake a type error if you annotate the `v-for` source as `Post[]` and then pass `posts` instead of `posts.data`.
+
+<CodeCompare before="Blank titles" after="Rows">
+
+```vue title="resources/js/pages/posts/Index.vue"
+<article v-for="post in posts" :key="post.id">
+```
+
+```vue title="resources/js/pages/posts/Index.vue"
+<article v-for="post in posts.data" :key="post.id">
+```
+
+</CodeCompare>
+
+### Paginator shapes differ
+
+| Controller method | Has `last_page` and `total`? |
+|---|---|
+| `paginate()` | Yes |
+| `simplePaginate()` | No |
+| `cursorPaginate()` | No (cursor URLs instead) |
 
 A simple paginator or a cursor paginator has no `last_page`. Drop that field from `Page` when the controller uses those methods. The differences are [pagination](/laravel-vue-pagination).
 
@@ -62,8 +101,57 @@ Keep this interface next to the page that receives it. A global `PageProps` augm
 
 Wayfinder types the URL you visit. It does not type these props. That generator is [Wayfinder](/laravel-wayfinder-vue).
 
-Run the kit's TypeScript check. A fresh starter kit calls `vue-tsc`. The script name is whatever `package.json` already has. Do not add a second checker. A red `posts.data` means the controller and the page disagree. Fix the one that is wrong. Do not silence it with `as any`.
+## Run the check
+
+Run the kit's TypeScript check. A fresh starter kit calls `vue-tsc`. The script name is whatever `package.json` already has. Do not add a second checker.
+
+<TryIt title="Break it on purpose">
+
+Change `posts.data` to `posts` in the template, then run the check:
+
+```bash
+npx vue-tsc --noEmit
+```
+
+Put it back and the error goes away.
+
+</TryIt>
+
+<Callout type="heads-up" title="no as any">
+
+A red `posts.data` means the controller and the page disagree. Fix the one that is wrong. Do not silence it with `as any`.
+
+</Callout>
 
 ## Where this stops
 
 Component tests for a presentational child are [tests](/test-laravel-vue). They mount the child with a `title` string. They do not replace `defineProps` on the Inertia page.
+
+## Recap
+
+- `defineProps<...>()` on the page types the controller payload.
+- Paginators wrap rows in `data`; simple and cursor paginators have no `last_page`.
+- JSON dates are strings.
+- Keep types local first; let `vue-tsc` catch disagreements.
+
+## FAQ
+
+<FAQ items={[
+  { q: 'Why is my Inertia v-for rendering blank rows?', a: 'You are looping over the paginator object instead of its rows. Use `posts.data`.' },
+  { q: 'Should I type Laravel dates as Date in Vue?', a: 'No. Inertia sends JSON, so dates arrive as strings. Type them as `string | null` and parse on purpose.' },
+  { q: 'Do I need a global PageProps type?', a: 'Not at first. Keep interfaces next to the page. A global augmentation pays off later, for shared props like the `auth` user.' },
+  { q: 'Does Wayfinder type my page props?', a: 'No. Wayfinder types routes and URLs. Props are typed with `defineProps` on the page.' },
+]} />
+
+## Next steps
+
+- [Paginate a Laravel list in Vue](/laravel-vue-pagination): which paginator sends what.
+- [Laravel Wayfinder with Vue](/laravel-wayfinder-vue): typed routes.
+- [Test a Laravel + Vue app](/test-laravel-vue): component and feature tests.
+- [Vue: TypeScript with the Composition API](https://vuejs.org/guide/typescript/composition-api)
+
+## Sources
+
+- [Vue: Typing component props](https://vuejs.org/guide/typescript/composition-api#typing-component-props)
+- [Inertia v3: TypeScript](https://inertiajs.com/docs/v3/advanced/typescript)
+- [Laravel: Pagination, converting results to JSON](https://laravel.com/docs/13.x/pagination#converting-results-to-json)
