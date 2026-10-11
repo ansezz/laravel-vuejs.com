@@ -163,14 +163,82 @@ export function agentPrompt(task: AgentTask): string {
   ].join("\n");
 }
 
-/** Written prompts stay as written. Every other practical guide adds the constraints from its own text. */
-export function agentTaskFor(post: {
+type GuidePost = {
   slug: string;
   title: string;
   excerpt: string;
   tags: { slug: string }[];
   body?: string;
-}): AgentTask | undefined {
+};
+
+/**
+ * The guide a reader opens next. CRUD, pagination, and upload stay in that
+ * order. Wayfinder follows the upload so it does not sit between them.
+ * Future slugs stay here and drop out until the post is in the published list.
+ */
+export const stationOrder = [
+  "laravel-vue-in-2026",
+  "requirements",
+  "application-setup",
+  "laravel-fortify-vue",
+  "laravel-vue-policies",
+  "test-laravel-vue",
+  "typescript-laravel-vue-pages",
+  "laravel-vite-vue",
+  "inertia-vue-persistent-layout",
+  "laravel-vue-flash",
+  "laravel-inertia-vue-crud",
+  "laravel-vue-pagination",
+  "laravel-vue-file-upload",
+  "laravel-wayfinder-vue",
+  "laravel-sail-vue",
+  "deploy-laravel-vue",
+  "inertia-ssr",
+  "laravel-sanctum-vue-spa",
+  "vue-router-laravel-spa",
+  "nuxt-laravel-api",
+  "laravel-sanctum-vs-passport",
+  "pinia-laravel-inertia",
+  "laravel-reverb-vue",
+  "laravel-socialite-vue",
+  "laravel-vue-permissions",
+  "laravel-breeze-jetstream-vue",
+  "laravel-api-resources-vue",
+  "laravel-vue-datatable",
+  "laravel-vue-queued-job",
+  "laravel-vue-notifications",
+  "laravel-precognition-vue",
+  "inertia-vue-document-title",
+  "inertia-partial-reloads",
+  "upgrade-inertia-2-to-3",
+  "inertia-3-optimistic-updates-usehttp",
+  "inertia-3-9-background-polling-navigate-type",
+  "laravel-vue-i18n",
+  "laravel-vue-cors",
+  "livewire-vs-inertia",
+  "laravel-ziggy-vue",
+  "laravel-13-35-query-routes-markdown-responses",
+] as const;
+
+/** The following published guide, with that guide's real prompt. */
+export function nextStation(
+  slug: string,
+  posts: GuidePost[],
+): AgentTask | undefined {
+  const at = stationOrder.indexOf(slug as (typeof stationOrder)[number]);
+  if (at < 0) return undefined;
+  const published = new Map(posts.map((post) => [post.slug, post]));
+  for (const id of stationOrder.slice(at + 1)) {
+    const post = published.get(id);
+    if (!post) continue;
+    const task = agentTaskFor(post);
+    if (task) return task;
+  }
+  return undefined;
+}
+
+/** Written prompts stay as written. Every other practical guide adds the constraints from its own text. */
+export function agentTaskFor(post: GuidePost): AgentTask | undefined {
   const written = agentTasks.find((task) => task.slug === post.slug);
   if (written) return written;
   if (editorial.has(post.slug)) return undefined;
