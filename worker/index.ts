@@ -124,9 +124,14 @@ async function handleForm(name: string, request: Request, env: Env, ctx: Executi
 // written by scripts/csp.mjs), Cloudflare Web Analytics, and Disqus (loaded only after a click). Inline style
 // attributes are used throughout the markup, so styles keep 'unsafe-inline'.
 const PERMISSIONS_POLICY = 'accelerometer=(), autoplay=(), camera=(), display-capture=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), midi=(), payment=(), usb=(), browsing-topics=()'
+// A fresh nonce per HTML response: we don't use it ourselves (our inline scripts are covered by hashes), but Cloudflare's
+// JavaScript Detections (Bot Fight Mode) injects an inline script that changes on every request. Cloudflare reads the
+// nonce from this header and adds it to the script it injects, so it runs without 'unsafe-inline' and without a CSP error.
+// https://developers.cloudflare.com/cloudflare-challenges/challenge-types/javascript-detections/#if-you-have-a-content-security-policy-csp
+const nonce = () => btoa(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(16))))
 const csp = (hashes: string[]) => [
   "default-src 'self'",
-  `script-src 'self' ${hashes.join(' ')} https://static.cloudflareinsights.com https://*.disqus.com https://*.disquscdn.com`,
+  `script-src 'self' 'nonce-${nonce()}' ${hashes.join(' ')} https://static.cloudflareinsights.com https://*.disqus.com https://*.disquscdn.com`,
   "style-src 'self' 'unsafe-inline' https://*.disquscdn.com",
   "img-src 'self' data: https:",
   "font-src 'self'",
