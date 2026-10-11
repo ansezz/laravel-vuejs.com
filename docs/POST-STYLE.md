@@ -98,7 +98,7 @@ php artisan make:model Post -mfs
 - File name: ```` ```php title="app/Models/Post.php" ````
 - Highlight lines by number: ```` ```ts {3,5-7} ````
 - Inline notations at the end of a line: `// [!code ++]` (added), `// [!code --]` (removed), `// [!code highlight]`,
-  `// [!code focus]`. Use the comment syntax of the language (`# [!code ++]` in bash, `{{-- [!code ++] --}}` in Blade).
+  `// [!code focus]`. Use the comment syntax of the language (`# [!code ++]` in bash). Blade comments (`{{-- --}}`) are not recognised: use a ```` ```diff ```` block for Blade changes.
 - ```` ```diff ```` for a quick unified diff.
 - The copy button skips removed (`--`) lines, so readers always copy the "after" version.
 

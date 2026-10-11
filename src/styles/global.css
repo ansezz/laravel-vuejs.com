@@ -4411,14 +4411,13 @@ label.chip {
 :root[data-theme='dark'] .callout-heads-up { --c-ink: #fcd34d; }
 
 /* Before / after */
-.code-compare { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; margin: 1.6em 0; }
+.code-compare { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; margin: 1.6em 0; }
 .code-compare > .code { margin-top: 0; }
-.code-compare > .code:nth-of-type(1) .code-head::before, .code-compare > .code:nth-of-type(2) .code-head::before { font: 700 .68rem/1 var(--font-mono); letter-spacing: .12em; text-transform: uppercase; padding: 5px 8px; border-radius: 6px; margin-right: 4px; }
+.code-compare > .code:nth-of-type(1) .code-head::before, .code-compare > .code:nth-of-type(2) .code-head::before { font: 700 .68rem/1 var(--font-mono); letter-spacing: .12em; text-transform: uppercase; padding: 5px 8px; border-radius: 6px; margin-right: 4px; white-space: nowrap; flex: none; }
 .code-compare > .code:nth-of-type(1) .code-head::before { content: var(--before); background: rgb(239 68 68 / .14); color: #b91c1c; }
 .code-compare > .code:nth-of-type(2) .code-head::before { content: var(--after); background: rgb(34 197 94 / .16); color: #15803d; }
 :root[data-theme='dark'] .code-compare > .code:nth-of-type(1) .code-head::before { color: #fca5a5; }
 :root[data-theme='dark'] .code-compare > .code:nth-of-type(2) .code-head::before { color: #86efac; }
-@media (max-width: 900px) { .code-compare { grid-template-columns: minmax(0, 1fr); } }
 
 /* Steps */
 .steps > ol { list-style: none; padding: 0; counter-reset: step; display: grid; gap: 4px; }
@@ -4435,7 +4434,7 @@ label.chip {
 /* Diagrams and figures */
 .diagram, .figure { margin: 1.8em 0; }
 .diagram { padding: 18px; border-radius: var(--radius-lg); border: 1px solid var(--border); background: var(--bg-elev); }
-.diagram img { display: block; width: 100%; height: auto; margin: 0 auto; }
+.diagram img { display: block; max-width: 100%; height: auto; margin: 0 auto; }
 .diagram .only-dark { display: none; }
 :root[data-theme='dark'] .diagram .only-light { display: none; }
 :root[data-theme='dark'] .diagram .only-dark { display: block; }

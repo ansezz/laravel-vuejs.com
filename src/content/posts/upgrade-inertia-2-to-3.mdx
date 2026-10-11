@@ -1,0 +1,359 @@
+---
+id: 7
+title: "Upgrade a Laravel 13 + Vue app from Inertia 2 to Inertia 3: the practical checklist"
+seoTitle: "Upgrade Inertia 2 to 3 in Laravel 13 + Vue: the checklist"
+excerpt: "Inertia 2 stopped getting bug fixes on September 26, 2026. Here is the step-by-step upgrade we tested on a real Laravel 13 + Vue app: dependencies, the new Vite plugin, renamed APIs, Axios, SSR and a final audit."
+date: 2026-10-13T07:00:00Z
+snippet: "npm i @inertiajs/vue3@^3"
+categories: [laravel, vuejs]
+tags: [inertia, laravel, vuejs, upgrade]
+---
+
+Your Laravel + Vue app still runs on Inertia 2, and since **September 26, 2026** that version no longer gets bug fixes. Security fixes stop on **March 26, 2027**. Upgrade now, while it is a planned afternoon and not an emergency.
+
+<TLDR
+  audience="Laravel + Vue developers with an app on Inertia 2.x"
+  learn={['Which APIs were renamed or removed', 'What to do about Axios, `qs` and `lodash-es`', 'How the `@inertiajs/vite` plugin slims down `app.ts` and SSR']}
+  tested="Laravel 13.35 · inertia-laravel 3.5 · @inertiajs/vue3 + @inertiajs/vite 3.9 · Vue 3.5 · Vite 8 · PHP 8.4"
+>
+
+- For a typical app the upgrade is small: after the package bump alone, our test app built, logged in, saved forms and passed all **40 feature tests**.
+- Rename the removed APIs (`router.cancel()`, the `invalid`/`exception` events, `Inertia::lazy()`), and install Axios, `qs` or `lodash-es` yourself if you imported them.
+- Add the `@inertiajs/vite` plugin: `resolve`, `setup` and usually `ssr.ts` can go, and SSR runs in `npm run dev`.
+- Inertia 3 needs **PHP 8.2+ and Laravel 11+**.
+
+</TLDR>
+
+## Why upgrade now
+
+Inertia 3 came out on **March 26, 2026**, and it is what the official Laravel Vue starter kit uses today. Inertia 2 is in security-only mode until March 2027 (see the [support policy](https://inertiajs.com/docs/v3/getting-started)).
+
+We tested every step below on the Laravel 13 Vue starter kit as it was just before the Inertia 3 release. The rest of the checklist is about removing old code and using what v3 adds.
+
+<Diagram name="inertia-upgrade-flow" alt="The upgrade in four stages: bump the PHP and npm packages and republish config/inertia.php; fix renamed APIs, events, Axios/qs/lodash-es imports and the head attribute; adopt the @inertiajs/vite plugin for a slimmer app.ts and simpler SSR; then verify with php artisan test, vue-tsc and a browser smoke test." caption="The seven steps, grouped into four stages." />
+
+## The checklist at a glance
+
+<Steps>
+
+1. **Upgrade the packages** and republish the config.
+2. **Audit your code** for removed and renamed APIs.
+3. **Check your imports** of Axios, `qs` or `lodash-es`.
+4. **Rename the `inertia` head attribute** (or switch to the new Blade components).
+5. **Adopt the `@inertiajs/vite` plugin** and slim down `app.ts`.
+6. **Simplify SSR.**
+7. **Run your tests**, then a browser smoke test.
+
+</Steps>
+
+## Step 1: upgrade the packages
+
+```bash
+composer require inertiajs/inertia-laravel:^3.0 -W
+npm install @inertiajs/vue3@^3.0 @inertiajs/vite@^3.0
+```
+
+`@inertiajs/vite` is optional, but you want it (step 5). Next, republish the config file, because v3 changed its structure. Then clear compiled views, because the output of the `@inertia` directive changed:
+
+```bash
+php artisan vendor:publish --provider="Inertia\ServiceProvider" --force
+php artisan view:clear
+```
+
+<Callout type="gotcha" title="--force overwrites your config">
+
+`--force` replaces `config/inertia.php`. Commit first, then re-apply your changes afterwards.
+
+</Callout>
+
+The main change: page settings now live under a `pages` key, and the `testing` section is shorter.
+
+```php title="config/inertia.php"
+'pages' => [
+    'ensure_pages_exist' => false,
+    'paths' => [resource_path('js/pages')],
+    'extensions' => ['js', 'jsx', 'svelte', 'ts', 'tsx', 'vue'],
+],
+
+'testing' => [
+    'ensure_pages_exist' => true,
+],
+```
+
+Check `paths`. The starter kits use lowercase `js/pages`, and older apps often use `js/Pages`.
+
+## Step 2: audit removed and renamed APIs
+
+Run this from your project root to find everything that needs a change:
+
+```bash
+grep -rnE "router\.cancel\(|router\.on\('(invalid|exception)'|inertia:(invalid|exception)|hideProgress|revealProgress|future:|Inertia::lazy|LazyProp|require\(['\"]@inertiajs" resources/js app routes
+```
+
+Here is what each match means, from the [official upgrade guide](https://inertiajs.com/docs/v3/getting-started/upgrade-guide):
+
+| Inertia 2 | Inertia 3 |
+|---|---|
+| `router.on('invalid', …)` | `router.on('httpException', …)` |
+| `router.on('exception', …)` | `router.on('networkError', …)` |
+| `router.cancel()` (sync visits only) | `router.cancelAll()` (sync, async and prefetch) |
+| `hideProgress()`, `revealProgress()` | `progress.hide()`, `progress.reveal()` |
+| `defaults: { future: { … } }` | delete it: all four options are now always on |
+| `Inertia::lazy()` / `LazyProp` | `Inertia::optional()` |
+| `require('@inertiajs/…')` | `import`: the packages are ESM only |
+
+To keep the old behavior of `router.cancel()`, call `router.cancelAll({ async: false, prefetch: false })`.
+
+### Handle errors without leaving the page
+
+The new per-visit callbacks let you deal with errors in place. Return `false` from `onHttpException` and Inertia will not show its error page:
+
+<CodeCompare before="Inertia 2" after="Inertia 3">
+
+```ts title="resources/js/app.ts"
+router.on('invalid', (event) => {
+    event.preventDefault()
+    toast.error('Server error. Please try again.')
+})
+router.on('exception', () => toast.error('You seem to be offline.'))
+```
+
+```ts title="resources/js/pages/invoices/Create.vue"
+router.post('/invoices', data, {
+    onHttpException: (response) => {
+        toast.error(`Server error (${response.status}). Please try again.`)
+        return false
+    },
+    onNetworkError: () => toast.error('You seem to be offline.'),
+})
+```
+
+</CodeCompare>
+
+<Callout type="tip" title="let TypeScript find the rest">
+
+`router.cancel` no longer exists in the v3 types, so `vue-tsc --noEmit` points to every place you still call it.
+
+</Callout>
+
+One quiet behavior change: `useForm` now keeps `processing` set to `true` until `onFinish`, not just until the response arrives. If you use `form.processing` to disable a submit button, the button now stays disabled a little longer, which is usually what you want.
+
+## Step 3: Axios, qs and lodash-es
+
+Inertia 3 no longer ships Axios. It uses a small built-in XHR client. For most apps nothing changes: Laravel's CSRF protection keeps working, because the client reads the `XSRF-TOKEN` cookie and sends it in the `X-XSRF-TOKEN` header (we checked this with POST requests in our test app).
+
+You do need to act in three cases.
+
+**You import `axios`, `qs` or `lodash-es` in your own code** but never installed them yourself. They used to come in with Inertia, and now they don't. Install them directly: `npm install axios` (or `qs`, or `lodash-es`).
+
+**You use Axios interceptors** to add headers or log errors. Move them to Inertia's built-in interceptors, which apply to the router, `useForm`, `<Form>` and `useHttp`:
+
+```ts title="resources/js/app.ts"
+import { http } from '@inertiajs/vue3'
+
+http.onRequest((config) => {
+    config.headers['X-Tenant'] = currentTenant()
+    return config
+})
+
+http.onError((error) => reportToSentry(error))
+```
+
+**You really need Axios** (a shared, customised instance, for example). Pass it through the adapter:
+
+```ts title="resources/js/app.ts"
+import axios from 'axios'
+import { axiosAdapter } from '@inertiajs/core'
+
+createInertiaApp({
+    http: axiosAdapter(axios.create({ timeout: 10_000 })),
+})
+```
+
+<Callout type="heads-up" title="ES2022 only">
+
+The packages now target **ES2022**. If you must support very old browsers, add `@vitejs/plugin-legacy`.
+
+</Callout>
+
+## Step 4: the head attribute
+
+v3 renamed the `inertia` attribute on head elements to `data-inertia`. In your root Blade view, `<title inertia>` becomes `<title data-inertia>`. In our test, Inertia still replaced the old title on the client. With SSR you can end up with duplicate tags, though, so rename it anyway.
+
+Even better, use the new Blade components. The slot of `<x-inertia::head>` is only rendered when SSR is off, which finally fixes duplicate `<title>` tags:
+
+```diff title="resources/views/app.blade.php"
+ <head>
+     @vite(['resources/css/app.css', 'resources/js/app.ts', "resources/js/pages/{$page['component']}.vue"])
+-    <title inertia>{{ config('app.name', 'Laravel') }}</title>
++    <x-inertia::head>
++        <title>{{ config('app.name', 'Laravel') }}</title>
++    </x-inertia::head>
+ </head>
+ <body class="font-sans antialiased">
+     <x-inertia::app />
+ </body>
+```
+
+The `@inertia` and `@inertiaHead` directives still work if you would rather not touch this file.
+
+## Step 5: adopt the Vite plugin
+
+This is where your code gets shorter. Add the plugin to `vite.config.ts`, and remove the `ssr` entry from the Laravel plugin if you had one:
+
+```ts title="vite.config.ts"
+import inertia from '@inertiajs/vite' // [!code ++]
+import laravel from 'laravel-vite-plugin'
+import vue from '@vitejs/plugin-vue'
+import { defineConfig } from 'vite'
+
+export default defineConfig({
+    plugins: [
+        laravel({
+            input: ['resources/css/app.css', 'resources/js/app.ts'],
+            refresh: true,
+        }),
+        inertia(), // [!code ++]
+        vue(),
+    ],
+})
+```
+
+The plugin resolves pages from `./pages` or `./Pages` and mounts the app for you, so the `resolve` and `setup` callbacks can go:
+
+```ts title="resources/js/app.ts"
+import { createInertiaApp } from '@inertiajs/vue3'
+import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers' // [!code --]
+import type { DefineComponent } from 'vue' // [!code --]
+import { createApp, h } from 'vue' // [!code --]
+import '../css/app.css'
+
+createInertiaApp({
+    title: (title) => (title ? `${title} - ${appName}` : appName),
+    resolve: (name) => // [!code --]
+        resolvePageComponent(`./pages/${name}.vue`, import.meta.glob<DefineComponent>('./pages/**/*.vue')), // [!code --]
+    setup({ el, App, props, plugin }) { // [!code --]
+        createApp({ render: () => h(App, props) }).use(plugin).mount(el) // [!code --]
+    }, // [!code --]
+    progress: { color: '#4B5563' },
+})
+```
+
+Do you register Vue plugins such as i18n or Pinia? Move them into `withApp`:
+
+```ts title="resources/js/app.ts"
+createInertiaApp({
+    withApp(app) {
+        app.use(i18n).use(pinia)
+    },
+})
+```
+
+<Callout type="tip" title="no rush on app.ts">
+
+Your old `resolve` and `setup` still work in v3. In our test, the app ran fine before we touched `app.ts`, so you can do this step later. The Laravel team made exactly this change in the starter kit ([commit 290aba0](https://github.com/laravel/vue-starter-kit/commit/290aba0dc11900cc1ac8a433229583b644699b48)).
+
+</Callout>
+
+### Optional: default layouts
+
+The starter kit also moved page layouts out of each page and into one place. This is the callback in the Vue kit's `app.ts`. `Welcome` has no layout. `auth/` uses `AuthLayout`. `settings/` nests `SettingsLayout` inside `AppLayout`. Everything else uses `AppLayout`.
+
+```ts title="resources/js/app.ts"
+createInertiaApp({
+    layout: (name) => {
+        switch (true) {
+            case name === 'Welcome':
+                return null
+            case name.startsWith('auth/'):
+                return AuthLayout
+            case name.startsWith('settings/'):
+                return [AppLayout, SettingsLayout]
+            default:
+                return AppLayout
+        }
+    },
+})
+```
+
+A page can then pass props to its layout with `defineOptions({ layout: { breadcrumbs: [...] } })`. That is optional, so do it page by page.
+
+## Step 6: simplify SSR
+
+With the Vite plugin, **SSR runs in `npm run dev`**. There is no separate SSR build and no `inertia:start-ssr` while you develop. The plugin also reuses `app.ts` for the server bundle, so you can usually delete `resources/js/ssr.ts`:
+
+```bash
+git rm resources/js/ssr.ts
+```
+
+In production nothing new is needed: build both bundles, then start the SSR server (Node.js 22 or newer):
+
+```bash
+npm run build:ssr   # vite build && vite build --ssr
+php artisan inertia:start-ssr
+```
+
+We checked this in our test app. After deleting `ssr.ts`, `vite build --ssr` still produced `bootstrap/ssr/app.js`. The SSR server rendered the login page with exactly one `<title>`.
+
+v3 can also turn SSR off for specific routes, via middleware or the facade. That is useful for pages that only make sense in the browser.
+
+## Step 7: test it
+
+<TryIt title="Run the final audit">
+
+```bash
+php artisan test
+npx vue-tsc --noEmit
+npm run build
+```
+
+</TryIt>
+
+Then click through the paths that matter most: log in, submit a form with a validation error, upload a file, and open a page that uses deferred or partial reloads. If you have a global error handler, trigger a 500 to make sure your `httpException` listener runs.
+
+## What you get for your trouble
+
+Upgrading is more than staying supported. v3 adds features that remove real code from Vue apps:
+
+| Feature | What it replaces |
+|---|---|
+| **`useHttp`** | Hand-rolled `processing`/`errors` state around Axios calls for JSON requests that don't change the page |
+| **Optimistic updates** with automatic rollback | Manual "update the UI, undo on error" code, for the router, `useForm`, `<Form>` and `useHttp` |
+| **Instant visits** and **layout props** | Waiting on the server before showing the next page; prop drilling into layouts |
+| **Better SSR error messages** | Guessing why the SSR server crashed |
+
+On Thursday we build two of those: an optimistic like button and a live search with `useHttp`. [Follow the series](/posts) so you don't miss it.
+
+## Recap
+
+- Inertia 2 is security-only until March 26, 2027; Inertia 3 needs PHP 8.2+ and Laravel 11+.
+- Bump the packages, republish `config/inertia.php`, and run `view:clear`.
+- Rename the removed APIs and events; install Axios, `qs` or `lodash-es` yourself if you used them.
+- Use `data-inertia` or `<x-inertia::head>` in the root view.
+- The `@inertiajs/vite` plugin removes `resolve`, `setup` and usually `ssr.ts`.
+
+## FAQ
+
+<FAQ items={[
+  { q: 'Do I have to rewrite app.ts to upgrade to Inertia 3?', a: 'No. The old `resolve` and `setup` callbacks still work in v3. Adopting the `@inertiajs/vite` plugin is optional, but it removes boilerplate and makes SSR run in `npm run dev`.' },
+  { q: 'Does CSRF still work now that Inertia 3 dropped Axios?', a: 'Yes. The built-in client reads the `XSRF-TOKEN` cookie and sends it as the `X-XSRF-TOKEN` header, which is what Laravel expects.' },
+  { q: 'What replaces router.cancel() in Inertia 3?', a: '`router.cancelAll()`. To cancel only sync visits like before, call `router.cancelAll({ async: false, prefetch: false })`.' },
+  { q: 'How long is Inertia 2 supported?', a: 'Bug fixes ended on September 26, 2026. Security fixes continue until March 26, 2027.' },
+  { q: 'Can I still use Axios with Inertia 3?', a: 'Yes. Pass your instance through `axiosAdapter` from `@inertiajs/core` in the `http` option of `createInertiaApp`.' },
+]} />
+
+## Next steps
+
+- [Optimistic updates and useHttp in Inertia 3](/inertia-3-optimistic-updates-usehttp): put two of the new features to work.
+- [Inertia 3.9: background polling and the navigate type](/inertia-3-9-background-polling-navigate-type): what landed after 3.0.
+- [Server-side rendering with Inertia and Vue](/inertia-ssr): SSR in production, in depth.
+- [Inertia v3 upgrade guide](https://inertiajs.com/docs/v3/getting-started/upgrade-guide): the official list of every change.
+
+## Sources
+
+- [Inertia v3 upgrade guide](https://inertiajs.com/docs/v3/getting-started/upgrade-guide)
+- [Inertia support policy](https://inertiajs.com/docs/v3/getting-started)
+- [Client-side setup and HTTP client](https://inertiajs.com/docs/v3/installation/client-side-setup)
+- [Server-side rendering](https://inertiajs.com/docs/v3/advanced/server-side-rendering)
+- [Laravel Vue starter kit: the Inertia 3 upgrade commit](https://github.com/laravel/vue-starter-kit/commit/290aba0dc11900cc1ac8a433229583b644699b48)
+- [Inertia releases on GitHub](https://github.com/inertiajs/inertia/releases)

@@ -1,6 +1,6 @@
 // Rehype plugin for posts (.md and .mdx): adds "#" anchors to h2/h3 (runs after rehypeHeadingIds, see astro.config.mjs)
-// and resolves the {{CONTACT_EMAIL}} placeholder in Markdown posts. Code frames are added by the Shiki transformer in
-// shiki-frame.mjs, because highlighting runs after user rehype plugins.
+// and resolves the {{CONTACT_EMAIL}} placeholder in .md posts (in .mdx, write the address as a mailto link). Code frames
+// are added by the Shiki transformer below (transformerFrame), because highlighting runs after user rehype plugins.
 const CONTACT = 'contact@laravel-vuejs.space'
 const LANG = { md: 'markdown', sh: 'bash', js: 'javascript', ts: 'typescript', plaintext: 'text', txt: 'text' }
 const svg = (cls, d) => ({ type: 'element', tagName: 'svg', properties: { className: [cls], width: 14, height: 14, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round', ariaHidden: 'true' }, children: d })
