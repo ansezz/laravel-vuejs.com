@@ -1,8 +1,9 @@
 ---
 import ToolPage from '../components/ToolPage.astro'
+import { SITE_URL } from '../config/site'
 import { allPosts } from '../lib/content'
 import { agentTaskFor } from '../data/agent-tasks'
-import { GROUPS, MODULES, SHAPES, defaultModuleIds, starterPrompt, type GuideBrief } from '../data/prompt-builder'
+import { GROUPS, MODULES, SHAPES, selectionFromSearch, starterPrompt, starterSearch, type GuideBrief } from '../data/prompt-builder'
 
 const posts = await allPosts()
 const needed = new Set([...SHAPES.flatMap(shape => shape.reads), ...MODULES.map(mod => mod.slug)])
@@ -14,11 +15,14 @@ for (const post of posts) {
   guides[post.slug] = { intent: task.intent, steps: task.steps, avoid: task.avoid }
 }
 const modules = MODULES.filter(mod => guides[mod.slug])
-const shape = 'inertia' as const
-const built = starterPrompt(shape, defaultModuleIds(shape), guides)
+const selection = selectionFromSearch(Astro.url.searchParams, modules.map(mod => mod.id))
+const shape = selection.shape
+const selected = new Set(selection.ids)
+const built = starterPrompt(shape, selection.ids, guides)
 const guideJson = JSON.stringify(guides).replace(/</g, '\\u003c')
 const description = 'Laravel and Vue are the base. Tick login, social login, Passport, and the other modules, then copy one prompt.'
-const inertiaNote = SHAPES.find(item => item.id === shape)?.note ?? ''
+const shapeNote = SHAPES.find(item => item.id === shape)?.note ?? ''
+const shareUrl = `${SITE_URL}/starter?${starterSearch(shape, selection.ids)}`
 ---
 <ToolPage title="Laravel and Vue starter" lead={description} description={description}>
   <div class="starter-stack">
@@ -27,7 +31,8 @@ const inertiaNote = SHAPES.find(item => item.id === shape)?.note ?? ''
       <span>Laravel 13</span>
       <span>Vue 3</span>
     </div>
-    <p class="pkg-set-note" data-starter-note>{inertiaNote}</p>
+    <p class="pkg-set-note" data-starter-note>{shapeNote}</p>
+    <p class="pkg-set-note">Already have an app? <a href="/fix">Paste the error, or composer.json and package.json.</a></p>
   </div>
   <form class="tool-layout" data-starter>
     <div class="starter-groups">
@@ -44,7 +49,7 @@ const inertiaNote = SHAPES.find(item => item.id === shape)?.note ?? ''
         ))}
       </fieldset>
       {GROUPS.map(group => (
-        <fieldset class="starter-group" data-starter-group={group.id}>
+        <fieldset class="starter-group" data-starter-group={group.id} hidden={!modules.some(mod => mod.group === group.id && mod.shapes.includes(shape))}>
           <legend class="kicker">{group.label}</legend>
           {modules.filter(mod => mod.group === group.id).map(mod => (
             <label class="tool-choice" hidden={!mod.shapes.includes(shape)}>
@@ -53,7 +58,7 @@ const inertiaNote = SHAPES.find(item => item.id === shape)?.note ?? ''
                 data-module={mod.id}
                 data-shapes={mod.shapes.join(',')}
                 data-default={mod.defaults.join(',')}
-                checked={mod.defaults.includes(shape)}
+                checked={selected.has(mod.id)}
               />
               <span>
                 <strong>{mod.label}</strong>
@@ -81,17 +86,23 @@ const inertiaNote = SHAPES.find(item => item.id === shape)?.note ?? ''
         </div>
         <pre><code data-starter-prompt>{built.prompt}</code></pre>
       </div>
+      <div class="pkg-actions">
+        <button class="btn btn-primary" type="button" data-starter-download>Download AGENTS.md</button>
+        <button class="btn" type="button" data-starter-link>Copy the link</button>
+      </div>
+      <p class="pkg-set-note starter-share" data-starter-url>{shareUrl}</p>
     </div>
   </form>
   <script type="application/json" id="starter-guides" set:html={guideJson} />
   <script>
-    import { starterPrompt, type GuideBrief, type ShapeId } from '../data/prompt-builder'
+    import { agentsDocument, selectionFromSearch, starterPrompt, starterSearch, type GuideBrief, type ShapeId } from '../data/prompt-builder'
 
     const guides = JSON.parse(document.getElementById('starter-guides')?.textContent || '{}') as Record<string, GuideBrief>
     const form = document.querySelector<HTMLFormElement>('[data-starter]')
     const out = document.querySelector<HTMLElement>('[data-starter-prompt]')
     const count = document.querySelector<HTMLElement>('[data-starter-count]')
     const note = document.querySelector<HTMLElement>('[data-starter-note]')
+    const share = document.querySelector<HTMLElement>('[data-starter-url]')
     if (form && out) {
       const shapeOf = () => (form.querySelector<HTMLInputElement>('input[name="shape"]:checked')?.value ?? 'inertia') as ShapeId
       const applyShape = (next: string) => {
@@ -113,13 +124,22 @@ const inertiaNote = SHAPES.find(item => item.id === shape)?.note ?? ''
         if (!input.checked || input.closest('.tool-choice')?.hasAttribute('hidden')) return []
         return input.dataset.module ? [input.dataset.module] : []
       })
+      const shareUrl = () => {
+        const url = new URL(location.href)
+        url.search = starterSearch(shapeOf(), ids())
+        return url
+      }
       const write = () => {
-        const built = starterPrompt(shapeOf(), ids(), guides)
+        const picked = ids()
+        const built = starterPrompt(shapeOf(), picked, guides)
         out.textContent = built.prompt
         if (count) {
           const noun = built.count === 1 ? 'guide' : 'guides'
           count.textContent = `${built.count} ${noun} in this prompt. Paste it into the AI agent you already have open.`
         }
+        const url = shareUrl()
+        history.replaceState(null, '', url)
+        if (share) share.textContent = url.toString()
       }
       form.addEventListener('change', (event) => {
         const target = event.target
@@ -127,6 +147,51 @@ const inertiaNote = SHAPES.find(item => item.id === shape)?.note ?? ''
         if (target.name === 'shape') applyShape(target.value)
         write()
       })
+      form.querySelector('[data-starter-download]')?.addEventListener('click', () => {
+        const file = agentsDocument(out.textContent ?? '')
+        const blobUrl = URL.createObjectURL(new Blob([file], { type: 'text/markdown;charset=utf-8' }))
+        const link = document.createElement('a')
+        link.href = blobUrl
+        link.download = 'AGENTS.md'
+        document.body.append(link)
+        link.click()
+        link.remove()
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 1500)
+      })
+      form.querySelector<HTMLButtonElement>('[data-starter-link]')?.addEventListener('click', async (event) => {
+        const button = event.currentTarget
+        if (!(button instanceof HTMLButtonElement)) return
+        const label = button.querySelector('.copy-label') ?? button
+        const previous = label.textContent
+        try {
+          await navigator.clipboard.writeText(shareUrl().toString())
+          label.textContent = 'Copied'
+        } catch {
+          label.textContent = 'Copy the address bar'
+        }
+        setTimeout(() => { label.textContent = previous }, 1600)
+      })
+      const params = new URLSearchParams(location.search)
+      if (params.has('app') || params.has('m')) {
+        const selection = selectionFromSearch(params)
+        form.querySelectorAll<HTMLInputElement>('input[name="shape"]').forEach((input) => {
+          input.checked = input.value === selection.shape
+        })
+        const pickedIds = new Set(selection.ids)
+        form.querySelectorAll<HTMLInputElement>('[data-module]').forEach((input) => {
+          const shapes = (input.dataset.shapes ?? '').split(',')
+          const fit = shapes.includes(selection.shape)
+          input.closest('.tool-choice')?.toggleAttribute('hidden', !fit)
+          input.checked = fit && pickedIds.has(input.dataset.module ?? '')
+        })
+        form.querySelectorAll<HTMLElement>('[data-starter-group]').forEach((group) => {
+          const visible = [...group.querySelectorAll<HTMLElement>('.tool-choice')].some((choice) => !choice.hidden)
+          group.toggleAttribute('hidden', !visible)
+        })
+        const pickedRadio = form.querySelector<HTMLInputElement>('input[name="shape"]:checked')
+        if (note && pickedRadio?.dataset.note) note.textContent = pickedRadio.dataset.note
+      }
+      write()
     }
   </script>
 </ToolPage>

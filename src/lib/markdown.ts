@@ -63,10 +63,15 @@ ${categories
   })
   .filter(Boolean)
   .join("\n")}
+## Roadmap
+
+- [Laravel and Vue roadmap](${SITE_URL}/path): tick topics in the browser. Each track credits the roadmap.sh map it leans on.
+
 ## Tools
 
 - [Developer tools](${SITE_URL}/tools): machine checks, the setup commands in order, the lines the setup guide shows, a stack recipe, a file map, October release notes, a 2019 to 2026 pick list, a compatibility card, and an AGENTS.md file
-- [Starter prompt](${SITE_URL}/starter): tick Laravel and Vue modules. The prompt reads those guides and copies their constraints
+- [Starter prompt](${SITE_URL}/starter): tick Laravel and Vue modules. The prompt reads those guides and copies their constraints. The same prompt downloads as AGENTS.md, and the query string keeps the ticks.
+- [Fix the app you have](${SITE_URL}/fix): paste an error, or composer.json and package.json. The prompt reads the matching guides.
 - [Start here](${SITE_URL}/tools/start) ([Markdown](${SITE_URL}/tools/start.md)): machine checks and the setup commands in order
 - [Samples](${SITE_URL}/tools/samples) ([Markdown](${SITE_URL}/tools/samples.md)): the lines the Vue starter kit setup guide prints
 - [Stack recipe](${SITE_URL}/tools/recipe): tick the jobs. The commands use the same packages as the chart. They do not pin versions

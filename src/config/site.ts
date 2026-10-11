@@ -91,11 +91,13 @@ export const FOOTER = [
     links: [
       { label: "All articles", href: "/posts" },
       { label: "Starter prompt", href: "/starter" },
+      { label: "Fix an app", href: "/fix" },
       { label: "Packages", href: "/packages" },
       { label: "Tools", href: "/tools" },
       { label: "Laravel", href: "/category/laravel" },
       { label: "Vue", href: "/category/vuejs" },
       { label: "Learning paths", href: "/page/courses" },
+      { label: "Roadmap", href: "/path" },
       { label: "Search", href: "/search" },
     ],
   },
