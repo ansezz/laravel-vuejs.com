@@ -9,6 +9,21 @@ snippet: "npm run build:ssr"
 categories: [laravel, vuejs]
 tags: [laravel, vuejs, inertia]
 ---
+Your public post list shows a blank page to link previews and slow phones until JavaScript loads. Inertia SSR sends real HTML on the first response. Here is how to build it, run it, and keep your Vue code from crashing it.
+
+<TLDR
+  audience="Laravel + Vue developers with public Inertia pages"
+  learn={['Which build and Artisan commands SSR needs', 'Why `window` crashes the server render, and the fix', 'Which pages are worth server-rendering']}
+  applies="Laravel 13 · Vue starter kit · inertia-laravel 3 · @inertiajs/vue3 + @inertiajs/vite 3.9"
+>
+
+- Ship `npm run build:ssr` (not just `npm run build`), then keep `php artisan inertia:start-ssr` running in production.
+- In development, `npm run dev` already server-renders through the Inertia Vite plugin.
+- Read `window` and `document` only in `onMounted`. An app entirely behind login can skip SSR.
+
+</TLDR>
+
+## When you need SSR
 
 Inertia SSR runs your Vue page in Node and sends HTML as the first response. Use it when a public page has to be readable without waiting for JavaScript. A tool that is entirely behind login does not need that HTML. The browser loads the client bundle after the redirect to login either way.
 
@@ -32,15 +47,34 @@ php artisan inertia:check-ssr
 php artisan inertia:stop-ssr
 ```
 
+| Command | What it does |
+|---|---|
+| `npm run build:ssr` | Builds the browser bundle and the server bundle in `bootstrap/ssr` |
+| `php artisan inertia:start-ssr` | Starts the SSR server (keep it supervised) |
+| `php artisan inertia:check-ssr` | Confirms the SSR server answers |
+| `php artisan inertia:stop-ssr` | Stops it, for example after a deploy |
+
 `inertia:check-ssr` is how you confirm the process answered before you blame the page. `inertia:start-ssr` accepts `--runtime=bun` when you are actually running Bun. Do not add the flag on a Node host.
 
+<Callout type="gotcha" title="SSR doesn't make public/hot safe">
+
 `public/hot` still must not be on the server. SSR does not make a dev server safe to deploy.
+
+</Callout>
 
 ## window is not there
 
 The first render has no `document` and no `window`. A line in `<script setup>` that reads `window.innerWidth` throws during that render. Inertia then falls back to the client-only page. Read the browser inside `onMounted`, or guard it.
 
-```ts
+<CodeCompare before="Crashes on the server" after="Runs in the browser only">
+
+```ts title="resources/js/pages/posts/Index.vue"
+import { ref } from "vue";
+
+const width = ref(window.innerWidth);
+```
+
+```ts title="resources/js/pages/posts/Index.vue"
 import { onMounted, ref } from "vue";
 
 const width = ref(0);
@@ -50,7 +84,23 @@ onMounted(() => {
 });
 ```
 
+</CodeCompare>
+
+<Callout type="heads-up" title="Pinia and SSR">
+
 Pinia has the same constraint. Create the store inside the existing `withApp` callback, not at module scope, so two SSR requests do not share one store. That callback is the [Pinia guide](/pinia-laravel-inertia). A manual `setup` callback turns off the Vite plugin's SSR wiring.
+
+</Callout>
+
+<TryIt title="Check the HTML, not the screen">
+
+```bash
+curl -s https://your-app.test/posts | grep -o "<h1[^>]*>[^<]*"
+```
+
+With SSR working, the heading is in the first response. Without it, you only get the empty app container.
+
+</TryIt>
 
 ## What to render
 
@@ -61,3 +111,31 @@ Deferred props still arrive after the HTML. They are not in the first document. 
 ## Where this stops
 
 The supervise step on a VPS, `php artisan optimize`, and the queue are the deploy guide. This page does not pick a host.
+
+## Recap
+
+- SSR is for public pages that need HTML on the first response.
+- Build with `npm run build:ssr`, run `inertia:start-ssr` under a supervisor, verify with `inertia:check-ssr`.
+- Touch `window`/`document` only in `onMounted`; create Pinia inside `withApp`.
+- Deferred props are never in the first HTML.
+
+## FAQ
+
+<FAQ items={[
+  { q: 'Do I need to run inertia:start-ssr in development?', a: 'No. With the Inertia Vite plugin, `npm run dev` and `composer run dev` already server-render.' },
+  { q: 'Why does my page render client-side only even with SSR on?', a: 'Something threw during the server render, often code that reads `window` or `document` in `<script setup>`. Inertia falls back to the client-only page. Move that code into `onMounted`.' },
+  { q: 'Does npm run build include the SSR bundle?', a: 'No. `npm run build` only writes `public/build`. Use `npm run build:ssr` to refresh `bootstrap/ssr` too.' },
+  { q: 'Do apps behind a login need SSR?', a: 'Usually not. Search engines and link previews never see those pages, and users load the client bundle after login anyway.' },
+]} />
+
+## Next steps
+
+- [Deploy a Laravel + Vue app](/deploy-laravel-vue): supervise the SSR process next to the queue.
+- [Pinia with Laravel and Inertia](/pinia-laravel-inertia): SSR-safe stores.
+- [Set the page title in Inertia and Vue](/inertia-vue-document-title): titles that land in the SSR HTML.
+- [Inertia docs: server-side rendering](https://inertiajs.com/docs/v3/advanced/server-side-rendering)
+
+## Sources
+
+- [Inertia v3: Server-side rendering](https://inertiajs.com/docs/v3/advanced/server-side-rendering)
+- [Laravel Vue starter kit](https://github.com/laravel/vue-starter-kit)

@@ -9,21 +9,34 @@ categories: [vuejs, laravel]
 tags: [inertia, vuejs, laravel]
 ---
 
-Users notice waiting. A like button that takes 300 ms to react feels broken, even when nothing is wrong. Until now, Laravel + Vue apps had two ways out: manage local state by hand, or bring in a separate data library. **Inertia 3** adds two built-in tools for this:
+A like button that takes 300 ms to react feels broken, even when nothing is wrong. Until now you had two ways out: juggle local state by hand, or add a data library. **Inertia 3** ships both fixes built in.
 
-- **Optimistic updates**: change the UI right away, send the request, and roll back automatically if it fails.
-- **`useHttp`**: the familiar `useForm` state (`processing`, `errors`, progress) for plain JSON requests that should not trigger a page visit.
+<TLDR
+  audience="Laravel + Vue developers on Inertia 3"
+  learn={['Optimistic updates with `router.optimistic()` and automatic rollback', 'Debounced JSON requests with `useHttp`', 'When to pick `useHttp().optimistic()` instead', 'How to test the endpoints with Pest']}
+  tested="Laravel 13.35 · inertia-laravel 3.5 · @inertiajs/vue3 3.9 · Vue 3.5 · TypeScript · Pest"
+>
 
-In this post we build both into one page: a **like button** and a **live search**. Every snippet comes from a working Laravel 13 app that we tested in the browser, with a slow server and with a failing one.
+- **`router.optimistic(fn)`** changes page props before the request and rolls back on any failure (500, 422, interrupted visit).
+- **`useHttp`** gives plain JSON requests `useForm`-style state: reactive data, `processing`, Laravel validation `errors`, typed responses.
+- Return the whole changed prop (the merge is shallow), call `cancel()` before a new search request, and catch the rejected promise.
 
-> **Tested with:** Laravel 13.35, `inertiajs/inertia-laravel` 3.5, `@inertiajs/vue3` 3.9, Vue 3.5, TypeScript, Pest. Still on Inertia 2? Start with our [upgrade checklist](/upgrade-inertia-2-to-3).
+</TLDR>
+
+## What we are building
+
+One page with two features:
+
+- **A like button** that fills instantly, then confirms or rolls back.
+- **A live search** that queries a JSON endpoint as you type, without page visits or history entries.
+
+Every snippet comes from a working Laravel 13 app that we tested in the browser, with a slow server and with a failing one. Still on Inertia 2? Start with our [upgrade checklist](/upgrade-inertia-2-to-3).
 
 ## The back end
 
 Posts can be liked by users, so we need a pivot table:
 
-```php
-// database/migrations/xxxx_create_post_likes_table.php
+```php title="database/migrations/xxxx_create_post_likes_table.php"
 Schema::create('post_likes', function (Blueprint $table) {
     $table->foreignId('post_id')->constrained()->cascadeOnDelete();
     $table->foreignId('user_id')->constrained()->cascadeOnDelete();
@@ -32,8 +45,7 @@ Schema::create('post_likes', function (Blueprint $table) {
 });
 ```
 
-```php
-// app/Models/Post.php
+```php title="app/Models/Post.php"
 public function likes(): BelongsToMany
 {
     return $this->belongsToMany(User::class, 'post_likes')->withTimestamps();
@@ -42,8 +54,7 @@ public function likes(): BelongsToMany
 
 The index page sends each post with its like count and whether the current user liked it:
 
-```php
-// app/Http/Controllers/PostController.php
+```php title="app/Http/Controllers/PostController.php"
 public function index(Request $request): Response
 {
     return Inertia::render('posts/Index', [
@@ -59,8 +70,7 @@ public function index(Request $request): Response
 
 Liking is an ordinary Inertia endpoint: change the data, then `back()`. Inertia follows the redirect and sends fresh props.
 
-```php
-// app/Http/Controllers/PostLikeController.php
+```php title="app/Http/Controllers/PostLikeController.php"
 public function store(Request $request, Post $post): RedirectResponse
 {
     $post->likes()->syncWithoutDetaching([$request->user()->id]);
@@ -78,8 +88,7 @@ public function destroy(Request $request, Post $post): RedirectResponse
 
 Search is a JSON endpoint. It is not a page, so it returns `response()->json()`:
 
-```php
-// app/Http/Controllers/PostSearchController.php
+```php title="app/Http/Controllers/PostSearchController.php"
 public function __invoke(Request $request): JsonResponse
 {
     $validated = $request->validate([
@@ -96,8 +105,7 @@ public function __invoke(Request $request): JsonResponse
 }
 ```
 
-```php
-// routes/web.php
+```php title="routes/web.php"
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('posts', [PostController::class, 'index'])->name('posts.index');
     Route::get('posts/search', PostSearchController::class)->name('posts.search');
@@ -106,14 +114,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 ```
 
+<Callout type="tip" title="CSRF just works">
+
 All routes live in `web.php`, so they share the session. Inertia's HTTP client sends the `XSRF-TOKEN` cookie as a header, which means CSRF protection works for `useHttp` POSTs with no extra setup.
+
+</Callout>
 
 ## Part 1: an optimistic like button
 
 Put a shared type for the page props in its own file:
 
-```ts
-// resources/js/types/post.ts
+```ts title="resources/js/types/post.ts"
 export interface Post {
     id: number
     title: string
@@ -125,8 +136,7 @@ export interface Post {
 
 Now the button. `router.optimistic()` takes the current page props and returns the props that should change. Inertia applies them **before** sending the request:
 
-```vue
-<!-- resources/js/components/posts/LikeButton.vue -->
+```vue title="resources/js/components/posts/LikeButton.vue" {10-17}
 <script setup lang="ts">
 import { router } from '@inertiajs/vue3'
 import type { Post } from '@/types/post'
@@ -160,23 +170,33 @@ function toggleLike() {
 </template>
 ```
 
-What happens on a click, according to the [optimistic updates docs](https://inertiajs.com/docs/v3/the-basics/optimistic-updates), and what we saw in the browser:
+### What happens on a click
+
+According to the [optimistic updates docs](https://inertiajs.com/docs/v3/the-basics/optimistic-updates), and what we saw in the browser:
 
 1. Inertia compares the returned props with the current ones and keeps a snapshot of the keys that changed (here only `posts`).
 2. It merges the new value, and Vue re-renders straight away. With the server slowed down on purpose, the heart filled and the count went from 0 to 1 while the request was still pending.
 3. On success, the server's props replace the optimistic ones. `only: ['posts']` keeps that response small.
 4. On failure, Inertia restores the snapshot. When we made the endpoint return a 500, the heart went back to its previous state. A 422 rolls back too, and the validation errors are kept.
 
-A few rules make this reliable:
+### Four rules that make it reliable
 
 - **Return only what changes.** The return value is merged shallowly, so return the whole `posts` array, not one post inside it.
 - **Do not mutate `pageProps`.** Build new objects (`{ ...p }`) as above.
 - **Let the server have the last word.** The optimistic value is a guess. The real count, including likes from other users, arrives with the response.
 - **Fast double clicks are handled.** Inertia tracks which props each optimistic update touched, and it does not let a response overwrite a prop until the last update that changed it has finished.
 
+<Callout type="gotcha" title="shallow merge">
+
+Returning `{ posts: [changedPost] }` would replace the whole list with one post. Map over `pageProps.posts` and return the full array.
+
+</Callout>
+
+### Stay on the page when it fails
+
 To keep the user on the page when the request fails, handle the error yourself. Inertia rolls back first, then you show a message:
 
-```ts
+```ts title="resources/js/components/posts/LikeButton.vue"
 router.optimistic(/* … */).post(url, {
     preserveScroll: true,
     onHttpException: () => {
@@ -186,14 +206,17 @@ router.optimistic(/* … */).post(url, {
 })
 ```
 
+<Callout type="tip" title="forms too">
+
 The same `optimistic()` method also works on `useForm`, and the `<Form>` component has an `:optimistic` prop. Use those for things like adding a todo to a list before the server confirms it.
 
-## Part 2: a live search with `useHttp`
+</Callout>
+
+## Part 2: a live search with useHttp
 
 Search results should not be page props. You don't want a history entry or a full props round trip on every keystroke. That is the job of `useHttp`: it makes a plain HTTP request and gives you `useForm`-style state.
 
-```vue
-<!-- resources/js/components/posts/PostSearch.vue -->
+```vue title="resources/js/components/posts/PostSearch.vue" {10,16}
 <script setup lang="ts">
 import { useHttp } from '@inertiajs/vue3'
 import { ref } from 'vue'
@@ -239,7 +262,9 @@ function onInput() {
 </template>
 ```
 
-Things worth knowing, from the [HTTP requests docs](https://inertiajs.com/docs/v3/the-basics/http-requests) and from reading the source:
+### Five things worth knowing
+
+From the [HTTP requests docs](https://inertiajs.com/docs/v3/the-basics/http-requests) and from reading the source:
 
 - **The data is the form.** `useHttp({ q: '' })` makes `search.q` reactive, so `v-model` works directly. For a `GET`, the data goes into the query string, so the request becomes `/posts/search?q=et`.
 - **The generics type both sides.** `useHttp<{ q: string }, Result[]>` types the form data and the resolved response.
@@ -247,14 +272,20 @@ Things worth knowing, from the [HTTP requests docs](https://inertiajs.com/docs/v
 - **Starting a new request does not cancel the old one.** Call `search.cancel()` yourself, as above, or an old slow response can arrive after a newer one.
 - **Need more callbacks?** `onSuccess(data, response)`, `onHttpException`, `onNetworkError`, `onCancel` and `onFinish` are all available, and each instance tracks its own `processing` state.
 
+<Callout type="gotcha" title="race conditions">
+
+Without `search.cancel()`, a slow response for "op" can land after the fast one for "optim" and overwrite the right results. One line prevents it.
+
+</Callout>
+
 In our browser test, typing "et" fired one request (the debounce absorbed the first keystroke) and showed 8 results.
 
 ## Bonus: optimistic updates on a JSON endpoint
 
 `useHttp` has `optimistic()` too. It works on the hook's own data instead of page props, which fits widgets that talk to a JSON API:
 
-```php
-// PostLikeController@toggle, route: POST posts/{post}/like/toggle
+```php title="app/Http/Controllers/PostLikeController.php"
+// route: POST posts/{post}/like/toggle
 public function toggle(Request $request, Post $post): JsonResponse
 {
     $post->likes()->toggle([$request->user()->id]);
@@ -266,7 +297,7 @@ public function toggle(Request $request, Post $post): JsonResponse
 }
 ```
 
-```vue
+```vue title="resources/js/components/posts/LikeToggle.vue"
 <script setup lang="ts">
 import { useHttp } from '@inertiajs/vue3'
 import type { Post } from '@/types/post'
@@ -304,14 +335,22 @@ async function toggle() {
 
 We tested this one with the same slow and failing server. It updated instantly, confirmed with `{"liked":true,"likes_count":1}`, and rolled back cleanly on a 500.
 
-**Which one should you use?** If the change is part of the page (a list, a counter that other components read from props), use `router.optimistic()`, so the page props stay the single source of truth. If the widget owns its data and talks to a JSON endpoint, use `useHttp().optimistic()`.
+### Which one should you use?
+
+| | `router.optimistic()` | `useHttp().optimistic()` |
+|---|---|---|
+| Works on | Page props | The hook's own data |
+| Server responds with | A redirect (`back()`), then fresh props | JSON |
+| Best for | Lists and counters other components read from props | Self-contained widgets talking to a JSON endpoint |
+| Source of truth | The page props | The widget |
+
+If the change is part of the page, use `router.optimistic()`, so the page props stay the single source of truth. If the widget owns its data and talks to a JSON endpoint, use `useHttp().optimistic()`.
 
 ## Test the server side
 
 The optimistic part runs in the browser, but the endpoints still need tests. Here are three Pest tests that pass against the code above:
 
-```php
-// tests/Feature/PostLikesTest.php
+```php title="tests/Feature/PostLikesTest.php"
 use App\Models\Post;
 use App\Models\User;
 
@@ -354,13 +393,39 @@ it('validates the search term', function () {
 });
 ```
 
+<TryIt title="Run the tests">
+
+```bash
+php artisan test --filter=PostLikesTest
+```
+
+</TryIt>
+
 For the browser side, a Playwright or Pest browser test with a delayed route (`page.route()` plus a short wait) is the easiest way to see the optimistic state and the rollback, which is how we checked the examples in this post.
 
 ## Recap
 
 - `router.optimistic(fn).post(…)` updates page props right away and rolls back on any failure, including 422s and interrupted visits.
 - `useHttp` gives JSON requests the same comfort as `useForm`: reactive data, `processing`, Laravel validation errors and typed responses.
-- Remember three things: return partial props, call `cancel()` before a new search request, and catch the rejected promise.
+- Return partial props (whole keys), call `cancel()` before a new search request, and catch the rejected promise.
+- Page data? `router.optimistic()`. Widget-owned JSON? `useHttp().optimistic()`.
+
+## FAQ
+
+<FAQ items={[
+  { q: 'Does an optimistic update roll back on a validation error?', a: 'Yes. A 422 rolls back the optimistic props too, and the validation errors are kept so you can show them.' },
+  { q: 'Why does my useHttp search show stale results?', a: 'Starting a new request does not cancel the previous one. Call `search.cancel()` before each new request so a slow old response cannot overwrite a newer one.' },
+  { q: 'Does useHttp reject the promise on a 422?', a: 'No. A 422 resolves with `undefined` and fills `errors`. Other HTTP errors, network errors and cancellations reject, so wrap `await` in `try`/`catch`.' },
+  { q: 'Do I need extra CSRF setup for useHttp POST requests?', a: 'No, as long as the routes are in `web.php`. Inertia sends the `XSRF-TOKEN` cookie back as the `X-XSRF-TOKEN` header.' },
+  { q: 'Can I use optimistic updates with useForm or the Form component?', a: 'Yes. `useForm` has the same `optimistic()` method, and `<Form>` takes an `:optimistic` prop.' },
+]} />
+
+## Next steps
+
+- [Upgrade from Inertia 2 to Inertia 3](/upgrade-inertia-2-to-3): the checklist, if you are not on v3 yet.
+- [Inertia 3.9: background polling and the navigate type](/inertia-3-9-background-polling-navigate-type): keep that like count fresh without a reload.
+- [Partial reloads in Inertia and Vue](/inertia-partial-reloads): more on `only` and small responses.
+- [Test a Laravel + Vue app](/test-laravel-vue): feature and browser tests.
 
 ## Sources
 
@@ -369,5 +434,3 @@ For the browser side, a Playwright or Pest browser test with a delayed route (`p
 - [Inertia v3: TypeScript (HTTP helper generics)](https://inertiajs.com/docs/v3/advanced/typescript)
 - [Inertia v3: CSRF protection](https://inertiajs.com/docs/v3/security/csrf-protection)
 - [Inertia v3 upgrade guide: what's new](https://inertiajs.com/docs/v3/getting-started/upgrade-guide)
-
-Built something with these? Share it in the [Laravel & VueJs Facebook group](https://www.facebook.com/groups/LaravelVueJs), and join us on [Telegram](https://t.me/LaravelVueJs) for the Sunday digest.

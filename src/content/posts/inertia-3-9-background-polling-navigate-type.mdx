@@ -8,25 +8,33 @@ snippet: "usePoll(5000, {}, { background: 'pause' })"
 categories: [vuejs, laravel]
 tags: [inertia, vuejs, release]
 ---
+Your dashboard polls every 5 seconds, and so does every forgotten tab, all day long. And when users hit the back button, they see the data from ten minutes ago. Inertia **3.9** fixes both with one option and one event field.
 
-Inertia **3.9.0** came out on **October 9, 2026**, followed a few hours later by **3.9.1**. It is a small release, but two of its additions remove code that many Vue apps write by hand:
+<TLDR
+  audience="Vue developers on Inertia 3"
+  learn={["Pausing `usePoll` in hidden tabs with `background: 'pause'`", "Refreshing stale pages after the back button with the `navigate` event `type`", 'What the 3.9.1 security fixes change']}
+  applies="@inertiajs/vue3 3.9.1 · inertia-laravel 3.5 · Vue 3.5"
+>
 
-- A **`background` option for polling**, so a dashboard can stop hitting your server while the tab is hidden.
-- A **`type` field on the `navigate` event**, so you can tell a back/forward button visit apart from a normal one and refresh stale data.
+- **3.9.0** (October 9, 2026) adds `background: 'pause' | 'throttle' | 'continue'` to polling and a `type` field (`'initial' | 'visit' | 'history'`) on the `navigate` event.
+- **3.9.1**, out a few hours later, keeps the XSRF header on same-origin requests and gives every encrypted history entry its own IV.
+- No breaking changes and nothing to change in Laravel. Update to **3.9.1**.
 
-3.9.1 then adds two security hardening fixes that you get just by updating. Let's go through them with Vue 3 examples.
+</TLDR>
 
-> **Applies to:** `@inertiajs/vue3` 3.9.1 (also React and Svelte). No changes are needed on the Laravel side; `inertiajs/inertia-laravel` 3.5 works as is.
+## Update to 3.9.1
 
-## Update
+<TryIt title="Update in one line">
 
 ```bash
 npm install @inertiajs/vue3@^3.9.1
 ```
 
-That's all. Nothing in 3.9 is a breaking change.
+</TryIt>
 
-## 1. Pause polling in background tabs
+That's all. Nothing in 3.9 is a breaking change, and `inertiajs/inertia-laravel` 3.5 works as is.
+
+## Pause polling in background tabs
 
 Polling is the simplest way to keep a page fresh: an order status, a queue monitor, a list of notifications. Until now, Inertia had two modes when the user switched to another tab:
 
@@ -35,11 +43,13 @@ Polling is the simplest way to keep a page fresh: an order status, a queue monit
 
 There was no way to stop completely. A dashboard that polls every 5 seconds still sent a request every 50 seconds from every forgotten tab, all day long.
 
-### Before (3.8)
+### Before and after
 
-To stop polling in hidden tabs, you had to wire it up yourself:
+Until 3.9, stopping polling in hidden tabs meant wiring up `visibilitychange` yourself. Now it is one option:
 
-```vue
+<CodeCompare before="3.8" after="3.9">
+
+```vue title="resources/js/pages/orders/index.vue"
 <script setup lang="ts">
 import { onMounted, onUnmounted } from 'vue'
 import { usePoll } from '@inertiajs/vue3'
@@ -57,15 +67,15 @@ onUnmounted(() => document.removeEventListener('visibilitychange', sync))
 </script>
 ```
 
-### After (3.9)
-
-```vue
+```vue title="resources/js/pages/orders/index.vue"
 <script setup lang="ts">
 import { usePoll } from '@inertiajs/vue3'
 
 usePoll(5000, { only: ['orders'] }, { background: 'pause' })
 </script>
 ```
+
+</CodeCompare>
 
 It is also smarter than the hand-written version. When the tab becomes visible again, Inertia sends a request **right away only if one was due** while the tab was hidden. Otherwise it waits for the rest of the current interval. So a user who flicks between tabs does not trigger a request on every switch.
 
@@ -77,11 +87,15 @@ The option has three values:
 | `'pause'` | Stops polling, resumes when the tab is visible |
 | `'continue'` | Keeps polling at the full interval |
 
-`keepAlive: true` still works, but it is now **deprecated** in favor of `background: 'continue'`. If you use it, this is a one-line change:
+<Callout type="heads-up" title="keepAlive is deprecated">
 
-```diff
-- usePoll(2000, {}, { keepAlive: true })
-+ usePoll(2000, {}, { background: 'continue' })
+`keepAlive: true` still works, but it is now **deprecated** in favor of `background: 'continue'`. If you use it, this is a one-line change.
+
+</Callout>
+
+```ts
+usePoll(2000, {}, { keepAlive: true }) // [!code --]
+usePoll(2000, {}, { background: 'continue' }) // [!code ++]
 ```
 
 The same option works with `router.poll()` outside components:
@@ -94,8 +108,7 @@ const { stop } = router.poll(10_000, { only: ['stats'] }, { background: 'pause' 
 
 On the Laravel side, pair polling with a partial reload so each request only computes the prop you need:
 
-```php
-// app/Http/Controllers/OrderController.php
+```php title="app/Http/Controllers/OrderController.php"
 public function index(Request $request): Response
 {
     return Inertia::render('orders/index', [
@@ -107,13 +120,19 @@ public function index(Request $request): Response
 }
 ```
 
+<Callout type="tip" title="poll only what changes">
+
 Because `orders` is a closure, a poll with `only: ['orders']` skips everything else.
 
-**Which one should you pick?** Use `'pause'` for anything the user only cares about while looking at it: dashboards, lists, admin screens. Keep `'continue'` for things that must keep running in the background, such as keeping a session alive or tracking a long job that should notify the user when it ends.
+</Callout>
+
+### Which mode should you pick?
+
+Use `'pause'` for anything the user only cares about while looking at it: dashboards, lists, admin screens. Keep `'continue'` for things that must keep running in the background, such as keeping a session alive or tracking a long job that should notify the user when it ends.
 
 Inertia 3.9 also fixes a related bug: a poll created while the tab was **already hidden** used to run at full speed until the next visibility change. Now it respects the hidden state from the start.
 
-## 2. Know how the user arrived: `navigate` event `type`
+## Know how the user arrived: the navigate event type
 
 When the user presses the back button, Inertia restores the page from browser history. That is fast, but the props are the ones the page had **when the user left it**. An inbox that showed 3 unread messages ten minutes ago still shows 3, even if there are now 12.
 
@@ -129,7 +148,7 @@ Before 3.9, there was no public way to tell a history restore apart from a norma
 
 Register the listener once, for example in `resources/js/app.ts`:
 
-```ts
+```ts title="resources/js/app.ts"
 import { router } from '@inertiajs/vue3'
 
 router.on('navigate', (event) => {
@@ -171,16 +190,24 @@ router.on('navigate', ({ detail }) => {
 })
 ```
 
-One detail from the pull request: if the user goes back from a **non-Inertia** page (an external site, a file download page) and the browser restores your app, the type is also `'history'`, because the props come from the saved history state in that case too.
+<Callout type="gotcha" title="coming back from another site">
 
-## 3. Security hardening in 3.9.1
+If the user goes back from a **non-Inertia** page (an external site, a file download page) and the browser restores your app, the type is also `'history'`, because the props come from the saved history state in that case too (from the pull request).
+
+</Callout>
+
+## Security hardening in 3.9.1
 
 Two fixes, both automatic once you update:
 
 - **The XSRF token stays on your own origin.** Inertia's built-in HTTP client sent the `X-XSRF-TOKEN` header on every request, including requests to other domains, for example a presigned S3 upload URL used with `useHttp`. Now the header is only added for same-origin URLs. If you really need it for another origin, add it yourself in an `http.onRequest` handler.
 - **History encryption uses a fresh IV for every entry.** If you use `Inertia::encryptHistory()`, entries used to share one AES-GCM IV per tab. Each entry now gets its own random IV. Entries saved by older versions can't be decrypted anymore, so Inertia simply fetches those pages from the server again. Users won't notice anything.
 
+<Callout type="heads-up" title="update to 3.9.1, not 3.9.0">
+
 If your app sends requests to other domains with `useHttp`, this is the main reason to update today.
+
+</Callout>
 
 ## Other fixes worth knowing
 
@@ -197,6 +224,30 @@ If your app sends requests to other domains with `useHttp`, this is the main rea
 - Consider `background: 'pause'` on every `usePoll` that only matters while the page is visible. It is a free reduction in server load.
 - On Inertia 2? Version **2.3.29** was released the same day with the history encryption IV fix and the prefetch cache flush.
 
+## Recap
+
+- `usePoll(ms, reload, { background: 'pause' })` stops polling in hidden tabs and catches up only if a poll was due.
+- `background` is `'throttle'` (default), `'pause'` or `'continue'`; `keepAlive: true` is deprecated.
+- `navigate` events now carry `type`: `'initial'`, `'visit'` or `'history'`. Reload stale props on `'history'`.
+- 3.9.1 keeps the XSRF header on your own origin and uses a fresh IV per encrypted history entry.
+
+## FAQ
+
+<FAQ items={[
+  { q: 'How do I stop Inertia polling when the tab is hidden?', a: "Pass `{ background: 'pause' }` as the third argument to `usePoll` (or `router.poll`). It needs `@inertiajs/vue3` 3.9 or newer." },
+  { q: 'Is keepAlive removed in Inertia 3.9?', a: "No, it still works but is deprecated. Replace `keepAlive: true` with `background: 'continue'`." },
+  { q: 'How can I detect a back-button visit in Inertia?', a: "Listen to the `navigate` event and check `event.detail.type === 'history'`. Then call `router.reload({ only: [...] })` to refresh stale props." },
+  { q: 'Do I need to change anything in Laravel for Inertia 3.9?', a: 'No. `inertiajs/inertia-laravel` 3.5 works as is; the changes are all in the client packages.' },
+  { q: 'Is there a fix for Inertia 2 too?', a: 'Yes. Inertia 2.3.29, released the same day, has the history encryption IV fix and the prefetch cache flush.' },
+]} />
+
+## Next steps
+
+- [Partial reloads in Inertia and Vue](/inertia-partial-reloads): make every poll and reload cheap.
+- [Laravel 13.35: QUERY routes and Markdown responses](/laravel-13-35-query-routes-markdown-responses): the Laravel release from the same week.
+- [Listen for Laravel events in Vue with Reverb](/laravel-reverb-vue): push updates instead of polling.
+- [Inertia docs: polling](https://inertiajs.com/docs/v3/data-props/polling)
+
 ## Sources
 
 - [Inertia v3.9.0 release notes](https://github.com/inertiajs/inertia/releases/tag/v3.9.0)
@@ -206,5 +257,3 @@ If your app sends requests to other domains with `useHttp`, this is the main rea
 - [PR #3313: XSRF header only for same-origin URLs](https://github.com/inertiajs/inertia/pull/3313)
 - [PR #3315: unique IV per encrypted history entry](https://github.com/inertiajs/inertia/pull/3315)
 - [Inertia docs: polling](https://inertiajs.com/docs/v3/data-props/polling)
-
-Questions about this release? Ask in our [Facebook group](https://www.facebook.com/groups/LaravelVueJs) or on [Telegram](https://t.me/LaravelVueJs).
