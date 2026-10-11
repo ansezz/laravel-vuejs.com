@@ -7,7 +7,7 @@ import NewsletterBand from '../components/NewsletterBand.astro'
 import { allPosts, related, enhanceHtml, fmtDate, absolute, type Post } from '../lib/content'
 import { SITE_NAME, SITE_URL, DISQUS_SHORTNAME, GITHUB_URL, AUTHOR } from '../config/site'
 import AgentTask from '../components/AgentTask.astro'
-import { agentTaskFor } from '../data/agent-tasks'
+import { agentTaskFor, nextStation } from '../data/agent-tasks'
 
 export async function getStaticPaths() {
   const posts = await allPosts()
@@ -17,6 +17,9 @@ interface Props { post: Post; newer?: Post; older?: Post }
 const { post, newer, older } = Astro.props
 const task = agentTaskFor({ ...post, body: post.entry.body ?? '' })
 const posts = await allPosts()
+const next = nextStation(post.slug, posts.map((item) => ({
+  slug: item.slug, title: item.title, excerpt: item.excerpt, tags: item.tags, body: item.entry.body ?? '',
+})))
 const html = enhanceHtml(post.entry.rendered?.html ?? '')
 const headings = ((post.entry.rendered?.metadata?.headings ?? []) as { depth: number; slug: string; text: string }[]).filter(h => h.depth === 2 || h.depth === 3)
 const url = absolute(post.url)
@@ -77,7 +80,7 @@ const jsonld = [{
 
     {task && (
       <div class="container">
-        <AgentTask task={task} />
+        <AgentTask task={task} next={next} />
       </div>
     )}
 

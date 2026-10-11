@@ -3554,6 +3554,59 @@ label.chip {
 .ask-handoff .btn {
   align-self: flex-start;
 }
+.ask-next {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin: 4px 0 0;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+  font-size: 0.92rem;
+  line-height: 1.35;
+}
+.ask-next-line {
+  flex: 1 1 16rem;
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+.ask-next-line::before {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 8px;
+  background: var(--brand);
+  vertical-align: 0.08em;
+}
+.ask-next a {
+  font-weight: 550;
+  color: var(--link);
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 0 1px;
+}
+.ask-next a:hover {
+  background-size: 100% 1px;
+}
+.ask-handoff .ask-next-copy {
+  flex: 0 0 auto;
+  height: 32px;
+  max-width: 100%;
+  margin-left: auto;
+  padding: 0 10px;
+  border-right: 2px solid var(--text);
+  border-bottom: 2px solid var(--text);
+  background: transparent;
+  color: var(--text);
+  font: 550 0.82rem/1 var(--font-sans);
+}
+.ask-handoff .ask-next-copy:hover {
+  background: var(--text);
+  border-color: var(--text);
+  color: var(--bg);
+}
 #article {
   scroll-margin-top: 88px;
 }
