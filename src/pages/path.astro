@@ -169,16 +169,17 @@ const total = pathTopicTotal();
   const guides = document.querySelector("#path-guides");
   const clear = document.querySelector("[data-path-clear]");
 
-  function read() {
+  function read(): Set<string> {
     try {
-      const parsed = JSON.parse(localStorage.getItem(KEY) || "[]");
-      return new Set(Array.isArray(parsed) ? parsed.filter((id) => typeof id === "string") : []);
+      const parsed: unknown = JSON.parse(localStorage.getItem(KEY) || "[]");
+      const ids = Array.isArray(parsed) ? parsed.filter((id): id is string => typeof id === "string") : [];
+      return new Set(ids);
     } catch {
-      return new Set();
+      return new Set<string>();
     }
   }
 
-  function write(ids) {
+  function write(ids: Set<string>) {
     try {
       localStorage.setItem(KEY, JSON.stringify([...ids].sort()));
     } catch {
@@ -186,12 +187,12 @@ const total = pathTopicTotal();
     }
   }
 
-  function boxes(id) {
+  function boxes(id: string) {
     return document.querySelectorAll(`[data-topic="${CSS.escape(id)}"]`);
   }
 
   function paint() {
-    const known = new Set();
+    const known = new Set<string>();
     document.querySelectorAll("[data-topic]").forEach((box) => {
       if (box instanceof HTMLInputElement && box.dataset.topic) known.add(box.dataset.topic);
     });
@@ -206,7 +207,7 @@ const total = pathTopicTotal();
       meter.style.setProperty("--path", `${pct}%`);
     }
     document.querySelectorAll(".path-track").forEach((track) => {
-      const ids = new Set();
+      const ids = new Set<string>();
       track.querySelectorAll("[data-topic]").forEach((box) => {
         if (box instanceof HTMLInputElement && box.dataset.topic) ids.add(box.dataset.topic);
       });
@@ -229,7 +230,7 @@ const total = pathTopicTotal();
     });
     document.querySelectorAll(".path-stage").forEach((stage) => {
       if (!(stage instanceof HTMLElement)) return;
-      const stageIds = new Set();
+      const stageIds = new Set<string>();
       stage.querySelectorAll("[data-topic]").forEach((box) => {
         if (box instanceof HTMLInputElement && box.dataset.topic) stageIds.add(box.dataset.topic);
       });
@@ -243,18 +244,18 @@ const total = pathTopicTotal();
     });
   }
 
-  function revealTab(label) {
-  const tabs = label?.closest(".path-tabs");
-  if (!(label instanceof HTMLElement) || !(tabs instanceof HTMLElement)) return;
-  const top = label.offsetParent === tabs ? label.offsetTop : label.offsetTop - tabs.offsetTop;
-  const below = top + label.offsetHeight > tabs.scrollTop + tabs.clientHeight + 1;
-  if (top < tabs.scrollTop || below) tabs.scrollTop = Math.max(0, top - 8);
-  const left = label.offsetLeft;
-  const past = left + label.offsetWidth > tabs.scrollLeft + tabs.clientWidth + 1;
-  if (left < tabs.scrollLeft || past) tabs.scrollLeft = Math.max(0, left - 8);
-}
+  function revealTab(label: Element | null) {
+    const tabs = label?.closest(".path-tabs");
+    if (!(label instanceof HTMLElement) || !(tabs instanceof HTMLElement)) return;
+    const top = label.offsetParent === tabs ? label.offsetTop : label.offsetTop - tabs.offsetTop;
+    const below = top + label.offsetHeight > tabs.scrollTop + tabs.clientHeight + 1;
+    if (top < tabs.scrollTop || below) tabs.scrollTop = Math.max(0, top - 8);
+    const left = label.offsetLeft;
+    const past = left + label.offsetWidth > tabs.scrollLeft + tabs.clientWidth + 1;
+    if (left < tabs.scrollLeft || past) tabs.scrollLeft = Math.max(0, left - 8);
+  }
 
-  function rememberTrack(id) {
+  function rememberTrack(id: string) {
     const url = new URL(location.href);
     if (id === "ours") url.searchParams.delete("track");
     else url.searchParams.set("track", id);
@@ -265,7 +266,7 @@ const total = pathTopicTotal();
   }
 
   const saved = read();
-  const known = new Set();
+  const known = new Set<string>();
   document.querySelectorAll("[data-topic]").forEach((box) => {
     if (!(box instanceof HTMLInputElement) || !box.dataset.topic) return;
     known.add(box.dataset.topic);
@@ -330,7 +331,7 @@ const total = pathTopicTotal();
   });
 
   clear?.addEventListener("click", () => {
-    write(new Set());
+    write(new Set<string>());
     document.querySelectorAll("[data-topic]").forEach((box) => {
       if (box instanceof HTMLInputElement) box.checked = false;
     });
