@@ -1,0 +1,283 @@
+---
+id: 2
+title: "Set up a Laravel 13 + Vue 3 app in ten minutes"
+excerpt: "Create a project with the official Vue starter kit, then add your first model, controller and typed Vue page with Inertia. Every command you need, start to finish."
+date: 2019-05-18T02:35:03Z
+updated: 2026-10-10T00:00:00Z
+snippet: "laravel new blog"
+featured: true
+categories: [laravel, vuejs]
+tags: [laravel, vuejs, inertia, setup]
+---
+You want a Laravel 13 app with a Vue 3 page showing data from your database, and you want it before your coffee goes cold. This guide goes from an empty folder to exactly that, with every command in order.
+
+<TLDR
+  audience="Developers starting their first Laravel + Vue app"
+  learn={['How to create a project with the Vue starter kit', 'How to add a model, migration, factory and seeder', 'How a controller sends typed props to a Vue page', 'How to test the page with Pest']}
+  applies="Laravel 13 · Vue starter kit · Inertia 3 · Vue 3.5 · TypeScript · Pest"
+>
+
+- `laravel new blog`, answer **yes** to a starter kit and pick **Vue**: login, Inertia 3, TypeScript and Tailwind are wired up.
+- `composer run dev` starts PHP, the queue, logs and Vite in one command.
+- A controller returns `Inertia::render('posts/Index', [...])`; the Vue page types those props with `defineProps`. No API to build.
+
+</TLDR>
+
+You need PHP 8.3+, Composer and Node.js (see [what you need](/requirements)).
+
+<Steps>
+
+1. **Install the Laravel installer.**
+2. **Create the project** with the Vue starter kit.
+3. **Start the dev servers.**
+4. **Add a model** with a migration, factory and seeder.
+5. **Add a route and a controller.**
+6. **Write the Vue page.**
+7. **Test it.**
+
+</Steps>
+
+## Step 1: install the Laravel installer
+
+```bash
+composer global require laravel/installer
+```
+
+Make sure Composer's global `bin` directory is on your `PATH`, so the `laravel` command is available.
+
+## Step 2: create the project
+
+```bash
+laravel new blog
+```
+
+The installer asks a few questions. Answer **yes** to a starter kit.
+
+<Callout type="gotcha" title="the defaults are not Vue">
+
+The starter kit default is no. Saying no, then picking Vue, installs Vue with no login. On the stack question, the default is React.
+
+</Callout>
+
+| Question | Answer |
+|---|---|
+| Starter kit? | **Yes** |
+| Starter kit stack | **Vue** |
+| Authentication | Laravel's built-in authentication |
+| Teams | No, unless you want them |
+
+Pest is installed for you. Pass `--phpunit` if you want PHPUnit instead. The installer does not show a testing-framework question.
+
+It then installs Composer and npm dependencies, creates a SQLite database and runs the first migrations. The Vue kit ships with **Inertia 3**, Vue 3, TypeScript, Tailwind CSS 4 and shadcn-vue.
+
+## Step 3: start the dev servers
+
+```bash
+cd blog
+composer run dev
+```
+
+This one command starts the PHP server, the queue worker, the log viewer and Vite with hot reload. Open `http://localhost:8000` and you will see the welcome page, with working **Log in** and **Register** links.
+
+## Step 4: add a model
+
+Create a `Post` model with a migration, a factory and a seeder:
+
+```bash
+php artisan make:model Post -mfs
+```
+
+Describe the table in the new migration:
+
+```php title="database/migrations/xxxx_xx_xx_create_posts_table.php"
+public function up(): void
+{
+    Schema::create('posts', function (Blueprint $table) {
+        $table->id();
+        $table->string('title');
+        $table->string('slug')->unique();
+        $table->text('excerpt');
+        $table->timestamp('published_at')->nullable();
+        $table->timestamps();
+    });
+}
+```
+
+Let the model be filled in bulk, and give the factory some fake data:
+
+```php title="app/Models/Post.php"
+class Post extends Model
+{
+    use HasFactory;
+
+    protected $fillable = ['title', 'slug', 'excerpt', 'published_at'];
+
+    protected function casts(): array
+    {
+        return ['published_at' => 'datetime'];
+    }
+}
+```
+
+```php title="database/factories/PostFactory.php"
+public function definition(): array
+{
+    $title = fake()->sentence();
+
+    return [
+        'title' => $title,
+        'slug' => str($title)->slug(),
+        'excerpt' => fake()->paragraph(),
+        'published_at' => now(),
+    ];
+}
+```
+
+```php title="database/seeders/PostSeeder.php"
+public function run(): void
+{
+    Post::factory()->count(12)->create();
+}
+```
+
+Run the migration and seed the table:
+
+```bash
+php artisan migrate
+php artisan db:seed --class=PostSeeder
+```
+
+## Step 5: add a route and a controller
+
+```bash
+php artisan make:controller PostController
+```
+
+```php title="app/Http/Controllers/PostController.php"
+use App\Models\Post;
+use Inertia\Inertia;
+use Inertia\Response;
+
+class PostController extends Controller
+{
+    public function index(): Response
+    {
+        return Inertia::render('posts/Index', [
+            'posts' => Post::query()
+                ->latest('published_at')
+                ->get(['id', 'title', 'slug', 'excerpt', 'published_at']),
+        ]);
+    }
+}
+```
+
+```php title="routes/web.php"
+use App\Http\Controllers\PostController;
+
+Route::get('/posts', [PostController::class, 'index'])->name('posts.index');
+```
+
+## Step 6: write the Vue page
+
+Inertia passes the controller's data to the page as props. With `<script setup>` and TypeScript, they are fully typed:
+
+```vue title="resources/js/pages/posts/Index.vue"
+<script setup lang="ts">
+import { Head } from "@inertiajs/vue3";
+
+interface Post {
+  id: number;
+  title: string;
+  slug: string;
+  excerpt: string;
+  published_at: string;
+}
+
+defineProps<{ posts: Post[] }>();
+</script>
+
+<template>
+  <Head title="Posts" />
+
+  <main class="mx-auto max-w-3xl space-y-6 p-8">
+    <h1 class="text-3xl font-semibold">Posts</h1>
+
+    <article v-for="post in posts" :key="post.id" class="rounded-xl border p-6">
+      <h2 class="text-xl font-medium">{{ post.title }}</h2>
+      <p class="mt-2 text-muted-foreground">{{ post.excerpt }}</p>
+    </article>
+  </main>
+</template>
+```
+
+Visit `http://localhost:8000/posts`. Vite reloads the page as you edit, and Laravel serves the data. There is no separate API to build.
+
+### The logged-in user is already shared
+
+The Vue starter kit already shares the logged-in user from `HandleInertiaRequests.php` as `auth.user`. A layout reads it with `usePage().props.auth.user`. 
+
+<Callout type="gotcha" title="new secret columns">
+
+The default `User` model hides `password`, `two_factor_secret`, `two_factor_recovery_codes`, and `remember_token` with the `Hidden` attribute. A secret column you add later goes on that same attribute, or you share `only(['id', 'name', 'email'])` instead of the whole model.
+
+</Callout>
+
+ The title template and a meta description are the [document title guide](/inertia-vue-document-title). The shell that stays mounted between those pages is the [persistent layout guide](/inertia-vue-persistent-layout).
+
+## Step 7: test it
+
+<TryIt title="Write and run the first test">
+
+```php title="tests/Feature/PostsTest.php"
+use App\Models\Post;
+
+it('lists posts', function () {
+    Post::factory()->create(['title' => 'Hello Laravel 13']);
+
+    $this->get('/posts')
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('posts/Index')
+            ->has('posts', 1)
+        );
+});
+```
+
+```bash
+php artisan test
+```
+
+</TryIt>
+
+## Recap
+
+- `laravel new blog` + Vue starter kit = auth, Inertia 3, Vue 3, TypeScript and Tailwind on day one.
+- `composer run dev` runs everything you need locally.
+- `make:model Post -mfs` gives you the migration, factory and seeder in one go.
+- Controllers send props with `Inertia::render`; pages type them with `defineProps`.
+
+## FAQ
+
+<FAQ items={[
+  { q: 'Why did laravel new install Vue without a login screen?', a: 'You answered no to the starter kit question. Run it again and answer yes, then pick Vue.' },
+  { q: 'Do I need to build an API for the Vue page?', a: 'No. With Inertia, the controller passes data to the page as props. You only need an API for other clients.' },
+  { q: 'How do I use PHPUnit instead of Pest?', a: 'Pass `--phpunit` to `laravel new`. The installer does not ask about the testing framework.' },
+  { q: 'Which database does a new Laravel app use?', a: 'SQLite, created for you by the installer. Switch to MySQL, MariaDB or PostgreSQL when production needs it.' },
+]} />
+
+## Next steps
+
+- Add create, edit, delete, search, and pagination in the [CRUD guide](/laravel-inertia-vue-crud).
+- Upload a cover image in the [file upload guide](/laravel-vue-file-upload).
+- Choose Inertia, a separate Vue SPA, or Nuxt in [which Laravel and Vue stack to use](/laravel-vue-in-2026).
+- Run `npm run build` for production. The [deploy guide](/deploy-laravel-vue) covers the SSR build, the queue, and the `public/hot` file.
+
+Looking for the original Laravel 5 + Nuxt 2 setup of this site? It is in the repository's Git history, from before the Astro migration.
+
+## Sources
+
+- [Laravel 13: Installation](https://laravel.com/docs/13.x/installation)
+- [Laravel 13: Starter kits](https://laravel.com/docs/13.x/starter-kits)
+- [Inertia v3: Pages](https://inertiajs.com/docs/v3/the-basics/pages)
+- [Inertia v3: Testing](https://inertiajs.com/docs/v3/advanced/testing)
+- [Laravel Vue starter kit](https://github.com/laravel/vue-starter-kit)
