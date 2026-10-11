@@ -1,0 +1,142 @@
+---
+id: 35
+title: "Laravel Vite and Vue"
+excerpt: "The starter kit already runs Vite. The pieces people break are the @ alias, a secret in a VITE_ variable, and a public/hot file left on the server."
+description: "Configure Laravel Vite for Vue: the @ alias, which env vars reach the browser, and why public/hot breaks production."
+seoTitle: "Laravel Vite and Vue"
+date: 2026-10-10T08:00:00Z
+snippet: "npm run dev"
+categories: [laravel, vuejs]
+tags: [laravel, vuejs, tooling]
+---
+The starter kit's Vite setup works on day one. Then someone adds an alias and deletes a plugin, someone else puts a secret in a `VITE_` variable, and production loads JavaScript from a laptop. Here are the three edits that go wrong, and the fix for each.
+
+<TLDR
+  audience="Laravel + Vue developers on the starter kit"
+  learn={['What `public/hot` does and why it must not reach production', 'How to restore the `@` alias without losing plugins', 'Which `VITE_` variables are safe in the browser']}
+  applies="Laravel 13 · Vue starter kit · Vite 8 · laravel-vite-plugin"
+>
+
+- `npm run dev` writes `public/hot`; `npm run build` writes `public/build`. Never deploy `public/hot`.
+- `@` points at `resources/js`. Add the alias beside the kit's plugins; don't replace them.
+- Every `VITE_` variable is public. Secrets stay in Laravel's `.env`, read on the server.
+- Restart `npm run dev` (or rebuild) after changing `.env`.
+
+</TLDR>
+
+`laravel new` with the Vue starter kit already wires Vite, the Vue plugin, and the Laravel plugin. You do not replace `vite.config.ts` to "add Vue". This page is the three edits that go wrong after that: imports, environment variables, and the dev server file.
+
+Production builds are the [deploy guide](/deploy-laravel-vue). Sail's HMR host is [Sail](/laravel-sail-vue). The app those assets belong to is [Inertia, a SPA, or Nuxt](/laravel-vue-in-2026).
+
+## Dev and build
+
+| Command | Writes | Browser loads assets from |
+|---|---|---|
+| `npm run dev` | `public/hot` | The Vite dev server (your machine) |
+| `npm run build` | `public/build` | Your Laravel app |
+
+`npm run dev` writes `public/hot` and serves assets from the Vite process. Laravel reads that file and points the browser at the dev server. That is what you want on your machine.
+
+`npm run build` writes `public/build` and removes the need for `public/hot`.
+
+<Callout type="gotcha" title="public/hot on the server">
+
+If `public/hot` is on the server, every page loads JavaScript from the URL in that file, which is your laptop. Delete it. Do not commit it. The deploy guide is the checklist around that file.
+
+</Callout>
+
+Restart `npm run dev` after `.env` changes. Vite reads `VITE_*` at startup and inlines them at build time. A key you add later is not in the bundle until you build again.
+
+<TryIt title="Check before you deploy">
+
+```bash
+git ls-files public/hot && echo "remove public/hot from git" || echo "ok"
+```
+
+</TryIt>
+
+## The @ alias
+
+The kit aliases `@` to `resources/js`. If a fresh config lost it, put it back beside the plugins. Do not remove `laravel()`, Vue, Tailwind, or Wayfinder while you add the alias.
+
+```ts title="vite.config.ts" {6-10}
+import { fileURLToPath, URL } from "node:url";
+import { defineConfig } from "vite";
+
+export default defineConfig({
+  // plugins: keep the kit's laravel(), vue(), tailwindcss(), and wayfinder()
+  resolve: {
+    alias: {
+      "@": fileURLToPath(new URL("./resources/js", import.meta.url)),
+    },
+  },
+});
+```
+
+<CodeCompare before="Breaks when files move" after="Same path everywhere">
+
+```ts title="resources/js/pages/posts/Edit.vue"
+import PostForm from "../../pages/posts/Form.vue";
+```
+
+```ts title="resources/js/pages/posts/Edit.vue"
+import PostForm from "@/pages/posts/Form.vue";
+```
+
+</CodeCompare>
+
+A relative `../../pages/posts/Form.vue` works until a file moves. The alias is the path the rest of the kit already uses, including [Wayfinder](/laravel-wayfinder-vue) imports under `@/actions`.
+
+## What VITE_ exposes
+
+Only variables whose names start with `VITE_` are available as `import.meta.env.VITE_...`. That is a browser bundle. Anyone who can load the JavaScript can read them.
+
+```ts title="resources/js/echo.ts"
+const key = import.meta.env.VITE_REVERB_APP_KEY;
+```
+
+| Safe as `VITE_` (public) | Never `VITE_` (secret) |
+|---|---|
+| Reverb app key, host and port | Database password |
+| The Laravel origin | GitHub client secret |
+| App name | Mail password, API secrets |
+
+<Callout type="heads-up" title="a VITE_ prefix publishes it">
+
+A Reverb app key is public by design. A database password, a GitHub client secret, or a mail password is not. Those stay in Laravel's `.env` and are read with `env()` or `config()` on the server. Prefixing a secret with `VITE_` so a Vue page can "just use it" publishes the secret.
+
+</Callout>
+
+The Laravel origin, the Reverb host, and the Reverb port are the usual public values. Set them before `npm run build`. The [Reverb guide](/laravel-reverb-vue) is why the key has to be in the bundle at all.
+
+## Where this stops
+
+Vite does not authenticate the API. Cookie setup for a separate dev server on port 5173 is [CORS](/laravel-vue-cors) and [Sanctum](/laravel-sanctum-vue-spa). Same-origin Inertia, opened through the Laravel URL, does not need that CORS file.
+
+## Recap
+
+- `public/hot` is for your machine only; production uses `public/build`.
+- Restore `@` beside the kit's plugins, never instead of them.
+- `VITE_` variables ship to every visitor; secrets stay server-side.
+- Restart or rebuild after `.env` changes.
+
+## FAQ
+
+<FAQ items={[
+  { q: 'Why does my production Laravel site try to load assets from localhost:5173?', a: 'A `public/hot` file was deployed. Delete it; with it present, Laravel points the browser at the dev server URL inside it.' },
+  { q: 'Why is my new VITE_ variable undefined?', a: 'Vite reads `VITE_*` variables at startup and inlines them at build time. Restart `npm run dev`, or run `npm run build` again.' },
+  { q: 'Can I put an API secret in a VITE_ variable?', a: 'No. Anything prefixed `VITE_` ends up in the JavaScript bundle that every visitor downloads. Keep secrets in Laravel config.' },
+]} />
+
+## Next steps
+
+- [Deploy a Laravel + Vue app](/deploy-laravel-vue): the build and the `public/hot` checklist.
+- [Laravel Sail with Vue and Vite](/laravel-sail-vue): HMR inside Docker.
+- [Typed routes with Wayfinder](/laravel-wayfinder-vue): the `@/actions` imports.
+- [Laravel docs: Vite](https://laravel.com/docs/13.x/vite)
+
+## Sources
+
+- [Laravel 13: Asset bundling (Vite)](https://laravel.com/docs/13.x/vite)
+- [Vite: Env variables and modes](https://vite.dev/guide/env-and-mode)
+- [Vite: resolve.alias](https://vite.dev/config/shared-options#resolve-alias)

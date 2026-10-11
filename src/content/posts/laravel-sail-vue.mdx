@@ -1,0 +1,134 @@
+---
+id: 21
+title: "Laravel Sail with Vue and Vite"
+excerpt: "Sail runs PHP, the database, and npm in Docker. The Vue dev server is a Sail command, and HMR fails when the browser cannot see that container."
+description: "Run a Laravel and Vue app with Sail: sail:install, sail up, migrations, npm run dev, and the documented HMR host."
+seoTitle: "Laravel Sail and Vue"
+date: 2026-10-10T05:40:00Z
+snippet: "php artisan sail:install"
+categories: [laravel, vuejs]
+tags: [laravel, vuejs, setup, tooling]
+---
+The page loads, but your Vue edits never show up. Or the HTML comes from Docker and the JavaScript from a server the browser can't reach. Sail runs PHP, the database and npm in containers; here is the command list and the one HMR setting that fixes the rest.
+
+<TLDR
+  audience="Laravel + Vue developers who want Docker instead of a local PHP install"
+  learn={['The Sail commands from install to `npm run dev`', 'Why `npm run dev` must run through Sail', 'The documented HMR host fix for WSL2']}
+  applies="Laravel 13 · Laravel Sail · Vue starter kit · Vite 8"
+>
+
+- `php artisan sail:install`, then run everything through `./vendor/bin/sail`: `up -d`, `artisan`, `npm`.
+- The app is on `http://localhost` (port 80), not `localhost:8000`.
+- Run `sail npm run dev`, never a host `npm run dev` next to Sail PHP.
+- Edits not reloading on WSL2? Set `server.hmr.host` to `localhost` in the Vite config.
+
+</TLDR>
+
+Sail is Docker for the Laravel app, the database, and the Node process that Vite uses. It is not a second way to structure Vue. You still pick Inertia, a SPA, or Nuxt in [the stack guide](/laravel-vue-in-2026), and you still follow [what you need](/requirements) for PHP 8.3 and Node. Sail only changes where those binaries run.
+
+## Install and start
+
+Install Sail from the host, then stop using the host's `php` and `npm` for this app.
+
+<TryIt title="From zero to a running app">
+
+```bash
+php artisan sail:install
+./vendor/bin/sail up -d
+./vendor/bin/sail artisan migrate
+./vendor/bin/sail npm install
+./vendor/bin/sail npm run dev
+```
+
+</TryIt>
+
+`sail:install` writes `compose.yaml` and updates `.env`. It does not write a Dockerfile. `sail artisan sail:publish` copies the Dockerfiles into `docker/` when you need to edit them. `up -d` starts the containers in the background. `artisan` and `npm` inside `./vendor/bin/sail` run in the `laravel.test` container, so the PHP version on your laptop is not the PHP version of the app.
+
+<Callout type="heads-up" title="it's port 80">
+
+The site is `http://localhost` unless you changed `APP_PORT`. That is port 80 in the compose file, not the `localhost:8000` you get from `php artisan serve` on the host.
+
+</Callout>
+
+<Callout type="pro-tip" title="a shorter command">
+
+Add `alias sail='sh $([ -f sail ] && echo sail || echo vendor/bin/sail)'` to your shell profile (from the Laravel docs) and type `sail up -d`.
+
+</Callout>
+
+## The first Vue page
+
+The [setup guide](/application-setup) still applies: a `Post` model, a factory, an Inertia page. Prefix Artisan with Sail.
+
+```bash
+./vendor/bin/sail artisan make:model Post -mf
+./vendor/bin/sail artisan migrate
+./vendor/bin/sail artisan test
+```
+
+`npm run dev` has to stay running for hot reload. Start it with Sail so the Vite process is on the Docker network the compose file publishes.
+
+<Callout type="gotcha" title="host npm + Sail PHP">
+
+A host `npm run dev` next to a Sail PHP container is how the page loads HTML from Docker and JavaScript from a server the browser cannot reach.
+
+</Callout>
+
+### Stop, remove, reset
+
+| Command | Containers | Database volume |
+|---|---|---|
+| `./vendor/bin/sail stop` | Stopped | Kept |
+| `./vendor/bin/sail down` | Removed | Kept |
+| `./vendor/bin/sail down -v` | Removed | **Deleted** |
+
+## When the page loads and edits do not
+
+Laravel's Vite docs add this for Sail on WSL2, when the browser on the host cannot talk to the dev server inside the container. Put it on the existing `defineConfig` call. Do not delete the `laravel`, Vue, or Tailwind plugins the starter kit already has.
+
+```ts title="vite.config.ts"
+export default defineConfig({
+  // plugins stay as the kit generated them
+  server: { // [!code ++]
+    hmr: { // [!code ++]
+      host: "localhost", // [!code ++]
+    }, // [!code ++]
+  }, // [!code ++]
+});
+```
+
+Restart `./vendor/bin/sail npm run dev` after the change. If the browser still requests a host that only exists inside Docker, the HMR host is the line that is wrong. The Laravel docs are the place that lists that setting. This page does not add other server flags.
+
+`public/hot` appears while that dev server is running. It must not be deployed. The [deploy guide](/deploy-laravel-vue) covers that file.
+
+## Where this stops
+
+Sail does not choose your auth or your router. Cookie auth for a second origin is [Sanctum](/laravel-sanctum-vue-spa). Asset URLs, the `@` alias, and `VITE_` variables are [Vite](/laravel-vite-vue).
+
+## Recap
+
+- Sail runs PHP, the database and Node in Docker; prefix every command with `./vendor/bin/sail`.
+- The app is on port 80 by default.
+- Run Vite through Sail; on WSL2, set `server.hmr.host` to `localhost`.
+- `down -v` deletes your database volume.
+
+## FAQ
+
+<FAQ items={[
+  { q: 'Why does Vite hot reload not work with Laravel Sail?', a: 'Either `npm run dev` runs on the host instead of through Sail, or (on WSL2) the browser cannot reach the HMR host. Run `./vendor/bin/sail npm run dev` and set `server.hmr.host` to `localhost`.' },
+  { q: 'Which URL does a Sail app use?', a: '`http://localhost` on port 80, unless you change `APP_PORT` in `.env`.' },
+  { q: 'Does sail down delete my database?', a: 'No. `sail down` removes the containers and keeps the volume. `sail down -v` deletes it.' },
+  { q: 'Does sail:install create a Dockerfile?', a: 'No. It writes `compose.yaml`. Run `sail artisan sail:publish` to copy the Dockerfiles into `docker/` for editing.' },
+]} />
+
+## Next steps
+
+- [Set up a Laravel 13 + Vue 3 app](/application-setup): the first page, now inside Sail.
+- [Laravel Vite and Vue](/laravel-vite-vue): `public/hot`, the alias and `VITE_` variables.
+- [Deploy a Laravel + Vue app](/deploy-laravel-vue): what changes off your machine.
+- [Laravel docs: Sail](https://laravel.com/docs/13.x/sail)
+
+## Sources
+
+- [Laravel 13: Sail](https://laravel.com/docs/13.x/sail)
+- [Laravel 13: Vite, running the development server in Sail on WSL2](https://laravel.com/docs/13.x/vite#configuring-hmr-in-sail-on-wsl2)
