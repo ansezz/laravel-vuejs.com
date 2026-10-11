@@ -10,9 +10,28 @@ categories: [laravel, vuejs]
 tags: [laravel, vuejs, inertia]
 ---
 
+Your tutorial says `route('posts.store')`, your starter kit says `store()`, and you're wondering which one is wrong. Neither, but you only want one. Here is why the current kit skips Ziggy and what to do with old code.
+
+<TLDR
+  audience="Developers following older Laravel + Vue tutorials"
+  learn={['What Ziggy did and what replaced it', 'How the old and new form calls compare', 'When it is fine to keep Ziggy']}
+  applies="Laravel 13 · Vue starter kit · Wayfinder · Ziggy"
+>
+
+- The Vue starter kit uses Wayfinder, not Ziggy.
+- Do not install Ziggy on the kit: two URL builders, only one checked.
+- `@routes` ships every named route to the browser.
+- An existing app on Ziggy can keep it.
+
+</TLDR>
+
 A Vue tutorial from a few years ago tells you to install Ziggy, drop `@routes` in the root Blade file, and call `route('posts.store')` from the page. That was how a Blade-less page learned Laravel's named routes. The Vue starter kit does not do it that way. It generates a TypeScript function per controller action with Wayfinder, and the form calls that function.
 
+<Callout type="gotcha" title="two URL builders">
+
 Do not install Ziggy on that kit. You would have two ways to build the same URL, and only one of them is checked when the route changes. Wayfinder itself is [typed routes in Vue](/laravel-wayfinder-vue). This page is only the choice. The stack is [Laravel and Vue in 2026](/laravel-vue-in-2026).
+
+</Callout>
 
 An app that already runs Ziggy, including an old Breeze app, can keep it. This page does not migrate that app. The [Breeze and Jetstream map](/laravel-breeze-jetstream-vue) is the same kind of decision for auth.
 
@@ -28,9 +47,25 @@ The Blade root then prints every named route into the page with `@routes`. Vue c
 <Form :action="route('posts.store')" method="post">
 ```
 
+<Callout type="heads-up" title="every named route is public">
+
 `@routes` sends the named route list to the browser. Anything you named is in that payload, including routes the current page never calls.
 
+</Callout>
+
 ## What the kit already generates
+
+<CodeCompare before="Ziggy (older tutorials)" after="Wayfinder (Vue starter kit)">
+
+```vue title="resources/js/pages/posts/Create.vue"
+<Form :action="route('posts.store')" method="post">
+```
+
+```vue title="resources/js/pages/posts/Create.vue"
+<Form :action="store()">
+```
+
+</CodeCompare>
 
 ```bash
 php artisan wayfinder:generate
@@ -38,7 +73,7 @@ php artisan wayfinder:generate
 
 Import the action the generator wrote and pass the function. Inertia reads the URL and the method from it, so you do not also set `method`.
 
-```vue
+```vue title="resources/js/pages/posts/Create.vue"
 <script setup lang="ts">
 import { store } from "@/actions/App/Http/Controllers/PostController";
 </script>
@@ -50,8 +85,43 @@ import { store } from "@/actions/App/Http/Controllers/PostController";
 
 The generator's files and the `update(post.id)` case stay in the Wayfinder guide. Check the generated file before you invent a helper it did not write.
 
+<TryIt title="Check what your app already has">
+
+```bash
+composer show tightenco/ziggy 2>/dev/null && echo "Ziggy installed" || echo "no Ziggy"
+ls resources/js/actions >/dev/null 2>&1 && echo "Wayfinder actions present"
+```
+
+</TryIt>
+
 ## Do not keep both
 
 On the Vue starter kit, skip `composer require tightenco/ziggy`, skip `@routes`, and skip a Ziggy plugin in `resources/js/app.ts`. The kit's `app.ts` does not register one. Adding it does not make `store()` start working.
 
 `route('posts.store')` is a string. `store()` is the Wayfinder action. Pick the one the app already has. A separate Vue SPA that is not Inertia does not use either of these for its own URLs. That router is [Vue Router](/vue-router-laravel-spa).
+
+## Recap
+
+- Ziggy printed named routes into the page; Wayfinder generates typed functions.
+- On the Vue kit, use Wayfinder only.
+- Old Ziggy apps can stay as they are.
+- A separate SPA uses Vue Router for its own URLs.
+
+## FAQ
+
+<FAQ items={[
+  { q: 'Is Ziggy deprecated for Laravel Vue?', a: 'Ziggy still works, but the Laravel 13 Vue starter kit uses Wayfinder instead and does not install Ziggy.' },
+  { q: 'Can I use Ziggy and Wayfinder together?', a: 'Avoid it. You would have two ways to build the same URL and only one is type-checked.' },
+  { q: 'Do I need to migrate an existing Ziggy app?', a: 'No. An app that already runs Ziggy, including an old Breeze app, can keep it.' },
+]} />
+
+## Next steps
+
+- [Typed routes with Wayfinder](/laravel-wayfinder-vue)
+- [Breeze, Jetstream, and the Vue starter kit](/laravel-breeze-jetstream-vue)
+- [Vue Router on a Laravel API](/vue-router-laravel-spa)
+
+## Sources
+
+- [Laravel Wayfinder on GitHub](https://github.com/laravel/wayfinder)
+- [Ziggy on GitHub](https://github.com/tighten/ziggy)
