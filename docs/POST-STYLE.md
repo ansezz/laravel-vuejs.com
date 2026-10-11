@@ -16,7 +16,7 @@ notes, PR) and linked in *Sources*. Code is run before it is published. Say what
 | # | Part | How |
 |---|---|---|
 | 1 | **Hook** | 2–3 lines: the problem, in the reader's words. Why should they care today? |
-| 2 | **TL;DR** | `<TLDR>` with 2–4 bullets that answer the post on their own, plus `learn`, `audience` and `tested`. |
+| 2 | **TL;DR** | `<TLDR>` with 2–4 bullets that answer the post on their own, plus `learn`, `audience` and `tested` (versions you ran the code with) or `applies` (versions it was checked against in the docs, when you didn't run it). |
 | 3 | **Reading time** | Automatic (shown in the header). |
 | 4 | **Table of contents** | Automatic from H2/H3 (sticky on desktop, collapsible on mobile). Write headings that make sense out of context. |
 | 5 | **Body** | Short sections. H2 for steps or ideas, H3 for sub-points. One idea per section. |
@@ -170,7 +170,7 @@ third-party logos) and an OG card with `node scripts/og.mjs <slug>`.
 ## Checklist (run before opening the PR)
 
 - [ ] Hook is 2–3 lines and names a real problem.
-- [ ] `<TLDR>` answers the post on its own, with `audience`, `learn` and `tested` filled in.
+- [ ] `<TLDR>` answers the post on its own, with `audience`, `learn` and `tested` (or `applies`) filled in. Only say `tested` when you ran it.
 - [ ] Every version, date and API name checked against an official source; *Sources* section links them.
 - [ ] Code was run; each block has a language, files have `title="…"`, changes use diff notation or `<CodeCompare>`.
 - [ ] Headings are short and meaningful out of context (they become the table of contents and search snippets).
