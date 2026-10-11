@@ -1,0 +1,30 @@
+---
+id: 88
+title: "Default a prop an Inertia page did not get"
+seoTitle: "Default a Vue prop"
+excerpt: "withDefaults fills a prop that is missing. A prop that arrives as null stays null."
+description: "withDefaults fills a prop that is missing. A prop that arrives as null stays null."
+date: 2026-10-11T10:35:00Z
+snippet: "withDefaults(defineProps<...>(), { search: '' })"
+categories: [laravel, vuejs]
+tags: [laravel, vuejs, typescript]
+---
+People searching "Vue prop default Inertia" set a default and still crash on `null`. `withDefaults` fills `undefined`. JSON `null` is a present value. The [TypeScript guide](/typescript-laravel-vue-pages) types the props. This page is the default.
+
+```vue
+<script setup lang="ts">
+const props = withDefaults(defineProps<{ search?: string }>(), {
+  search: "",
+});
+</script>
+```
+
+If the controller always sends `search`, the default never runs. Send the key only when you mean it, or send `''` from Laravel when the query string is empty:
+
+```php
+'search' => $request->string('search')->trim()->toString(),
+```
+
+That is a string, including an empty one. The default is then unnecessary, which is the better fix.
+
+Do not default `post` to `{}` so a missing record renders an empty editor. A missing record should 404 in the controller. The page should not pretend there is a post.

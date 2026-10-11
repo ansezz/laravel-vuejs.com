@@ -95,6 +95,48 @@ export const agentTasks: AgentTask[] = [
       "A 419 is CSRF: check SESSION_DOMAIN and supports_credentials.",
     ],
   },
+  {
+    slug: "laravel-ai-sdk-vue",
+    ask: "Draft a reply with the AI SDK",
+    intent:
+      "Add one Laravel AI SDK agent and show its reply on an existing Inertia Vue page.",
+    command: "composer require laravel/ai",
+    files: [
+      "app/Ai/Agents/DraftReply.php",
+      "the controller that already renders the page",
+      "the Vue page that posts the note",
+    ],
+    steps: [
+      "Publish the AI SDK config and migrate only if the agent stores a conversation.",
+      "Validate note as a required string, max 2000 characters, and pass only that string to prompt().",
+      "Redirect back with the reply string. Render it from a prop.",
+      "Fake DraftReply in a test and assert the prompt.",
+    ],
+    avoid: [
+      "Do not put the provider key in a VITE_ variable or call the provider from the browser.",
+      "Do not leave the prompt route public.",
+      "Do not pass $request->all() to prompt().",
+      "Do not store a conversation or add tools on this change.",
+    ],
+  },
+  {
+    slug: "laravel-boost-vue",
+    ask: "Install Laravel Boost",
+    intent:
+      "Install Laravel Boost as a dev dependency so the coding agent follows the Vue and Inertia versions in this app.",
+    command: "composer require laravel/boost --dev",
+    files: ["composer.json", "the agent guideline files boost:install writes"],
+    steps: [
+      "Run php artisan boost:install and enable the agents you actually use.",
+      "Restart the agent and confirm the Laravel Boost MCP server is connected.",
+      "After an Inertia or Laravel upgrade, run php artisan boost:update.",
+    ],
+    avoid: [
+      "Do not install Boost with npm or mount it in a Vue page.",
+      "Do not put a provider API key in boost.json.",
+      "Do not add Vue Router or Ziggy because an older prompt mentioned them.",
+    ],
+  },
 ];
 
 const editorial = new Set([
