@@ -1,0 +1,9 @@
+---
+// Before/after code side by side (stacked on small screens). Put exactly two fenced code blocks inside.
+interface Props { before?: string; after?: string }
+const { before = 'Before', after = 'After' } = Astro.props
+---
+<div class="code-compare" style={`--before:'${before.replace(/'/g, '’')}';--after:'${after.replace(/'/g, '’')}'`}>
+  <p class="cc-labels sr-only">{before}, then {after}:</p>
+  <slot />
+</div>

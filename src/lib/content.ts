@@ -1,6 +1,6 @@
 import { getCollection, type CollectionEntry } from 'astro:content'
 import taxonomies from '../content/taxonomies.json'
-import { CONTACT_EMAIL, SITE_URL } from '../config/site'
+import { SITE_URL } from '../config/site'
 
 export type Category = { id: string; slug: string; name: string; description: string }
 export type Tag = { id: string; slug: string; name: string }
@@ -57,18 +57,6 @@ export function related(post: Post, posts: Post[], n = 3) {
     .sort((a, b) => b.s - a.s || b.p.id - a.p.id).slice(0, n).map(x => x.p)
 }
 
-const COPY_SVG = '<svg class="i-copy" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><svg class="i-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>'
-const LANG: Record<string, string> = { md: 'markdown', sh: 'bash', js: 'javascript', ts: 'typescript', plaintext: 'text' }
-
-// Post-processes rendered Markdown: contact email, code-block frames (language + copy button), heading anchors.
-export function enhanceHtml(html: string) {
-  return html
-    .replaceAll('{{CONTACT_EMAIL}}', `<a href="mailto:${CONTACT_EMAIL}">${CONTACT_EMAIL}</a>`)
-    .replace(/<pre class="astro-code[^"]*"[^>]*data-language="([^"]*)"[^>]*>[\s\S]*?<\/pre>/g, (pre, lang) =>
-      `<div class="code"><div class="code-head"><span class="code-lang">${LANG[lang] ?? lang}</span><button type="button" class="copy-btn" aria-label="Copy code">${COPY_SVG}<span class="copy-label">Copy</span></button></div>${pre}</div>`)
-    .replace(/<(h[23]) id="([^"]+)">([\s\S]*?)<\/\1>/g, (_, tag, id, inner) =>
-      `<${tag} id="${id}">${inner}<a class="anchor" href="#${id}" aria-label="Link to this section">#</a></${tag}>`)
-}
 // Trim text to at most n characters on a word boundary, for meta descriptions.
 export function clip(text: string, n: number) {
   const t = text.replace(/\s+/g, ' ').trim()

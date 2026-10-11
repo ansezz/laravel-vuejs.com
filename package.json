@@ -1,7 +1,7 @@
 {
   "name": "laravel-vuejs",
   "version": "3.0.0",
-  "description": "Laravel & VueJs blog — static Astro build of laravel-vuejs.space",
+  "description": "Laravel & VueJs blog \u2014 static Astro build of laravel-vuejs.space",
   "author": "Anass EZ-ZOUAINE <ansezzouaine@gmail.com>",
   "private": true,
   "license": "MIT",
@@ -11,7 +11,7 @@
   },
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build && node scripts/csp.mjs",
+    "build": "astro build && node scripts/markdown.mjs && node scripts/csp.mjs",
     "preview": "astro preview",
     "cf:dev": "wrangler dev",
     "deploy": "wrangler deploy",
@@ -21,18 +21,24 @@
     "check:tools": "node --experimental-strip-types scripts/check-tools.mjs",
     "lhci": "npx --yes @lhci/cli@0.15.x autorun",
     "check:worker": "tsc -p worker",
-    "db:migrate:local": "wrangler d1 migrations apply laravel-vuejs-forms --local"
+    "db:migrate:local": "wrangler d1 migrations apply laravel-vuejs-forms --local",
+    "diagrams": "node scripts/diagrams.mjs"
   },
   "dependencies": {
+    "@astrojs/markdown-remark": "^7.3.2",
+    "@astrojs/mdx": "^8.0.3",
     "@astrojs/rss": "^4.0.19",
     "@fontsource-variable/geist": "^5.3.0",
     "@fontsource-variable/geist-mono": "^5.3.0",
     "@fontsource-variable/newsreader": "^5.3.0",
+    "@shikijs/transformers": "^4.5.0",
     "astro": "^7.3.8"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
     "@cloudflare/workers-types": "^5.20261009.1",
+    "turndown": "^7.2.4",
+    "turndown-plugin-gfm": "^1.0.2",
     "typescript": "^6.0.3",
     "wrangler": "^4.149.0"
   }

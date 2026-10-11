@@ -1,0 +1,6 @@
+flowchart TB
+  A(["Inertia 2 app"]) --> B
+  B["<b>1. Packages</b><br/>bump PHP + npm packages<br/>republish config/inertia.php"] --> C
+  C["<b>2–4. Code fixes</b><br/>renamed APIs and events<br/>Axios / qs / lodash-es imports<br/>head attribute: data-inertia"] --> D
+  D["<b>5–6. New setup</b><br/>@inertiajs/vite plugin<br/>slimmer app.ts, simpler SSR"] --> E
+  E["<b>7. Verify</b><br/>php artisan test · vue-tsc<br/>browser smoke test"] --> F(["Inertia 3 app"])

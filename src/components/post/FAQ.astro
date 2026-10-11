@@ -1,0 +1,13 @@
+---
+// FAQ section with FAQPage structured data. items: [{ q, a }] where a is short inline Markdown.
+import { inline } from '../../lib/inline-md'
+// Put a Markdown `## FAQ` heading above it so the question list shows up in the table of contents.
+interface Props { items: { q: string; a: string }[] }
+const { items } = Astro.props
+const jsonld = { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: items.map(f => ({ '@type': 'Question', name: f.q,
+  acceptedAnswer: { '@type': 'Answer', text: f.a.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1').replace(/[`*]/g, '') } })) }
+---
+<div class="faq post-faq">
+  {items.map(f => <details><summary>{f.q}</summary><div class="answer"><p set:html={inline(f.a)} /></div></details>)}
+</div>
+<script type="application/ld+json" set:html={JSON.stringify(jsonld)} />

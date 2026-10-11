@@ -4,7 +4,7 @@ import { glob } from 'astro/loaders'
 
 // Blog posts (Markdown). Higher `id` = newer; lists are sorted by id, then date.
 const posts = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: './src/content/posts' }),
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/posts' }),
   schema: z.object({
     id: z.number(),
     title: z.string(),

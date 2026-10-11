@@ -137,7 +137,13 @@ const cleanLine = (line: string) =>
 
 /** "Do not ..." sentences already written in a guide. Code fences are skipped. */
 export function constraintsFrom(body: string): string[] {
-  const prose = body.replace(/```[\s\S]*?```/g, "\n");
+  // Skip code fences, MDX imports, the FAQ props and component tags (posts can be MDX, see docs/POST-STYLE.md).
+  const prose = body
+    .replace(/```[\s\S]*?```/g, "\n")
+    .replace(/<FAQ[\s\S]*?\/>/g, "\n")
+    .replace(/^import .*$/gm, "\n")
+    .replace(/\{\/\*[\s\S]*?\*\/\}/g, "\n")
+    .replace(/<\/?[A-Z][^>]*>/g, "\n");
   const hits: string[] = [];
   for (const part of prose.split(/(?<=[.!?])\s+|\n+/)) {
     const clean = cleanLine(part);

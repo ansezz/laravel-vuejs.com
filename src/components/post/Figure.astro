@@ -1,0 +1,11 @@
+---
+// An illustration with a caption, using the optimised AVIF/WebP pipeline.
+import type { ImageMetadata } from 'astro'
+import Art from '../Art.astro'
+interface Props { src: ImageMetadata; alt: string; caption?: string }
+const { src, alt, caption } = Astro.props
+---
+<figure class="figure">
+  <Art src={src} alt={alt} sizes="(max-width: 820px) 100vw, 760px" widths={[400, 640, 960, 1280]} />
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>

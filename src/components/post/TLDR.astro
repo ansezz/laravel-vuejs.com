@@ -1,0 +1,20 @@
+---
+// TL;DR box at the top of every post: the answer in 2-4 bullets (slot), plus who it's for, what you'll learn and tested versions.
+import Icon from '../Icon.astro'
+import { inline } from '../../lib/inline-md'
+interface Props { audience?: string; learn?: string[]; tested?: string }
+const { audience, learn = [], tested } = Astro.props
+---
+<section class="tldr" aria-label="TL;DR">
+  <p class="tldr-title"><strong>TL;DR</strong></p>
+  <div class="tldr-body"><slot /></div>
+  {(learn.length > 0 || audience || tested) && (
+    <div class="tldr-meta">
+      {learn.length > 0 && <div><p class="tldr-label"><strong>What you'll learn</strong></p><ul>{learn.map(l => <li set:html={inline(l)} />)}</ul></div>}
+      <div class="tldr-facts">
+        {audience && <p><Icon name="users" size={15} /> <span><strong>Who it's for:</strong> <span set:html={inline(audience)} /></span></p>}
+        {tested && <p><Icon name="check" size={15} /> <span><strong>Tested with:</strong> <span set:html={inline(tested)} /></span></p>}
+      </div>
+    </div>
+  )}
+</section>
