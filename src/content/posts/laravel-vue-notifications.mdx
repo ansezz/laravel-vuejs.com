@@ -10,7 +10,26 @@ categories: [laravel, vuejs]
 tags: [laravel, vuejs]
 ---
 
+You want a bell with unread notifications, and every tutorial jumps straight to websockets. Start smaller: a database notification, ten unread rows in a prop, and a "mark as read" POST. Live updates can come later.
+
+<TLDR
+  audience="Laravel + Vue developers adding in-app notifications"
+  learn={['How to store a database notification', 'How to share unread notifications with a Vue page', 'How to mark one read safely']}
+  applies="Laravel 13 · Inertia 3 · Vue 3"
+>
+
+- `make:notification` + `make:notifications-table`; `via` returns `['database']`.
+- Share `unreadNotifications()->latest()->limit(10)`; read `notification.data.title`.
+- Mark read through the current user’s `notifications()` so other ids 404.
+- Database notifications do not push to an open page; that is Reverb.
+
+</TLDR>
+
+<Callout type="heads-up" title="stored, not pushed">
+
 The database channel writes a row the page can read on the next visit. It does not push that row to an open browser. If the bell has to update while the user sits on the page, that is [Reverb](/laravel-reverb-vue). This page stops at the stored notification and the Vue list.
+
+</Callout>
 
 The app those pages belong to is [Inertia, a SPA, or Nuxt](/laravel-vue-in-2026).
 
@@ -24,8 +43,7 @@ php artisan migrate
 
 `via` returns the database channel only. `toArray` is the JSON stored on the row. Keep it small. The Vue page will print `data.title`.
 
-```php
-// app/Notifications/PostPublished.php
+```php title="app/Notifications/PostPublished.php"
 public function via(object $notifiable): array
 {
     return ['database'];
@@ -45,13 +63,17 @@ Pass the post into the constructor and call `notify` on the user who should see 
 $user->notify(new PostPublished($post));
 ```
 
+<Callout type="tip" title="one channel at a time">
+
 Mail, Slack, and broadcast drivers are other `via` values. Leave them out until you mean to send them. A broadcast notification needs the queue and the Reverb process from that guide. Do not half-configure Echo here.
+
+</Callout>
 
 ## Show ten
 
 Share the unread rows from `HandleInertiaRequests` or from the controller that renders the layout's data. Limit the query. An unbounded `notifications` relation will grow into the props.
 
-```php
+```php title="app/Http/Middleware/HandleInertiaRequests.php"
 'notifications' => $request->user()
     ?->unreadNotifications()
     ->latest()
@@ -59,7 +81,7 @@ Share the unread rows from `HandleInertiaRequests` or from the controller that r
     ->get(['id', 'data', 'created_at']) ?? [],
 ```
 
-```vue
+```vue title="resources/js/components/NotificationList.vue"
 <ul>
   <li v-for="notification in notifications" :key="notification.id">
     {{ notification.data.title }}
@@ -67,11 +89,15 @@ Share the unread rows from `HandleInertiaRequests` or from the controller that r
 </ul>
 ```
 
+<Callout type="gotcha" title="data is not the model">
+
 `data` is the array from `toArray`, decoded. It is not the Eloquent model. If the title is missing, the notification class returned different keys than the template reads.
+
+</Callout>
 
 Mark one read with a normal POST. Scope it to the current user so an id from someone else 404s.
 
-```php
+```php title="routes/web.php"
 Route::post('/notifications/{id}/read', function (Request $request, string $id) {
     $notification = $request->user()
         ->notifications()
@@ -86,6 +112,41 @@ Route::post('/notifications/{id}/read', function (Request $request, string $id) 
 
 The Vue control is an Inertia `Link` or `Form` with `method="post"`. After `back()`, the shared query hides the row because it is no longer unread.
 
+<TryIt title="Send yourself one">
+
+```bash
+php artisan tinker --execute="App\\Models\\User::first()->notify(new App\\Notifications\\PostPublished(App\\Models\\Post::first()));"
+```
+
+Reload the page: the title appears in the list. Mark it read and it disappears.
+
+</TryIt>
+
 ## Where this stops
 
 Nothing in this page opens a websocket. Polling `router.reload({ only: ['notifications'] })` works and is the [partial reload](/inertia-partial-reloads) guide. A live bell is Reverb. Pick one. Do not poll and subscribe to the same list.
+
+## Recap
+
+- Database channel first; it is a row, not a push.
+- Limit the shared query to ten unread rows.
+- Scope "mark as read" to the current user.
+- Poll with a partial reload or go live with Reverb, not both.
+
+## FAQ
+
+<FAQ items={[
+  { q: 'Do Laravel database notifications update the Vue page live?', a: 'No. They are stored rows read on the next visit. Use Reverb, or poll with a partial reload, for live updates.' },
+  { q: 'Why is notification.data.title undefined?', a: '`data` holds whatever `toArray` returned. Make the template read the same keys the notification class stores.' },
+  { q: 'How do I stop users marking other users’ notifications read?', a: 'Look the id up through `$request->user()->notifications()` so anyone else’s id returns 404.' },
+]} />
+
+## Next steps
+
+- [Laravel Reverb with Vue](/laravel-reverb-vue)
+- [Inertia partial reloads](/inertia-partial-reloads)
+- [Show a queued job on a Vue page](/laravel-vue-queued-job)
+
+## Sources
+
+- [Laravel 13: Notifications, database notifications](https://laravel.com/docs/13.x/notifications#database-notifications)

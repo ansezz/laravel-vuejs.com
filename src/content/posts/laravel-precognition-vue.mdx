@@ -10,13 +10,33 @@ categories: [laravel, vuejs]
 tags: [laravel, vuejs, inertia]
 ---
 
+Users fill in a long form, hit Save, and only then learn the title was too long. Precognition runs your real Laravel rules as they type, without running the controller. Inertia 3's `<Form>` already supports it; here is the server opt-in and the Vue slot.
+
+<TLDR
+  audience="Laravel + Vue developers with forms on Inertia 3"
+  learn={['How to opt a route into precognitive requests', 'How to validate fields live with the `<Form>` slot', 'How to handle files and expensive rules']}
+  applies="Laravel 13 · Inertia 3 · Vue 3"
+>
+
+- Put rules in a form request; add `HandlePrecognitiveRequests` to `store`/`update`.
+- A precognitive request validates and stops: the controller never runs.
+- In Vue: `@change="validate('title')"`, then `invalid('title')` and `errors.title`.
+- Files are skipped unless you set `validate-files`; skip `required` with `isPrecognitive()`.
+- No `laravel-precognition-vue-inertia` package needed on Inertia 3.
+
+</TLDR>
+
 The [CRUD form](/laravel-inertia-vue-crud) shows errors after submit. Precognition shows them when the field changes, using the same Laravel rules. Inertia 3's `<Form>` component already does this. Older tutorials install `laravel-precognition-vue-inertia` and call `useForm` from that package. You do not need that package on a current Inertia app. Remove it if a previous tutorial added it.
 
 This page does not cover optimistic UI. The form still waits for the server. The stack choice is [Inertia, a SPA, or Nuxt](/laravel-vue-in-2026).
 
 ## The server still has to opt in
 
+<Callout type="heads-up" title="validation only, no insert">
+
 A precognitive request runs the route middleware and the validation. It does not run the controller method. Typing in the title field must not insert a post. Laravel only treats the request that way when `HandlePrecognitiveRequests` is on the route.
+
+</Callout>
 
 Put the rules in a form request so the precognitive call and the real submit share them.
 
@@ -24,8 +44,7 @@ Put the rules in a form request so the precognitive call and the real submit sha
 php artisan make:request StorePostRequest
 ```
 
-```php
-// app/Http/Requests/StorePostRequest.php
+```php title="app/Http/Requests/StorePostRequest.php"
 public function rules(): array
 {
     return [
@@ -35,7 +54,7 @@ public function rules(): array
 }
 ```
 
-```php
+```php title="app/Http/Controllers/PostController.php"
 use App\Http\Requests\StorePostRequest;
 use Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests;
 use Illuminate\Routing\Controllers\HasMiddleware;
@@ -70,7 +89,7 @@ class PostController extends Controller implements HasMiddleware
 
 `validate('title')` sends the precognitive request. `invalid('title')` is true only after a response says the field failed. `validating` is true while that request is in flight. A field that still has its initial value does not send a request.
 
-```vue
+```vue title="resources/js/pages/posts/Create.vue"
 <Form
   action="/posts"
   method="post"
@@ -94,13 +113,23 @@ class PostController extends Controller implements HasMiddleware
 </Form>
 ```
 
+<TryIt title="Watch the precognitive request">
+
+Open DevTools → Network, type a 300-character title and tab out. You will see a request with a `Precognition: true` header come back 422, and no new row in the database.
+
+</TryIt>
+
 Import `Form` from `@inertiajs/vue3`, the same component the CRUD guide uses. Submit still posts the form. You do not add a second `@submit` handler.
 
 ## Files and expensive rules
 
+<Callout type="gotcha" title="required files fail every live check">
+
 Precognition leaves files out of the live request unless you set `validate-files` on `<Form>`, or call `validateFiles()` on `useForm`. With the default, a rule that says `cover` is required fails every live check, because the file is not in that request. Skip the required rule while the request is precognitive, and keep the image rules for the real submit. The field itself is the [upload guide](/laravel-vue-file-upload).
 
-```php
+</Callout>
+
+```php title="app/Http/Requests/StorePostRequest.php"
 'cover' => [
     ...$this->isPrecognitive() ? [] : ['required'],
     'image',
@@ -113,3 +142,29 @@ Precognition leaves files out of the live request unless you set `validate-files
 ## Where this stops
 
 The errors after a normal submit are still the CRUD form. Who is allowed to submit is a [permission](/laravel-vue-permissions) or a [policy](/laravel-vue-policies). Precognition does not replace either one.
+
+## Recap
+
+- Form request + `HandlePrecognitiveRequests` = live validation with your real rules.
+- The controller only runs on the real submit.
+- Use the `<Form>` slot helpers; no extra package.
+- Treat files and expensive rules differently with `isPrecognitive()`.
+
+## FAQ
+
+<FAQ items={[
+  { q: 'Do I need laravel-precognition-vue-inertia with Inertia 3?', a: 'No. Inertia 3’s `<Form>` component supports precognition. Remove the old package if a tutorial added it.' },
+  { q: 'Does Precognition run my controller?', a: 'No. It runs route middleware and validation, then stops before the controller method.' },
+  { q: 'Why does my required file field always fail live validation?', a: 'Files are not sent in precognitive requests by default. Skip `required` when `$this->isPrecognitive()` is true, or set `validate-files`.' },
+]} />
+
+## Next steps
+
+- [CRUD with Inertia and Vue](/laravel-inertia-vue-crud)
+- [Upload files with Laravel and Vue](/laravel-vue-file-upload)
+- [Show Laravel validation errors in Vue](/laravel-vue-validation-errors)
+
+## Sources
+
+- [Laravel 13: Precognition](https://laravel.com/docs/13.x/precognition)
+- [Inertia v3: Forms](https://inertiajs.com/docs/v3/the-basics/forms)
