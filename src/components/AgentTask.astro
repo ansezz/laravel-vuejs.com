@@ -18,7 +18,7 @@ const preview = [
     {compact && <h3>{task.ask}</h3>}
     <p class="ask-intent">Copies a prompt. Paste it into the AI agent you already have open.</p>
     {!compact && <pre class="ask-preview"><code>{preview}</code></pre>}
-    <button type="button" class="copy-btn ask-copy" data-copy={prompt} aria-label={`Copy the prompt for ${task.ask}`}>
+    <button type="button" class="copy-btn ask-copy" data-copy={prompt} aria-label={`Copy the prompt: ${task.ask}`}>
       <svg class="i-copy" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
       <svg class="i-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
       <span class="copy-label">Copy the prompt</span>
@@ -26,7 +26,7 @@ const preview = [
     {!compact && next && (
       <p class="ask-next">
         <span class="ask-next-line">Next: <a href={`/${next.slug}`}>{next.ask}</a></span>
-        <button type="button" class="copy-btn ask-next-copy" data-copy={nextPrompt} aria-label={`Copy the prompt for ${next.ask}`}>
+        <button type="button" class="copy-btn ask-next-copy" data-copy={nextPrompt} aria-label={`Copy the next prompt: ${next.ask}`}>
           <svg class="i-copy" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
           <svg class="i-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
           <span class="copy-label">Copy the next prompt</span>

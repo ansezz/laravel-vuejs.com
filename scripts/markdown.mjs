@@ -36,7 +36,7 @@ td.addRule('codeCompare', { filter: n => n.nodeName === 'DIV' && n.classList?.co
   return parts.length === 2 ? `\n\n**${a.slice(1, -1)}:**${parts[0]}\n\n**${b.slice(1, -1)}:**${parts[1]}\n\n` : content
 } })
 const quote = s => s.trim().split('\n').map(l => `> ${l}`.trimEnd()).join('\n')
-td.addRule('callout', { filter: n => n.nodeName === 'ASIDE' && n.classList?.contains('callout'), replacement: content => `\n\n${quote(content)}\n\n` })
+td.addRule('callout', { filter: n => (n.nodeName === 'ASIDE' || n.nodeName === 'DIV') && n.classList?.contains('callout'), replacement: content => `\n\n${quote(content)}\n\n` })
 td.addRule('tldr', { filter: n => n.nodeName === 'SECTION' && (n.classList?.contains('tldr') || n.classList?.contains('try-it')), replacement: content => `\n\n${quote(content)}\n\n` })
 td.addRule('faq', { filter: 'details', replacement: (_, n) => `\n\n**Q: ${n.querySelector('summary')?.textContent?.trim()}**\n\n${td.turndown(n.querySelector('.answer')?.innerHTML ?? '')}\n\n` })
 td.addRule('absLinks', { filter: n => n.nodeName === 'A' && n.getAttribute('href')?.startsWith('/'), replacement: (c, n) => `[${c}](${SITE}${n.getAttribute('href')})` })
