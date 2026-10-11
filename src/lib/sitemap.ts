@@ -17,6 +17,7 @@ const PAGES: [string, Date?][] = [
   ["/page/privacy-policy", LEGAL_UPDATED],
   ["/page/terms-and-conditions", LEGAL_UPDATED],
   ["/page/dmca-policy", LEGAL_UPDATED],
+  ["/page/accessibility", LEGAL_UPDATED],
   ["/jobs/job-archive"],
   ["/jobs/create-job"],
   ["/jobs/pricing"],
