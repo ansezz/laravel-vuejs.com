@@ -14,6 +14,8 @@ The first roadmap for this project was a checklist for a GraphQL API: single pos
 
 In 2026 we rebuilt the site from scratch. Here is where things stand.
 
+For what to learn, and in what order, use the [tickable roadmap](/path). Each track links the roadmap.sh map it leans on. This note stays the checklist for the site itself.
+
 ## Shipped
 
 - [x] New home: **laravel-vuejs.space**

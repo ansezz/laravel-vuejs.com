@@ -1,0 +1,348 @@
+---
+import Base from "../layouts/Base.astro";
+import PageHero from "../components/PageHero.astro";
+import Icon from "../components/Icon.astro";
+import {
+  PATH_SOURCE_LIST,
+  PATH_TRACKS,
+  pathTopicTotal,
+  pathTrackCount,
+} from "../data/skill-path";
+
+const description =
+  "Tick a Laravel and Vue learning path. Each track credits the roadmap.sh map it leans on.";
+const total = pathTopicTotal();
+---
+
+<Base title="Laravel and Vue roadmap" description={description}>
+  <PageHero
+    kicker="Learn"
+    title="Laravel and Vue roadmap"
+    lead="Tick what you can already do. The order is ours. Every track credits the roadmap.sh map it leans on."
+    crumbs={[{ label: "Roadmap" }]}
+  >
+    <ol class="path-route">
+      <li><a href="/path?track=php" data-jump="php">PHP</a></li>
+      <li><a href="/path?track=laravel" data-jump="laravel">Laravel</a></li>
+      <li><a href="/path?track=vue" data-jump="vue">Vue</a></li>
+      <li><a href="/path?track=fullstack" data-jump="fullstack">Full stack</a></li>
+      <li><a href="/path?track=devops" data-jump="devops">Ship</a></li>
+    </ol>
+  </PageHero>
+  <section class="container section-tight path-shell">
+    <div class="path-side">
+      <p class="path-progress">
+        <span data-path-done>0</span> of {total} topics ticked on this browser.
+      </p>
+      <span class="path-meter" data-path-meter style="--path: 0%"></span>
+      <label class="check path-filter">
+        <input id="path-guides" type="checkbox" />
+        Only topics with a guide here
+      </label>
+      <button class="btn btn-sm" type="button" data-path-clear>Clear ticks</button>
+      <div class="path-tabs" role="radiogroup" aria-label="Roadmap tracks">
+        {
+          PATH_TRACKS.map((track) => (
+            <>
+              <input
+                class="path-pick"
+                type="radio"
+                name="path-track"
+                id={`t-${track.id}`}
+                value={track.id}
+                checked={track.id === "ours"}
+              />
+              <label for={`t-${track.id}`} data-accent={track.accent}>
+                <span>{track.title}</span>
+                <span class="path-tab-count" data-tab-count={track.id}>
+                  0/{pathTrackCount(track)}
+                </span>
+              </label>
+            </>
+          ))
+        }
+      </div>
+      <script is:inline>
+        (function () {
+          var params = new URLSearchParams(location.search);
+          var id = params.get("track") || (location.hash || "").replace(/^#/, "");
+          var radio = id && document.getElementById("t-" + id);
+          if (radio) radio.checked = true;
+        })();
+      </script>
+    </div>
+
+    <div class="path-board">
+      {
+        PATH_TRACKS.map((track) => (
+          <article class="path-track" id={`track-${track.id}`} data-track={track.id} data-accent={track.accent}>
+            <header class="path-sheet">
+              <p class="path-fraction">
+                <b data-track-done>0</b>
+                <span>of {pathTrackCount(track)}</span>
+              </p>
+              <div>
+                <h2>{track.heading}</h2>
+                <p class="path-summary">{track.summary}</p>
+                {track.source ? (
+                  <p class="path-source">
+                    Source:{" "}
+                    <a class="link-arrow" href={track.source.href} target="_blank" rel="noopener noreferrer">
+                      {track.source.label} on roadmap.sh <Icon name="arrow-up-right" size={14} />
+                    </a>
+                  </p>
+                ) : (
+                  <p class="path-source">Each station names the roadmap.sh map it leans on.</p>
+                )}
+              </div>
+            </header>
+            <p class="path-empty">No guide on this site for this track yet. Clear the filter to see the topics.</p>
+            {track.stages.map((group, index) => (
+              <section class="path-stage">
+                <div class="path-stage-head">
+                  <span class="path-index">{String(index + 1).padStart(2, "0")}</span>
+                  <div>
+                    <h3>{group.title}</h3>
+                    {group.source && (
+                      <a class="path-from link-arrow" href={group.source.href} target="_blank" rel="noopener noreferrer">
+                        Leans on the {group.source.label} roadmap <Icon name="arrow-up-right" size={14} />
+                      </a>
+                    )}
+                  </div>
+                </div>
+                <ol>
+                  {group.topics.map((topic) => (
+                    <li class="path-topic">
+                      <label>
+                        <input type="checkbox" data-topic={topic.id} />
+                        <span>
+                          {topic.when && <span class="path-when">{topic.when}</span>}
+                          <b>{topic.title}</b>
+                          <small>{topic.detail}</small>
+                        </span>
+                      </label>
+                      {topic.guide && (
+                        <a class="path-guide" href={`/${topic.guide}`}>Guide</a>
+                      )}
+                    </li>
+                  ))}
+                </ol>
+              </section>
+            ))}
+          </article>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="container section-tight path-sources" aria-labelledby="path-sources-title">
+    <h2 id="path-sources-title">Sources</h2>
+    <p>
+      The topics on this page are written for Laravel and Vue. They lean on these public roadmaps:
+    </p>
+    <ul>
+      {
+        PATH_SOURCE_LIST.map((source) => (
+          <li>
+            <a
+              href={source.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-accent={source.label === "Laravel" ? "brand" : source.label === "Vue" ? "accent" : "ink"}
+            >
+              <span>roadmap.sh</span>
+              <b>{source.label}</b>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</Base>
+
+<script>
+  const KEY = "lv-path";
+  const GUIDE_KEY = "lv-path-guides";
+  const shell = document.querySelector(".path-shell");
+  const done = document.querySelector("[data-path-done]");
+  const meter = document.querySelector("[data-path-meter]");
+  const guides = document.querySelector("#path-guides");
+  const clear = document.querySelector("[data-path-clear]");
+
+  function read() {
+    try {
+      const parsed = JSON.parse(localStorage.getItem(KEY) || "[]");
+      return new Set(Array.isArray(parsed) ? parsed.filter((id) => typeof id === "string") : []);
+    } catch {
+      return new Set();
+    }
+  }
+
+  function write(ids) {
+    try {
+      localStorage.setItem(KEY, JSON.stringify([...ids].sort()));
+    } catch {
+      /* This browser is not storing the ticks. */
+    }
+  }
+
+  function boxes(id) {
+    return document.querySelectorAll(`[data-topic="${CSS.escape(id)}"]`);
+  }
+
+  function paint() {
+    const known = new Set();
+    document.querySelectorAll("[data-topic]").forEach((box) => {
+      if (box instanceof HTMLInputElement && box.dataset.topic) known.add(box.dataset.topic);
+    });
+    let ticked = 0;
+    known.forEach((id) => {
+      const box = document.querySelector(`[data-topic="${CSS.escape(id)}"]`);
+      if (box instanceof HTMLInputElement && box.checked) ticked += 1;
+    });
+    if (done) done.textContent = String(ticked);
+    if (meter instanceof HTMLElement) {
+      const pct = known.size ? Math.round((ticked / known.size) * 100) : 0;
+      meter.style.setProperty("--path", `${pct}%`);
+    }
+    document.querySelectorAll(".path-track").forEach((track) => {
+      const ids = new Set();
+      track.querySelectorAll("[data-topic]").forEach((box) => {
+        if (box instanceof HTMLInputElement && box.dataset.topic) ids.add(box.dataset.topic);
+      });
+      let n = 0;
+      ids.forEach((id) => {
+        const box = track.querySelector(`[data-topic="${CSS.escape(id)}"]`);
+        if (box instanceof HTMLInputElement && box.checked) n += 1;
+      });
+      const slot = track.querySelector("[data-track-done]");
+      if (slot) slot.textContent = String(n);
+      const tab = document.querySelector(`[data-tab-count="${track.getAttribute("data-track")}"]`);
+      if (tab) {
+        tab.textContent = `${n}/${ids.size}`;
+        const label = tab.closest("label");
+        if (label instanceof HTMLElement) {
+          const pct = ids.size ? Math.round((n / ids.size) * 100) : 0;
+          label.style.setProperty("--tab", `${pct}%`);
+        }
+      }
+    });
+    document.querySelectorAll(".path-stage").forEach((stage) => {
+      if (!(stage instanceof HTMLElement)) return;
+      const stageIds = new Set();
+      stage.querySelectorAll("[data-topic]").forEach((box) => {
+        if (box instanceof HTMLInputElement && box.dataset.topic) stageIds.add(box.dataset.topic);
+      });
+      let stageDone = 0;
+      stageIds.forEach((id) => {
+        const box = stage.querySelector(`[data-topic="${CSS.escape(id)}"]`);
+        if (box instanceof HTMLInputElement && box.checked) stageDone += 1;
+      });
+      const stagePct = stageIds.size ? Math.round((stageDone / stageIds.size) * 100) : 0;
+      stage.style.setProperty("--stage", `${stagePct}%`);
+    });
+  }
+
+  function revealTab(label) {
+  const tabs = label?.closest(".path-tabs");
+  if (!(label instanceof HTMLElement) || !(tabs instanceof HTMLElement)) return;
+  const top = label.offsetParent === tabs ? label.offsetTop : label.offsetTop - tabs.offsetTop;
+  const below = top + label.offsetHeight > tabs.scrollTop + tabs.clientHeight + 1;
+  if (top < tabs.scrollTop || below) tabs.scrollTop = Math.max(0, top - 8);
+  const left = label.offsetLeft;
+  const past = left + label.offsetWidth > tabs.scrollLeft + tabs.clientWidth + 1;
+  if (left < tabs.scrollLeft || past) tabs.scrollLeft = Math.max(0, left - 8);
+}
+
+  function rememberTrack(id) {
+    const url = new URL(location.href);
+    if (id === "ours") url.searchParams.delete("track");
+    else url.searchParams.set("track", id);
+    url.hash = "";
+    const next = `${url.pathname}${url.search}`;
+    const now = `${location.pathname}${location.search}`;
+    if (next !== now) history.pushState(null, "", next);
+  }
+
+  const saved = read();
+  const known = new Set();
+  document.querySelectorAll("[data-topic]").forEach((box) => {
+    if (!(box instanceof HTMLInputElement) || !box.dataset.topic) return;
+    known.add(box.dataset.topic);
+    box.checked = saved.has(box.dataset.topic);
+  });
+  for (const id of saved) {
+    if (!known.has(id)) saved.delete(id);
+  }
+  write(saved);
+
+  if (guides instanceof HTMLInputElement) {
+    try {
+      guides.checked = localStorage.getItem(GUIDE_KEY) === "1";
+    } catch {
+      guides.checked = false;
+    }
+  }
+
+  paint();
+  revealTab(document.querySelector(".path-pick:checked + label"));
+
+  document.querySelector(".path-route")?.addEventListener("click", (event) => {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+    const link = target.closest("a");
+    const id = link?.getAttribute("data-jump");
+    if (!id) return;
+    const radio = document.getElementById(`t-${id}`);
+    if (!(radio instanceof HTMLInputElement)) return;
+    event.preventDefault();
+    radio.checked = true;
+    radio.dispatchEvent(new Event("change", { bubbles: true }));
+    document.querySelector(".path-shell")?.scrollIntoView({ block: "start" });
+  });
+
+  shell?.addEventListener("change", (event) => {
+    const box = event.target;
+    if (!(box instanceof HTMLInputElement)) return;
+    if (box.classList.contains("path-pick")) {
+      rememberTrack(box.value);
+      if (box.nextElementSibling instanceof HTMLElement) revealTab(box.nextElementSibling);
+      return;
+    }
+    if (box.id === "path-guides") {
+      try {
+        localStorage.setItem(GUIDE_KEY, box.checked ? "1" : "0");
+      } catch {
+        /* The filter still works for this visit. */
+      }
+      return;
+    }
+    const id = box.dataset.topic;
+    if (!id) return;
+    boxes(id).forEach((other) => {
+      if (other instanceof HTMLInputElement) other.checked = box.checked;
+    });
+    const ids = read();
+    if (box.checked) ids.add(id);
+    else ids.delete(id);
+    write(ids);
+    paint();
+  });
+
+  clear?.addEventListener("click", () => {
+    write(new Set());
+    document.querySelectorAll("[data-topic]").forEach((box) => {
+      if (box instanceof HTMLInputElement) box.checked = false;
+    });
+    paint();
+  });
+
+  window.addEventListener("popstate", () => {
+    const id = new URLSearchParams(location.search).get("track") || "ours";
+    const radio = document.getElementById(`t-${id}`);
+    if (radio instanceof HTMLInputElement) {
+      radio.checked = true;
+      if (radio.nextElementSibling instanceof HTMLElement) revealTab(radio.nextElementSibling);
+    }
+  });
+</script>

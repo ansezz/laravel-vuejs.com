@@ -300,6 +300,83 @@ export function defaultModuleIds(shape: ShapeId): string[] {
   ).map((mod) => mod.id);
 }
 
+const SHAPE_IDS: ShapeId[] = ["inertia", "spa", "nuxt"];
+
+function asShape(value: string | null): ShapeId {
+  return SHAPE_IDS.find((id) => id === value) ?? "inertia";
+}
+
+/** `?app=spa&m=fortify,socialite` opens those ticks. A missing `m` uses the usual set. */
+export function selectionFromSearch(
+  params: URLSearchParams,
+  allowed: string[] = MODULES.map((mod) => mod.id),
+): { shape: ShapeId; ids: string[] } {
+  const shape = asShape(params.get("app"));
+  const allow = new Set(allowed);
+  if (!params.has("m")) {
+    return {
+      shape,
+      ids: defaultModuleIds(shape).filter((id) => allow.has(id)),
+    };
+  }
+  const wanted = new Set(
+    (params.get("m") ?? "")
+      .split(",")
+      .map((id) => id.trim())
+      .filter(Boolean),
+  );
+  return {
+    shape,
+    ids: MODULES.filter(
+      (mod) =>
+        wanted.has(mod.id) && mod.shapes.includes(shape) && allow.has(mod.id),
+    ).map((mod) => mod.id),
+  };
+}
+
+export function starterSearch(shape: string, ids: string[]): string {
+  const params = new URLSearchParams();
+  params.set("app", asShape(shape));
+  params.set("m", ids.join(","));
+  return params.toString();
+}
+
+/** The same prompt, saved where the agent in the repo will read it. */
+export function agentsDocument(prompt: string): string {
+  return [
+    "# AGENTS.md",
+    "",
+    "Laravel and Vue rules for this app. Keep this file at the project root.",
+    "Follow it before inventing a different stack.",
+    "",
+    prompt.trim(),
+    "",
+  ].join("\n");
+}
+
+export function guideBlocks(
+  slugs: string[],
+  guides: Record<string, GuideBrief>,
+): string[] {
+  const seen: string[] = [];
+  const blocks: string[] = [];
+  for (const slug of slugs) {
+    if (seen.includes(slug)) continue;
+    seen.push(slug);
+    const guide = guides[slug];
+    if (!guide) continue;
+    blocks.push(
+      [
+        `Read ${SITE_URL}/${slug}.md`,
+        guide.intent,
+        ...guide.steps,
+        ...guide.avoid.slice(0, 4),
+      ].join("\n"),
+    );
+  }
+  return blocks;
+}
+
 function uniqueSlugs(shapeId: string, moduleIds: string[]): string[] {
   const shape = shapeById(shapeId);
   const slugs: string[] = [];
@@ -322,18 +399,7 @@ export function starterPrompt(
   guides: Record<string, GuideBrief>,
 ): { prompt: string; count: number } {
   const shape = shapeById(shapeId);
-  const blocks = uniqueSlugs(shape.id, moduleIds).flatMap((slug) => {
-    const guide = guides[slug];
-    if (!guide) return [];
-    return [
-      [
-        `Read ${SITE_URL}/${slug}.md`,
-        guide.intent,
-        ...guide.steps,
-        ...guide.avoid.slice(0, 4),
-      ].join("\n"),
-    ];
-  });
+  const blocks = guideBlocks(uniqueSlugs(shape.id, moduleIds), guides);
   return {
     count: blocks.length,
     prompt: [

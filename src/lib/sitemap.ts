@@ -44,6 +44,8 @@ export async function sitemapUrls(): Promise<
       { loc: "/packages", lastmod: PACKAGE_UPDATED },
       { loc: "/tools", lastmod: PACKAGE_UPDATED },
       { loc: "/starter", lastmod: latest },
+      { loc: "/fix", lastmod: latest },
+      { loc: "/path", lastmod: latest },
       ...[
         "/tools/start",
         "/tools/samples",

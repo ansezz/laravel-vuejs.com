@@ -1,0 +1,95 @@
+---
+import ToolPage from '../components/ToolPage.astro'
+import { allPosts } from '../lib/content'
+import { agentTaskFor } from '../data/agent-tasks'
+import { FIX_SLUGS, fixPrompt } from '../data/fix-app'
+import type { GuideBrief } from '../data/prompt-builder'
+
+const posts = await allPosts()
+const needed = new Set(FIX_SLUGS)
+const guides: Record<string, GuideBrief> = {}
+for (const post of posts) {
+  if (!needed.has(post.slug)) continue
+  const task = agentTaskFor({ ...post, body: post.entry.body ?? '' })
+  if (!task) continue
+  guides[post.slug] = { intent: task.intent, steps: task.steps, avoid: task.avoid }
+}
+const guideJson = JSON.stringify(guides).replace(/</g, '\\u003c')
+const description = 'Paste an error, or composer.json and package.json. Copy a prompt that reads the matching guides.'
+const errorPrompt = fixPrompt('error', {}, guides).prompt
+const filesPrompt = fixPrompt('files', {}, guides).prompt
+---
+<ToolPage title="Fix the app you have" lead={description} description={description}>
+  <p class="pkg-set-note">This page does not chat. It matches the text to a guide on this site and copies a prompt. A new app starts on the <a href="/starter">starter prompt</a>.</p>
+
+  <h2 class="fix-title">Paste the error</h2>
+  <form class="tool-layout" data-fix="error">
+    <label class="fix-field">
+      <span class="kicker">Terminal or browser</span>
+      <textarea class="input fix-paste" data-fix-error rows="10" placeholder="Paste the 419, the CORS line, public/hot, or the Ziggy error."></textarea>
+    </label>
+    <div class="tool-output starter-output">
+      <h3>The prompt</h3>
+      <div class="code">
+        <div class="code-head">
+          <span class="code-lang">prompt</span>
+          <button type="button" class="copy-btn" aria-label="Copy the prompt">
+            <svg class="i-copy" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            <svg class="i-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+            <span class="copy-label">Copy the prompt</span>
+          </button>
+        </div>
+        <pre><code data-fix-prompt>{errorPrompt}</code></pre>
+      </div>
+    </div>
+  </form>
+
+  <h2 class="fix-title">Paste the lockfiles</h2>
+  <form class="tool-layout" data-fix="files">
+    <div class="fix-files">
+      <label class="fix-field">
+        <span class="kicker">composer.json</span>
+        <textarea class="input fix-paste" data-fix-composer rows="8" placeholder='{ "require": { "tightenco/ziggy": "^2.0" } }'></textarea>
+      </label>
+      <label class="fix-field">
+        <span class="kicker">package.json</span>
+        <textarea class="input fix-paste" data-fix-package rows="8" placeholder='{ "dependencies": { "vue-router": "^4.0.0", "@inertiajs/vue3": "^2.0.0" } }'></textarea>
+      </label>
+    </div>
+    <div class="tool-output starter-output">
+      <h3>The prompt</h3>
+      <div class="code">
+        <div class="code-head">
+          <span class="code-lang">prompt</span>
+          <button type="button" class="copy-btn" aria-label="Copy the prompt">
+            <svg class="i-copy" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            <svg class="i-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+            <span class="copy-label">Copy the prompt</span>
+          </button>
+        </div>
+        <pre><code data-fix-prompt>{filesPrompt}</code></pre>
+      </div>
+    </div>
+  </form>
+  <script type="application/json" id="fix-guides" set:html={guideJson} />
+  <script>
+    import { fixPrompt } from '../data/fix-app'
+    import type { GuideBrief } from '../data/prompt-builder'
+
+    const guides = JSON.parse(document.getElementById('fix-guides')?.textContent || '{}') as Record<string, GuideBrief>
+    const paint = (form: HTMLFormElement) => {
+      const kind = form.dataset.fix === 'files' ? 'files' : 'error'
+      const built = fixPrompt(kind, {
+        error: form.querySelector<HTMLTextAreaElement>('[data-fix-error]')?.value,
+        composer: form.querySelector<HTMLTextAreaElement>('[data-fix-composer]')?.value,
+        package: form.querySelector<HTMLTextAreaElement>('[data-fix-package]')?.value,
+      }, guides)
+      const out = form.querySelector<HTMLElement>('[data-fix-prompt]')
+      if (out) out.textContent = built.prompt
+    }
+    document.querySelectorAll<HTMLFormElement>('[data-fix]').forEach((form) => {
+      form.addEventListener('submit', (event) => event.preventDefault())
+      form.addEventListener('input', () => paint(form))
+    })
+  </script>
+</ToolPage>
