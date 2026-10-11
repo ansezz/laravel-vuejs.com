@@ -72,4 +72,8 @@ Read down this list. Each link is a different job, and they link back here so th
 
 **The rest of the app.** [Nuxt in front of the API](/nuxt-laravel-api) and [JSON resources](/laravel-api-resources-vue). [Permissions](/laravel-vue-permissions) and [policies](/laravel-vue-policies). [Pinia](/pinia-laravel-inertia), [partial reloads](/inertia-partial-reloads), and [typed routes](/laravel-wayfinder-vue). Older tutorials still say [Ziggy](/laravel-ziggy-vue). [TypeScript props](/typescript-laravel-vue-pages), a [document title](/inertia-vue-document-title), a [persistent layout](/inertia-vue-persistent-layout), and [translations](/laravel-vue-i18n). [Reverb](/laravel-reverb-vue), [database notifications](/laravel-vue-notifications), and a [queued job on the page](/laravel-vue-queued-job).
 
+**Agents.** [Laravel Boost](/laravel-boost-vue) teaches the coding agent the Vue and Inertia versions you installed. [The AI SDK](/laravel-ai-sdk-vue) answers a note on a Vue page. The provider key stays on the server.
+
+**Short searches.** [One hundred short guides](/laravel-vue-keyword-guides) answer one failure each: a 419, a validation error, a Fortify email, a queue worker, a session cookie.
+
 **Production.** [Sail](/laravel-sail-vue), [Vite](/laravel-vite-vue), and [tests](/test-laravel-vue). Then [server rendering](/inertia-ssr), [deploy](/deploy-laravel-vue), and [Livewire or Inertia](/livewire-vs-inertia).
