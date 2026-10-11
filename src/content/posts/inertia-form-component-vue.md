@@ -1,0 +1,32 @@
+---
+id: 54
+title: "Use the Inertia Form component in Vue"
+seoTitle: "Inertia Form component in Vue"
+excerpt: "The Inertia Form component posts the fields and exposes errors. Wayfinder can supply the action."
+description: "The Inertia Form component posts the fields and exposes errors. Wayfinder can supply the action."
+date: 2026-10-11T10:01:00Z
+snippet: "<Form action=\"/posts\" method=\"post\">"
+categories: [laravel, vuejs]
+tags: [laravel, vuejs, inertia]
+---
+People searching "Inertia Form component Vue" want the form that ships with `@inertiajs/vue3`, not a third-party form library. The [Wayfinder guide](/laravel-wayfinder-vue) passes a generated action into it. The [file upload guide](/laravel-vue-file-upload) uses the same component for a file. This page is the error slot.
+
+```vue
+<script setup lang="ts">
+import { Form } from "@inertiajs/vue3";
+</script>
+
+<template>
+  <Form action="/posts" method="post" v-slot="{ errors, processing }">
+    <input name="title" />
+    <p v-if="errors.title">{{ errors.title }}</p>
+    <button type="submit" :disabled="processing">Save</button>
+  </Form>
+</template>
+```
+
+Fields need a `name`. The component submits those names. A `v-model` without a `name` is not sent. `errors.title` matches the Laravel rule key, the same way `form.errors.title` does with `useForm`.
+
+When the action comes from Wayfinder, drop `method="post"` and use `:action="store()"`. The generated object already carries the method. Adding both is how a GET form gets posted twice in tutorials that mix the two styles.
+
+Do not install Vue Router so this form can "have a route". The route is the Laravel URL in `action`.
