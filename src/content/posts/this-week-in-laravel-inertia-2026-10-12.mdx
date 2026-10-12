@@ -1,0 +1,173 @@
+---
+id: 151
+title: "This week in Laravel & Inertia: patch releases, Oct 12, 2026"
+seoTitle: "This week in Laravel & Inertia: patches (Oct 12, 2026)"
+excerpt: "The small releases you might have missed: Inertia 2.3.29 security backports, Laravel 12.69.3 queue and S3 fixes, Inertia Laravel 3.5.1 and Boost 2.10.1 to 2.10.3."
+date: 2026-10-12T00:30:00Z
+snippet: "composer update laravel/framework inertiajs/inertia-laravel laravel/boost"
+categories: [laravel, inertia]
+tags: [laravel, inertia, release]
+---
+Big releases get the headlines. Patch releases quietly fix the bug you hit last Tuesday, or close a security gap you didn't know you had.
+
+Here is everything small that shipped in the Laravel and Inertia world since our last release posts, in one five-minute read.
+
+<TLDR
+  audience="Laravel + Vue developers on Inertia 2 or 3"
+  learn={['Which patch releases shipped and what they fix', 'Who should update first', 'The one-line update commands']}
+  applies="Inertia 2.3.29 · Inertia Laravel 3.5.1 · Laravel 12.69.3 · Boost 2.10.3 (checked against the release notes and PRs)"
+>
+
+- **Still on Inertia 2?** Update to **2.3.29**. It gives every encrypted history entry its own encryption IV and clears the prefetch cache when history is cleared.
+- **Still on Laravel 12?** **12.69.3** makes the queue worker's timeout exit code reachable and backports named S3 credential providers.
+- **Inertia Laravel 3.5.1** and **Boost 2.10.1 to 2.10.3** are small fixes. Boost now writes an MCP config for the Pi agent too.
+- Nothing here changes your code. Update, run your tests and move on.
+
+</TLDR>
+
+## The week at a glance
+
+| Package | Version | Released (UTC) | Should you hurry? |
+|---|---|---|---|
+| `@inertiajs/vue3` (2.x line) | 2.3.29 | Oct 9 | Yes, if you use encrypted history |
+| `laravel/framework` (12.x line) | 12.69.3 | Sep 29 | Only if you run timed-out queue jobs or S3 on Laravel Cloud |
+| `inertiajs/inertia-laravel` | 3.5.1 | Oct 1 | No, it is a testing fix |
+| `laravel/boost` | 2.10.1, 2.10.2, 2.10.3 | Oct 1, 5, 7 | Nice to have |
+
+<Callout type="heads-up" title="On the latest versions already?">
+
+Inertia **3.9.1** shipped the same security fixes for the 3.x line. We covered it in [Inertia 3.9: pause polling in background tabs](/inertia-3-9-background-polling-navigate-type), and Laravel 13 got its own post: [Laravel 13.35](/laravel-13-35-query-routes-markdown-responses).
+
+</Callout>
+
+## Inertia 2.3.29: security backports for the 2.x line
+
+If you haven't moved to Inertia 3 yet, this one is for you. It brings two fixes from 3.x back to 2.x.
+
+**A unique IV for every encrypted history entry.** With history encryption on, Inertia encrypts page data in the browser's history with AES-GCM. Until now every entry shared one IV (the random value that keeps two encryptions of similar data from looking alike), generated once per tab and kept in `sessionStorage`. Now each entry gets a fresh IV, stored in front of its ciphertext.
+
+**The prefetch cache is flushed on `clearHistory`.** When you clear history (for example on logout), prefetched pages are now dropped too, so a cached response can't outlive the session that fetched it.
+
+```php title="app/Http/Controllers/Auth/LogoutController.php"
+use Inertia\Inertia;
+
+public function __invoke(Request $request)
+{
+    Auth::logout();
+    $request->session()->invalidate();
+
+    Inertia::clearHistory(); // with 2.3.29, this also drops prefetched pages
+
+    return redirect('/');
+}
+```
+
+<Callout type="gotcha" title="A one-time refetch after you deploy">
+
+Entries written by older versions don't have the new IV prefix. Inertia simply fetches those pages from the server again when a user goes back to them, and tabs with the old shared IV start over with a new key. Nothing breaks, but you may see a small bump in requests right after the deploy.
+
+</Callout>
+
+Update the adapter you use:
+
+```bash
+npm install @inertiajs/vue3@^2.3.29
+```
+
+## Laravel 12.69.3: queue timeouts and S3 credentials
+
+Two backports from 13.x for apps still on Laravel 12.
+
+**The worker timeout exit code is now reachable.** When a job times out, the worker kills itself with `SIGKILL`, so the exit status it meant to return never left the process. A supervisor only saw "killed by signal". This release adds `Worker::$timedOutExitCode` and a `Worker::killUsing()` hook that runs before the kill, the same as 13.x. You only need it if a process manager or platform reacts to that exit code.
+
+**Named S3 credential providers and Cloud IAM disks.** S3 disks can use a named AWS credential provider, which is what Laravel Cloud's IAM-based disks need. If you deploy a Laravel 12 app on Cloud with S3 storage, update.
+
+```bash
+composer update laravel/framework
+php artisan --version   # Laravel Framework 12.69.3
+```
+
+## Inertia Laravel 3.5.1: BigInt assertions
+
+A follow-up to 3.5.0. With `preserveBigIntegers()` on, integers outside JavaScript's safe range are sent as `{ "$bigint": "<digits>" }` markers, so your tests had to assert against the marker. Now the testing helpers turn the markers back into integers, and you assert the value you actually passed.
+
+<CodeCompare before="3.5.0" after="3.5.1">
+
+```php title="tests/Feature/OrderTest.php"
+$response->assertInertia(fn (AssertableInertia $page) => $page
+    ->where('order.id', ['$bigint' => '900719925474099988'])
+);
+```
+
+```php title="tests/Feature/OrderTest.php"
+$response->assertInertia(fn (AssertableInertia $page) => $page
+    ->where('order.id', 900719925474099988)
+    ->hasFlash('id', 900719925474099988)
+);
+
+$this->assertSame(900719925474099988, $response->inertiaProps('order.id'));
+```
+
+</CodeCompare>
+
+Markers are only decoded on pages that opted in with `preserveBigIntegers()`, so nothing changes if you don't use it.
+
+## Laravel Boost 2.10.1 to 2.10.3
+
+Three small Boost releases, mostly about better AI guidelines:
+
+- **2.10.1** keeps syncing `CLAUDE.md` for existing Claude Code projects, uses Sail's executable in guidelines when you run Sail, and trims always-loaded guidelines that evals showed had no effect.
+- **2.10.2** adds MCP support for the **Pi** agent: `boost:install` now writes `.pi/mcp.json`. It also rejects JSON5 MCP configs whose root isn't an object.
+- **2.10.3** lists database tables through the schema builder for drivers Boost doesn't support directly, and fixes inaccurate guidance in four bundled skills.
+
+<TryIt title="Update Boost and refresh its files">
+
+```bash
+composer update laravel/boost
+php artisan boost:install
+```
+
+Re-running the installer refreshes your guidelines and MCP configs. Our [Boost update guide](/laravel-boost-update-vue) walks through it.
+
+</TryIt>
+
+## Also shipped: Laravel AI SDK 1.1 and 1.2
+
+These are minor releases with new features, not patches, so they get a proper write-up of their own. Short version: **1.1.0** (Oct 5) added Agent Skills support, Cohere text generation, approval for built-in tools and a `MoveFile` filesystem tool. **1.2.0** (Oct 7) added OpenAI Decisions classification and refreshed the default Anthropic models. See the [release notes](https://github.com/laravel/ai/releases) for the full list.
+
+## Upgrade notes
+
+- None of these releases has breaking changes. Run `composer update` or `npm update`, then your test suite.
+- Inertia 2.x apps: expect pages from old history entries to be refetched once after the deploy.
+- If you pin exact versions, bump them: `@inertiajs/vue3@2.3.29`, `laravel/framework:^12.69.3`, `laravel/boost:^2.10.3`.
+
+## Recap
+
+- **Inertia 2.3.29** is the one to install today if you are on 2.x with history encryption.
+- **Laravel 12.69.3** fixes queue timeout exit codes and S3 credentials on Laravel Cloud.
+- **Inertia Laravel 3.5.1** and **Boost 2.10.x** are small, safe updates.
+- On Laravel 13 and Inertia 3.9.1 already? You're covered.
+
+## FAQ
+
+<FAQ items={[
+  { q: 'Do I need to change any code for these updates?', a: 'No. They are bug-fix and security releases. Update the packages and run your tests.' },
+  { q: 'I use Inertia 3. Do I need 2.3.29?', a: 'No. Inertia 3.9.1 has the same encrypted-history fix. See our [Inertia 3.9 post](/inertia-3-9-background-polling-navigate-type).' },
+  { q: 'Why will some pages be refetched after I update Inertia?', a: 'History entries written by older versions have no per-entry IV, so Inertia fetches them from the server again instead of decrypting them. It happens once per old entry.' },
+  { q: 'What is Pi in the Boost 2.10.2 notes?', a: 'Pi is an AI coding agent that now supports MCP servers. Boost writes its config to `.pi/mcp.json` so Pi can use tools like `search-docs`.' },
+]} />
+
+## Next steps
+
+- [The official Inertia 3 upgrade guide](https://inertiajs.com/upgrade-guide), if the 2.x backports are your cue to move on.
+- [Update Laravel Boost after you upgrade](/laravel-boost-update-vue)
+- [Inertia history encryption docs](https://inertiajs.com/history-encryption)
+
+## Sources
+
+- [Inertia v2.3.29 release](https://github.com/inertiajs/inertia/releases/tag/v2.3.29), [PR #3317 (unique IV)](https://github.com/inertiajs/inertia/pull/3317), [PR #3316 (prefetch flush)](https://github.com/inertiajs/inertia/pull/3316)
+- [Inertia v3.9.1 PR #3315 (unique IV, 3.x)](https://github.com/inertiajs/inertia/pull/3315)
+- [Laravel v12.69.3 release](https://github.com/laravel/framework/releases/tag/v12.69.3), [PR #61623](https://github.com/laravel/framework/pull/61623), [PR #61757](https://github.com/laravel/framework/pull/61757)
+- [Inertia Laravel v3.5.1 release](https://github.com/inertiajs/inertia-laravel/releases/tag/v3.5.1), [PR #918](https://github.com/inertiajs/inertia-laravel/pull/918)
+- [Boost v2.10.1](https://github.com/laravel/boost/releases/tag/v2.10.1), [v2.10.2](https://github.com/laravel/boost/releases/tag/v2.10.2), [v2.10.3](https://github.com/laravel/boost/releases/tag/v2.10.3), [PR #1049 (Pi)](https://github.com/laravel/boost/pull/1049)
+- [Laravel AI v1.1.0](https://github.com/laravel/ai/releases/tag/v1.1.0) and [v1.2.0](https://github.com/laravel/ai/releases/tag/v1.2.0)
