@@ -1,0 +1,308 @@
+---
+id: 153
+title: "Laravel defer(): run code after the response, no queue worker"
+seoTitle: "Laravel defer(): Run Code After the Response"
+excerpt: "Hidden gem: Laravel's defer() runs CRM syncs, webhooks and analytics after the user gets their page. No queue worker, one line. Tested on Laravel 13.35."
+date: 2026-10-12T02:00:00Z
+snippet: "defer(fn () => Http::post($crm, $payload));"
+categories: [laravel, vuejs]
+tags: [laravel, php, inertia, vuejs]
+---
+Your checkout form spins for two seconds after "Place order". The order itself saved in milliseconds. The rest is your CRM sync and a Slack webhook that the customer will never see. Laravel has a one-line fix that most apps never use, and it doesn't need a queue worker.
+
+<TLDR
+  audience="Laravel 11–13 developers, including Inertia + Vue apps"
+  learn={['What `defer()` does and when it runs', 'Usual way vs `defer()` side by side', 'The `deferred` and `background` queue connections', 'The gotchas: status codes, swallowed errors, `artisan serve`, tests']}
+  tested="Laravel 13.35 · inertia-laravel 3.5.1 · PHP 8.4 (PHP-FPM and artisan serve)"
+>
+
+- `defer(fn () => ...)` runs a closure **after the HTTP response is sent**, in the same PHP process. No queue, no worker, no Supervisor.
+- It only runs when the response status is **below 400**. Chain `->always()` to run it on errors too.
+- Exceptions inside a deferred closure are **reported and swallowed**, and nothing retries. Use a real queue for work you can't lose.
+- Already have a job class? `dispatch(...)->onConnection('deferred')` gives the same behaviour, and `'background'` runs it in a separate PHP process.
+
+</TLDR>
+
+## What defer() is and why most people miss it
+
+`defer()` shipped in Laravel 11.23 (September 2024), in the same release as `Concurrency` and `Cache::flexible`. It lives in the helpers page under "Deferred Functions", between `dispatch()` and `Sleep`. That's prime real estate for being skipped.
+
+The idea is simple. You hand Laravel a closure, Laravel sends the response, and only then runs your closure. On PHP-FPM the browser is already rendering the next page while your code talks to the CRM.
+
+```php title="routes/web.php"
+use function Illuminate\Support\defer;
+
+Route::post('/newsletter', function (Request $request) {
+    $subscriber = Subscriber::create($request->validate(['email' => 'required|email']));
+
+    defer(fn () => $subscriber->syncToMailingList()); // [!code highlight]
+
+    return back()->with('success', 'You are in!');
+});
+```
+
+There's also a global `defer()` helper, so the `use function` line is optional. Keep it anyway: it makes the import obvious and avoids a clash with Swoole's own `defer` (more on that below).
+
+## The usual way vs the gem
+
+Most apps end up in one of two places: do the work inline and make the user wait, or create a job class and run a queue worker for a 30-line webhook call.
+
+<CodeCompare before="Inline (user waits)" after="defer() (user doesn't)">
+
+```php title="app/Http/Controllers/CheckoutController.php"
+public function store(Request $request)
+{
+    $order = Order::create($request->validate([/* ... */]));
+
+    Http::post(config('services.crm.url').'/contacts', [
+        'email' => $order->email,
+        'last_order_total' => $order->total,
+    ]); // the user waits for the CRM
+
+    Http::post(config('services.slack.orders_webhook'), [
+        'text' => "New order #{$order->id}",
+    ]); // ...then for Slack. If Slack hangs, so does checkout
+
+    return to_route('orders.show', $order);
+}
+```
+
+```php title="app/Http/Controllers/CheckoutController.php"
+use function Illuminate\Support\defer;
+
+public function store(Request $request)
+{
+    $order = Order::create($request->validate([/* ... */]));
+
+    defer(fn () => Http::post(config('services.crm.url').'/contacts', [
+        'email' => $order->email,
+        'last_order_total' => $order->total,
+    ]));
+
+    defer(fn () => Http::post(config('services.slack.orders_webhook'), [
+        'text' => "New order #{$order->id}",
+    ]));
+
+    return to_route('orders.show', $order);
+}
+```
+
+</CodeCompare>
+
+We measured it with a closure that sleeps for 2 seconds, behind PHP-FPM 8.4. The client got its response in **0.016 s**, and the deferred closure finished 2 seconds later. Same code inline: 2 seconds of spinner.
+
+Here's how the options compare:
+
+| Option | User waits? | Needs a worker? | Retries? | Best for |
+|---|---|---|---|---|
+| Inline call | Yes | No | No | Work the response depends on |
+| `defer()` | No | No | No | Small, best-effort side effects |
+| `->onConnection('deferred')` | No | No | No | An existing job class, same idea |
+| `->onConnection('background')` | No | No | No | Slower work that shouldn't hold the FPM worker |
+| Real queue (`redis`, `database`, SQS) | No | Yes | Yes | Anything you can't afford to lose |
+
+## Real-world example: an Inertia checkout
+
+This is the full controller from our test app. The Vue side is a normal `useForm` post: nothing changes on the front end, it just gets its redirect faster.
+
+```php title="app/Http/Controllers/CheckoutController.php"
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Order;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
+
+use function Illuminate\Support\defer;
+
+class CheckoutController extends Controller
+{
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'email' => ['required', 'email'],
+            'total' => ['required', 'integer', 'min:1'],
+        ]);
+
+        $order = Order::create($data);
+
+        // The customer doesn't care about any of this. Do it after they get their page.
+        defer(fn () => Http::post(config('services.crm.url').'/contacts', [
+            'email' => $order->email,
+            'last_order_total' => $order->total,
+        ]));
+
+        defer(fn () => Http::post(config('services.slack.orders_webhook'), [
+            'text' => "New order #{$order->id}: {$order->total} cents",
+        ]));
+
+        return to_route('orders.show', $order)->with('success', 'Order placed!');
+    }
+}
+```
+
+```vue title="resources/js/pages/Checkout.vue"
+<script setup lang="ts">
+import { useForm } from '@inertiajs/vue3'
+
+const form = useForm({ email: '', total: 4900 })
+</script>
+
+<template>
+  <form @submit.prevent="form.post('/orders')">
+    <input v-model="form.email" type="email" />
+    <p v-if="form.errors.email">{{ form.errors.email }}</p>
+    <button :disabled="form.processing">Place order</button>
+  </form>
+</template>
+```
+
+`form.processing` now flips back as soon as the order is saved, not when Slack feels like answering.
+
+<Diagram name="laravel-defer-lifecycle" alt="The lifecycle of a deferred function: the request reaches the controller, which saves the order and registers closures with defer(). Laravel sends the response, so the browser gets the Inertia redirect. Then the InvokeDeferredCallbacks middleware checks the status: if it is below 400, or the callback was marked always(), the closures run in the same PHP process and any exception is logged. For 4xx and 5xx responses they are skipped." caption="defer() runs after the response, and only for successful status codes unless you call always()." />
+
+### Already have a job? Use the deferred connection
+
+Since Laravel 12.35 you can push any queued job onto the `deferred` connection. It runs synchronously, after the response, with no worker. Since 12.37 there's also `background`, which runs the job in a separately spawned PHP process so your FPM worker is free for the next request.
+
+```php title="app/Http/Controllers/CheckoutController.php"
+SyncOrderToCrm::dispatch($order)->onConnection('deferred');
+
+GenerateInvoicePdf::dispatch($order)->onConnection('background');
+```
+
+Both connections are in the default `config/queue.php` of new Laravel 13 apps. In an older app, add them yourself:
+
+```php title="config/queue.php"
+'connections' => [
+    // ...
+    'deferred' => ['driver' => 'deferred'],
+    'background' => ['driver' => 'background'],
+],
+```
+
+### Cancel or replace a deferred closure
+
+Give a closure a name and you can cancel it with `forget()`. A name is also a cheap debounce: register the same name three times and only the **last** one runs. We checked that in our test app.
+
+```php title="app/Http/Controllers/ProfileController.php"
+defer(fn () => Search::sync($user), 'sync-search');
+defer(fn () => Search::sync($user->fresh()), 'sync-search'); // only this one runs
+
+defer(fn () => Metrics::report(), 'metrics');
+defer()->forget('metrics'); // never runs
+```
+
+## Gotchas
+
+**The status code decides.** Callbacks run when the final status is below 400. A redirect counts as success, and that includes the 302 Laravel sends when validation fails on an Inertia form. In our test, a closure registered *before* `$request->validate()` still ran on a failed submit. Register deferred work after validation, after the thing it reports on actually happened.
+
+<Callout type="gotcha" title="Errors disappear quietly">
+
+Laravel wraps each deferred closure in `rescue()`. An exception is reported to your log or error tracker, the response is already gone, the next closure still runs, and **nothing retries**. That's fine for analytics. It's not fine for "charge the card" or "send the invoice". Those go on a real queue.
+
+</Callout>
+
+**`php artisan serve` makes it look broken.** The built-in server keeps the connection open until the script ends, so locally the browser still waits the full 2 seconds. Behind PHP-FPM, Laravel calls `fastcgi_finish_request()` and the browser is released straight away. Test the speed-up on a real PHP-FPM setup, not on `artisan serve`.
+
+**It still uses your PHP worker.** The user doesn't wait, but that FPM worker is busy until your closure finishes. A dozen 10-second deferred calls under load can starve the pool. Keep `defer()` for work measured in milliseconds to a couple of seconds, and use `'background'` or a real queue for the rest.
+
+**`background` needs to spawn processes.** It runs `php artisan invoke-serialized-closure` in the background, so `proc_open` must be allowed and the `php` binary reachable. Some shared hosts block that.
+
+**Swoole has its own `defer`.** With the Swoole extension installed, the global `defer()` can hit Swoole's function. Import `use function Illuminate\Support\defer;` and you're safe.
+
+**It works in Artisan commands and queued jobs too.** In a command, closures run after it exits with code 0. In a job, they run after the job finishes successfully. Same `->always()` escape hatch.
+
+## Testing deferred code
+
+In HTTP tests (`$this->post(...)`), Laravel terminates the request, so deferred closures **do** run after the response, just like production. But a closure deferred from a plain service call in a unit test never runs, because there's no request to terminate. `withoutDefer()` runs every closure immediately instead, and lets exceptions bubble so your test fails loudly.
+
+<TryIt title="Try it yourself">
+
+Drop this into a fresh Laravel 13 app next to the controller above and run `php artisan test`. Both tests pass.
+
+```php title="tests/Feature/CheckoutTest.php"
+<?php
+
+namespace Tests\Feature;
+
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
+use Tests\TestCase;
+
+class CheckoutTest extends TestCase
+{
+    use RefreshDatabase;
+
+    public function test_checkout_syncs_the_crm_after_the_response(): void
+    {
+        config(['services.crm.url' => 'https://crm.test', 'services.slack.orders_webhook' => 'https://hooks.slack.test/x']);
+        Http::fake();
+
+        $this->post('/orders', ['email' => 'amina@example.com', 'total' => 4900])
+            ->assertRedirect('/orders/1');
+
+        Http::assertSent(fn ($request) => $request->url() === 'https://crm.test/contacts'
+            && $request['email'] === 'amina@example.com');
+        Http::assertSentCount(2);
+    }
+
+    public function test_failed_validation_sends_nothing(): void
+    {
+        Http::fake();
+
+        $this->post('/orders', ['email' => 'nope'])->assertSessionHasErrors('email');
+
+        Http::assertNothingSent();
+    }
+}
+```
+
+</TryIt>
+
+## How useful is this?
+
+| | Score |
+|---|---|
+| Time saved per use | ★★★★☆ One line instead of a job class and a worker |
+| How often you'll reach for it | ★★★★★ Every webhook, CRM sync, analytics ping |
+| Risk if misused | ★★★☆☆ Silent failures, no retries |
+| **Overall** | **4.5 / 5**: a default tool for best-effort side effects |
+
+If your app has a "send to Slack" or "ping the CRM" line inside a controller, you can use this today.
+
+## Recap
+
+- `defer()` runs a closure after the response is sent, with no queue worker.
+- It runs only for status codes below 400 (redirects included), unless you chain `->always()`.
+- Errors are logged and swallowed, with no retries: keep it for best-effort work.
+- Existing jobs can use the `deferred` or `background` connections instead.
+- Measure on PHP-FPM, not `artisan serve`, and use `withoutDefer()` in unit tests.
+
+## FAQ
+
+<FAQ items={[
+  { q: 'Is defer() the same as Inertia::defer()?', a: 'No. `Inertia::defer()` sends a page first and loads a slow prop in a second request (see [partial reloads](/inertia-partial-reloads)). Laravel’s `defer()` runs server-side work after the response, and the browser never receives its result.' },
+  { q: 'Does defer() replace my queue?', a: 'Only for small, best-effort work. There are no retries, no backoff and no failed-jobs table, and a worker restart loses anything still pending. Emails, payments and anything you must not lose belong on a real queue.' },
+  { q: 'Why does my page still wait locally?', a: 'The built-in `php artisan serve` server keeps the connection open until the script ends. Behind PHP-FPM, Laravel calls `fastcgi_finish_request()` and the browser is released before your closures run.' },
+  { q: 'Does it run when validation fails?', a: 'Yes, if you registered it before validation. A failed validation is a 302 redirect, and redirects count as success. Call `defer()` after `validate()`.' },
+  { q: 'Which Laravel version do I need?', a: '`defer()` arrived in Laravel 11.23. The `deferred` queue connection came in 12.35 and `background` in 12.37. Everything here was tested on Laravel 13.35.' },
+]} />
+
+## Next steps
+
+- [Show a queued Laravel job in Vue](/laravel-vue-queued-job), for work that needs a real queue
+- [Inertia partial reloads in Vue](/inertia-partial-reloads), where `Inertia::defer()` lives
+- [queue:work in production, listen locally](/laravel-queue-work-vs-listen)
+- [Laravel docs: Deferred functions](https://laravel.com/docs/13.x/helpers#deferred-functions)
+
+## Sources
+
+- [Laravel 13 docs: Deferred functions](https://laravel.com/docs/13.x/helpers#deferred-functions)
+- [Laravel 13 docs: Deferred dispatching (`deferred` and `background` connections)](https://laravel.com/docs/13.x/queues#deferred-dispatching)
+- [Laravel 13 docs: Deferring concurrent tasks](https://laravel.com/docs/13.x/concurrency#deferring-concurrent-tasks)
+- [laravel/framework v11.23.0 release (Laracon 2024 PR #52710)](https://github.com/laravel/framework/releases/tag/v11.23.0)
+- [laravel/framework PR #57428: Deferred queue (v12.35.0)](https://github.com/laravel/framework/pull/57428)
+- [laravel/framework PR #57648: Process queue jobs in background (v12.37.0)](https://github.com/laravel/framework/pull/57648)
+- [Source: `InvokeDeferredCallbacks` middleware](https://github.com/laravel/framework/blob/13.x/src/Illuminate/Foundation/Http/Middleware/InvokeDeferredCallbacks.php)
