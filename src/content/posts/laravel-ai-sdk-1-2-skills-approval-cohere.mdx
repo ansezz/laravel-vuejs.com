@@ -1,0 +1,598 @@
+---
+id: 152
+title: "Laravel AI SDK 1.1 and 1.2: Agent Skills, tool approval, Cohere"
+seoTitle: "Laravel AI SDK 1.2: Skills, Tool Approval, Cohere"
+excerpt: "Laravel AI SDK 1.1 and 1.2 add Agent Skills, approval for built-in tools, Cohere chat, MoveFile and OpenAI image classification. Tested code, a Vue approval prompt and upgrade notes."
+date: 2026-10-12T01:00:00Z
+snippet: "class SupportAgent implements Agent, HasSkills"
+categories: [laravel, vuejs]
+tags: [laravel, vuejs, inertia, release, upgrade]
+---
+Your support agent's system prompt is now 400 lines of refund rules and brand voice, and your file assistant can delete files with nobody watching. Two minor releases of the Laravel AI SDK fix both, and one `composer update` gets you there.
+
+<TLDR
+  audience="Laravel 13 developers using laravel/ai with Vue and Inertia"
+  learn={['Agent Skills with `HasSkills` and `SKILL.md` folders', 'How to make built-in tools (files, MCP) ask before they run', 'A Vue 3 + Inertia 3 approval prompt', 'Cohere chat, OpenAI image classification and the upgrade gotchas']}
+  tested="Laravel 13.35 · laravel/ai 1.2.0 · inertia-laravel 3.5.1 · @inertiajs/vue3 3.9.1 · Vue 3.5 · PHP 8.4"
+>
+
+- **1.1.0** (Oct 5, 2026) adds **Agent Skills**: instructions in `resources/skills/*/SKILL.md` that the agent loads only when a prompt needs them.
+- 1.1.0 also lets **built-in tools** (filesystem, MCP, sub-agent, similarity search) call `requireApproval()`, adds **Cohere** text generation and a **MoveFile** tool.
+- **1.2.0** (Oct 7, 2026) makes **OpenAI** a classification provider that can look at images, and stops sending `temperature`/`top_p` to Claude 4.7+.
+- Upgrading from 1.0 is a minor bump, but **default models changed**. Pin your models if cost or behaviour matters.
+
+</TLDR>
+
+## What's new at a glance
+
+| Change | Version | Replaces |
+|---|---|---|
+| Agent Skills (`HasSkills`, `LoadSkill`) | 1.1.0 | A giant `instructions()` string |
+| `requireApproval()` on built-in tools | 1.1.0 | Subclassing `McpTool` or `DeleteFile` just to gate it |
+| Cohere text generation | 1.1.0 | Cohere for embeddings and reranking only |
+| `MoveFile` filesystem tool | 1.1.0 | `CopyFile` + `DeleteFile` (two tool calls) |
+| Provider tools skipped on failover | 1.1.0 | A failover run dying on an unsupported tool |
+| OpenAI classification with images | 1.2.0 | TypeSafe or OpenRouter only, text only |
+| No sampling params on Claude 4.7+ | 1.2.0 | A 400 error when you set `#[Temperature]` |
+
+Everything below ran in a fresh Laravel 13.35 app with `laravel/ai` 1.2.0. Provider calls were faked with `Http::fake()`, so the request and response shapes are real but no API key was charged.
+
+## Agent Skills: instructions on demand
+
+A skill is a folder with a `SKILL.md` file: a short description of *when* to use it, then the instructions. The format is the open [Agent Skills](https://agentskills.io) standard, so the same folder works for your app's agents and for the coding agent you build the app with.
+
+The trick is that the agent only sees each skill's one-line description up front. It loads the full instructions, and any bundled files, only when a prompt calls for them. Your context window stays small and your instructions stay organised.
+
+### Write a skill
+
+```text
+resources/skills/
+└── refund-policy/
+    ├── SKILL.md
+    └── references/EDGE-CASES.md
+```
+
+```markdown title="resources/skills/refund-policy/SKILL.md"
+---
+name: refund-policy
+description: Use when a customer asks for a refund or disputes a charge.
+---
+
+# Refund policy
+
+- Full refund within 30 days of purchase, no questions asked.
+- After 30 days, offer store credit instead.
+- Read references/EDGE-CASES.md before you answer about annual plans.
+```
+
+### Give the agent its skills
+
+Implement `HasSkills` and return your sources: directories, `Skill` objects, or closures.
+
+<CodeCompare before="1.0" after="1.1">
+
+```php title="app/Ai/Agents/SupportAgent.php"
+class SupportAgent implements Agent
+{
+    use Promptable;
+
+    public function instructions(): Stringable|string
+    {
+        return 'You are a friendly support agent for Acme. '
+            .'Refunds: full refund within 30 days... '
+            .'Annual plans: refund the unused months... '
+            .'House style: short sentences, no jargon... ';
+            // ...and 300 more lines
+    }
+}
+```
+
+```php title="app/Ai/Agents/SupportAgent.php"
+use Laravel\Ai\Contracts\Agent;
+use Laravel\Ai\Contracts\HasSkills;
+use Laravel\Ai\Promptable;
+use Laravel\Ai\Skills\Skill;
+
+class SupportAgent implements Agent, HasSkills
+{
+    use Promptable;
+
+    public function instructions(): Stringable|string
+    {
+        return 'You are a friendly support agent for Acme.';
+    }
+
+    public function skills(): iterable
+    {
+        return [
+            resource_path('skills'),
+            new Skill(
+                name: 'house-style',
+                description: 'Use when you write copy for a customer.',
+                instructions: 'Short sentences. No jargon. Sign off with "The Acme team".',
+            ),
+        ];
+    }
+}
+```
+
+</CodeCompare>
+
+That's it. The agent now gets one `LoadSkill` tool. This is the tool description the model saw in our test:
+
+```text
+Load a skill's instructions before performing a task matching the skill's description. Pass a path to read one of the skill's bundled files instead.
+
+Available skills:
+- house-style: Use when you write copy for a customer.
+- refund-policy: Use when a customer asks for a refund or disputes a charge.
+```
+
+When the model calls `LoadSkill` with `refund-policy`, it gets the instructions wrapped in a `<skill_content>` tag, plus a list of bundled files (`references/EDGE-CASES.md`). It can call the tool again with a `path` to read one of them.
+
+### Skills from the database
+
+Need per-team playbooks? Return a closure. It only runs when the agent first needs its skills, so it suits data that lives in your database:
+
+```php title="app/Ai/Agents/SupportAgent.php"
+public function skills(): iterable
+{
+    return [
+        resource_path('skills'),
+        base_path('.agents/skills'), // share skills with your coding agent
+        fn () => $this->user->team->skills->map(
+            fn ($skill) => new Skill($skill->name, $skill->description, $skill->instructions)
+        ),
+    ];
+}
+```
+
+<Callout type="gotcha" title="three ways a skill quietly disappears">
+
+- A `SKILL.md` **without a `description`** is ignored, with no error. (No `name` is fine: the folder name is used.)
+- When two skills share a name, the **source listed first wins**.
+- Files over **256 KB** and binary files are not returned to the model. Path tricks such as `../../.env` are refused: in our test the tool answered "File [../../../.env] is not bundled with skill [refund-policy]."
+
+If `tools()` also returns a `LoadSkill`, the agent's skills are merged into it and a warning is logged, because providers reject duplicate tool names.
+
+</Callout>
+
+## Built-in tools can now ask first
+
+Since 1.0 you could make **your own** tools wait for a human with `requireApproval()`. The tools that ship with the SDK (filesystem, MCP, sub-agent and similarity search tools) could not. 1.1.0 changes that. Approval stays **off by default**, so existing agents behave exactly as before.
+
+### Gate the destructive file tools
+
+`FileStorage::all()` returns every filesystem tool, now including the new `MoveFile`. Gate the ones that write:
+
+```php title="app/Ai/Agents/FileAssistant.php"
+use Laravel\Ai\Concerns\RemembersConversations;
+use Laravel\Ai\Contracts\Agent;
+use Laravel\Ai\Contracts\Conversational;
+use Laravel\Ai\Contracts\HasTools;
+use Laravel\Ai\Promptable;
+use Laravel\Ai\Tools\FileStorage;
+use Laravel\Ai\Tools\Filesystem\CopyFile;
+use Laravel\Ai\Tools\Filesystem\DeleteFile;
+use Laravel\Ai\Tools\Filesystem\MoveFile;
+use Laravel\Ai\Tools\Filesystem\WriteFile;
+
+class FileAssistant implements Agent, Conversational, HasTools
+{
+    use Promptable, RemembersConversations;
+
+    public function instructions(): Stringable|string
+    {
+        return 'You manage files on the reports disk.';
+    }
+
+    public function tools(): iterable
+    {
+        return FileStorage::all('local')
+            ->map(fn ($tool) => match (true) {
+                $tool instanceof DeleteFile => $tool->requireApproval('This permanently deletes a file.'), // [!code highlight]
+                $tool instanceof WriteFile,
+                $tool instanceof CopyFile,
+                $tool instanceof MoveFile => $tool->requireApproval(),
+                default => $tool, // ListFiles, ReadFile, FileExists... run freely
+            })
+            ->all();
+    }
+}
+```
+
+When the model asked to delete `reports/old-invoice.pdf`, the run paused and the file was still there. `$response->pendingApprovals` held exactly one entry:
+
+```php
+[
+    'id' => 'call_abc',
+    'tool' => 'DeleteFile',
+    'arguments' => ['path' => 'reports/old-invoice.pdf'],
+    'reason' => 'This permanently deletes a file.',
+]
+```
+
+### Gate MCP tools that write
+
+This is the case the PR was written for: you connect a GitHub MCP server and want `create_issue` to wait for a human, but `search_issues` to run freely.
+
+<CodeCompare before="1.0" after="1.1">
+
+```php title="app/Ai/Agents/GitHubAssistant.php"
+// A subclass, only to add approval support
+class ApprovableMcpTool extends McpTool implements Approvable
+{
+    use InteractsWithApprovals;
+}
+
+$github->tools()->map(fn ($tool) => in_array($tool->name, ['create_issue', 'merge_pull_request'])
+    ? (new ApprovableMcpTool($tool))->requireApproval()
+    : $tool
+);
+```
+
+```php title="app/Ai/Agents/GitHubAssistant.php"
+use Laravel\Ai\Tools\McpTool;
+
+// Anything the server doesn't mark as read-only needs a yes
+$github->tools()
+    ->mapInto(McpTool::class)
+    ->map(fn (McpTool $tool) => ($tool->annotations()['readOnlyHint'] ?? false)
+        ? $tool
+        : $tool->requireApproval());
+```
+
+</CodeCompare>
+
+We checked the mapping with two stub tools: `search_issues` (marked `readOnlyHint`) ran, `create_issue` needed approval. Note the names: the wrapper prefixes them, so they show up as `mcp_tools_search_issues` and `mcp_tools_create_issue` in `pendingApprovals`.
+
+<Callout type="heads-up" title="you need laravel/mcp for this part">
+
+MCP tools come from the [Laravel MCP](https://laravel.com/docs/13.x/mcp) package. AI SDK 1.x requires `laravel/mcp` 1.0 or later.
+
+</Callout>
+
+## Build the approval prompt in Vue
+
+A paused run is only useful if someone can answer it. Here is the full loop with Inertia 3: the user sends a message, the agent pauses, the page shows what it wants to do, and the user's decision resumes the run.
+
+<Diagram name="ai-sdk-tool-approval-flow" alt="The approval loop: the controller prompts the agent; the model calls a tool such as DeleteFile; if the tool requires approval, the run pauses and the pending approvals are stored with the conversation; the Vue page shows them and the user approves or rejects; the controller sends a Decisions object with continue(), the tool runs and the agent replies. Tools without approval run straight away." caption="Approvable tools pause the run until the user decides." />
+
+### The controller
+
+Three actions: send a message, show the conversation, and post decisions. The database conversation store can rebuild the pending approvals after a page reload, so you don't need to keep them in the session.
+
+```php title="app/Http/Controllers/FileChatController.php"
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Ai\Agents\FileAssistant;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use Inertia\Inertia;
+use Inertia\Response;
+use Laravel\Ai\Approvals\Decision;
+use Laravel\Ai\Approvals\Decisions;
+use Laravel\Ai\Contracts\ConversationStore;
+
+class FileChatController
+{
+    public function __construct(private ConversationStore $store) {}
+
+    public function show(Request $request, string $conversation): Response
+    {
+        $this->authorizeConversation($request, $conversation);
+
+        return Inertia::render('files/Chat', [
+            'conversationId' => $conversation,
+            'reply' => session('reply'),
+            'approvals' => collect($this->store->pendingApprovalsFor($conversation))->toArray(),
+        ]);
+    }
+
+    public function store(Request $request): RedirectResponse
+    {
+        $validated = $request->validate(['message' => ['required', 'string', 'max:2000']]);
+
+        $response = (new FileAssistant)
+            ->forUser($request->user())
+            ->prompt($validated['message']);
+
+        return to_route('files.chat', $response->conversationId)->with('reply', $response->text);
+    }
+
+    public function decide(Request $request, string $conversation): RedirectResponse
+    {
+        $this->authorizeConversation($request, $conversation);
+
+        $validated = $request->validate([
+            'decisions' => ['required', 'array'],
+            'decisions.*.action' => ['required', Rule::in(['approve', 'reject'])],
+            'decisions.*.result' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        $decisions = Decisions::from(collect($validated['decisions'])->map(
+            fn (array $decision) => $decision['action'] === 'approve'
+                ? Decision::approve()
+                : Decision::reject($decision['result'] ?? 'The user declined.'),
+        )->all());
+
+        $response = (new FileAssistant)
+            ->continue($conversation, as: $request->user())
+            ->prompt($decisions);
+
+        return to_route('files.chat', $conversation)->with('reply', $response->text);
+    }
+
+    private function authorizeConversation(Request $request, string $conversation): void
+    {
+        abort_unless($this->store->conversationBelongsTo(
+            $conversation,
+            $request->user()->getMorphClass(),
+            $request->user()->getKey(),
+        ), 403);
+    }
+}
+```
+
+```php title="routes/web.php"
+use App\Http\Controllers\FileChatController;
+
+Route::middleware('auth')->group(function () {
+    Route::post('/files/chat', [FileChatController::class, 'store'])->name('files.chat.store');
+    Route::get('/files/chat/{conversation}', [FileChatController::class, 'show'])->name('files.chat');
+    Route::post('/files/chat/{conversation}/decisions', [FileChatController::class, 'decide'])->name('files.chat.decide');
+});
+```
+
+<Callout type="gotcha" title="always check who owns the conversation">
+
+Paused turns are matched by conversation ID and tool call IDs, **not** by the user who started them. Without `conversationBelongsTo()`, anyone who guesses an ID could approve someone else's delete. Our test confirms the second user gets a 403.
+
+</Callout>
+
+### The Vue component
+
+The component keeps one decision per tool call and only enables the submit button when every call has one. That matters: the SDK throws an `ApprovalMismatchException` if a pending call is missing a decision.
+
+```ts title="resources/js/types/ai.ts"
+export type PendingApproval = {
+    id: string
+    tool: string
+    arguments: Record<string, unknown>
+    reason: string | null
+}
+```
+
+```vue title="resources/js/components/ToolApproval.vue"
+<script setup lang="ts">
+import { useForm } from '@inertiajs/vue3'
+import { computed } from 'vue'
+import type { PendingApproval } from '@/types/ai'
+
+const props = defineProps<{
+    conversationId: string
+    approvals: PendingApproval[]
+}>()
+
+type Choice = { action: 'approve' | 'reject'; result?: string }
+
+const form = useForm({
+    decisions: {} as Record<string, Choice>,
+})
+
+// Every paused call needs a decision, or the SDK throws ApprovalMismatchException.
+const ready = computed(() => props.approvals.every((approval) => form.decisions[approval.id]))
+
+function choose(id: string, action: Choice['action']) {
+    form.decisions[id] = action === 'approve' ? { action } : { action, result: 'The user declined this action.' }
+}
+
+function submit() {
+    form.post(`/files/chat/${props.conversationId}/decisions`, { preserveScroll: true })
+}
+</script>
+
+<template>
+    <section v-if="approvals.length" class="approval" aria-live="polite">
+        <h2>The assistant wants to do {{ approvals.length === 1 ? 'this' : 'these' }}:</h2>
+
+        <article v-for="approval in approvals" :key="approval.id">
+            <p>
+                <code>{{ approval.tool }}</code>
+                <span v-if="approval.reason"> · {{ approval.reason }}</span>
+            </p>
+            <pre>{{ JSON.stringify(approval.arguments, null, 2) }}</pre>
+
+            <button type="button" :aria-pressed="form.decisions[approval.id]?.action === 'approve'" @click="choose(approval.id, 'approve')">
+                Approve
+            </button>
+            <button type="button" :aria-pressed="form.decisions[approval.id]?.action === 'reject'" @click="choose(approval.id, 'reject')">
+                Reject
+            </button>
+        </article>
+
+        <button type="button" :disabled="!ready || form.processing" @click="submit">
+            {{ form.processing ? 'Sending…' : 'Send decisions' }}
+        </button>
+    </section>
+</template>
+```
+
+```vue title="resources/js/pages/files/Chat.vue"
+<script setup lang="ts">
+import ToolApproval from '@/components/ToolApproval.vue'
+import type { PendingApproval } from '@/types/ai'
+
+defineProps<{
+    conversationId: string
+    reply: string | null
+    approvals: PendingApproval[]
+}>()
+</script>
+
+<template>
+    <main>
+        <p v-if="reply">{{ reply }}</p>
+        <ToolApproval :conversation-id="conversationId" :approvals="approvals" />
+    </main>
+</template>
+```
+
+A rejection **with** a result (like ours) is sent back to the model so it can explain itself to the user. A rejection without one stops the run.
+
+<Callout type="pro-tip" title="faking a provider? count the requests">
+
+We tested this loop with `Http::fakeSequence()`. A remembered conversation makes one extra request on its first turn: the SDK asks the provider's **cheapest** model for a conversation title. Push a response for it, or your sequence runs dry on the resume.
+
+</Callout>
+
+## Cohere can chat now
+
+Cohere was already supported for embeddings and reranking. 1.1.0 adds text generation through Cohere's v2 Chat API: prompting, streaming, tools and structured output.
+
+```dotenv title=".env"
+COHERE_API_KEY=your-key
+```
+
+```php title="app/Ai/Agents/TicketTriage.php"
+use Laravel\Ai\Attributes\Model;
+use Laravel\Ai\Attributes\Provider;
+use Laravel\Ai\Contracts\Agent;
+use Laravel\Ai\Enums\Lab;
+use Laravel\Ai\Promptable;
+
+#[Provider(Lab::Cohere)]
+#[Model('command-a-03-2025')]
+class TicketTriage implements Agent
+{
+    use Promptable;
+
+    public function instructions(): Stringable|string
+    {
+        return 'Summarise the support ticket in one sentence.';
+    }
+}
+```
+
+Or switch any existing agent per call with `->prompt('Hello', provider: 'cohere')`. Our `FileAssistant` approval test above ran on Cohere, tool calls and all.
+
+| Tier | Default Cohere model |
+|---|---|
+| Default | `command-a-03-2025` |
+| Cheapest | `command-r7b-12-2024` |
+| Smartest | `command-a-plus-05-2026` |
+
+**Limits to know:** attachments are images only, citations and document attachments are not mapped, and Cohere can't force one named tool (the SDK sends only that tool with `REQUIRED` instead). Cohere-specific options such as `documents`, `safety_mode` and `thinking` go through provider options.
+
+## OpenAI classification can look at images (1.2)
+
+Classification asks typed questions (yes/no, choice, score) and returns probabilities instead of free text. In 1.2.0, OpenAI joins TypeSafe and OpenRouter as a classification provider, and you can pass images as the second argument to `of()`:
+
+```php title="app/Actions/InspectReturnPhoto.php"
+use Laravel\Ai\Classification;
+use Laravel\Ai\Classification\Boolean;
+use Laravel\Ai\Files\Image;
+
+$result = Classification::of('Inspect the product in this photo.', [
+    Image::fromPath($photo),
+])
+    ->question('damaged', new Boolean('Does the product have visible damage?'))
+    ->classify(provider: 'openai');
+
+if ($result['damaged']->isTrue(threshold: 0.8)) {
+    // route the return to a human
+}
+```
+
+Images work with OpenAI only: JPEG, PNG, GIF and WebP, sent inline (remote images are downloaded first). Other attachment types, or images sent to TypeSafe or OpenRouter, throw before any request. Classification is still marked **experimental**.
+
+## Claude 4.7+ and sampling parameters (1.2)
+
+Claude 4.7 and later reject a non-default `temperature` or `top_p` with a 400. So an agent with `#[UseCheapestModel]` and `#[Temperature]` started failing once the cheapest Anthropic default moved to a newer model.
+
+From 1.2.0 the SDK only sends sampling parameters to Claude 3.x and 4.0 to 4.6. On 4.7+, `#[Temperature]` and `#[TopP]` are simply ignored. No more 400, but also no effect, so don't rely on them for those models.
+
+## The smaller changes
+
+| Change | Version | Why you care |
+|---|---|---|
+| Provider tools the next provider can't run are skipped | 1.1.0 | Failover from Anthropic to OpenAI with `WebFetch` no longer kills the run |
+| Azure `ToolSearch`, Groq `WebSearch` and `CodeExecution` | 1.1.0 | Groq maps them to `browser_search` / `code_interpreter` on GPT-OSS models |
+| Web search location sent to OpenRouter | 1.1.0 | `WebSearch` location works there too |
+| Self-hosted Laya via the `typesafe` driver | 1.1.0 | Local classification with a custom `url` |
+| Stateless OpenAI `file_search` replay fixed | 1.1.0 | No more 404 when `store` is `false` |
+| `useChat` edits no longer replaced by the reply | 1.1.0 | Fixes edit-and-resend in Vercel AI SDK UIs |
+| ElevenLabs options sent in the query string | 1.1.0 | `output_format` (WAV etc.) now actually applies |
+| Anthropic `output_config` merged, not replaced | 1.2.0 | Structured output survives `effort` in provider options |
+| Bedrock structured output without forced tool choice | 1.2.0 | Fixes structured output on those models |
+
+## Upgrade notes
+
+```bash
+composer require laravel/ai:^1.2
+```
+
+<Steps>
+
+1. **Pin your models.** 1.1.0 and 1.2.0 both moved provider defaults (for Anthropic: cheapest is now `claude-haiku-5-5`, smartest `claude-opus-5-5`). If you rely on defaults or `#[UseCheapestModel]`, your bill and your outputs can change. Use `#[Model('...')]` or `models.text.default` in `config/ai.php` for anything that must stay stable.
+2. **Custom classification providers:** `ClassificationProvider::classify()` and `ClassificationGateway::classify()` gain a trailing `array $attachments = []`. Add it to your implementations. Nobody else is affected.
+3. **Check temperature on Claude 4.7+.** It is now ignored instead of failing. Remove it or move those agents to a model that accepts it.
+4. **Failover with provider tools:** an unsupported provider tool is now dropped for that attempt instead of throwing. If you relied on the exception, add a test for the new behaviour.
+5. **Coming from 0.x?** Read the 1.0 section of the upgrade guide first: it needs `laravel/mcp` 1.0+ and a conversation table migration, and the Boost-powered upgrade needs `laravel/boost` 2.10 or later.
+
+</Steps>
+
+Nothing in skills, approvals or Cohere is on by default. Your agents behave the same until you opt in.
+
+## Try it yourself
+
+<TryIt title="Load your first skill in 2 minutes">
+
+```bash
+composer require laravel/ai:^1.2
+mkdir -p resources/skills/house-style
+printf -- "---\ndescription: Use when you write copy for a customer.\n---\n\nShort sentences. No jargon.\n" > resources/skills/house-style/SKILL.md
+php artisan tinker --execute 'echo (new Laravel\Ai\Tools\LoadSkill)->handle(new Laravel\Ai\Tools\Request(["name" => "house-style"]));'
+```
+
+You should see the instructions wrapped in `<skill_content name="house-style">`. Delete the `description` line and run it again: you get "Skill [house-style] does not exist."
+
+</TryIt>
+
+## Recap
+
+- **Agent Skills** move long instructions into `resources/skills` folders that load only when needed. Implement `HasSkills`.
+- **Built-in tools** (files, MCP, sub-agents, similarity search) can now `requireApproval()`. Off by default.
+- A **Vue + Inertia** approval prompt needs three actions, an ownership check and a decision for every pending call.
+- **Cohere** does chat now, **OpenAI** classifies images, and **Claude 4.7+** ignores sampling params.
+- Pin your models before you upgrade.
+
+## FAQ
+
+<FAQ items={[
+  { q: 'Do I need to change anything to upgrade from AI SDK 1.0 to 1.2?', a: 'Usually no. Run `composer require laravel/ai:^1.2`. Only custom classification providers need a code change. Pin your models if you depend on the defaults, because they changed.' },
+  { q: 'What is the difference between Agent Skills and agent instructions?', a: 'Instructions are always sent. A skill only sends its one-line description up front; the agent loads the full text through the `LoadSkill` tool when a prompt needs it.' },
+  { q: 'Why is my skill not showing up?', a: 'Most often the `SKILL.md` frontmatter has no `description`, which makes the SDK skip it. Also check for a skill with the same name in an earlier source: the first one wins.' },
+  { q: 'Can I require approval for MCP tools in the Laravel AI SDK?', a: 'Yes, since 1.1.0. Wrap them with `mapInto(McpTool::class)` and call `requireApproval()` on the ones that are not read-only.' },
+  { q: 'Does #[Temperature] work with Claude 4.7?', a: 'No. Since 1.2.0 the SDK does not send `temperature` or `top_p` to Claude 4.7 and later, because those models reject non-default values.' },
+]} />
+
+## Next steps
+
+- [Approve an AI SDK tool before it runs](/laravel-ai-tool-approval-vue)
+- [Continue an AI SDK conversation you own](/laravel-ai-conversation-vue)
+- [Fake an AI agent in a Pest test](/pest-fake-ai-agent-vue)
+- [Laravel AI SDK docs: Skills](https://laravel.com/docs/13.x/ai-sdk#skills)
+
+## Sources
+
+- [laravel/ai v1.1.0 release notes](https://github.com/laravel/ai/releases/tag/v1.1.0) and [v1.2.0 release notes](https://github.com/laravel/ai/releases/tag/v1.2.0)
+- [PR #1054: Agent Skills](https://github.com/laravel/ai/pull/1054) and [PR #1102: HasSkills](https://github.com/laravel/ai/pull/1102)
+- [PR #1097: approval for built-in tools](https://github.com/laravel/ai/pull/1097) and [PR #1092: MoveFile](https://github.com/laravel/ai/pull/1092)
+- [PR #1078: Cohere text generation](https://github.com/laravel/ai/pull/1078) and [PR #1080: skip unsupported provider tools](https://github.com/laravel/ai/pull/1080)
+- [PR #1106: OpenAI classification with images](https://github.com/laravel/ai/pull/1106) and [PR #1107: Anthropic defaults and sampling params](https://github.com/laravel/ai/pull/1107)
+- [laravel/ai upgrade guide](https://github.com/laravel/ai/blob/1.x/UPGRADE.md)
+- Laravel docs: [Skills](https://laravel.com/docs/13.x/ai-sdk#skills), [Human tool approval](https://laravel.com/docs/13.x/ai-sdk#human-tool-approval), [Classification](https://laravel.com/docs/13.x/ai-sdk#classification)
