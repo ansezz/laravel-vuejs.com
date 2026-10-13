@@ -1,0 +1,17 @@
+flowchart LR
+  A["`**1. Next step**
+  PendingStep with
+  steps + usage so far`"] --> B{"`**Stop
+  middleware**`"}
+  B -- "keep going" --> C["`**2. Model call**
+  provider answers`"]
+  C --> D{"`**Tool calls?**`"}
+  D -- yes --> E["`**3. Tools run**
+  results added`"]
+  E --> A
+  D -- no --> F["`**Done**
+  finish reason
+  stop`"]
+  B -- "stop" --> G["`**Stopped**
+  completed steps kept,
+  stream ends cancelled`"]

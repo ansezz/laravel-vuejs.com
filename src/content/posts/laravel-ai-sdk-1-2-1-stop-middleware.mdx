@@ -1,0 +1,458 @@
+---
+id: 154
+title: "Laravel AI SDK 1.2.1: Stop middleware for agent runs"
+seoTitle: "Laravel AI SDK 1.2.1: Stop Middleware for Agents"
+excerpt: "Laravel AI SDK 1.2.1 adds Stop::when, Stop::unless and StepResult::stop() to end agent runs early. Tested stop button, token budgets and a Vue 3 + Inertia 3 UI."
+date: 2026-10-13T01:00:00Z
+snippet: "Stop::when(fn (PendingStep $step) => Cache::has($key))"
+categories: [laravel, vuejs]
+tags: [laravel, vuejs, inertia, release, upgrade]
+---
+Your research agent is on tool call number nine, your user has already found the answer on Stack Overflow, and they're mashing a Stop button that does nothing. Meanwhile the token meter keeps spinning. Laravel AI SDK 1.2.1 is a patch release with a real new feature: **Stop middleware**, a clean way to end an agent run before the next model call.
+
+<TLDR
+  audience="Laravel 13 developers running tool-calling agents with laravel/ai, Vue and Inertia"
+  learn={['`Stop::when` and `Stop::unless` for stop buttons and token budgets', 'Custom middleware that returns `StepResult::stop()`', 'What a stopped `prompt()` and `stream()` return (hint: `cancelled`, not `stop`)', 'A Vue 3 + Inertia 3 Stop button, plus the other 1.2.1 fixes']}
+  tested="Laravel 13.35 · laravel/ai 1.2.1 · inertia-laravel 3.5.1 · @inertiajs/vue3 3.9.1 · Vue 3.5 · PHP 8.4"
+>
+
+- **1.2.1** (Oct 12, 2026) adds `Laravel\Ai\Middleware\Stop` with `Stop::when()` and `Stop::unless()`, plus `StepResult::stop()` for your own middleware.
+- The run ends **before the next model call**. Completed steps, tool results and usage are kept; `text` is `''`.
+- A stopped stream ends with `stream_end` and **`reason: "cancelled"`** (a new `FinishReason::Cancelled`). The Vercel protocol reports it as `other`.
+- Also in 1.2.1: OpenRouter image models like Flux work, Ollama embeddings keep their native size, and a short `Retry-After` is honoured before failover. Upgrade with `composer update laravel/ai`.
+
+</TLDR>
+
+## What's in 1.2.1
+
+| Change | PR | Why you care |
+|---|---|---|
+| **Stop middleware** (`Stop::when`, `Stop::unless`, `StepResult::stop()`) | [#1072](https://github.com/laravel/ai/pull/1072) | Stop buttons and token budgets without fake responses |
+| OpenRouter image generation uses `/images` | [#1116](https://github.com/laravel/ai/pull/1116) | Image-only models (Flux) stop failing with a 404 |
+| Ollama keeps native embedding dimensions | [#1115](https://github.com/laravel/ai/pull/1115) | No more silent truncation to 768 |
+| OpenRouter reasoning replayed in tool loops | [#1110](https://github.com/laravel/ai/pull/1110) | Reasoning models stop "starting over" every step |
+| One retry after a short `Retry-After` | [#1112](https://github.com/laravel/ai/pull/1112) | Brief 429s don't fail over or fail the prompt |
+| Terminal Responses API stream events handled | [#1113](https://github.com/laravel/ai/pull/1113) | `response.incomplete` keeps usage and finish reason |
+| Structured output with quotes in keys decoded | [#1111](https://github.com/laravel/ai/pull/1111) | `$response->structured` no longer comes back `[]` |
+| `CopyFile` refuses directories | [#1109](https://github.com/laravel/ai/pull/1109) | Same guard as `MoveFile` and `DeleteFile` |
+
+Everything below ran in a Laravel 13.35 app with `laravel/ai` 1.2.1. Agents were faked with `ResearchAgent::fake()`, and the token budget test used `Http::fake()` with real Cohere response shapes, so no API key was charged.
+
+## Why agents needed a Stop
+
+Agent middleware runs **once per step**, before each model call. Since 1.0 it could change the model, trim tools or summarise history. What it couldn't do was say "that's enough, end the run".
+
+The only escape hatch was to answer the step yourself with a hand-built `StepResponse`. The SDK then treated your fake as a real model reply.
+
+<CodeCompare before="1.2.0" after="1.2.1">
+
+```php title="app/Ai/Middleware/StopWhenCancelled.php"
+use Laravel\Ai\Gateway\StepResponse;
+use Laravel\Ai\Responses\Data\FinishReason;
+use Laravel\Ai\Responses\Data\Meta;
+use Laravel\Ai\Responses\Data\TextUsage;
+
+public function handle(PendingStep $step, Closure $next)
+{
+    if (! $this->cancelled($step)) {
+        return $next($step);
+    }
+
+    // Pretend the model answered with nothing...
+    return new StepResponse(
+        text: '',
+        toolCalls: [],
+        finishReason: FinishReason::Stop,
+        usage: new TextUsage,
+        meta: new Meta($step->provider, $step->model),
+    );
+}
+```
+
+```php title="app/Ai/Middleware/StopWhenCancelled.php"
+use Laravel\Ai\Gateway\StepResult;
+
+public function handle(PendingStep $step, Closure $next)
+{
+    return $this->cancelled($step) ? StepResult::stop() : $next($step); // [!code highlight]
+}
+```
+
+</CodeCompare>
+
+`StepResult::stop()` tells the loop "no model call, no fake step, we're done". And for the two most common cases you don't even need a class.
+
+## Stop::when and Stop::unless
+
+`Laravel\Ai\Middleware\Stop` takes a closure (or a plain `bool`) that receives the `PendingStep`. `Stop::when()` stops when it returns `true`; `Stop::unless()` stops when it returns `false`.
+
+Here is a research agent with a Stop button and a per-run token budget, straight from the PR's example:
+
+```php title="app/Ai/Agents/ResearchAgent.php"
+<?php
+
+namespace App\Ai\Agents;
+
+use App\Ai\Middleware\EnforceDailyTokenBudget;
+use App\Ai\Tools\SearchDocs;
+use App\Models\Chat;
+use Illuminate\Support\Facades\Cache;
+use Laravel\Ai\Contracts\Agent;
+use Laravel\Ai\Contracts\HasMiddleware;
+use Laravel\Ai\Contracts\HasTools;
+use Laravel\Ai\Middleware\Stop;
+use Laravel\Ai\PendingStep;
+use Laravel\Ai\Promptable;
+use Stringable;
+
+class ResearchAgent implements Agent, HasMiddleware, HasTools
+{
+    use Promptable;
+
+    public function __construct(public Chat $chat) {}
+
+    public function instructions(): Stringable|string
+    {
+        return 'Research the question with the docs tool, then answer briefly.';
+    }
+
+    public function tools(): iterable
+    {
+        return [new SearchDocs];
+    }
+
+    public function middleware(): array
+    {
+        return [
+            // The user clicked "Stop" in the UI
+            Stop::when(fn (PendingStep $step) => Cache::has($this->chat->stopKey())), // [!code highlight]
+
+            // Keep going only while this run is under 50k input tokens
+            Stop::unless(fn (PendingStep $step) => $step->usage->inputTokens < 50_000), // [!code highlight]
+
+            new EnforceDailyTokenBudget($this->chat->user),
+        ];
+    }
+}
+```
+
+`stopKey()` is a one-liner on the model, so the controller and the agent agree on the cache key:
+
+```php title="app/Models/Chat.php"
+public function stopKey(): string
+{
+    return "chat:{$this->id}:stopped";
+}
+```
+
+### What the PendingStep tells you
+
+The closure gets the step that's **about to** run, so you can decide with the full picture:
+
+| Property | What it holds |
+|---|---|
+| `$step->number` / `isFirstStep()` | Step index, `0` for the first call |
+| `$step->steps` | The steps completed so far in this run |
+| `$step->usage` | Usage **accumulated by completed steps** (`inputTokens`, `outputTokens`, ...) |
+| `$step->tools`, `$step->messages`, `$step->model` | What's about to be sent |
+
+<Callout type="gotcha" title="a budget check is a soft ceiling">
+
+`$step->usage` only counts steps that already finished, so the step that crosses the line still runs. In our test each Cohere step used 30,000 input tokens: steps 1 and 2 ran (60,000 total), and the third model call was never made. Set the threshold a step below your hard limit.
+
+</Callout>
+
+<Diagram name="ai-sdk-stop-middleware-flow" alt="Before every step, the agent runs its middleware. If the Stop middleware's condition says keep going, the model is called; if it returns tool calls, the tools run and the loop goes back to the next step, otherwise the run is done with finish reason stop. If the condition says stop, the run ends immediately: completed steps are kept and a stream ends with reason cancelled." caption="Stop is checked before each model call, never in the middle of one." />
+
+## A custom middleware with StepResult::stop()
+
+`Stop::when()` covers one-liners. When you need dependencies or bookkeeping, write a class with `php artisan make:agent-middleware` and return `StepResult::stop()` yourself.
+
+This one enforces a **daily** budget per user, and uses `then()` to record what each step actually cost:
+
+```php title="app/Ai/Middleware/EnforceDailyTokenBudget.php"
+<?php
+
+namespace App\Ai\Middleware;
+
+use App\Models\User;
+use Closure;
+use Illuminate\Support\Facades\Cache;
+use Laravel\Ai\Gateway\StepResponse;
+use Laravel\Ai\Gateway\StepResult;
+use Laravel\Ai\PendingStep;
+
+class EnforceDailyTokenBudget
+{
+    public function __construct(
+        protected User $user,
+        protected int $limit = 200_000,
+    ) {}
+
+    public function handle(PendingStep $step, Closure $next)
+    {
+        $key = "ai-tokens:{$this->user->id}:".today()->toDateString();
+
+        if (Cache::get($key, 0) >= $this->limit) {
+            return StepResult::stop(); // [!code highlight]
+        }
+
+        return $next($step)->then(function (StepResponse $response) use ($key) {
+            Cache::add($key, 0, now()->endOfDay());
+            Cache::increment($key, $response->usage->inputTokens + $response->usage->outputTokens);
+        });
+    }
+}
+```
+
+After the two-step Cohere run above, the counter read `60400` (60,000 input + 400 output). With the counter pre-set to 250,000, the next prompt returned an empty response without calling the provider at all.
+
+## What a stopped run returns
+
+We stopped runs at different points and checked what came back:
+
+| Stopped... | `prompt()` returns | `stream()` ends with |
+|---|---|---|
+| Before the first step | `text: ''`, `steps` empty | `stream_end`, `reason: "cancelled"` |
+| After a tool step | `text: ''`, completed steps and `toolResults` kept (last step's finish reason `tool_calls`) | `stream_end`, `reason: "cancelled"` |
+| Not stopped | The model's answer | `stream_end`, `reason: "stop"` |
+
+This is the tail of the SSE response when the user hit Stop during the first tool call:
+
+```text
+data: {"type":"tool_result","tool_name":"SearchDocs","result":"Top result for [queues]: ...","successful":true, ...}
+
+data: {"type":"stream_end","reason":"cancelled","usage":{"input_tokens":0,"output_tokens":0, ...}, ...}
+
+data: [DONE]
+```
+
+<Callout type="heads-up" title="it's cancelled, not stop">
+
+The PR description says a stopped stream finishes with a `stop` reason, but the merged code adds a new `FinishReason::Cancelled` case and the tests assert `cancelled`. That's what we saw too. With `->usingVercelDataProtocol()` the finish part reads `"finishReason":"other"`, because the Vercel mapping has no `cancelled`.
+
+</Callout>
+
+Two more details from the tests worth knowing:
+
+- A **structured agent** stopped before its first step returns a plain `AgentResponse` with empty text, not a structured one. Guard your `$response['field']` access.
+- With `RemembersConversations`, a stopped turn is **saved up to its last tool result**. Stopped before step one? Only the user message is stored.
+
+## Wire a Stop button with Vue and Inertia
+
+The backend needs two routes: one that streams the run, one that raises the flag.
+
+```php title="routes/web.php"
+use App\Http\Controllers\ChatController;
+
+Route::middleware('auth')->group(function () {
+    Route::post('/chats/{chat}/stream', [ChatController::class, 'stream'])->name('chats.stream');
+    Route::post('/chats/{chat}/stop', [ChatController::class, 'stop'])->name('chats.stop');
+});
+```
+
+```php title="app/Http/Controllers/ChatController.php"
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Ai\Agents\ResearchAgent;
+use App\Models\Chat;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+
+class ChatController
+{
+    public function stream(Request $request, Chat $chat)
+    {
+        abort_unless($chat->user->is($request->user()), 403);
+
+        Cache::forget($chat->stopKey()); // a fresh run starts un-stopped
+
+        return (new ResearchAgent($chat))->stream($request->string('prompt'));
+    }
+
+    public function stop(Request $request, Chat $chat)
+    {
+        abort_unless($chat->user->is($request->user()), 403);
+
+        Cache::put($chat->stopKey(), true, now()->addMinutes(10));
+
+        return response()->noContent();
+    }
+}
+```
+
+On the front end, the stream is read with `fetch` (it's a POST, so no `EventSource`), and the Stop button uses Inertia 3's `useHttp`, which sends a plain request with CSRF handled for you:
+
+```vue title="resources/js/components/AgentChat.vue"
+<script setup lang="ts">
+import { useHttp } from '@inertiajs/vue3'
+import { ref } from 'vue'
+
+const props = defineProps<{ chatId: number }>()
+
+const prompt = ref('')
+const answer = ref('')
+const status = ref<'idle' | 'streaming' | 'stopped' | 'done'>('idle')
+
+const stopRequest = useHttp('post', `/chats/${props.chatId}/stop`, {}) // [!code highlight]
+
+function xsrfToken(): string {
+    const match = document.cookie.match(/(?:^|; )XSRF-TOKEN=([^;]+)/)
+
+    return match ? decodeURIComponent(match[1]) : ''
+}
+
+async function ask() {
+    answer.value = ''
+    status.value = 'streaming'
+
+    const response = await fetch(`/chats/${props.chatId}/stream`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-XSRF-TOKEN': xsrfToken() },
+        body: JSON.stringify({ prompt: prompt.value }),
+    })
+
+    const reader = response.body!.pipeThrough(new TextDecoderStream()).getReader()
+    let buffer = ''
+
+    while (true) {
+        const { value, done } = await reader.read()
+        if (done) break
+
+        buffer += value
+        const chunks = buffer.split('\n\n')
+        buffer = chunks.pop() ?? ''
+
+        for (const chunk of chunks) {
+            const data = chunk.replace(/^data: /, '')
+            if (data === '[DONE]') continue
+
+            const event = JSON.parse(data)
+
+            if (event.type === 'text_delta') answer.value += event.delta
+            if (event.type === 'stream_end') {
+                status.value = event.reason === 'cancelled' ? 'stopped' : 'done' // [!code highlight]
+            }
+        }
+    }
+}
+</script>
+
+<template>
+    <form @submit.prevent="ask">
+        <textarea v-model="prompt" />
+        <button type="submit" :disabled="status === 'streaming'">Ask</button>
+        <button
+            v-if="status === 'streaming'"
+            type="button"
+            :disabled="stopRequest.processing"
+            @click="stopRequest.submit()"
+        >
+            Stop
+        </button>
+    </form>
+
+    <p>{{ answer }}</p>
+    <p v-if="status === 'stopped'">Stopped. Here's what the agent found so far.</p>
+</template>
+```
+
+The component passed `vue-tsc` with `@inertiajs/vue3` 3.9.1. In a Pest or PHPUnit test, `$this->post(route('chats.stop', $chat))->assertNoContent()` raised the flag, and another user's chat got a 403.
+
+<Callout type="pro-tip" title="the current step always finishes">
+
+Stop runs **between** steps. If the model is mid-answer when the user clicks, that answer streams to the end, then the run stops before the next call. For a "kill it now" button, also abort the `fetch` on the client with an `AbortController`. Stop middleware makes sure the server doesn't start another (paid) step either way.
+
+</Callout>
+
+## The other 1.2.1 fixes
+
+**OpenRouter images ([#1116](https://github.com/laravel/ai/pull/1116)).** Image generation used to go through `chat/completions`, which only works for chat models that can output images, so Flux returned a 404. It now uses OpenRouter's `/images` endpoint. `quality()` still maps to 1K, 2K and 4K, so existing code keeps working.
+
+**Ollama embeddings ([#1115](https://github.com/laravel/ai/pull/1115)).** The SDK used to send `dimensions: 768` by default, which truncated larger models (`qwen3-embedding`, `bge-m3`) and broke smaller ones (`all-minilm`). With no dimensions configured, Ollama's native size is now used. If you stored truncated vectors, **re-embed** before you mix old and new rows in a similarity search.
+
+**Retry-After ([#1112](https://github.com/laravel/ai/pull/1112)).** On a 429 or overloaded status with a numeric `Retry-After` of 10 seconds or less, the SDK waits and retries once before failing over. Longer delays, HTTP-date values or no header fail over immediately, as before.
+
+**Streams and structured output ([#1113](https://github.com/laravel/ai/pull/1113), [#1111](https://github.com/laravel/ai/pull/1111), [#1110](https://github.com/laravel/ai/pull/1110)).** OpenAI and Azure `response.incomplete` events now keep usage and the finish reason and block tool execution. Gemini output with unescaped quotes in object keys decodes again. OpenRouter replays `reasoning_details` in tool loops, so reasoning models keep their train of thought.
+
+## Upgrade notes
+
+```bash
+composer update laravel/ai
+composer show laravel/ai | grep versions   # versions : * v1.2.1
+```
+
+<Steps>
+
+1. **Nothing breaks.** Stop middleware is opt-in, and agents without it behave exactly as in 1.2.0.
+2. **Match on `cancelled`.** If your front end switches on the stream's finish reason, add a `cancelled` branch (or `other` with the Vercel protocol).
+3. **Ollama users:** check `config/ai.php`. If you never set embedding dimensions, new vectors come back at the model's native size.
+4. **Replace fake-response stops.** Middleware that returned a hand-built `StepResponse` to end a run can switch to `StepResult::stop()` or `Stop::when()`.
+5. **Coming from 1.0?** Read our [1.1 and 1.2 post](/laravel-ai-sdk-1-2-skills-approval-cohere) first: default models changed there.
+
+</Steps>
+
+## Try it yourself
+
+<TryIt title="Stop an agent in one line">
+
+```php title="tests/Feature/StopTest.php"
+use App\Ai\Agents\ResearchAgent;
+use App\Models\Chat;
+use App\Models\User;
+use Illuminate\Support\Facades\Cache;
+
+uses(Illuminate\Foundation\Testing\RefreshDatabase::class);
+
+test('a raised stop flag skips the model call', function () {
+    $chat = Chat::create(['user_id' => User::factory()->create()->id]);
+    Cache::put($chat->stopKey(), true, 600);
+
+    ResearchAgent::fake(['This should never be returned']);
+
+    $response = (new ResearchAgent($chat))->prompt('How do queues work?');
+
+    expect($response->text)->toBe('')
+        ->and($response->steps)->toBeEmpty();
+});
+```
+
+Remove the `Cache::put()` line and the fake answer comes back. That's your Stop button, tested in under a second.
+
+</TryIt>
+
+## Recap
+
+- `Stop::when()` / `Stop::unless()` end an agent run **before the next model call**. Add them in `middleware()`.
+- Use a cache flag for Stop buttons and `$step->usage` for budgets (a soft ceiling: the crossing step still runs).
+- Custom middleware returns `StepResult::stop()` and can track spend with `then()`.
+- A stopped run keeps its completed steps; streams end with `reason: "cancelled"`.
+- `composer update laravel/ai` and you also get OpenRouter Flux images, native Ollama dimensions and a smarter `Retry-After`.
+
+## FAQ
+
+<FAQ items={[
+  { q: 'How do I stop a Laravel AI SDK agent run early?', a: 'Since laravel/ai 1.2.1, add `Stop::when(fn (PendingStep $step) => ...)` to your agent\'s `middleware()` array, or return `StepResult::stop()` from a custom middleware. The run ends before the next model call.' },
+  { q: 'Does Stop middleware interrupt a response that is already streaming?', a: 'No. It is checked before each step, so the current model call finishes first. Abort the request on the client too if you want the text to stop immediately.' },
+  { q: 'What finish reason does a stopped stream have?', a: 'The `stream_end` event has `reason: "cancelled"` (the new `FinishReason::Cancelled`). With the Vercel data protocol the finish part reports `other`.' },
+  { q: 'Do I lose the tool results when I stop a run?', a: 'No. Completed steps, tool results and usage stay on the response, and `RemembersConversations` stores the turn up to its last tool result. Only `text` is empty.' },
+  { q: 'Is laravel/ai 1.2.1 a breaking upgrade?', a: 'No. It is a patch release: Stop middleware is opt-in. The one behaviour change to check is Ollama embeddings, which now use the model\'s native dimensions when none are configured.' },
+]} />
+
+## Next steps
+
+- [Laravel AI SDK 1.1 and 1.2: Agent Skills, tool approval, Cohere](/laravel-ai-sdk-1-2-skills-approval-cohere)
+- [Approve an AI SDK tool before it runs](/laravel-ai-tool-approval-vue)
+- [Fake an AI agent in a Pest test](/pest-fake-ai-agent-vue)
+- [Laravel AI SDK docs: Middleware](https://laravel.com/docs/13.x/ai-sdk#middleware)
+
+## Sources
+
+- [laravel/ai v1.2.1 release notes](https://github.com/laravel/ai/releases/tag/v1.2.1) and [full changelog v1.2.0...v1.2.1](https://github.com/laravel/ai/compare/v1.2.0...v1.2.1)
+- [PR #1072: Add Stop middleware to end agent runs early](https://github.com/laravel/ai/pull/1072) ([`Stop.php`](https://github.com/laravel/ai/blob/v1.2.1/src/Middleware/Stop.php), [`StepResult.php`](https://github.com/laravel/ai/blob/v1.2.1/src/Gateway/StepResult.php))
+- [PR #1116: OpenRouter images endpoint](https://github.com/laravel/ai/pull/1116) and [PR #1115: Ollama native embedding dimensions](https://github.com/laravel/ai/pull/1115)
+- [PR #1112: Retry-After before failover](https://github.com/laravel/ai/pull/1112), [PR #1113: Responses API stream handling](https://github.com/laravel/ai/pull/1113), [PR #1111: structured output decoding](https://github.com/laravel/ai/pull/1111), [PR #1110: OpenRouter reasoning replay](https://github.com/laravel/ai/pull/1110), [PR #1109: CopyFile guard](https://github.com/laravel/ai/pull/1109)
+- Laravel docs: [Agent middleware](https://laravel.com/docs/13.x/ai-sdk#middleware), [Streaming](https://laravel.com/docs/13.x/ai-sdk#streaming)
+- Inertia docs: [HTTP requests with useHttp](https://inertiajs.com/docs/v3/the-basics/http-requests)
