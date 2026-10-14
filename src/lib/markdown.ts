@@ -1,3 +1,4 @@
+import { CHEATSHEETS } from "../data/cheatsheets";
 import { allPosts, categories, type Post } from "./content";
 import { agentPrompt, agentTaskFor, firstApp } from "../data/agent-tasks";
 import {
@@ -45,6 +46,11 @@ ${categories
   })
   .filter(Boolean)
   .join("\n")}
+## Cheat sheets
+
+- [Cheat sheets](${SITE_URL}/cheatsheets): printable one-page references, checked against the official docs
+${CHEATSHEETS.map((s) => `- [${s.title}](${SITE_URL}/cheatsheets/${s.slug}): ${s.description} (checked ${s.checked})`).join("\n")}
+
 ## Roadmap
 
 - [Laravel and Vue roadmap](${SITE_URL}/path): tick topics in the browser. Each track credits the roadmap.sh map it leans on.

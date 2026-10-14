@@ -35,7 +35,8 @@ const FORMS: Record<Form, { label: string; fields: Record<string, Field> }> = {
       budget: { max: 60 }, timeline: { max: 60 }, message: { max: 5000, required: true, min: 20 },
     },
   },
-  newsletter: { label: 'Newsletter signup', fields: { email: { max: 200, required: true }, consent: { max: 3, required: true } } },
+  // cheatsheet: optional slug of the cheat sheet the visitor signed up for (the plain-HTML post then lands on its download page).
+  newsletter: { label: 'Newsletter signup', fields: { email: { max: 200, required: true }, consent: { max: 3, required: true }, cheatsheet: { max: 60 } } },
   job: {
     label: 'Job submission',
     fields: {
@@ -91,7 +92,7 @@ async function handleForm(name: string, request: Request, env: Env, ctx: Executi
   // Bots get a normal-looking success so they don't adapt; nothing is stored or sent.
   const ts = Number(input.get('ts') ?? 0)
   if (String(input.get('website') ?? '').trim() !== '' || (ts > 0 && Date.now() - ts < 2500)) {
-    return reply(request, 200, { ok: true, message: thanks(form) }, {}, form)
+    return reply(request, 200, { ok: true, message: thanks(form) }, {}, form, cheatsheetNext(form, input))
   }
 
   const { data, errors } = validate(form, input)
@@ -116,7 +117,13 @@ async function handleForm(name: string, request: Request, env: Env, ctx: Executi
     await env.DB.prepare(`INSERT INTO subscribers (email) VALUES (?1) ON CONFLICT(email) DO UPDATE SET unsubscribed_at = NULL`).bind(email.toLowerCase()).run()
   }
   if (row) ctx.waitUntil(notify(env, form, row.id, data))
-  return reply(request, 200, { ok: true, message: thanks(form) }, {}, form)
+  return reply(request, 200, { ok: true, message: thanks(form) }, {}, form, cheatsheetNext(form, input))
+}
+
+// After a newsletter signup from a cheat sheet page, plain HTML posts (no JS) go to that sheet's download page.
+function cheatsheetNext(form: Form, input: FormData) {
+  const slug = String(input.get('cheatsheet') ?? '')
+  return form === 'newsletter' && /^[a-z0-9-]{1,60}$/.test(slug) ? `/cheatsheets/${slug}/download` : undefined
 }
 
 // Static asset headers (the _headers file is not applied when the Worker runs first, so they live here).
@@ -166,6 +173,8 @@ function withHeaders(res: Response, url: URL) {
     h.set('Link', `<https://${APEX}/${md[1]}>; rel="canonical"`)
   }
   if (res.ok && /^\/llms(-full)?\.txt$/.test(url.pathname)) h.set('Content-Type', 'text/plain; charset=utf-8')
+  // Cheat sheet PDFs sit behind the newsletter form (soft gate): keep them out of search results.
+  if (res.ok && url.pathname.startsWith('/cheatsheets/pdf/')) h.set('X-Robots-Tag', 'noindex')
   // Keep workers.dev production and preview URLs out of search results (laravel-vuejs.space is canonical).
   if (url.hostname.endsWith('.workers.dev')) h.set('X-Robots-Tag', 'noindex')
   return out
@@ -203,11 +212,12 @@ function thanks(form: Form) {
 }
 
 // JSON for fetch() callers, a redirect to a thank-you or error page for plain HTML form posts (no JS).
-function reply(request: Request, status: number, body: { ok: boolean; message?: string; error?: string }, headers: Record<string, string> = {}, form?: Form) {
+function reply(request: Request, status: number, body: { ok: boolean; message?: string; error?: string }, headers: Record<string, string> = {}, form?: Form, next?: string) {
   const wantsJson = (request.headers.get('Accept') ?? '').includes('application/json')
   if (wantsJson) {
     return new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', ...headers } })
   }
+  if (body.ok && next) return new Response(null, { status: 303, headers: { Location: next, 'Cache-Control': 'no-store', ...headers } })
   const target = new URL(body.ok ? '/thanks' : '/form-error', request.url)
   if (form) target.searchParams.set('form', form)
   if (body.error) target.searchParams.set('reason', body.error.slice(0, 200))

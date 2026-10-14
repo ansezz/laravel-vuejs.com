@@ -1,6 +1,7 @@
 import { allPosts, categories, tags, type Post } from "./content";
 import { SITE_URL, AUTHOR } from "../config/site";
 import { PACKAGES, SNAPSHOT } from "../data/packages";
+import { CHEATSHEETS } from "../data/cheatsheets";
 
 // Sitemap index (/sitemap.xml) with three child sitemaps. lastmod is only set where we know it:
 // a post's updated/published date, the newest post in a listing, or the "last updated" date of a static page.
@@ -57,6 +58,8 @@ export async function sitemapUrls(): Promise<
         "/tools/compatibility",
         "/tools/agents",
       ].map((loc) => ({ loc, lastmod: PACKAGE_UPDATED })),
+      { loc: "/cheatsheets", lastmod: new Date(`${CHEATSHEETS.map((s) => s.checked).sort().at(-1)}T00:00:00Z`) },
+      ...CHEATSHEETS.map((s) => ({ loc: `/cheatsheets/${s.slug}`, lastmod: new Date(`${s.checked}T00:00:00Z`) })),
       ...PACKAGES.map((pkg) => ({
         loc: `/packages/${pkg.slug}`,
         lastmod: PACKAGE_UPDATED,

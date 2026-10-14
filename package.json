@@ -22,7 +22,8 @@
     "lhci": "npx --yes @lhci/cli@0.15.x autorun",
     "check:worker": "tsc -p worker",
     "db:migrate:local": "wrangler d1 migrations apply laravel-vuejs-forms --local",
-    "diagrams": "node scripts/diagrams.mjs"
+    "diagrams": "node scripts/diagrams.mjs",
+    "cheatsheets:pdf": "node --experimental-strip-types scripts/cheatsheets-pdf.mjs"
   },
   "dependencies": {
     "@astrojs/markdown-remark": "^7.3.2",
