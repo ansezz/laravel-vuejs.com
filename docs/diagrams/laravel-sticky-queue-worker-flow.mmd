@@ -1,0 +1,11 @@
+flowchart LR
+  A["`**Job 1 writes**
+  INSERT on the
+  write connection`"] --> B{"`**Worker resets
+  between jobs**`"}
+  B -- "default" --> C["`**Job 2 reads**
+  still pinned to
+  the write primary`"]
+  B -- "flushStickyConnections = true" --> D["`**Job 2 reads**
+  back on the
+  read replica`"]
