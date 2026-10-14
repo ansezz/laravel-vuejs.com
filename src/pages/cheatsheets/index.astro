@@ -1,0 +1,29 @@
+---
+import Base from '../../layouts/Base.astro'
+import PageHero from '../../components/PageHero.astro'
+import { CHEATSHEETS } from '../../data/cheatsheets'
+import { SITE_URL } from '../../config/site'
+
+const description = 'Dense, printable cheat sheets for Laravel 13 Eloquent, Inertia 3 and the Vue 3 Composition API, checked against the official docs. Each one has a free A4 PDF.'
+const jsonld = [{
+  '@type': 'CollectionPage', '@id': SITE_URL + '/cheatsheets#page', name: 'Cheat sheets', description, url: SITE_URL + '/cheatsheets',
+  isPartOf: { '@id': SITE_URL + '/#website' },
+  mainEntity: { '@type': 'ItemList', itemListElement: CHEATSHEETS.map((s, i) => ({ '@type': 'ListItem', position: i + 1, name: s.title, url: `${SITE_URL}/cheatsheets/${s.slug}` })) },
+}]
+---
+<Base title="Cheat sheets for Laravel, Inertia and Vue" description={description} jsonld={jsonld}>
+  <PageHero kicker="Print it, pin it" title="Cheat sheets"
+    lead="One page per topic, in current syntax: Eloquent for Laravel 13, Inertia 3 with Laravel and Vue, and the Vue 3 Composition API. Copy any snippet, print the page, or get the A4 PDF."
+    crumbs={[{ label: 'Cheat sheets' }]} />
+  <section class="container section-tight">
+    <div class="grid grid-2 tool-index">
+      {CHEATSHEETS.map((s) => (
+        <a class="card tile" href={`/cheatsheets/${s.slug}`}>
+          <p class="kicker">{s.version}</p>
+          <h2>{s.short}</h2>
+          <p>{s.lead}</p>
+        </a>
+      ))}
+    </div>
+  </section>
+</Base>

@@ -1,0 +1,18 @@
+---
+import Page from '../../../layouts/Page.astro'
+import Icon from '../../../components/Icon.astro'
+import { CHEATSHEETS, pdfPath, type CheatSheet } from '../../../data/cheatsheets'
+
+// Thank-you state after a newsletter signup from a cheat sheet page (the plain HTML form post lands here).
+export const getStaticPaths = () => CHEATSHEETS.map((sheet) => ({ params: { slug: sheet.slug }, props: { sheet } }))
+interface Props { sheet: CheatSheet }
+const { sheet } = Astro.props
+---
+<Page title={`${sheet.short} cheat sheet PDF`} kicker="You're on the list" heading="Thanks! Here is your cheat sheet." lead="Watch your inbox for the next issue of the newsletter. Your PDF is ready below." noindex>
+  <section class="container-narrow section-tight">
+    <div class="hero-cta" style="margin:0">
+      <a class="btn btn-primary" href={pdfPath(sheet.slug)} download>Download the {sheet.short} PDF <Icon name="arrow" size={18} class="icon-arrow" /></a>
+      <a class="btn" href={`/cheatsheets/${sheet.slug}`}>Back to the cheat sheet</a>
+    </div>
+  </section>
+</Page>

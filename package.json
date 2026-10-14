@@ -1,7 +1,7 @@
 {
   "name": "laravel-vuejs",
   "version": "3.0.0",
-  "description": "Laravel & VueJs blog \u2014 static Astro build of laravel-vuejs.space",
+  "description": "Laravel & VueJs blog — static Astro build of laravel-vuejs.space",
   "author": "Anass EZ-ZOUAINE <ansezzouaine@gmail.com>",
   "private": true,
   "license": "MIT",
@@ -22,7 +22,8 @@
     "lhci": "npx --yes @lhci/cli@0.15.x autorun",
     "check:worker": "tsc -p worker",
     "db:migrate:local": "wrangler d1 migrations apply laravel-vuejs-forms --local",
-    "diagrams": "node scripts/diagrams.mjs"
+    "diagrams": "node scripts/diagrams.mjs",
+    "cheatsheets:pdf": "node --experimental-strip-types scripts/cheatsheets-pdf.mjs"
   },
   "dependencies": {
     "@astrojs/markdown-remark": "^7.3.2",
@@ -37,6 +38,7 @@
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
     "@cloudflare/workers-types": "^5.20261009.1",
+    "shiki": "^4.5.0",
     "turndown": "^7.2.4",
     "turndown-plugin-gfm": "^1.0.2",
     "typescript": "^6.0.3",

@@ -1,0 +1,68 @@
+---
+import { Code } from 'astro:components'
+import Base from '../../layouts/Base.astro'
+import PageHero from '../../components/PageHero.astro'
+import CheatGate from '../../components/CheatGate.astro'
+import { CHEATSHEETS, type CheatSheet } from '../../data/cheatsheets'
+import { SITE_URL, SITE_NAME, AUTHOR } from '../../config/site'
+
+export const getStaticPaths = () => CHEATSHEETS.map((sheet) => ({ params: { slug: sheet.slug }, props: { sheet } }))
+interface Props { sheet: CheatSheet }
+const { sheet } = Astro.props
+const url = `${SITE_URL}/cheatsheets/${sheet.slug}`
+const LANG: Record<string, string> = { ts: 'typescript', js: 'javascript', vue: 'vue', php: 'php', bash: 'bash' }
+const jsonld = [
+  {
+    '@type': 'TechArticle', '@id': url + '#article', headline: sheet.title, description: sheet.description, url,
+    mainEntityOfPage: url, inLanguage: 'en', dateModified: sheet.checked, proficiencyLevel: 'Intermediate',
+    about: sheet.version, author: { '@type': 'Person', name: AUTHOR.name, url: SITE_URL + AUTHOR.url },
+    publisher: { '@id': SITE_URL + '/#organization' }, isPartOf: { '@id': SITE_URL + '/#website' },
+    citation: sheet.sources.map((s) => s.url),
+  }
+]
+---
+<Base title={sheet.title} description={sheet.description} jsonld={jsonld}>
+  <PageHero kicker={`Cheat sheet · ${sheet.version}`} title={sheet.title} lead={sheet.lead}
+    crumbs={[{ label: 'Cheat sheets', href: '/cheatsheets' }, { label: sheet.short }]}>
+    <div class="row cs-actions no-print" style="margin-top:22px">
+      <a class="btn btn-primary btn-sm" href="#pdf">Get the PDF</a>
+      <button class="btn btn-sm" type="button" data-print>Print this page</button>
+    </div>
+    <p class="muted mono" style="margin-top:14px;font-size:.8rem">Checked against the official docs on {sheet.checked}</p>
+  </PageHero>
+  <section class="container section-tight cs">
+    <nav class="cs-toc no-print" aria-label="Sections">
+      {sheet.sections.map((s, i) => <a href={`#s${i + 1}`}>{s.title}</a>)}
+    </nav>
+    <div class="cs-grid">
+      {sheet.sections.map((section, i) => (
+        <section class="cs-section" id={`s${i + 1}`}>
+          <h2>{section.title}</h2>
+          {section.items.map((item) => (
+            <div class="cs-item">
+              <h3>{item.title}</h3>
+              <div class="code">
+                <div class="code-head">
+                  <span class="code-lang">{LANG[item.lang]}</span>
+                  <button type="button" class="copy-btn" aria-label={`Copy: ${item.title}`}>
+                    <svg class="i-copy" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                    <svg class="i-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+                    <span class="copy-label">Copy</span>
+                  </button>
+                </div>
+                <Code code={item.code} lang={item.lang} themes={{ light: 'github-light-high-contrast', dark: 'github-dark-dimmed' }} defaultColor={false} />
+              </div>
+              {item.note && <p class="cs-note">{item.note}</p>}
+            </div>
+          ))}
+        </section>
+      ))}
+    </div>
+    <p class="cs-sources">Sources: {sheet.sources.map((s, i) => <>{i > 0 && ' · '}<a href={s.url} rel="noopener">{s.label}</a></>)}</p>
+    <div id="pdf" class="no-print" style="margin-top:40px"><CheatGate sheet={sheet} /></div>
+    <p class="no-print" style="margin-top:28px"><a href="/cheatsheets">All cheat sheets</a></p>
+  </section>
+  <script>
+    document.querySelectorAll<HTMLButtonElement>('[data-print]').forEach((b) => b.addEventListener('click', () => print()))
+  </script>
+</Base>

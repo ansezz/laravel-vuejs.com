@@ -1,0 +1,31 @@
+---
+// Newsletter signup that unlocks a cheat sheet PDF (soft gate). Posts to /api/forms/newsletter like every newsletter form,
+// with the same unticked consent box. With JS the link appears in place; without JS the Worker redirects to
+// /cheatsheets/<slug>/download.
+import Icon from './Icon.astro'
+import FormGuard from './FormGuard.astro'
+import Consent from './Consent.astro'
+import { pdfPath, type CheatSheet } from '../data/cheatsheets'
+interface Props { sheet: CheatSheet }
+const { sheet } = Astro.props
+const id = `cs-${sheet.slug}`
+---
+<section class="cs-gate band" aria-labelledby={`${id}-title`}>
+  <p class="kicker" style="color:var(--mint)">Free PDF</p>
+  <h2 id={`${id}-title`}>Get the {sheet.short} cheat sheet as a printable PDF</h2>
+  <p>A4, two pages, same content as this page. Join the monthly Laravel &amp; Vue newsletter and the download link appears right here.</p>
+  <form class="nl-form" action="/api/forms/newsletter" method="post" data-api data-unlock={`${id}-ready`}>
+    <input type="hidden" name="cheatsheet" value={sheet.slug}>
+    <div class="inline-form">
+      <label class="sr-only" for={`${id}-email`}>Email address</label>
+      <input class="input" id={`${id}-email`} name="email" type="email" required placeholder="you@example.com" autocomplete="email" style="background:rgb(255 255 255 / .08);color:#fff;border-color:rgb(255 255 255 / .2)">
+      <button class="btn btn-light" type="submit">Send me the PDF <Icon name="arrow" size={16} class="icon-arrow" /></button>
+    </div>
+    <Consent id={`${id}-consent`} />
+    <FormGuard />
+  </form>
+  <div id={`${id}-ready`} class="cs-ready" hidden>
+    <p><strong>You're on the list.</strong> Here is your cheat sheet:</p>
+    <a class="btn btn-light" href={pdfPath(sheet.slug)} download>Download the PDF <Icon name="arrow" size={16} class="icon-arrow" /></a>
+  </div>
+</section>
