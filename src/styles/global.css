@@ -607,7 +607,9 @@ label.chip:hover {
 .mobile-nav {
   display: none;
 }
-@media (max-width: 1080px) {
+/* 8 nav links + actions need ~1240px; below that use the menu */
+.nav-links a { white-space: nowrap; }
+@media (max-width: 1260px) {
   .nav-links,
   .nav-actions .hide-sm {
     display: none;

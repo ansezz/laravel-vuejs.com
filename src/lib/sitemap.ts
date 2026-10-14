@@ -15,7 +15,7 @@ const PAGES: [string, Date?][] = [
   ["/page/faq"],
   ["/page/courses"],
   ["/page/products"],
-  ["/page/privacy-policy", LEGAL_UPDATED],
+  ["/page/privacy-policy", new Date("2026-10-15T00:00:00Z")],
   ["/page/terms-and-conditions", LEGAL_UPDATED],
   ["/page/dmca-policy", LEGAL_UPDATED],
   ["/page/accessibility", LEGAL_UPDATED],
