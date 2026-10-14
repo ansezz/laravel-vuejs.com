@@ -4,6 +4,7 @@ title: "Laravel 13.36: validation rule builders, Vitess olap() and sticky queue 
 seoTitle: "Laravel 13.36: Rule Builders, olap() and Sticky Queues"
 excerpt: "Laravel 13.36 adds Rule:: builders for almost every validation rule, DB::olap() for PlanetScale, and a flag that stops queue workers sticking to the write database."
 date: 2026-10-14T00:30:00Z
+updated: 2026-10-14T01:00:00Z
 snippet: "Rule::requiredWith('phone', 'email')"
 categories: [laravel]
 tags: [laravel, release]
@@ -238,11 +239,11 @@ Now, if the order is deleted before a `Mail::to($user)->later(...)` mail goes ou
 
 ### Backports to 12.x (already in 13.x)
 
-13.36 also lists a few `[12.x]` PRs. They are backports of features 13.x already had, now shipped to Laravel 12 in **v12.70.0** (same day):
+13.36 also lists a few `[12.x]` PRs, merged up from the 12.x branch. They are backports of features 13.x already had:
 
-- **`EncodedParameter`** ([#61871](https://github.com/laravel/framework/pull/61871), from [#61610](https://github.com/laravel/framework/pull/61610) in 13.33): wrap an already-encoded route parameter so `route()` doesn't encode its `?`, `%` or `#` again.
-- **Named S3 credential providers** ([#61757](https://github.com/laravel/framework/pull/61757), from [#61676](https://github.com/laravel/framework/pull/61676) in 13.34): `'credentials' => 'ecs'` or `'instance'` on S3 disks, like SQS.
-- Query fixes ([#61838](https://github.com/laravel/framework/pull/61838)) and a Blade cache file per `$echoFormat` ([#61822](https://github.com/laravel/framework/pull/61822)).
+- **`EncodedParameter`** ([#61871](https://github.com/laravel/framework/pull/61871), from [#61610](https://github.com/laravel/framework/pull/61610) in 13.33): wrap an already-encoded route parameter so `route()` doesn't encode its `?`, `%` or `#` again. New on Laravel 12 in **v12.70.0** (same day).
+- **Named S3 credential providers** ([#61757](https://github.com/laravel/framework/pull/61757), from [#61676](https://github.com/laravel/framework/pull/61676) in 13.34): `'credentials' => 'ecs'` or `'instance'` on S3 disks, like SQS. On Laravel 12 since v12.69.3.
+- Query fixes ([#61838](https://github.com/laravel/framework/pull/61838)) and a Blade cache file per `$echoFormat` ([#61822](https://github.com/laravel/framework/pull/61822)), also in v12.70.0.
 
 ## Upgrade notes
 
@@ -265,7 +266,7 @@ Two fixes can change behaviour you might be relying on: queued mailables with `#
   { q: 'Is there a Rule::ipAddress() method?', a: 'No, the helper is `Rule::ip()`. Call `->version(4)` or `->version(6)` for `ipv4` or `ipv6`.' },
   { q: 'Does DB::olap() break on regular MySQL or MariaDB?', a: 'No. If `isVitess()` is false, it simply runs your callback without sending any `set workload` query.' },
   { q: 'Should I enable Worker::$flushStickyConnections?', a: 'If you use read replicas with `sticky` enabled and your jobs don’t rely on reading another job’s writes on the same worker, yes. It is off by default only for backwards compatibility.' },
-  { q: 'What does Laravel 12.70 include?', a: 'Backports from 13.x: `EncodedParameter` for pre-encoded route parameters, named S3 credential providers, query fixes and a Blade cache fix for custom `$echoFormat`.' },
+  { q: 'What does Laravel 12.70 include?', a: 'Three changes: the `EncodedParameter` backport for pre-encoded route parameters, query fixes and a Blade cache fix for custom `$echoFormat`.' },
 ]} />
 
 ## Next steps
