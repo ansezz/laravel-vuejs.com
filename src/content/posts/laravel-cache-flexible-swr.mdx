@@ -1,0 +1,272 @@
+---
+id: 156
+title: "Cache::flexible: serve stale cache while it refreshes"
+seoTitle: "Laravel Cache::flexible: Stale-While-Revalidate"
+excerpt: "Hidden gem: Cache::flexible serves slightly stale data instantly and refreshes after the response. No user waits on a cache miss. Tested on Laravel 13.35."
+date: 2026-10-15T02:30:00Z
+snippet: "Cache::flexible('stats', [5, 30], fn () => …)"
+categories: [laravel, vuejs]
+tags: [laravel, php, inertia, vuejs]
+---
+Your dashboard prop hits `Cache::remember` with a 60-second TTL. At second 61, one unlucky visitor pays for the full recount while everyone else was fine a moment earlier. Laravel ships a one-line fix for that stampede: `Cache::flexible`, the stale-while-revalidate helper most apps still ignore.
+
+<TLDR
+  audience="Laravel 11–13 developers, including Inertia + Vue apps"
+  learn={['What `Cache::flexible` does (fresh / stale / expired)', 'Usual `remember` vs `flexible` side by side', 'How it uses `defer()` under the hood', 'Gotchas: locks, `forget`, truthy TTL math, when not to use it']}
+  tested="Laravel 13.35 · PHP 8.4 · database cache store"
+>
+
+- `Cache::flexible($key, [$fresh, $stale], $callback)` returns the cache when it is **fresh**, returns it **and refreshes after the response** when it is **stale**, and only recalculates **inline** when it is expired or missing.
+- Fresh and stale are seconds from the moment the value was stored. The second number is also the real cache TTL.
+- Under the hood, the stale refresh is a named `defer()` with a cache lock, so concurrent requests do not all rebuild the same key.
+- For data that must be exact (balances, permissions), keep `remember` or no cache. Flexible is for counts, lists and other "close enough for a few seconds" props.
+
+</TLDR>
+
+## What Cache::flexible is and why people miss it
+
+`Cache::flexible` arrived in Laravel 11.23 (September 2024), in the same Laracon release as `defer()` and `Concurrency`. It lives on the [cache docs](https://laravel.com/docs/13.x/cache#swr) under "Stale While Revalidate", one heading below `remember`. Easy to scroll past when you already "know" the Cache facade.
+
+The idea comes from HTTP's `stale-while-revalidate`: serve what you have, refresh in the background, and only make someone wait when the entry is truly gone.
+
+```php title="app/Http/Controllers/DashboardController.php"
+use Illuminate\Support\Facades\Cache;
+
+$stats = Cache::flexible('dashboard.stats', [5, 30], function () {
+    return [
+        'orders_today' => Order::query()->whereDate('created_at', today())->count(),
+        'revenue_cents' => Order::query()->whereDate('created_at', today())->sum('total'),
+    ];
+});
+```
+
+Pass that `$stats` array as an Inertia prop. For the next 5 seconds every request is a pure cache hit. From second 5 to 30, visitors still get the previous numbers instantly, and Laravel refreshes the key **after** the response is sent. Past 30 seconds the entry is gone, and the next visitor pays for the query.
+
+## The usual way vs the gem
+
+Most apps reach for `Cache::remember`. It is fine until the TTL ends: then one request blocks on the callback while the rest of the world waits for that same key to fill again.
+
+<CodeCompare before="remember (someone waits)" after="flexible (almost nobody waits)">
+
+```php title="app/Http/Controllers/DashboardController.php"
+public function __invoke()
+{
+    $stats = Cache::remember('dashboard.stats', 30, function () {
+        return [
+            'orders_today' => Order::query()->whereDate('created_at', today())->count(),
+            'revenue_cents' => Order::query()->whereDate('created_at', today())->sum('total'),
+        ];
+    });
+
+    return Inertia::render('Dashboard', [
+        'stats' => $stats,
+    ]);
+}
+```
+
+```php title="app/Http/Controllers/DashboardController.php"
+public function __invoke()
+{
+    $stats = Cache::flexible('dashboard.stats', [5, 30], function () {
+        return [
+            'orders_today' => Order::query()->whereDate('created_at', today())->count(),
+            'revenue_cents' => Order::query()->whereDate('created_at', today())->sum('total'),
+        ];
+    });
+
+    return Inertia::render('Dashboard', [
+        'stats' => $stats,
+    ]);
+}
+```
+
+</CodeCompare>
+
+We timed it on Laravel 13.35 with the `database` cache store and a callback that sleeps 80 ms (standing in for a heavy aggregate):
+
+| Phase | What you get | Our timing | Callback runs? |
+|---|---|---|---|
+| Miss / expired | New value, user waits | ~82–87 ms | Yes, inline |
+| Fresh (0 … `$fresh`) | Cached value | ~0–1 ms | No |
+| Stale (`$fresh` … `$stale`) | Cached value now; refresh after response | ~1 ms to the client | Yes, via `defer()` |
+
+Two stale hits in the same request only registered **one** deferred refresh (named debounce). After `defer` invoked, the stored value was the new one.
+
+Here is how the options compare for a dashboard prop:
+
+| Option | User waits on expiry? | Needs a worker? | Best for |
+|---|---|---|---|
+| No cache | Always | No | Tiny queries, must-be-exact data |
+| `Cache::remember` | Yes, every TTL boundary | No | Cheap callbacks, or data that cannot be stale |
+| `Cache::flexible` | Only when fully expired | No | Aggregates, public counts, "good enough" lists |
+| `remember` + queue rebuild | No (if you pre-warm) | Yes | Huge jobs you schedule yourself |
+
+## Real-world example: an Inertia dashboard
+
+Full controller from the test app. The Vue page just renders the props; nothing changes on the front end except that the spinner is gone on most refreshes.
+
+```php title="app/Http/Controllers/DashboardController.php"
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Order;
+use Illuminate\Support\Facades\Cache;
+use Inertia\Inertia;
+use Inertia\Response;
+
+class DashboardController extends Controller
+{
+    public function __invoke(): Response
+    {
+        $stats = Cache::flexible('dashboard.stats', [5, 30], function () {
+            return [
+                'orders_today' => Order::query()->whereDate('created_at', today())->count(),
+                'revenue_cents' => Order::query()->whereDate('created_at', today())->sum('total'),
+            ];
+        });
+
+        return Inertia::render('Dashboard', [
+            'stats' => $stats,
+        ]);
+    }
+}
+```
+
+```vue title="resources/js/pages/Dashboard.vue"
+<script setup lang="ts">
+defineProps<{
+  stats: { orders_today: number; revenue_cents: number }
+}>()
+</script>
+
+<template>
+  <div>
+    <p>Orders today: {{ stats.orders_today }}</p>
+    <p>Revenue: {{ (stats.revenue_cents / 100).toFixed(2) }}</p>
+  </div>
+</template>
+```
+
+Hit `/dashboard` a few times after the fresh window. The HTML (or Inertia JSON) still comes back in a millisecond, and the heavy query runs after the browser already has the page.
+
+<Diagram name="laravel-cache-flexible-swr" alt="Cache::flexible flow: you call flexible with a key, a [fresh, stale] pair and a callback. If the entry age is within fresh, Laravel returns the cache with no refresh. If age is between fresh and stale, it returns the cache immediately and registers a defer() refresh after the response. If the entry is missing or past stale, the callback runs inline and the user waits." caption="Fresh = instant hit. Stale = instant hit + background refresh. Expired = you wait." />
+
+### What the `[fresh, stale]` pair actually means
+
+Both numbers are **seconds from the created timestamp**, not a sliding window:
+
+1. **`ttl[0]` (fresh):** until `created + fresh`, return the value and do nothing else.
+2. **`ttl[1]` (stale / absolute TTL):** until `created + stale`, return the value **and** register a deferred refresh. The cache entry itself is stored with a TTL of `stale` seconds, so past that point both the value and the `illuminate:cache:flexible:created:…` meta key are gone.
+3. **Past stale (or never stored):** run the callback inline, store value + created timestamp, TTL = `stale`.
+
+So `[5, 30]` means: 5 seconds of pure hits, then 25 seconds of "serve old, rebuild after response", then a real miss.
+
+### Locks and the alwaysDefer flag
+
+When several requests land in the stale window together, Laravel does not want every FPM worker to rebuild the same key. The refresh closure takes a cache lock (`illuminate:cache:flexible:lock:…`) and re-checks the created timestamp before writing. You can pass lock options as the fourth argument:
+
+```php
+Cache::flexible('dashboard.stats', [5, 30], $callback, lock: ['seconds' => 10]);
+```
+
+The fifth argument, `$alwaysDefer`, is passed through to `defer(..., $always)`. Set it when you want the refresh to run even if the response status is 4xx/5xx. Default is `false`, matching normal `defer()` rules (see [defer()](/laravel-defer-helper-after-response)).
+
+## Gotchas
+
+**Stale means stale.** The user who triggers the refresh still sees the previous value. For a homepage order count that is fine. For "can this user delete the invoice?" it is not. Do not flexible authz, balances or anything a lawyer will ask about.
+
+<Callout type="gotcha" title="forget() and the created key">
+
+`Cache::flexible` stores two keys: your value and `illuminate:cache:flexible:created:{key}`. On database and file stores, `Cache::forget($key)` also clears the created meta key. On some other drivers the meta key may linger until its own TTL; the next `flexible` call still recovers, but prefer forgetting through the same store you write with, and do not hand-delete only one of the two keys.
+
+</Callout>
+
+**The refresh uses `defer()`.** Same rules as the [defer() gem](/laravel-defer-helper-after-response): it runs after the response when the status is below 400, errors are reported and swallowed, and `php artisan serve` keeps the connection open so locally it can look like the refresh still blocks. Measure on PHP-FPM.
+
+**First visitor after a full expiry still waits.** Flexible removes the stampede for everyone **during** the stale window. The one request that finds nothing in the cache still runs the callback inline. If that callback is 5 seconds, that one user waits 5 seconds. Pre-warm critical keys on deploy if that matters.
+
+**Locks need a lock-capable store.** The refresh path calls `$this->store->lock(...)`. Array cache in unit tests is fine for happy paths; in production stick to Redis, database, Memcached, file or another driver that implements locks if you expect concurrent stale hits.
+
+**Do not nest a 30-second callback inside every Inertia partial reload.** Flexible helps, but a prop that is expensive and requested on every poll still burns workers during refresh. Pair it with [Inertia once props](https://inertiajs.com/docs/v3/data-props/once-props) or a longer fresh window when the number barely moves.
+
+<Callout type="tip" title="Start with [5, 30] and tune">
+
+Five seconds fresh and thirty seconds total is a solid default for dashboard aggregates. Bump fresh if the number changes slowly (daily stats). Shrink stale if "wrong for half a minute" would confuse people. Log callback duration once; if it is over a couple of seconds, consider a real queued rebuild instead.
+
+</Callout>
+
+## Try it yourself
+
+<TryIt title="Prove fresh / stale / expired in tinker">
+
+```bash
+php artisan tinker
+```
+
+```php
+use Illuminate\Support\Facades\Cache;
+
+Cache::flush();
+$calls = 0;
+$fn = function () use (&$calls) {
+    $calls++;
+    usleep(80_000);
+    return "n-{$calls}";
+};
+
+Cache::flexible('demo', [1, 3], $fn); // miss, ~80 ms, n-1
+Cache::flexible('demo', [1, 3], $fn); // fresh, ~0 ms, n-1
+sleep(2);
+Cache::flexible('demo', [1, 3], $fn); // stale, ~0 ms, still n-1; refresh deferred
+app(\Illuminate\Support\Defer\DeferredCallbackCollection::class)->invoke();
+Cache::get('demo'); // n-2
+sleep(4);
+Cache::flexible('demo', [1, 3], $fn); // expired, ~80 ms, n-3
+```
+
+</TryIt>
+
+## How useful is this?
+
+| | Score |
+|---|---|
+| Time saved per use | ★★★★☆ Swap `remember` for `flexible`, tune two numbers |
+| How often you'll reach for it | ★★★★☆ Every dashboard, public count, slow Inertia prop |
+| Risk if misused | ★★★☆☆ Stale authz or money figures will bite you |
+| **Overall** | **4.5 / 5**: the default for "fast enough" cached props |
+
+If you already `Cache::remember` a count or aggregate for an Inertia page, you can switch today.
+
+## Recap
+
+- `Cache::flexible($key, [$fresh, $stale], $callback)` implements stale-while-revalidate on top of your cache store.
+- Fresh hits return immediately. Stale hits return immediately and refresh via `defer()` after the response. Only a full miss makes the user wait.
+- Concurrent stale refreshes share a named deferred callback and a cache lock.
+- Keep it for aggregates and public stats; keep exact data on `remember` or uncached queries.
+- It shipped in Laravel 11.23 and was tested here on Laravel 13.35.
+
+## FAQ
+
+<FAQ items={[
+  { q: 'Is Cache::flexible the same as Cache::remember?', a: 'No. `remember` always recalculates inline when the TTL is gone. `flexible` adds a stale window where the old value is served and the refresh runs after the response via `defer()`.' },
+  { q: 'Does the user who triggers the refresh see the new value?', a: 'Not on that request. They get the stale value; the deferred refresh writes the new value for the next visitors. That is the point of stale-while-revalidate.' },
+  { q: 'Which Laravel version do I need?', a: '`Cache::flexible` arrived in Laravel 11.23 (Laracon 2024 PR #52710). Everything here was tested on Laravel 13.35 with the database cache store.' },
+  { q: 'How is this different from defer() alone?', a: '`defer()` runs arbitrary work after the response. `Cache::flexible` uses `defer()` only for the stale refresh path, and still returns a value to the current request. See [Laravel defer()](/laravel-defer-helper-after-response).' },
+  { q: 'Can I use it with cache tags?', a: 'Yes, call `flexible` on a tagged repository (`Cache::tags([...])->flexible(...)`) on drivers that support tags. Invalidation still goes through your usual `tags()->flush()` or `forget()` flow.' },
+]} />
+
+## Next steps
+
+- [Laravel defer(): run code after the response](/laravel-defer-helper-after-response), the helper flexible uses for refreshes
+- [Cache a prop and forget it on write](/laravel-cache-remember-vue), when plain `remember` is the right tool
+- [Inertia partial reloads](/inertia-partial-reloads), so slow props are not refetching on every visit
+- [Laravel docs: Stale while revalidate](https://laravel.com/docs/13.x/cache#swr)
+
+## Sources
+
+- [Laravel 13 docs: Stale while revalidate (`Cache::flexible`)](https://laravel.com/docs/13.x/cache#swr)
+- [Laravel 13 docs: Deferred functions](https://laravel.com/docs/13.x/helpers#deferred-functions)
+- [laravel/framework v11.23.0 release (Laracon 2024 PR #52710)](https://github.com/laravel/framework/releases/tag/v11.23.0)
+- [laravel/framework PR #52891: Cache::flexible improvements](https://github.com/laravel/framework/pull/52891)
+- [Source: `Illuminate\Cache\Repository::flexible`](https://github.com/laravel/framework/blob/13.x/src/Illuminate/Cache/Repository.php)
