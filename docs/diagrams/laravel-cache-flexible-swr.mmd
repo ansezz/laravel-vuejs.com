@@ -1,0 +1,14 @@
+flowchart LR
+  A["`**1. Cache::flexible**
+  key + [fresh, stale]
+  + callback`"] --> B{"`**Age of entry**`"}
+  B -- "0 … fresh" --> C["`**Fresh**
+  return cache
+  no refresh`"]
+  B -- "fresh … stale" --> D["`**Stale**
+  return cache now
+  defer() refresh
+  after response`"]
+  B -- "past stale / miss" --> E["`**Expired**
+  run callback now
+  user waits`"]
