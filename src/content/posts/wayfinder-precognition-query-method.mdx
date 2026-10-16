@@ -1,0 +1,231 @@
+---
+id: 157
+title: "Wayfinder + Precognition catch up with Laravel's QUERY routes"
+seoTitle: "Wayfinder & Precognition: QUERY method support"
+excerpt: "Wayfinder 0.1.22 and Precognition 2.1.1 add first-class QUERY support, so Route::query() finally works end-to-end with typed clients and live validation."
+date: 2026-10-16T00:30:00Z
+snippet: "search.query() · client.query()"
+categories: [laravel]
+tags: [laravel, vuejs, inertia, release]
+---
+Laravel **13.35** gave you `Route::query()`. Your routes file was ready. Your TypeScript client was not. Wayfinder **0.1.22** and Precognition **2.1.1** close that gap: typed `.query()` helpers, form spoofing, and live validation with a body.
+
+<TLDR
+  audience="Laravel 13 + Vue / Inertia apps using Wayfinder or Precognition"
+  learn={['`search.query()` from Wayfinder 0.1.22', '`client.query()` / Precognition live validation with a body', 'Form spoofing via `_method=QUERY`', 'Shared-URI routes keyed by verb (#303)']}
+  applies="laravel/wayfinder v0.1.22 · laravel-precognition@2.1.1 · Laravel 13.35+"
+>
+
+- **Wayfinder 0.1.22** (15 Oct 2026) adds `"query"` to the `Method` union, so `RouteDefinition<"query">` type-checks and you get `search.query()` plus `search.form.query()`.
+- **Precognition 2.1.1** (tag, same day) adds `client.query(url, data)`: data goes in the **body** (like POST), and CSRF still applies.
+- HTML forms only speak GET/POST, so Wayfinder spoofs QUERY as `POST` with `?_method=QUERY`, same pattern as PUT/PATCH/DELETE.
+- Bonus: shared-URI routes are now keyed by verb (#303), middleware aliases resolve for URL defaults (#295), and a barrel self-import bug is fixed (#317).
+
+</TLDR>
+
+## What's new at a glance
+
+| Piece | Version | What you get |
+|---|---|---|
+| `laravel/wayfinder` | [v0.1.22](https://github.com/laravel/wayfinder/releases/tag/v0.1.22) | `"query"` on `Method`, `.query()`, form spoofing ([#324](https://github.com/laravel/wayfinder/pull/324)) |
+| `laravel-precognition` | [v2.1.1](https://github.com/laravel/precognition/releases) (npm + git tag) | `client.query()` with body + CSRF ([#179](https://github.com/laravel/precognition/pull/179)) |
+| `laravel/framework` | [v13.35+](https://github.com/laravel/framework/releases/tag/v13.35.0) | `Route::query()` ([#61797](https://github.com/laravel/framework/pull/61797)) — already covered |
+
+If you already ship `Route::query()` from [Laravel 13.35](/laravel-13-35-query-routes-markdown-responses), this is the front-end half of that story.
+
+## Why QUERY again (one paragraph)
+
+[QUERY](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods/QUERY) is a safe, idempotent method with a request body — think "GET with JSON filters". Laravel registered it in 13.35; Wayfinder and Precognition now speak it without casting everything to POST.
+
+## Wayfinder: typed `.query()` and form spoofing
+
+Before 0.1.22, a route registered with `Route::match(['QUERY'], …)` already generated a URL, but the `Method` type in `wayfinder.ts` stopped at `"options"`. `RouteDefinition<"query">` failed to type-check. [#324](https://github.com/laravel/wayfinder/pull/324) adds `"query"` to that union.
+
+```php title="routes/web.php"
+use App\Http\Controllers\SearchController;
+
+Route::query('/search', [SearchController::class, 'index'])
+    ->name('search.index');
+
+Route::match(['GET', 'QUERY'], '/search/{type}', [SearchController::class, 'show'])
+    ->name('search.show');
+```
+
+After `php artisan wayfinder:generate`:
+
+```ts title="resources/js/pages/Search.vue (script setup)"
+import { search } from '@/routes'
+
+// QUERY-only route
+search.index()        // { url: '/search', method: 'query' }
+search.index.query()  // same
+
+// GET + QUERY route: default stays GET; pick QUERY explicitly
+search.show('posts')        // { url: '/search/posts', method: 'get' }
+search.show.query('posts')  // { url: '/search/posts', method: 'query' }
+```
+
+HTML forms cannot send QUERY. Wayfinder spoofs it the same way it spoofs PUT:
+
+```ts
+search.index.form()
+// { action: '/search?_method=QUERY', method: 'post' }
+
+search.show.form.query('posts')
+// { action: '/search/posts?_method=QUERY', method: 'post' }
+```
+
+Symfony's `Request` allows overriding the method to QUERY (it only blocks GET, HEAD, CONNECT and TRACE), so Laravel's method spoofing middleware accepts it.
+
+<Callout type="heads-up" title="lowercase method string">
+
+Generated definitions use lowercase `"query"`, consistent with `"patch"`. The Fetch standard does not normalise that casing, so if you pass the method straight to `fetch()`, uppercase it yourself (`'QUERY'`) when your HTTP client is picky.
+
+</Callout>
+
+### Call it with fetch (Inertia does not speak QUERY yet)
+
+Inertia's `Method` type is still `get | post | put | patch | delete` as of **3.9.1**, so `router.visit({ method: 'query' })` will not type-check. Use Wayfinder's definition with `fetch` (or axios), and keep CSRF in mind for `web` routes:
+
+```ts title="resources/js/pages/ProductSearch.vue"
+import { search } from '@/routes'
+
+async function runSearch(filters: Record<string, unknown>) {
+  const def = search.index.query() // { url: '/search', method: 'query' }
+  const res = await fetch(def.url, {
+    method: 'QUERY', // uppercase for picky clients / Fetch
+    headers: {
+      'Content-Type': 'application/json',
+      'X-XSRF-TOKEN': decodeURIComponent(
+        document.cookie.match(/XSRF-TOKEN=([^;]+)/)?.[1] ?? '',
+      ),
+      Accept: 'application/json',
+    },
+    credentials: 'same-origin',
+    body: JSON.stringify(filters),
+  })
+  return res.json()
+}
+```
+
+When Inertia adds QUERY, you will be able to pass the Wayfinder object straight through. Until then, Precognition (next section) is the polished path for live validation against a QUERY route.
+
+## Precognition: `client.query()` for live validation
+
+Precognition 2.1.1 adds a `query` method next to `post` / `put` / `patch`. Like those, **data goes in the request body**, not as query-string params. GET and DELETE still merge into `params`.
+
+```ts title="resources/js/pages/ProductSearch.vue"
+import { useForm } from 'laravel-precognition-vue'
+import { search } from '@/routes'
+
+const form = useForm('query', search.index.url(), {
+  q: '',
+  category: null as string | null,
+  price_min: null as number | null,
+  price_max: null as number | null,
+  tags: [] as string[],
+})
+
+// On each field change, Precognition hits the QUERY route with a JSON body
+form.validate('q')
+```
+
+Under the hood that is `client.query(url, data)` → `mergeConfig('query', …)` → body merge (not `params`). The Precognition suite asserts `config.method === 'query'` and that `data` is present.
+
+<Callout type="gotcha" title="QUERY is still CSRF-verified">
+
+Laravel's QUERY support ([#61797](https://github.com/laravel/framework/pull/61797)) deliberately **does not** treat QUERY as a "reading" method for CSRF. The handler carries a body; verifying the token keeps CSRF independent of your CORS config. Precognition already sends the XSRF header on body-carrying methods — including `query`. Opt out per route with `preventRequestForgery(except: […])` only if you know why.
+
+</Callout>
+
+### Optional peer fix (#176)
+
+Same tag also fixes the axios adapter to use the **default export**, so the optional `axios` peer can be absent when you use the fetch client. If you saw odd import errors after dropping axios, bump to 2.1.1.
+
+## Shared URI, middleware aliases, barrel import
+
+Three more Wayfinder fixes in 0.1.22 worth knowing:
+
+| PR | Problem | Fix |
+|---|---|---|
+| [#303](https://github.com/laravel/wayfinder/pull/303) | Two verbs on the same URI / invokable controller wrote the same dictionary key twice | Entries keyed by `verb + URI` when the URI is shared |
+| [#295](https://github.com/laravel/wayfinder/pull/295) | Middleware aliases never resolved during `wayfinder:generate`, so `URL::defaults()` from those middleware were missed | Kernel is resolved before walking routes |
+| [#317](https://github.com/laravel/wayfinder/pull/317) | A barrel child named `index` imported `./index` and pulled itself in | Import by full path; drop only leaf-only `index` children |
+
+The shared-URI fix is the one you feel when you have:
+
+```php
+Route::post('/actions/{name}', ActionController::class)->name('actions.run');
+Route::get('/actions/{name}', ActionController::class)->name('actions.show');
+```
+
+Before #303 the generated action file did not compile. After it, you get distinct keys (`post /actions/{name}` vs `get /actions/{name}`) and you still pick the route explicitly.
+
+<Diagram
+  name="wayfinder-precognition-query-flow"
+  alt="Flow: Vue calls search.query() or Precognition client.query() with a JSON body, Laravel matches Route::query(), CSRF is verified, then the controller returns search results."
+  caption="QUERY end-to-end: typed client → body + CSRF → Route::query()"
+/>
+
+## Upgrade notes
+
+<Steps>
+
+1. **Framework first.** You need Laravel **13.35+** for `Route::query()`. See [the 13.35 post](/laravel-13-35-query-routes-markdown-responses) if you skipped it.
+2. **Wayfinder.** `composer update laravel/wayfinder` to `^0.1.22`, then `php artisan wayfinder:generate`.
+3. **Precognition.** Bump the npm packages you use:
+   ```bash
+   npm install laravel-precognition@2.1.1 laravel-precognition-vue@2.1.1
+   # or -react / -alpine / core, matching your stack
+   ```
+4. **Smoke-test one route.** Register a QUERY search route, hit it from Wayfinder `.query()` and from a Precognition `useForm('query', …)`, confirm 204/200 and that a missing CSRF token still 419s.
+
+</Steps>
+
+No breaking changes in either package for existing GET/POST routes. Adopting QUERY on a route is opt-in.
+
+<TryIt title="Generate and inspect a QUERY definition">
+
+```bash
+# After adding Route::query('/search', ...) and updating Wayfinder:
+php artisan wayfinder:generate
+rg -n "method: .query.|\"query\"" resources/js/routes resources/js/actions | head
+```
+
+</TryIt>
+
+## Recap
+
+- Laravel had `Route::query()` since 13.35; Wayfinder 0.1.22 and Precognition 2.1.1 make it usable from TypeScript.
+- Wayfinder: `search.query()`, `search.form.query()` with `_method=QUERY` spoofing.
+- Precognition: `client.query(url, data)` sends a body and keeps CSRF.
+- Also in Wayfinder 0.1.22: shared-URI-by-verb keys, middleware-alias URL defaults, barrel self-import fix.
+
+## FAQ
+
+<FAQ items={[
+  { q: 'Do I need both Wayfinder and Precognition?', a: 'No. Use Wayfinder for typed route helpers, Precognition for live validation, or both together. Each release independently adds QUERY.' },
+  { q: 'Does Inertia support QUERY visits yet?', a: 'Not in 3.9.1 — its Method union is still get/post/put/patch/delete. Use fetch/axios with Wayfinder\'s definition, or Precognition `useForm(\'query\', …)` for live validation. Inertia pages can still render the response once you have the data.' },
+  { q: 'Why does my HTML form POST to `/search?_method=QUERY`?', a: 'Browsers only submit GET and POST. Wayfinder\'s `.form.query()` spoofs QUERY the same way Laravel spoofs PUT/PATCH/DELETE.' },
+  { q: 'Is QUERY CSRF-exempt like GET?', a: 'No. Laravel deliberately keeps CSRF on QUERY (#61797). Precognition sends the XSRF header; bare `fetch` must too.' },
+  { q: 'Was there a GitHub Release for Precognition 2.1.1?', a: 'Not at publish time — only a git tag and npm publish (same pattern as 2.1.0). Trust the tag `v2.1.1` and the npm version.' },
+]} />
+
+## Next steps
+
+- [Laravel 13.35: QUERY routes, Markdown responses and model defaults()](/laravel-13-35-query-routes-markdown-responses)
+- [Wayfinder query-string helpers in Vue](/wayfinder-query-string-vue)
+- [Laravel 13.36: validation rule builders, olap() and sticky queues](/laravel-13-36-validation-builders-olap-sticky-queues)
+- [MDN: HTTP QUERY method](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods/QUERY)
+
+## Sources
+
+- [laravel/wayfinder v0.1.22 release notes](https://github.com/laravel/wayfinder/releases/tag/v0.1.22)
+- [wayfinder#324 Support the QUERY HTTP method](https://github.com/laravel/wayfinder/pull/324)
+- [wayfinder#303 Key routes that share a URI by verb](https://github.com/laravel/wayfinder/pull/303)
+- [wayfinder#295 Resolve middleware aliases when inferring URL defaults](https://github.com/laravel/wayfinder/pull/295)
+- [wayfinder#317 Fix barrel self-import](https://github.com/laravel/wayfinder/pull/317)
+- [precognition#179 Add support for the QUERY method](https://github.com/laravel/precognition/pull/179)
+- [precognition#176 axios default-export fix](https://github.com/laravel/precognition/pull/176)
+- [framework#61797 Add QUERY route method support](https://github.com/laravel/framework/pull/61797)
+- [RFC 9110 / QUERY drafts via MDN](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods/QUERY)

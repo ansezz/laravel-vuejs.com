@@ -1,0 +1,6 @@
+flowchart LR
+  Vue["Vue / Inertia"] -->|"search.query() or client.query(body)"| Client["Wayfinder / Precognition"]
+  Client -->|"QUERY + JSON body + XSRF"| Laravel["Laravel web stack"]
+  Laravel -->|"CSRF verified"| Route["Route::query('/search')"]
+  Route --> Controller["Search controller"]
+  Controller --> Results["JSON / Inertia response"]
