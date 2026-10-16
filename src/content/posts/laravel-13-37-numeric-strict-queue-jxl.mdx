@@ -1,0 +1,256 @@
+---
+id: 158
+title: "Laravel 13.37: strict Rule::numeric(), queue filters and JPEG XL"
+seoTitle: "Laravel 13.37: Rule::numeric(strict), queue filters, JXL"
+excerpt: "Laravel 13.37 adds Rule::numeric(strict: true), queue:failed --queue, multi-id queue:forget, JPEG XL in the Image API, and withWhereHas column selection with a callback."
+date: 2026-10-16T12:40:00Z
+snippet: "Rule::numeric(strict: true)"
+categories: [laravel]
+tags: [laravel, release]
+---
+You typed `42` into a JSON API and Laravel accepted `"42"` as numeric. Your `failed_jobs` table is a mess of queues you cannot filter. And you still cannot ask `withWhereHas('items:id,order_id,sku', …)` without a `RelationNotFoundException`. Laravel **13.37** fixes each of those, and none of them change behaviour until you opt in.
+
+<TLDR
+  audience="Laravel 13 developers (validation, queues, Image API, Eloquent, FTP/SFTP)"
+  learn={['`Rule::numeric(strict: true)` vs plain `numeric`', '`queue:failed --queue` and multi-id `queue:forget`', 'JPEG XL (`toJxl()`) on the Image API', '`withWhereHas` column selection with a callback', 'RedirectResponse as Responsable, SFTP mime-by-path, and the smaller fixes']}
+  tested="Laravel 13.37.0 · PHP 8.4 · Pest 4 (6 tests / 20 assertions: Rule::numeric strict, queue command signatures, RedirectResponse instanceof Responsable). Image JXL / FTP mime-by-path applies (API present; no Imagick JXL encode or live SFTP run)."
+>
+
+- **13.37.0** was released on **October 16, 2026**: a real minor with opt-in features plus a long list of fixes.
+- `Rule::numeric(strict: true)` is the object form of `numeric:strict`. String `"42"` fails; int/float `42` passes. `Rule::when()` / `Rule::unless()` also accept `Stringable`.
+- `php artisan queue:failed --queue=emails` filters failed jobs. `php artisan queue:forget 1 2 3` deletes several IDs in one go.
+- Image API: `->toJxl()->quality(80)` next to HEIC/AVIF. `withWhereHas('items:id,order_id,sku', fn…)` no longer throws. `RedirectResponse` implements `Responsable`.
+
+</TLDR>
+
+## What's new at a glance
+
+| Feature | PR | Replaces |
+|---|---|---|
+| `Rule::numeric(strict: true)` | [#62031](https://github.com/laravel/framework/pull/62031) | Remembering the string `'numeric:strict'` |
+| `queue:failed --queue=` | [#61971](https://github.com/laravel/framework/pull/61971) | Grepping the failed-jobs table by hand |
+| `queue:forget` with multiple IDs | [#61901](https://github.com/laravel/framework/pull/61901) | One `queue:forget` call per failed job |
+| Image API JPEG XL (`toJxl()`) | [#62019](https://github.com/laravel/framework/pull/62019) | Converting to JXL outside Laravel |
+| `withWhereHas` + column list + callback | [#62039](https://github.com/laravel/framework/pull/62039) | `RelationNotFoundException` on `items:id,…` |
+| SFTP/FTP `detect_mime_type_using_path` | [#61972](https://github.com/laravel/framework/pull/61972) | Downloading the whole file just for `mimeType()` |
+| `RedirectResponse` implements `Responsable` | [#62036](https://github.com/laravel/framework/pull/62036) | Controllers typed `Responsable\|Renderable` rejecting `redirect()` |
+
+## Strict Rule::numeric()
+
+Laravel already had `Rule::numeric()` as a fluent builder (`->min()`, `->max()`, `->integer()`, …). What it could not say was the strict mode that rejects numeric *strings*. In 13.37, pass `strict: true`:
+
+<CodeCompare before="Laravel 13.36" after="Laravel 13.37">
+
+```php title="app/Http/Requests/StorePaymentRequest.php"
+public function rules(): array
+{
+    return [
+        'amount' => ['required', 'numeric:strict', 'min:0.01'],
+    ];
+}
+```
+
+```php title="app/Http/Requests/StorePaymentRequest.php"
+use Illuminate\Validation\Rule;
+
+public function rules(): array
+{
+    return [
+        'amount' => [
+            'required',
+            Rule::numeric(strict: true)->min(0.01), // [!code ++]
+        ],
+    ];
+}
+```
+
+</CodeCompare>
+
+`(string) Rule::numeric(strict: true)` is `numeric:strict`. We ran it on 13.37:
+
+| Payload | `Rule::numeric()` | `Rule::numeric(strict: true)` |
+|---|---|---|
+| `42` (int) | passes | passes |
+| `3.14` (float) | passes | passes |
+| `"42"` (string) | passes | **fails** |
+| `"not-a-number"` | fails | fails |
+
+Use strict mode on JSON APIs where you want the client to send real numbers, not quoted ones. Keep the loose rule when forms (or query strings) always arrive as strings.
+
+<Callout type="tip" title="Rule::when / unless accept Stringable too">
+
+[#62030](https://github.com/laravel/framework/pull/62030) widens the `$rules` / `$defaultRules` parameter types on `Rule::when()` and `Rule::unless()` to include `Stringable`. Handy when a rule object (or a helper that returns one) is `Stringable`.
+
+</Callout>
+
+## Filter failed jobs by queue
+
+`queue:failed` listed every failed job. On a busy app that mixes `emails`, `default` and `horizon`, that table is noisy. 13.37 adds `--queue`:
+
+```bash
+php artisan queue:failed --queue=emails
+php artisan queue:failed --queue=emails --json
+```
+
+Only rows whose `queue` column matches are shown. We checked the command signature on 13.37: the option is there and filters with `->where('queue', $queue)`.
+
+## Forget several failed jobs at once
+
+Before, `queue:forget` took a single ID. Clearing a bad deploy meant a loop. Now the `id` argument is an array:
+
+```bash
+php artisan queue:forget 12 45 91
+```
+
+Each ID is forgotten in turn. Missing IDs print an error and the command exits with failure so scripts can detect a partial clear.
+
+## JPEG XL in the Image API
+
+HEIC and AVIF already had helpers. JPEG XL gets the same treatment:
+
+```php title="app/Actions/StoreAvatar.php"
+use Illuminate\Support\Facades\Image;
+
+$path = Image::fromStorage('avatars/photo.jpg', 'public')
+    ->cover(400, 400)
+    ->toJxl()
+    ->quality(80)
+    ->storePublicly('avatars', 'public');
+```
+
+`toJxl()` sets the output format to `jxl` (Intervention's `JxlEncoder` under the hood). Your Imagick/GD build must actually support JXL encoding; we confirmed the method exists on `Illuminate\Image\Image` in 13.37 but did not run an encode on this box.
+
+<Callout type="heads-up" title="needs a JXL-capable image driver">
+
+If Imagick was built without JPEG XL, `toJxl()` will fail at encode time the same way an unsupported HEIC would. Check your driver before flipping production uploads to JXL.
+
+</Callout>
+
+## withWhereHas column selection with a callback
+
+`with('items:id,order_id,sku')` has worked for years. `withWhereHas` accepted the same column list **without** a callback, but threw when you passed both:
+
+```php
+// Before 13.37 — RelationNotFoundException:
+// Call to undefined relationship [items:id,order_id,sku]
+Order::withWhereHas('items:id,order_id,sku', function ($query) {
+    $query->where('status', 'backordered');
+})->get();
+```
+
+[#62039](https://github.com/laravel/framework/pull/62039) parses the column list the same way `with()` does, so the snippet above loads only those columns on matching `items`. Use it when you want the constraint **and** a lean eager load in one call.
+
+## SFTP/FTP mime type from the path
+
+On SFTP and FTP disks, `Storage::mimeType($path)` used to download the file into memory so Flysystem could sniff bytes. For big assets that is expensive. 13.37 adds an opt-in config flag:
+
+```php title="config/filesystems.php"
+'sftp' => [
+    'driver' => 'sftp',
+    // ...
+    'detect_mime_type_using_path' => true, // [!code ++]
+],
+```
+
+When `true`, Flysystem guesses from the extension/path instead of reading the body. Default stays `false`, so existing apps are unchanged. Same key works on the `ftp` driver and via `Storage::build([...])`.
+
+## RedirectResponse implements Responsable
+
+Controllers typed as returning `Responsable|Renderable` could return a view, but `redirect()->back()` failed the type check because `RedirectResponse` was not `Responsable`. Now it is:
+
+```php title="app/Http/Controllers/WelcomeController.php"
+use Illuminate\Contracts\Support\Renderable;
+use Illuminate\Contracts\Support\Responsable;
+
+class WelcomeController
+{
+    public function __invoke(): Responsable|Renderable
+    {
+        if (! auth()->check()) {
+            return redirect()->route('login');
+        }
+
+        return view('welcome');
+    }
+}
+```
+
+We asserted `redirect('/dashboard') instanceof Responsable` and that `toResponse()` still produces a redirect. Your Vue/Inertia apps are unaffected; this is a PHP typing win for classic controllers and action classes.
+
+## Smaller changes worth knowing
+
+| Change | PR | What it fixes |
+|---|---|---|
+| `ScheduledTaskFailed::$runtime` | [#61970](https://github.com/laravel/framework/pull/61970) | Failed schedule events now carry how long they ran (nullable float), like the finished event |
+| Exception reporting | [#62047](https://github.com/laravel/framework/pull/62047) | Cleaner reporting around Cloud / cached config / avoiding double reports |
+| Unique lock release on failed push | [#62010](https://github.com/laravel/framework/pull/62010), [#62045](https://github.com/laravel/framework/pull/62045) | Unique job/listener locks are released when the push to the queue fails |
+| `encrypted:object` / `encrypted:collection` always dirty | [#62032](https://github.com/laravel/framework/pull/62032) | Unchanged encrypted casts no longer mark the model dirty |
+| Cached `Attribute` accessor stale after set | [#62035](https://github.com/laravel/framework/pull/62035) | Setting the underlying attribute refreshes a cached accessor |
+| Eloquent `cursor()` extra models | [#62001](https://github.com/laravel/framework/pull/62001) | Avoids creating spare model instances while iterating |
+| Soft-delete `restore()` with joins | [#61998](https://github.com/laravel/framework/pull/61998) | Restore works when the query has joins |
+| Nested JSON:API include N+1 | [#62000](https://github.com/laravel/framework/pull/62000) | Nested includes no longer fire N+1 queries |
+| `migrate:status` skipped ≠ pending | [#61989](https://github.com/laravel/framework/pull/61989) | Skipped migrations are not listed as pending |
+| `DynamoDbStore::many()` numeric keys | [#62029](https://github.com/laravel/framework/pull/62029) | Numeric cache keys keep the correct values |
+| `latest()` / `oldest()` with joins | [#62024](https://github.com/laravel/framework/pull/62024) | Default order column is qualified |
+| Faked `Sleep` in limiter `block()` | [#62017](https://github.com/laravel/framework/pull/62017) | Rate-limiter timeouts respect `Sleep::fake()` |
+| `onOneServer` + `withoutOverlapping` race | [#62007](https://github.com/laravel/framework/pull/62007) | Fixes the race when both are used on a job |
+
+## Upgrade notes
+
+Run `composer update laravel/framework` (13.37.0 or later). Everything above is opt-in: loose `numeric` still accepts strings, `queue:failed` without `--queue` lists everything, JXL is only used when you call `toJxl()`, and `detect_mime_type_using_path` defaults to `false`.
+
+Two fixes can change behaviour you might have been living with: encrypted object/collection casts stop looking dirty when unchanged, and skipped migrations no longer show as pending in `migrate:status`. Both match what the APIs already promised.
+
+<TryIt title="See strict numeric reject a string">
+
+```bash
+php artisan tinker --execute="
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
+dump(Validator::make(['n' => '42'], ['n' => Rule::numeric(strict: true)])->fails());
+dump((string) Rule::numeric(strict: true)->min(1));
+"
+```
+
+</TryIt>
+
+You should see `true` (the string failed) and `numeric:strict|min:1`.
+
+## Recap
+
+- `Rule::numeric(strict: true)` is the typed form of `numeric:strict`; string numbers fail, real ints/floats pass.
+- `queue:failed --queue=…` filters the failed list; `queue:forget 1 2 3` clears several IDs at once.
+- Image API gains `toJxl()->quality(…)`, same shape as HEIC/AVIF.
+- `withWhereHas('rel:cols', fn)` works; SFTP/FTP can sniff mime from the path; `RedirectResponse` is `Responsable`.
+- Plenty of solid fixes: unique lock release, encrypted dirty tracking, cursor memory, soft-delete restore with joins, and more.
+
+## FAQ
+
+<FAQ items={[
+  { q: 'Will Rule::numeric(strict: true) break my HTML forms?', a: 'Possibly, if the browser sends numbers as strings (it usually does). Use strict mode on JSON APIs; keep the loose rule for classic form requests.' },
+  { q: 'Does queue:failed --queue change the failed_jobs table?', a: 'No. It only filters what is printed (or returned as JSON). The rows stay until you retry or forget them.' },
+  { q: 'Do I need a special PHP extension for JPEG XL?', a: 'You need an image driver (typically Imagick) built with JXL support. The Laravel helper is there in 13.37; the encode still depends on the underlying library.' },
+  { q: 'Is detect_mime_type_using_path on by default?', a: 'No. It defaults to false so mimeType() behaviour stays byte-based until you opt in on the SFTP/FTP disk config.' },
+  { q: 'Why did redirect() fail my Responsable return type before?', a: 'RedirectResponse did not implement Responsable. In 13.37 it does, so controllers typed Responsable|Renderable can return redirect() or a view.' },
+]} />
+
+## Next steps
+
+- [Laravel 13.36: validation rule builders, olap() and sticky queues](/laravel-13-36-validation-builders-olap-sticky-queues): last week's release.
+- [Form Requests with Inertia and Vue](/laravel-form-request-inertia): where strict `Rule::numeric()` belongs.
+- [Run a queued job and show its progress in Vue](/laravel-vue-queued-job): put the queue CLI improvements to work.
+- [Laravel validation docs](https://laravel.com/docs/13.x/validation)
+
+## Sources
+
+- [Laravel v13.37.0 release notes](https://github.com/laravel/framework/releases/tag/v13.37.0)
+- [PR #62031: strict option on Rule::numeric()](https://github.com/laravel/framework/pull/62031)
+- [PR #62030: Stringable in Rule::when / unless](https://github.com/laravel/framework/pull/62030)
+- [PR #61971: queue:failed --queue](https://github.com/laravel/framework/pull/61971)
+- [PR #61901: queue:forget multiple IDs](https://github.com/laravel/framework/pull/61901)
+- [PR #62019: JPEG XL in the Image API](https://github.com/laravel/framework/pull/62019)
+- [PR #62039: withWhereHas column selection with callback](https://github.com/laravel/framework/pull/62039)
+- [PR #61972: detect_mime_type_using_path for SFTP/FTP](https://github.com/laravel/framework/pull/61972)
+- [PR #62036: RedirectResponse implements Responsable](https://github.com/laravel/framework/pull/62036)
+- [PR #61970: ScheduledTaskFailed runtime](https://github.com/laravel/framework/pull/61970)
+- [PR #62047: improve exception reporting](https://github.com/laravel/framework/pull/62047)
