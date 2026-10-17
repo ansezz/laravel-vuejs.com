@@ -1,0 +1,14 @@
+flowchart LR
+  A["`**query changes**`"] --> B["`**1. Cleanups from
+  the previous run**
+  clearTimeout(timer)
+  controller.abort()`"]
+  B --> C["`**2. Callback runs**
+  new AbortController
+  onWatcherCleanup(…)
+  setTimeout(run, 250)`"]
+  C --> D["`**3. Timer fires**
+  fetch(url, { signal })`"]
+  D --> E["`**results updated**`"]
+  U["`**component unmounts**
+  watcher stops`"] --> B
