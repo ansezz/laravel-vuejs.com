@@ -36,6 +36,7 @@ npm run check:links      # no internal link, image, script or stylesheet in dist
 npm run check:packages   # the package chart data (src/data/packages.ts) is consistent
 npm run check:tools      # the developer tools data (src/data/dev-tools.ts) is consistent
 npm run lhci             # Lighthouse CI against dist/ (lighthouserc.json)
+npm run check:live       # the post-deploy check against the live site (SITE_URL=... for a preview or wrangler dev)
 ```
 
 Generated files that are committed, with the script that makes them: `public/og/*.jpg` (`scripts/og.mjs`, see [Writing a post](#writing-a-post)), `public/diagrams/*.svg` (`npm run diagrams`, Mermaid sources in `docs/diagrams/`) and `public/cheatsheets/pdf/*.pdf` (`npm run cheatsheets:pdf`, sheets in `src/data/cheatsheets.ts`). The last two need a Chromium binary (`CHROME_PATH`).
@@ -123,7 +124,7 @@ Future posts are included in Workers Builds previews (every branch except `maste
 
 ## Deploying
 
-Pushes to `master` are deployed by Cloudflare Workers Builds; pull requests get a preview URL. Manual deploy:
+Pushes to `master` are deployed by Cloudflare Workers Builds; pull requests get a preview URL. After each deploy of `master`, the `Post-deploy check` workflow waits until `/version.json` reports the pushed commit (up to 15 minutes), then runs `scripts/check-live.mjs` against the live site: key pages and content types, the security headers the Worker adds, the 404 page and the `www` redirect, the newest post with its Markdown twin and OG image, the forms API, and that every post whose date has passed is live. It also runs daily at 07:45 UTC, after the scheduled-publishing job. A red run means the deploy needs a look. Manual deploy:
 
 ```bash
 npx wrangler login
@@ -136,7 +137,7 @@ npm run deploy
 - [Othmane Gourirran](https://github.com/OthmanDev)
 - [Omar Bourhaouta](https://github.com/bourhaouta)
 
-Bug reports, ideas and pull requests are welcome.
+Bug reports, ideas and pull requests are welcome; see [`CONTRIBUTING.md`](./CONTRIBUTING.md). Dependabot opens grouped update PRs weekly for npm packages and monthly for GitHub Actions (`.github/dependabot.yml`).
 
 ## License
 
