@@ -1,9 +1,10 @@
-// Usage: npm run build && npx astro preview --port 4400 & then: npx -p playwright-core node scripts/og.mjs http://localhost:4400 public/og
+// Usage: npm run build && npx astro preview --port 4400 & then: npx -p playwright-core node scripts/og.mjs http://localhost:4400 public/og [slug ...]
+// With one or more slugs, only those cards are rendered (build with SHOW_FUTURE_POSTS=1 for scheduled posts).
 // (needs a Chromium install: npx playwright-core install chromium). Re-run after adding or renaming a post.
 // Renders 1200x630 Open Graph cards (default + one per post, over the generated artwork in src/assets/art/) into public/og/*.jpg.
 import { chromium } from 'playwright-core'
 import fs from 'node:fs'
-const [base, outDir] = process.argv.slice(2)
+const [base, outDir, ...only] = process.argv.slice(2)
 const posts = await (await fetch(base + '/api/posts.json')).json()
 const fonts = fs.readdirSync(new URL('../dist/_astro', import.meta.url))
 const sans = fonts.find(f => /^geist-latin-wght/.test(f)), mono = fonts.find(f => /^geist-mono-latin-wght/.test(f))
@@ -26,7 +27,7 @@ const page = await browser.newPage({ viewport: { width: 1200, height: 630 } })
 const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;')
 const jobs = [['default', 'Laravel &amp; Vue', 'Build modern apps with Laravel &amp; Vue.', 'laravel-vuejs.space', artUrl('hero')],
   ...posts.map(p => [p.slug, esc(p.categories.map(c => c.name).join(' · ')), esc(p.title), `laravel-vuejs.space/${p.slug} · ${p.minutes} min read`, artUrl(p.slug)])]
-for (const [name, k, t, s, art] of jobs) {
+for (const [name, k, t, s, art] of jobs.filter(j => !only.length || only.includes(j[0]))) {
   await page.goto(base + '/robots.txt'); await page.setContent(html(t, k, s, art), { waitUntil: 'networkidle' })
   await page.evaluate(() => document.fonts.ready)
   await page.screenshot({ path: `${outDir}/${name}.jpg`, type: 'jpeg', quality: 84 }); console.log('og', name)

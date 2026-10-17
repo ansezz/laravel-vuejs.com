@@ -347,7 +347,7 @@ for (const phrase of [
   "March 17, 2026",
   "Composer 2.",
   "Ctype, cURL, DOM, Fileinfo, Filter, Hash, Mbstring, OpenSSL, PCRE, PDO, Session, Tokenizer, and XML.",
-  "v22.12+ or v24",
+  "v20.19+ or v22.12+",
   "does not pin an npm version",
   "does not pass flags",
   "built-in authentication",

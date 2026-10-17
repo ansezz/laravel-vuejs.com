@@ -165,7 +165,7 @@ You did X, and now Y happens. Hook in 2–3 lines.
 ````
 
 Also add a cover: generated art at `src/assets/art/<slug>.webp` (1376×768, mint/purple brand style, no people, no
-third-party logos) and an OG card with `node scripts/og.mjs <slug>`.
+third-party logos) and an OG card with `node scripts/og.mjs http://localhost:4400 public/og <slug>` (see the top of the script).
 
 ## Checklist (run before opening the PR)
 
