@@ -1,0 +1,223 @@
+---
+id: 160
+title: "This week in Laravel & Vue: Laravel 12.70 query hardening, Pinia 4.1, Vue 3.5.44, Oct 19, 2026"
+seoTitle: "This week in Laravel & Vue: patches (Oct 19, 2026)"
+excerpt: "The small releases you might have missed: Laravel 12.70 closes two query injection holes, Horizon 5.50.1 fixes horizon:listen, Pinia 4.1 adds getStores(), Vue 3.5.44 lands 25 fixes."
+date: 2026-10-19T00:30:00Z
+snippet: "composer update laravel/framework laravel/horizon && npm update vue pinia"
+categories: [laravel, vuejs]
+tags: [laravel, vuejs, pinia, release]
+---
+Laravel 13.36 and 13.37 took the headlines this week. Underneath them, the 12.x line got a query hardening release, Horizon stopped ignoring half your project, Pinia grew a long-requested helper and Vue shipped its biggest patch of the year.
+
+Here is everything small that shipped in the Laravel and Vue world since [last week's roundup](/this-week-in-laravel-inertia-2026-10-12), in one five-minute read.
+
+<TLDR
+  audience="Laravel + Vue developers on Laravel 12 or 13, Inertia 2 or 3"
+  learn={['Which patch releases shipped between Oct 13 and Oct 17 and what they fix', 'Who should update first', 'The one-line update commands']}
+  applies="Laravel 12.70.0 · Horizon 5.50.1 · Telescope 5.26.0 · Sail 1.69.0 · Pinia 4.1.0 · Vue 3.5.44 · Wayfinder 0.1.23 · Nuxt 4.6.2 (checked against the release notes and PRs)"
+>
+
+- **Still on Laravel 12?** Update to **12.70.0** today. `cursorPaginate()` no longer treats an order column with parentheses as raw SQL, and `whereRowValues()` rejects bogus operators.
+- **Horizon 5.50.1** makes `horizon:listen` restart on changes in `config/`, `database/` and `resources/` again when you have chokidar 5.
+- **Pinia 4.1.0** adds `getStores(pinia)` so you can loop over every live store without touching internals.
+- **Vue 3.5.44** is 25 bug fixes, several closing issues from 2022. Nothing changes in your code; update.
+
+</TLDR>
+
+## The week at a glance
+
+| Package | Version | Released (UTC) | Should you hurry? |
+|---|---|---|---|
+| `laravel/framework` (12.x line) | 12.70.0 | Oct 13 | **Yes**, if user input ever reaches `cursorPaginate` ordering or `whereRowValues` |
+| `laravel/horizon` | 5.50.1 | Oct 13 | Yes, if `horizon:listen` stopped restarting after `npm install chokidar` |
+| `laravel/telescope` | 5.26.0 | Oct 13 | New installs only; existing apps copy one line |
+| `laravel/sail` | 1.69.0 | Oct 13 | Only if you use the MongoDB service |
+| `vue` | 3.5.44 | Oct 13 | Yes, it is all fixes |
+| `pinia` | 4.1.0 | Oct 14 | Nice to have |
+| `laravel/ai` | 1.2.2, 1.2.3 | Oct 14, 15 | Yes, if you classify images or stream agents with sub-agents |
+| `laravel/wayfinder` | 0.1.23 | Oct 16 | Only if `wayfinder:generate` runs where the database isn't reachable |
+| `nuxt` | 4.6.2 | Oct 16 | Nice to have |
+
+<Callout type="heads-up" title="The big releases have their own posts">
+
+This week's minor releases are covered in full: [Laravel 13.36](/laravel-13-36-validation-builders-olap-sticky-queues) (validation rule builders, `DB::olap()`, sticky queue flushes), [Laravel 13.37](/laravel-13-37-numeric-strict-queue-jxl) (`Rule::numeric(strict: true)`, queue filters, JPEG XL) and [Wayfinder 0.1.22 + Precognition 2.1.1](/wayfinder-precognition-query-method) (the QUERY method end-to-end).
+
+</Callout>
+
+## Laravel 12.70.0: two query holes closed, one backport
+
+The release notes say "Address query issues", which undersells it. [PR #61838](https://github.com/laravel/framework/pull/61838) backports a hardening commit that landed on 13.x on Oct 2 and shipped in Laravel 13.35.
+
+**`cursorPaginate()` order columns.** Until now, any order column containing parentheses was passed through as a raw `Expression`, because that is how aliased expressions like `count(*) as total` were recognised. A column name such as `id) or 1=1 or (id` therefore ended up unquoted in the `WHERE` clause. The raw wrapping now also requires the resolved original column to differ from the column name, so a plain identifier with parentheses is quoted like any other.
+
+**`whereRowValues()` operators.** The method accepted any string as the operator. It now runs the same `invalidOperator()` check as `where()` and throws an `InvalidArgumentException` for anything that isn't a known operator.
+
+```php title="app/Http/Controllers/ProductController.php"
+// Never let the request pick the order column directly.
+$column = $request->enum('sort', ProductSort::class)?->column() ?? 'id';
+
+return Product::query()
+    ->orderBy($column)
+    ->cursorPaginate(25);
+```
+
+If you already whitelist sort columns, as above, you were fine before. Update anyway, because the paginator is now safe even when a future refactor forgets to.
+
+**`EncodedParameter`** ([#61871](https://github.com/laravel/framework/pull/61871)). 12.69.2 started encoding `?`, `%` and `#` in route parameters, which broke `%id%`-style placeholders that JavaScript fills in later ([#61499](https://github.com/laravel/framework/issues/61499)). The 13.x fix is now on 12.x: wrap a value that is already encoded and `route()` leaves it alone. We ran the wrapper on Laravel 13.37, where the class is identical: `%id%` comes out as `/users/%id%` instead of `/users/%25id%25`.
+
+```php title="resources/views/users/index.blade.php"
+@php use Illuminate\Routing\EncodedParameter; @endphp
+
+<table data-show-url="{{ route('users.show', ['user' => new EncodedParameter('%id%')]) }}">
+```
+
+The last change, [#61822](https://github.com/laravel/framework/pull/61822), gives Blade a separate compiled cache file per configured `$echoFormat`, so switching the format no longer serves views compiled under the old one.
+
+```bash
+composer update laravel/framework
+php artisan --version   # Laravel Framework 12.70.0
+```
+
+## Horizon 5.50.1: horizon:listen with chokidar 5
+
+The docs say `npm install --save-dev chokidar`, which today installs chokidar 5. Horizon's file watcher only expanded its glob paths for chokidar 4, so on 5.x the globs went straight to chokidar, which dropped glob support in 4.0. Result: `horizon:listen` restarted for changes in `app/` and `routes/` but ignored `config/`, `database/`, `public/` and `resources/`.
+
+[PR #1832](https://github.com/laravel/horizon/pull/1832) checks the major version instead, the way Octane does. If you pinned `chokidar@4` as a workaround, you can drop the pin.
+
+```bash
+composer update laravel/horizon
+php artisan horizon:listen
+```
+
+## Telescope 5.26.0: set-cookie joins the hidden headers
+
+Outside `local`, the generated `TelescopeServiceProvider` already hides the `cookie`, `x-csrf-token` and `x-xsrf-token` request headers. [PR #1769](https://github.com/laravel/telescope/pull/1769) adds `set-cookie` to the stub, since it carries the fresh session token.
+
+The stub only affects new installs. Existing apps add the header themselves:
+
+```php title="app/Providers/TelescopeServiceProvider.php"
+Telescope::hideRequestHeaders([
+    'cookie',
+    'set-cookie', // [!code ++]
+    'x-csrf-token',
+    'x-xsrf-token',
+]);
+```
+
+## Sail 1.69.0: the MongoDB service works as advertised
+
+[PR #902](https://github.com/laravel/sail/pull/902) fixes six things in the MongoDB service at once: the compose stub no longer overrides the image's health check, `sail mongodb` uses port 27017 inside the container instead of the forwarded host port, `MONGODB_USERNAME` and `MONGODB_PASSWORD` now land in `MONGODB_URI` (with `authSource=admin`), the config volume is mounted on existing installs too, the test suite gets its own `MONGODB_DATABASE`, and `DB_CONNECTION` defaults to `mongodb` when no SQL service is selected.
+
+```bash
+composer update laravel/sail
+php artisan sail:install   # re-run and pick mongodb to refresh the service
+```
+
+## Pinia 4.1.0: getStores() and a dispose warning
+
+`getStores(pinia)` ([#3194](https://github.com/vuejs/pinia/pull/3194)) returns a fresh array of the stores currently registered on a Pinia instance, setup stores included, disposed stores excluded. The use case is "do something to every store" without reaching into `pinia._s`, which could loop forever when you dispose and recreate stores while iterating it.
+
+```ts title="resources/js/auth/logout.ts"
+import { getStores } from 'pinia'
+import { pinia } from '@/pinia'
+
+export function clearStores() {
+    for (const store of getStores(pinia)) {
+        store.$reset() // option stores; give setup stores their own $reset
+    }
+}
+```
+
+The second feature ([#3193](https://github.com/vuejs/pinia/pull/3193)) is a dev-only warning, `PINIA_R1008`, when you call `$dispose()` on a store instance that has already been replaced by a newer one with the same id. The stale call no longer removes the new instance from the registry either.
+
+Fixes in the same release: shallow refs patched with the object syntax trigger updates, HMR keeps the runtime state of empty placeholder objects, and `@pinia/nuxt` resolves `storesDirs` per layer.
+
+```bash
+npm install pinia@^4.1.0
+```
+
+## Vue 3.5.44: 25 fixes, some years in the making
+
+No features, just fixes, and a few close issues that have been open since 2022:
+
+- **Reactivity:** watcher callbacks that run inside another effect no longer track dependencies for that effect (`#5009`), a `once` watcher stops even when its callback throws, and shallow collections keep their shallow semantics.
+- **Templates:** `v-show` keeps its transition in production builds, `playsinline` is treated as a boolean attribute, and an invalid `v-for` range renders nothing instead of throwing in production.
+- **Transitions:** nested `<TransitionGroup>`s measure against their moving outer item (`#5385`, `#1531`), and `<Transition>` handles component roots wrapped in comments (`#6080`, `#5500`).
+- **Teleport, KeepAlive, Suspense:** `targetStart` moves with its children, a pruned KeepAlive component is unmounted when its vnode was cloned on mount, and resolved async components mount in their own namespace (SVG inside Suspense).
+- **SSR:** async `setup()` errors propagate through the server renderer.
+
+```bash
+npm install vue@^3.5.44
+```
+
+<Callout type="gotcha" title="3.6.0-rc.12 is not 3.5.44">
+
+Vue **3.6.0-rc.11** (Oct 10) and **rc.12** (Oct 16) also shipped this week. They are Vapor mode release candidates with dozens of `runtime-vapor` fixes each. Stay on 3.5.x in production until 3.6.0 is final.
+
+</Callout>
+
+## Laravel AI SDK 1.2.2 and 1.2.3
+
+Two patch releases in two days. **1.2.2** (Oct 14) runs structured sub-agents unstreamed when the parent agent streams (they used to fail with "Streaming structured output is not currently supported"), adds classification to the `openai-compatible` provider, dispatches `*Failed` events for embeddings, images, audio, transcription, reranking and classification, and keeps the call id on an interrupted tool result so OpenAI conversations recover after a failed turn. **1.2.3** (Oct 15) lets TypeSafe and OpenRouter classify image attachments and restores non-incrementing conversation ids on Laravel 12.
+
+We tested the lot in [Laravel AI SDK 1.2.2 and 1.2.3](/laravel-ai-sdk-1-2-3-classification-failure-events).
+
+```bash
+composer update laravel/ai
+```
+
+## Wayfinder 0.1.23: generate without a database
+
+[PR #331](https://github.com/laravel/wayfinder/pull/331) adds `--skip-database` to `wayfinder:generate`. Route model binding types are read from each model's `@property` docblocks instead of the database schema, so the command never opens a connection. It exists because a build box that cannot reach the database retries every connection and a one-minute generate turned into thirty.
+
+```bash
+php artisan wayfinder:generate --skip-database
+```
+
+## Nuxt 4.6.2
+
+A fix-only patch: server island heads follow the `useHeadSafe` rules, server route rules match case-insensitively unless routing is set to sensitive, error state survives an aborted navigation, and the dev server's Vite error overlay and `vue` resolution are fixed. Nothing to change.
+
+## Upgrade notes
+
+- None of these releases has breaking changes. Run `composer update` and `npm update`, then your test suite.
+- Laravel 12 apps that pass user input to `orderBy()` before `cursorPaginate()`: update first, then audit the whitelist anyway.
+- Telescope: the `set-cookie` line is yours to add; the stub won't touch an existing provider.
+- If you pin exact versions, bump them: `laravel/framework:^12.70`, `laravel/horizon:^5.50.1`, `vue@3.5.44`, `pinia@4.1.0`.
+
+## Recap
+
+- **Laravel 12.70.0** closes two query injection paths and backports `EncodedParameter`. Update today.
+- **Horizon 5.50.1** fixes `horizon:listen` with chokidar 5; drop your `chokidar@4` pin.
+- **Pinia 4.1.0** adds `getStores()`; **Vue 3.5.44** is 25 fixes with no API change.
+- **AI SDK 1.2.2/1.2.3**, **Wayfinder 0.1.23**, **Telescope 5.26.0**, **Sail 1.69.0** and **Nuxt 4.6.2** are small, safe updates.
+
+## FAQ
+
+<FAQ items={[
+  { q: 'Is Laravel 12.70 a security release?', a: 'The release notes do not label it one, but PR #61838 stops `cursorPaginate()` from injecting an order column with parentheses as raw SQL and makes `whereRowValues()` validate its operator. Treat it as one and update.' },
+  { q: 'I am on Laravel 13. Do I need to do anything for these query fixes?', a: 'No. The same commit landed on 13.x on Oct 2 and shipped in Laravel 13.35. Laravel 13.36 and 13.37 include it too.' },
+  { q: 'horizon:listen only restarts when I edit app/ or routes/. Why?', a: 'You have chokidar 5 and Horizon older than 5.50.1. Its file watcher only expanded glob paths for chokidar 4. Run `composer update laravel/horizon`.' },
+  { q: 'Does getStores() return setup stores too?', a: 'Yes. It returns every store currently registered on the Pinia instance, including setup stores, and leaves out disposed ones. Each call returns a new array.' },
+  { q: 'Should I try Vue 3.6.0-rc.12?', a: 'Only on a branch. It is a release candidate for Vapor mode, and this week\'s two RCs are long lists of Vapor fixes. Production apps stay on Vue 3.5.44.' },
+]} />
+
+## Next steps
+
+- [Laravel 13.37: strict Rule::numeric(), queue filters and JPEG XL](/laravel-13-37-numeric-strict-queue-jxl)
+- [Laravel 13.36: validation rule builders, Vitess olap() and sticky queue flushes](/laravel-13-36-validation-builders-olap-sticky-queues)
+- [Pinia with Laravel and Inertia](/pinia-laravel-inertia)
+- [Laravel Telescope in development only](/laravel-telescope-dev-only)
+
+## Sources
+
+- [Laravel v12.70.0 release](https://github.com/laravel/framework/releases/tag/v12.70.0), [PR #61838 (query hardening)](https://github.com/laravel/framework/pull/61838), [commit 2c32946 on 13.x](https://github.com/laravel/framework/commit/2c32946), [PR #61871 (EncodedParameter backport)](https://github.com/laravel/framework/pull/61871), [PR #61610 (EncodedParameter)](https://github.com/laravel/framework/pull/61610), [issue #61499](https://github.com/laravel/framework/issues/61499), [PR #61822 (Blade cache per echoFormat)](https://github.com/laravel/framework/pull/61822)
+- [Horizon v5.50.1 release](https://github.com/laravel/horizon/releases/tag/v5.50.1), [PR #1832](https://github.com/laravel/horizon/pull/1832)
+- [Telescope v5.26.0 release](https://github.com/laravel/telescope/releases/tag/v5.26.0), [PR #1769](https://github.com/laravel/telescope/pull/1769)
+- [Sail v1.69.0 release](https://github.com/laravel/sail/releases/tag/v1.69.0), [PR #902](https://github.com/laravel/sail/pull/902)
+- [Pinia v4.1.0 release](https://github.com/vuejs/pinia/releases/tag/v4.1.0), [PR #3194 (getStores)](https://github.com/vuejs/pinia/pull/3194), [PR #3193 (dispose warning)](https://github.com/vuejs/pinia/pull/3193)
+- [Vue 3.5.44 changelog](https://github.com/vuejs/core/blob/main/CHANGELOG.md), [Vue 3.6.0-rc.12 changelog](https://github.com/vuejs/core/blob/minor/CHANGELOG.md)
+- [Laravel AI v1.2.2](https://github.com/laravel/ai/releases/tag/v1.2.2) and [v1.2.3](https://github.com/laravel/ai/releases/tag/v1.2.3)
+- [Wayfinder v0.1.23 release](https://github.com/laravel/wayfinder/releases/tag/v0.1.23), [PR #331](https://github.com/laravel/wayfinder/pull/331)
+- [Nuxt v4.6.2 release](https://github.com/nuxt/nuxt/releases/tag/v4.6.2)

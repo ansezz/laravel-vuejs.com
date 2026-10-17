@@ -1,0 +1,17 @@
+flowchart LR
+  A["`**Streamed parent**
+  SupportAgent::stream()`"] --> B["`**Sub-agent tool**
+  AgentTool`"]
+  B --> C{"`**HasStructuredOutput?**`"}
+  C -- no --> D["`**stream()**
+  partial output flows
+  to the parent`"]
+  C -- yes --> E["`**handle()** since 1.2.2
+  no partial output,
+  events + parent link kept`"]
+  D --> F["`**Tool result**
+  back to the parent step`"]
+  E --> F
+  C -. "before 1.2.2" .-> G["`**Threw**
+  tool result was
+  an error string`"]
