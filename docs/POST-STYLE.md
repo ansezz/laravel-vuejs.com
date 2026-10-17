@@ -102,6 +102,10 @@ php artisan make:model Post -mfs
 - ```` ```diff ```` for a quick unified diff.
 - The copy button skips removed (`--`) lines, so readers always copy the "after" version.
 
+**Figures:** `<Figure src={img} alt="…" caption="…" />` for an illustration that is not a diagram. The image needs an
+import at the top of the post (`import img from '../../assets/art/<name>.webp'`); it goes through the same AVIF/WebP pipeline as
+the cover art.
+
 **Diagrams:** write Mermaid in `docs/diagrams/<name>.mmd`, run `npm run diagrams` (renders light and dark SVGs into
 `public/diagrams/` in the brand palette), commit both SVGs, then use `<Diagram name="<name>" alt="…" />`. The `alt` text
 must explain the diagram on its own (it is also what the Markdown copy and screen readers get).

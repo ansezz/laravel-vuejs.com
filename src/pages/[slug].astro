@@ -14,8 +14,9 @@ import Steps from '../components/post/Steps.astro'
 import TryIt from '../components/post/TryIt.astro'
 import FAQ from '../components/post/FAQ.astro'
 import Diagram from '../components/post/Diagram.astro'
+import Figure from '../components/post/Figure.astro'
 // Building blocks available in every .mdx post without imports (see docs/POST-STYLE.md).
-const components = { TLDR, Callout, CodeCompare, Steps, TryIt, FAQ, Diagram }
+const components = { TLDR, Callout, CodeCompare, Steps, TryIt, FAQ, Diagram, Figure }
 import { SITE_NAME, SITE_URL, DISQUS_SHORTNAME, GITHUB_URL, AUTHOR } from '../config/site'
 import AgentTask from '../components/AgentTask.astro'
 import { agentTaskFor, nextStation } from '../data/agent-tasks'
