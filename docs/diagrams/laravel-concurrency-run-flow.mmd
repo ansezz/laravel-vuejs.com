@@ -1,0 +1,19 @@
+flowchart LR
+  A["`**Request**
+  Concurrency::run([a, b, c])`"] --> B["`**Serialize**
+  each closure
+  + Context`"]
+  B --> C1["`**php artisan**
+  invoke-serialized-closure
+  runs a`"]
+  B --> C2["`**php artisan**
+  invoke-serialized-closure
+  runs b`"]
+  B --> C3["`**php artisan**
+  invoke-serialized-closure
+  runs c`"]
+  C1 --> D["`**Parent waits**
+  unserializes results
+  rethrows any exception`"]
+  C2 --> D
+  C3 --> D
