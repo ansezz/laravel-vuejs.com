@@ -1,3 +1,4 @@
+import fs from "node:fs";
 // Checks the developer tools against the same module the pages and the browser use.
 import { PACKAGES } from "../src/data/packages.ts";
 import {
@@ -6,6 +7,7 @@ import {
   ERA_ROWS,
   FILE_ROWS,
   SHIPPED_ROWS,
+  SHIPPED_SOURCES,
   START_CHECKS,
   START_STEPS,
   GUIDE_SAMPLES,
@@ -249,10 +251,14 @@ if (
   fail("file map dropped the plain empty-cell labels");
 }
 
-const allowedShippedSources = new Set([
-  "/laravel-13-35-query-routes-markdown-responses",
-  "/inertia-3-9-background-polling-navigate-type",
-]);
+// Every source is a published post file, and every row cites one of the listed sources.
+const allowedShippedSources = new Set(SHIPPED_SOURCES.map((source) => source.path));
+for (const source of SHIPPED_SOURCES) {
+  const file = new URL(`../src/content/posts${source.path}.mdx`, import.meta.url);
+  if (!fs.existsSync(file)) fail(`shipped source ${source.path} is not a post`);
+  const date = Date.parse(fs.readFileSync(file, "utf8").match(/^date:\s*(\S+)/m)?.[1] ?? "");
+  if (!(date <= Date.now())) fail(`shipped source ${source.path} is not published yet`);
+}
 for (const row of SHIPPED_ROWS) {
   if (!allowedShippedSources.has(row.sourcePath)) {
     fail(`shipped row ${row.id} cites ${row.sourcePath}`);
@@ -278,6 +284,14 @@ for (const phrase of [
   "https://laravel-vuejs.space/inertia-3-9-background-polling-navigate-type",
   "October 6, 2026",
   "October 9, 2026",
+  "Rule::requiredWith()",
+  "Rule::ip(), not Rule::ipAddress()",
+  "Worker::$flushStickyConnections",
+  "Rule::numeric(strict: true)",
+  "queue:failed --queue=emails",
+  "search.query()",
+  "--skip-database",
+  "https://laravel-vuejs.space/laravel-13-37-numeric-strict-queue-jxl",
 ]) {
   if (!shipped.includes(phrase)) fail(`shipped markdown is missing ${phrase}`);
 }
