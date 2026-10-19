@@ -2,16 +2,15 @@
 // Lists posts whose `date` has passed but that the live site does not serve yet (they were future-dated at the
 // last production build). Prints them and writes `missing=<slugs>` to $GITHUB_OUTPUT when run in Actions.
 import fs from 'node:fs'
-import path from 'node:path'
 
 const site = process.env.SITE_URL || 'https://laravel-vuejs.space'
 const dir = new URL('../src/content/posts/', import.meta.url)
 const now = Date.now()
 
-const due = fs.readdirSync(dir).filter(f => f.endsWith('.md')).flatMap(f => {
+const due = fs.readdirSync(dir).filter(f => /\.mdx?$/.test(f)).flatMap(f => {
   const fm = fs.readFileSync(new URL(f, dir), 'utf8').match(/^---\n([\s\S]*?)\n---/)?.[1] ?? ''
   const date = Date.parse(fm.match(/^date:\s*["']?([^"'\n]+)["']?\s*$/m)?.[1] ?? '')
-  return !Number.isNaN(date) && date <= now ? [{ slug: path.basename(f, '.md'), date: new Date(date).toISOString() }] : []
+  return !Number.isNaN(date) && date <= now ? [{ slug: f.replace(/\.mdx?$/, ''), date: new Date(date).toISOString() }] : []
 })
 
 const res = await fetch(`${site}/api/posts.json`, { headers: { 'cache-control': 'no-cache' } })

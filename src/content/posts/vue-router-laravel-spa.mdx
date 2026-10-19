@@ -1,0 +1,208 @@
+---
+id: 43
+title: "Vue Router on a Laravel API"
+excerpt: "Routes, a login redirect, and a guest guard for a Vue app that is not Inertia. Load the user before the router runs."
+description: "Add Vue Router to a separate Laravel SPA: login, a guest guard, and a load of the user before the first navigation."
+seoTitle: "Vue Router with a Laravel API"
+date: 2026-10-10T08:50:00Z
+snippet: "npm install vue-router"
+categories: [laravel, vuejs]
+tags: [laravel, vuejs]
+---
+
+You log in, refresh, and the router kicks you back to `/login` even though the session is fine. The guard ran before the app knew who you were. Here is Vue Router for a separate Laravel SPA, with the user loaded before the first navigation.
+
+<TLDR
+  audience="Developers building a standalone Vue SPA on a Laravel API"
+  learn={['When Vue Router belongs in a Laravel project (and when it does not)', 'How to define guest and auth routes', 'How to load the user before the first guard runs']}
+  applies="Vue Router 4 · Vue 3 · Pinia · Laravel 13 · Sanctum"
+>
+
+- Inertia apps do not use Vue Router. This is for a separate SPA only.
+- Mark routes with `meta.auth` / `meta.guest`; redirect in `router.beforeEach`.
+- Await `GET /api/user` (credentialed client) before `app.use(router)` and `mount`.
+- Your SPA host must serve `index.html` for unknown paths.
+
+</TLDR>
+
+<Callout type="heads-up" title="not for the starter kit">
+
+This router belongs in a Vue app that talks to Laravel over HTTP. It does not belong in the Vue starter kit. Inertia already changes the page. A second router fights that navigation, and the kit's URLs stay in `routes/web.php`. If you are on the kit, stop here and use [Laravel and Vue in 2026](/laravel-vue-in-2026).
+
+</Callout>
+
+The separate app is the case Sanctum's cookie flow is for. Axios, the CSRF cookie, and `withCredentials` stay in [Authenticate a Vue SPA with Laravel Sanctum](/laravel-sanctum-vue-spa). This page only adds the URLs. Client-only state inside an Inertia app is [Pinia](/pinia-laravel-inertia), which is a different file than the store below.
+
+## The routes
+
+```bash
+npm install vue-router
+```
+
+Vue Router 4 is `createRouter` and `createWebHistory`. Two routes are enough to see the guard: `/login` is for guests, and `/` requires a user.
+
+```ts title="src/router.ts"
+import { createRouter, createWebHistory } from "vue-router";
+import Login from "./pages/Login.vue";
+import Posts from "./pages/Posts.vue";
+
+export const router = createRouter({
+  history: createWebHistory(),
+  routes: [
+    {
+      path: "/login",
+      name: "login",
+      component: Login,
+      meta: { guest: true },
+    },
+    {
+      path: "/",
+      name: "posts",
+      component: Posts,
+      meta: { auth: true },
+    },
+  ],
+});
+```
+
+<Callout type="gotcha" title="refresh = 404">
+
+The host that serves this SPA has to answer unknown paths with `index.html`. Otherwise a refresh on `/login` is a 404. The [deploy guide](/deploy-laravel-vue) is the second host for that SPA. It does not set this fallback.
+
+</Callout>
+
+## Load the user first
+
+`router.beforeEach` that runs before you know who is logged in sends a valid session to `/login` on the first paint. Call `GET /api/user` on the credentialed `api` client from the Sanctum guide and wait. A plain Axios import does not send the session cookie to another origin. A 401 means there is no session, so the store user stays null. Any other error is a failed API, not a logged-out user.
+
+```ts title="src/stores/auth.ts"
+import { defineStore } from "pinia";
+import { ref } from "vue";
+import axios from "axios";
+import { api } from "../api";
+
+export const useAuth = defineStore("auth", () => {
+  const user = ref(null);
+
+  async function load() {
+    try {
+      user.value = (await api.get("/api/user")).data;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        user.value = null;
+        return;
+      }
+
+      throw error;
+    }
+  }
+
+  return { user, load };
+});
+```
+
+Mount only after that call. The guard is registered before `mount`, so the first navigation already knows the answer.
+
+```ts title="src/main.ts" {13}
+import { createApp } from "vue";
+import { createPinia } from "pinia";
+import App from "./App.vue";
+import { router } from "./router";
+import { useAuth } from "./stores/auth";
+
+async function boot() {
+  const app = createApp(App);
+  const pinia = createPinia();
+  app.use(pinia);
+
+  const auth = useAuth();
+  await auth.load();
+
+  router.beforeEach((to) => {
+    if (to.meta.auth && !auth.user) {
+      return { name: "login" };
+    }
+
+    if (to.meta.guest && auth.user) {
+      return { name: "posts" };
+    }
+  });
+
+  app.use(router);
+  app.mount("#app");
+}
+
+boot();
+```
+
+## After login
+
+The login POST itself is the Sanctum article: CSRF cookie, then credentials, with credentials included. That POST returns no content. Load the account with `currentUser()` from that same client, write it into the store, and move.
+
+<CodeCompare before="Full reload, store lost" after="Router navigation">
+
+```ts title="src/pages/Login.vue"
+window.location.assign("/");
+```
+
+```ts title="src/pages/Login.vue"
+auth.user = await currentUser();
+await router.push({ name: "posts" });
+```
+
+</CodeCompare>
+
+Do not `window.location` assign. The router is the reason this page exists.
+
+```ts title="src/pages/Login.vue (after the login POST)"
+import { useRouter } from "vue-router";
+import { useAuth } from "../stores/auth";
+import { currentUser } from "../api";
+
+const router = useRouter();
+const auth = useAuth();
+
+auth.user = await currentUser();
+await router.push({ name: "posts" });
+```
+
+<Callout type="gotcha" title="plain axios drops the cookie">
+
+`currentUser()` is `GET /api/user` on the credentialed client. A plain `axios.get` does not send the session cookie to another origin. Logging out clears `auth.user` and pushes `{ name: "login" }` after Laravel's logout endpoint returns.
+
+</Callout>
+
+<TryIt title="Check the first paint">
+
+Log in, then hard-refresh on `/`. You should stay on the posts page. Open DevTools → Network: `/api/user` must finish before any redirect to `/login`.
+
+</TryIt>
+
+A third party with its own client id is not this router. That decision is [Sanctum or Passport](/laravel-sanctum-vs-passport). OAuth's redirect lives on the other product's server. Your first-party SPA keeps the cookie and these two routes.
+
+## Recap
+
+- Vue Router is for a separate SPA; Inertia apps keep Laravel routes.
+- Guest and auth routes via `meta` and one `beforeEach` guard.
+- Load the user before the router runs; treat only 401 as logged out.
+- Use the credentialed client for every call.
+
+## FAQ
+
+<FAQ items={[
+  { q: 'Can I use Vue Router with Inertia?', a: 'No. Inertia already handles navigation from Laravel routes. A second router fights it.' },
+  { q: 'Why does my Vue Router guard redirect to login after a refresh?', a: 'The guard runs before the user is loaded. Await `GET /api/user` before registering the router and mounting the app.' },
+  { q: 'Why does refreshing a Vue Router page give a 404?', a: 'The SPA host must answer unknown paths with `index.html`, so the router can resolve them in the browser.' },
+]} />
+
+## Next steps
+
+- [Authenticate a Vue SPA with Laravel Sanctum](/laravel-sanctum-vue-spa)
+- [Pinia with Laravel and Inertia](/pinia-laravel-inertia)
+- [Deploy a Laravel + Vue app](/deploy-laravel-vue)
+
+## Sources
+
+- [Vue Router: Navigation guards](https://router.vuejs.org/guide/advanced/navigation-guards.html)
+- [Vue Router: HTML5 mode server configuration](https://router.vuejs.org/guide/essentials/history-mode.html)
+- [Laravel 13: Sanctum, SPA authentication](https://laravel.com/docs/13.x/sanctum#spa-authentication)

@@ -1,0 +1,15 @@
+flowchart LR
+  A["`**1. Post::all()**
+  one query
+  50 posts in a collection`"] --> B["`**2. $post->author**
+  on any one post`"]
+  B --> C{"`**Relation
+  already loaded?**`"}
+  C -- "yes" --> D["`**Return it**
+  no query`"]
+  C -- "no, auto on" --> E["`**Load for the whole collection**
+  one where in (...) query
+  for all 50 posts`"]
+  C -- "no, auto off" --> F["`**Lazy load**
+  one query per post
+  N+1`"]

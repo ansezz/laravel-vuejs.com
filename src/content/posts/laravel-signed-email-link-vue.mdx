@@ -1,0 +1,57 @@
+---
+id: 116
+title: "Put a signed URL in an email"
+seoTitle: "Signed link in an email"
+excerpt: "temporarySignedRoute belongs in the mail. The Vue page opens after the signed middleware passes."
+description: "temporarySignedRoute belongs in the mail. The Vue page opens after the signed middleware passes."
+date: 2026-10-11T11:03:00Z
+snippet: "->middleware('signed')"
+categories: [laravel, vuejs]
+tags: [laravel, vuejs]
+---
+People searching "Laravel signed URL email" build the link in Vue and hope the email client keeps it. Build it in PHP. The [Fortify guide](/laravel-fortify-vue) already does this for password reset. A custom mail uses the same middleware.
+
+<TLDR audience="Laravel + Vue developers" applies="Laravel 13 · Vue 3">
+
+- temporarySignedRoute belongs in the mail.
+- The Vue page opens after the signed middleware passes.
+- Do not sign the URL for a year.
+- Do not log the full URL.
+
+</TLDR>
+
+## The fix
+
+```php
+$url = URL::temporarySignedRoute(
+    'posts.review',
+    now()->addDays(3),
+    ['post' => $post->id],
+);
+```
+
+Mail that string. The route is:
+
+```php
+Route::get('/posts/{post}/review', [PostController::class, 'review'])
+    ->middleware('signed')
+    ->name('posts.review');
+```
+
+An edited query string fails the signature and Laravel returns 403. The controller can render an Inertia page after that. The link in the email is a normal `<a href>`. It is not an Inertia `<Link>`, because a mail client is not your app.
+
+## What to avoid
+
+<Callout type="gotcha">
+
+Do not sign the URL for a year. Three days is a decision you can defend. Do not log the full URL. It is the credential.
+
+
+</Callout>
+
+## FAQ
+
+<FAQ items={[
+  { q: 'How do I put a signed URL in an email?', a: 'temporarySignedRoute belongs in the mail. The Vue page opens after the signed middleware passes.' },
+  { q: 'What goes wrong with Laravel signed URL email?', a: 'Many developers build the link in Vue and hope the email client keeps it. Do not sign the URL for a year.' },
+]} />

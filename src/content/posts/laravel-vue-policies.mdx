@@ -1,0 +1,174 @@
+---
+id: 33
+title: "Laravel policies on a Vue page"
+excerpt: "A policy decides whether this user can update this post. The Vue page receives that boolean. The controller still calls authorize."
+description: "Authorize a single Laravel post with a policy, and pass the same boolean to the Vue edit link."
+seoTitle: "Laravel policies on a Vue page"
+date: 2026-10-10T07:40:00Z
+snippet: "php artisan make:policy PostPolicy --model=Post"
+categories: [laravel, vuejs]
+tags: [laravel, vuejs, permissions]
+---
+
+"Only the author can edit this post" sounds like one `v-if`. It is three pieces that have to agree: an owner column, a policy, and a controller that calls it. Here they are, plus the boolean that keeps the Vue link honest.
+
+<TLDR
+  audience="Laravel + Vue developers adding per-record authorization"
+  learn={['How to add an owner column safely', 'How to write and call a policy', 'How to pass the same answer to the Vue page and test it']}
+  applies="Laravel 13 · Inertia 3 · Vue 3 · Pest"
+>
+
+- Add `user_id`, set it from `$request->user()`, never from the request body.
+- `PostPolicy::update` returns `$user->id === $post->user_id`; Laravel discovers it by name.
+- The controller calls `$this->authorize('update', $post)`; the page gets `canUpdate`.
+- Test with `assertForbidden()` on the endpoint.
+
+</TLDR>
+
+The posts in the [setup guide](/application-setup) have no owner. A policy needs one. This page adds `user_id`, then allows update only for that user. A permission such as "editor" is a different question and stays in [permissions](/laravel-vue-permissions). The screen is still the [CRUD guide](/laravel-inertia-vue-crud). The app is [Inertia, a SPA, or Nuxt](/laravel-vue-in-2026).
+
+## The column
+
+```php title="database/migrations/xxxx_add_user_id_to_posts_table.php"
+Schema::table('posts', function (Blueprint $table) {
+    $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+});
+```
+
+```php title="app/Models/Post.php"
+public function user(): BelongsTo
+{
+    return $this->belongsTo(User::class);
+}
+```
+
+<Callout type="gotcha" title="user_id never comes from the form">
+
+Add `user_id` to `$fillable`, and set it in `store` from the logged-in user. Do not take `user_id` from the request body. The form would then let anyone assign the post to someone else.
+
+</Callout>
+
+```php title="app/Http/Controllers/PostController.php" {3}
+Post::create([
+    ...$data,
+    'user_id' => $request->user()->id,
+    'slug' => str($data['title'])->slug(),
+    'published_at' => now(),
+]);
+```
+
+## The policy
+
+Laravel discovers `PostPolicy` for `Post` when the names match. You do not register it by hand.
+
+```bash
+php artisan make:policy PostPolicy --model=Post
+```
+
+```php title="app/Policies/PostPolicy.php"
+public function update(User $user, Post $post): bool
+{
+    return $user->id === $post->user_id;
+}
+```
+
+<Callout type="gotcha" title="an empty method returns false">
+
+`update` and `destroy` can share that line. `viewAny` can return `true` while the index is still a list of every post. Write the method you mean. An empty policy method that falls through to `false` hides every button and then looks like a Vue bug.
+
+</Callout>
+
+Call it from the controller. `authorize` throws 403 before the update runs.
+
+```php
+public function update(Request $request, Post $post): RedirectResponse
+{
+    $this->authorize('update', $post);
+
+    // validation from the CRUD guide
+}
+```
+
+Pass the same answer to the page. The link and the endpoint then agree.
+
+<CodeCompare before="The page guesses" after="The policy decides">
+
+```vue title="resources/js/pages/posts/Form.vue"
+<Link v-if="post.user_id === $page.props.auth.user.id" :href="`/posts/${post.id}/edit`">Edit</Link>
+```
+
+```vue title="resources/js/pages/posts/Form.vue"
+<Link v-if="canUpdate" :href="`/posts/${post.id}/edit`">Edit</Link>
+```
+
+</CodeCompare>
+
+```php
+return Inertia::render('posts/Form', [
+    'post' => $post->only(['id', 'title', 'excerpt']),
+    'canUpdate' => $request->user()?->can('update', $post) ?? false,
+]);
+```
+
+```vue
+<Link v-if="canUpdate" :href="`/posts/${post.id}/edit`">Edit</Link>
+```
+
+<Callout type="tip" title="per-row booleans on the index">
+
+On the index, that boolean is per row. Compute it in the query's map or share a list of ids the user can edit. Do not ship every user's id to the browser and decide there.
+
+</Callout>
+
+## A test
+
+<TryIt title="Prove the endpoint is closed">
+
+```php title="tests/Feature/PostPolicyTest.php"
+it('forbids a user who does not own the post', function () {
+    $owner = User::factory()->create();
+    $other = User::factory()->create();
+    $post = Post::factory()->for($owner)->create();
+
+    $this->actingAs($other)
+        ->put("/posts/{$post->id}", [
+            'title' => 'Taken',
+            'excerpt' => 'Not yours.',
+        ])
+        ->assertForbidden();
+});
+```
+
+</TryIt>
+
+The factory needs `user_id` once the column exists. `assertForbidden` is the assertion that matters. A test that only checks the missing link does not close the endpoint.
+
+## Where this stops
+
+Spatie permissions and this policy can both exist. An editor permission can allow `update` even when the user is not the owner, inside the policy, with `$user->can('posts.update')`. Put that combination in the policy so there is still one method the controller calls. Do not check the role in the Vue page.
+
+## Recap
+
+- Owner column from the logged-in user, never from input.
+- One policy method per ability; the controller calls it.
+- The page receives the policy’s answer as a boolean.
+- Combine permissions inside the policy, not in Vue.
+
+## FAQ
+
+<FAQ items={[
+  { q: 'How do I hide the Edit button for users who do not own a post in Inertia?', a: 'Compute `$request->user()?->can(\'update\', $post)` in the controller, pass it as `canUpdate`, and use `v-if`. The controller still calls `authorize`.' },
+  { q: 'Do I need to register a Laravel policy?', a: 'No. Laravel discovers `App\\\\Policies\\\\PostPolicy` for `App\\\\Models\\\\Post` when the names match.' },
+  { q: 'Can an editor role override the owner check?', a: 'Yes. Inside the policy, return true when `$user->can(\'posts.update\')` or the user owns the post, so the controller still calls one method.' },
+]} />
+
+## Next steps
+
+- [Laravel permissions on a Vue page](/laravel-vue-permissions)
+- [CRUD with Inertia and Vue](/laravel-inertia-vue-crud)
+- [Test a Laravel and Vue app](/test-laravel-vue)
+
+## Sources
+
+- [Laravel 13: Authorization, policies](https://laravel.com/docs/13.x/authorization#creating-policies)
+- [Inertia v3: Authorization](https://inertiajs.com/docs/v3/security/authorization)

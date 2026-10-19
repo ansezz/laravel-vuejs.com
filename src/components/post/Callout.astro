@@ -1,0 +1,17 @@
+---
+// <Callout type="tip|gotcha|heads-up|pro-tip" title="optional">Markdown</Callout>
+import Icon from '../Icon.astro'
+type Kind = 'tip' | 'gotcha' | 'heads-up' | 'pro-tip'
+interface Props { type?: Kind; title?: string }
+const { type = 'tip', title } = Astro.props
+const meta: Record<Kind, { label: string; icon: string }> = {
+  tip: { label: 'Tip', icon: 'sparkles' }, gotcha: { label: 'Gotcha', icon: 'zap' },
+  'heads-up': { label: 'Heads up', icon: 'shield' }, 'pro-tip': { label: 'Pro tip', icon: 'code' },
+}
+const m = meta[type]
+---
+<!-- role="note", not <aside>: several callouts on one page must not become duplicate landmarks (axe landmark-unique). -->
+<div class={`callout callout-${type}`} role="note" aria-label={title ? `${m.label}: ${title}` : m.label}>
+  <p class="callout-title"><Icon name={m.icon} size={16} /> <strong>{title ? `${m.label}: ${title}` : m.label}</strong></p>
+  <div class="callout-body"><slot /></div>
+</div>

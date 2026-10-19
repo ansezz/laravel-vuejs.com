@@ -81,6 +81,7 @@ export const NAV = [
   { label: "Vue", href: "/category/vuejs" },
   { label: "Packages", href: "/packages" },
   { label: "Tools", href: "/tools" },
+  { label: "Cheat sheets", href: "/cheatsheets" },
   { label: "Jobs", href: "/jobs/job-archive" },
   { label: "Community", href: "/page/about-us" },
 ] as const;
@@ -98,6 +99,7 @@ export const FOOTER = [
       { label: "Today's project", href: "/spin" },
       { label: "Packages", href: "/packages" },
       { label: "Tools", href: "/tools" },
+      { label: "Cheat sheets", href: "/cheatsheets" },
       { label: "Laravel", href: "/category/laravel" },
       { label: "Vue", href: "/category/vuejs" },
       { label: "Learning paths", href: "/page/courses" },

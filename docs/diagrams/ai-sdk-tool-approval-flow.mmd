@@ -1,0 +1,16 @@
+flowchart LR
+  A["`**1. Prompt**
+  controller calls
+  the agent`"] --> B["`**2. Tool call**
+  model picks
+  DeleteFile`"]
+  B --> C{"`**requireApproval?**`"}
+  C -- no --> F["`**5. Tool runs**
+  agent replies`"]
+  C -- yes --> D["`**3. Pause**
+  pendingApprovals
+  saved in conversation`"]
+  D --> E["`**4. Vue prompt**
+  user approves
+  or rejects`"]
+  E -- "Decisions + continue()" --> F

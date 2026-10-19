@@ -1,0 +1,199 @@
+---
+id: 23
+title: "Laravel and Vue translations"
+excerpt: "Laravel holds the strings. vue-i18n renders them. The instance is created once, so a locale change has to push new messages into it."
+description: "Translate a Laravel and Vue app with lang files, a shared locale prop, and vue-i18n in legacy: false mode."
+seoTitle: "Laravel and Vue translations"
+date: 2026-10-10T06:00:00Z
+snippet: "npm install vue-i18n"
+categories: [laravel, vuejs]
+tags: [laravel, vuejs, i18n]
+---
+
+Your Laravel validation messages are in French and your Vue buttons are still in English. Two translation systems, zero shared strings. Here is how to send Laravel's `lang` files to vue-i18n as Inertia props, and switch language without a reload of the app.
+
+<TLDR
+  audience="Laravel + Vue developers adding a second language"
+  learn={['How to share Laravel translation strings with Vue', 'How to switch locale safely', 'How to keep vue-i18n in sync across visits']}
+  applies="Laravel 13 · Inertia 3 · Vue 3 · vue-i18n"
+>
+
+- Share `i18n.locale` and `Lang::get('messages')` from `HandleInertiaRequests`.
+- Switch with a POST to `/locale` that validates against an allow-list.
+- Register vue-i18n in the kit’s `withApp` (`legacy: false`); keep the kit’s other options.
+- Watch `page.props.i18n` in a persistent layout and merge the new messages.
+
+</TLDR>
+
+Laravel already has a `lang` directory. Vue does not read it. The job is to share the locale and the strings as Inertia props, then let vue-i18n render them. Do not add a second translation package that syncs files. The stack around this page is [Inertia, a SPA, or Nuxt](/laravel-vue-in-2026).
+
+## The PHP strings
+
+```php title="lang/en/messages.php"
+return [
+    'posts' => 'Posts',
+    'saved' => 'Saved.',
+];
+```
+
+```php title="lang/fr/messages.php"
+return [
+    'posts' => 'Articles',
+    'saved' => 'Sauvegarde.',
+];
+```
+
+<Callout type="gotcha" title="set the locale before loading strings">
+
+Share the active file from `HandleInertiaRequests`. `Lang::get('messages')` returns the array for that locale. Set the locale from the session before you load the file, or the French page still receives the English array.
+
+</Callout>
+
+```php title="app/Http/Middleware/HandleInertiaRequests.php"
+use Illuminate\Support\Facades\Lang;
+
+public function share(Request $request): array
+{
+    $locale = $request->session()->get('locale', config('app.locale'));
+    app()->setLocale($locale);
+
+    return [
+        ...parent::share($request),
+        'i18n' => [
+            'locale' => $locale,
+            'messages' => Lang::get('messages'),
+        ],
+    ];
+}
+```
+
+```php title="routes/web.php"
+Route::post('/locale', function (Request $request) {
+    $locale = $request->validate([
+        'locale' => ['required', 'in:en,fr'],
+    ])['locale'];
+
+    $request->session()->put('locale', $locale);
+
+    return back();
+});
+```
+
+<Callout type="gotcha" title="never trust the raw locale">
+
+The allow-list is the point. Do not write `$request->string('locale')` straight into `setLocale`.
+
+</Callout>
+
+## vue-i18n
+
+```bash
+npm install vue-i18n
+```
+
+<Callout type="heads-up" title="keep the kit’s options">
+
+Register it in the starter kit's `withApp` callback in `resources/js/app.ts`. Keep the `title`, `layout`, and `progress` options the kit already passes. A manual `setup` callback turns off the Vite plugin's SSR wiring. `legacy: false` is the Composition API mode. The shared props are `page.props`.
+
+</Callout>
+
+```ts title="resources/js/app.ts"
+import { createI18n } from "vue-i18n";
+
+// inside the existing createInertiaApp({ ... }) call
+withApp(app, { page }) {
+  const i18n = createI18n({
+    legacy: false,
+    locale: page.props.i18n.locale,
+    messages: {
+      [page.props.i18n.locale]: page.props.i18n.messages,
+    },
+  });
+
+  app.use(i18n);
+},
+```
+
+<Callout type="gotcha" title="created once, so watch for changes">
+
+That instance is created once. A later visit can change `page.props.i18n` without rebuilding it. Update the instance when the shared prop changes. A layout that is always mounted is the right place.
+
+</Callout>
+
+```vue title="resources/js/layouts/AppLayout.vue"
+<script setup lang="ts">
+import { watch } from "vue";
+import { useI18n } from "vue-i18n";
+import { usePage } from "@inertiajs/vue3";
+
+const page = usePage();
+const { locale, mergeLocaleMessage } = useI18n();
+
+watch(
+  () => page.props.i18n,
+  (i18n) => {
+    mergeLocaleMessage(i18n.locale, i18n.messages);
+    locale.value = i18n.locale;
+  },
+);
+</script>
+```
+
+In a page, `t` reads the key you put in the PHP file.
+
+```vue title="resources/js/pages/posts/Index.vue"
+<script setup lang="ts">
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
+</script>
+
+<template>
+  <h1>{{ t("posts") }}</h1>
+</template>
+```
+
+<TryIt title="Switch to French">
+
+```vue title="resources/js/components/LocaleSwitch.vue"
+<Form action="/locale" method="post">
+  <button name="locale" value="fr">Français</button>
+</Form>
+```
+
+Click it: the heading changes to "Articles" with no full reload.
+
+</TryIt>
+
+The locale switch is a normal Inertia form posting to `/locale`. `back()` loads the same page again, the middleware shares the other file, and the watcher swaps `t("posts")`.
+
+## Where this stops
+
+Dates and money still use `Intl` in the browser or Carbon on the server. This page does not format them. Client-only drafts stay in [Pinia](/pinia-laravel-inertia). Pinia is the wrong place to copy the language files.
+
+## Recap
+
+- Laravel’s `lang` files stay the source of truth.
+- Share the active locale’s strings as a prop.
+- Allow-list the locale before `setLocale`.
+- Create vue-i18n once; merge new messages on each visit.
+
+## FAQ
+
+<FAQ items={[
+  { q: 'How do I use Laravel translations in Vue with Inertia?', a: 'Share `Lang::get(\'messages\')` and the locale from `HandleInertiaRequests`, then load them into vue-i18n.' },
+  { q: 'Why does vue-i18n not change language after switching locale?', a: 'The i18n instance is created once. Watch `page.props.i18n` in a persistent layout and call `mergeLocaleMessage` and set `locale`.' },
+  { q: 'Do I need a package to sync Laravel lang files to Vue?', a: 'No. Sharing the strings as Inertia props is enough.' },
+]} />
+
+## Next steps
+
+- [Switch the app locale from Vue](/laravel-app-locale-vue)
+- [Persistent layouts in Inertia + Vue](/inertia-vue-persistent-layout)
+- [Pinia with Laravel and Inertia](/pinia-laravel-inertia)
+
+## Sources
+
+- [Laravel 13: Localization](https://laravel.com/docs/13.x/localization)
+- [Vue I18n: Composition API](https://vue-i18n.intlify.dev/guide/advanced/composition)
+- [Inertia v3: Shared data](https://inertiajs.com/docs/v3/data-props/shared-data)

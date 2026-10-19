@@ -1,0 +1,124 @@
+---
+id: 46
+title: "Set the Inertia document title in Vue"
+excerpt: "The starter kit already appends the app name. Set VITE_APP_NAME, then give each page a title and one meta description."
+description: "Set an Inertia Vue page title and meta description. The starter kit already appends the app name from VITE_APP_NAME."
+seoTitle: "Inertia titles and meta in Vue"
+date: 2026-10-10T09:20:00Z
+snippet: "VITE_APP_NAME"
+categories: [laravel, vuejs]
+tags: [laravel, vuejs, inertia]
+---
+Every tab in your app says "Laravel", and every page shares the same meta description, or two of them. Here is how the Vue starter kit already builds titles, and the one `head-key` that keeps descriptions from piling up.
+
+<TLDR
+  audience="Laravel + Vue developers on the Inertia starter kit"
+  learn={['Where the app name in the title comes from', 'How to set one description per page with `head-key`', 'What the first HTML response shows before Vue runs']}
+  applies="Laravel 13 · Vue starter kit · @inertiajs/vue3 3.9 · Vite 8"
+>
+
+- Set `VITE_APP_NAME` in `.env` and restart `npm run dev`: `<Head title="Posts" />` becomes `Posts - My App`.
+- Give the layout and the page the same `head-key="description"` so only one description survives.
+- Keep `config('app.name')` and `VITE_APP_NAME` identical so the first paint and the next click agree.
+
+</TLDR>
+
+A Vue page renders inside the document body. It cannot write the `<title>` by putting a tag in the template and hoping the browser promotes it. Inertia's `<Head>` does that write. The [setup guide](/application-setup) already uses `<Head title="Posts" />` on the first list. This page is the app name and the description that list still lacks.
+
+The stack is [Laravel and Vue in 2026](/laravel-vue-in-2026). Server rendering of the same tags is [Inertia SSR](/inertia-ssr).
+
+## The app name is already appended
+
+The Vue starter kit sets the callback in `resources/js/app.ts`:
+
+```ts title="resources/js/app.ts"
+const appName = import.meta.env.VITE_APP_NAME || "Laravel";
+
+title: (title) => (title ? `${title} - ${appName}` : appName),
+```
+
+`<Head title="Posts" />` becomes `Posts - My App` once `VITE_APP_NAME` is `My App`. Leave the callback. An app that does not have it yet should add that `title` function inside the existing `createInertiaApp` call, next to the [layout callback](/inertia-vue-persistent-layout) and `progress`. Do not start a second `createInertiaApp`.
+
+```ini title=".env"
+APP_NAME="My App"
+VITE_APP_NAME="${APP_NAME}"
+```
+
+<Callout type="gotcha" title="restart the dev server">
+
+`VITE_APP_NAME` belongs in `.env`. Vite only exposes names that start with `VITE_`, which the [Vite guide](/laravel-vite-vue) already covers. Restart `npm run dev` after you change it. A running dev server keeps the previous value.
+
+</Callout>
+
+When a page sets no title, the callback keeps the app name. It does not render a leading hyphen.
+
+## One description per page
+
+A layout can ship a default description. A page replaces it. Both tags need the same `head-key`, or the document keeps both and the first one is the one a crawler may read.
+
+```vue title="resources/js/pages/posts/Index.vue"
+<Head title="Posts">
+  <meta
+    head-key="description"
+    name="description"
+    content="Posts you have published."
+  />
+</Head>
+```
+
+Inertia renders a single `<title>`. It stacks every other head tag unless `head-key` marks them as the same slot. Use `description` for that slot on the layout and on the page.
+
+<TryIt title="Count the descriptions">
+
+Open a page, then run this in the browser console. The answer should be `1`.
+
+```js
+document.querySelectorAll('meta[name="description"]').length
+```
+
+</TryIt>
+
+## The first HTML response
+
+The first HTML response, before Vue runs, still comes from `resources/views/app.blade.php`. A title in that file is the fallback. `<Head>` replaces it on the visit. When SSR is off, the Blade component below is the fallback and is skipped once SSR is rendering the head itself:
+
+```blade title="resources/views/app.blade.php"
+<x-inertia::head>
+  <title>{{ config('app.name') }}</title>
+  <meta name="description" content="Posts you have published." />
+</x-inertia::head>
+```
+
+<Callout type="heads-up" title="two settings, one name">
+
+`config('app.name')` and `VITE_APP_NAME` are two settings. Set both to the same words, or the first paint and the next click disagree.
+
+</Callout>
+
+## Recap
+
+- The starter kit's `title` callback appends `VITE_APP_NAME`; keep it in your one `createInertiaApp`.
+- Restart Vite after changing `VITE_` variables.
+- Use `head-key="description"` on the layout and the page so the page wins.
+- `<x-inertia::head>` in Blade is the fallback for the first response.
+
+## FAQ
+
+<FAQ items={[
+  { q: 'Why does my Inertia page title still say Laravel?', a: '`VITE_APP_NAME` is not set, or the dev server was started before you set it. Add it to `.env` and restart `npm run dev`.' },
+  { q: 'Why do I have two meta descriptions?', a: 'Inertia stacks head tags unless they share a `head-key`. Put `head-key="description"` on both the layout default and the page tag.' },
+  { q: 'Can I put a title tag directly in a Vue template?', a: 'No. The page renders inside the body. Use Inertia’s `<Head>` component, which writes to the document head.' },
+]} />
+
+## Next steps
+
+- [Keep the layout between Inertia visits](/inertia-vue-persistent-layout): the other callback in `createInertiaApp`.
+- [Server-render an Inertia app](/inertia-ssr): titles in the first HTML.
+- [Laravel Vite and Vue](/laravel-vite-vue): how `VITE_` variables reach the browser.
+- [Inertia docs: title and meta](https://inertiajs.com/docs/v3/the-basics/title-and-meta)
+
+## Sources
+
+- [Inertia v3: Title and meta](https://inertiajs.com/docs/v3/the-basics/title-and-meta)
+- [Laravel Vue starter kit](https://github.com/laravel/vue-starter-kit)
+- [Laravel: Vite environment variables](https://laravel.com/docs/13.x/vite#environment-variables)

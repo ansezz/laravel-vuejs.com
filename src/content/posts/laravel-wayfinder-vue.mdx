@@ -1,0 +1,119 @@
+---
+id: 30
+title: "Typed Laravel routes in Vue with Wayfinder"
+excerpt: "Wayfinder writes a TypeScript function per controller action. The Inertia form takes that function. You do not add a second router."
+description: "Generate typed Laravel controller actions with Wayfinder and pass them to Inertia's Vue Form component."
+seoTitle: "Typed routes with Wayfinder"
+date: 2026-10-10T07:10:00Z
+snippet: "php artisan wayfinder:generate"
+categories: [laravel, vuejs]
+tags: [laravel, vuejs, inertia, typescript]
+---
+
+You rename a route, every form that posted to the old string breaks, and nothing tells you until a user clicks. Wayfinder turns Laravel routes into TypeScript functions, so the build fails instead. Here is how the kit uses it.
+
+<TLDR
+  audience="Laravel + Vue developers on the starter kit"
+  learn={['How Wayfinder generates actions from your routes', 'How to post a form to `store()`', 'What breaks on deploy and how to avoid it']}
+  applies="Laravel 13 · Wayfinder · Inertia 3 · Vue 3 · TypeScript"
+>
+
+- The starter kit already ships Wayfinder; `npm run dev` regenerates files as routes change.
+- Import `store` from `@/actions/App/Http/Controllers/PostController` and pass `:action="store()"`. No `method` needed.
+- `store.url()` is just a string, so a string href is a GET.
+- Clear a stale `route:cache` before `wayfinder:generate` on deploy.
+
+</TLDR>
+
+The Vue starter kit already ships Wayfinder. It reads the Laravel routes and writes TypeScript functions for the controller actions. A form then posts to `store()` instead of a string you can typo. This is not Vue Router. Inertia still navigates. Adding a client router beside it is the mistake [the stack guide](/laravel-vue-in-2026) warns about.
+
+Typed props on the page are a separate job: [TypeScript props](/typescript-laravel-vue-pages).
+
+## Generate
+
+The Vite plugin in the kit regenerates the files while `npm run dev` is running. After you add a controller, run the command yourself if the import is missing.
+
+```bash
+php artisan wayfinder:generate
+```
+
+<Callout type="gotcha" title="stale route cache on deploy">
+
+The files land in `resources/js/wayfinder`, `resources/js/actions`, and `resources/js/routes`. You can gitignore all three. They are rebuilt. On deploy, generate against the routes you are shipping. A stale `route:cache` from the previous release makes Wayfinder skip new routes, and Vite then fails looking for a file that was never written. Clear that cache before generating. The rest of the build is the [deploy guide](/deploy-laravel-vue).
+
+</Callout>
+
+## The form
+
+<CodeCompare before="A string you can typo" after="A generated, typed action">
+
+```vue title="resources/js/pages/posts/Create.vue"
+<Form action="/posts" method="post">
+```
+
+```vue title="resources/js/pages/posts/Create.vue"
+<Form :action="store()">
+```
+
+</CodeCompare>
+
+Import `store` from the file Wayfinder wrote for `PostController`. With the kit's `@` alias pointing at `resources/js`, that path is the one below. If your generate path differs, import the file that is actually on disk.
+
+```vue title="resources/js/pages/posts/Create.vue"
+<script setup lang="ts">
+import { Form } from "@inertiajs/vue3";
+import { store } from "@/actions/App/Http/Controllers/PostController";
+</script>
+
+<template>
+  <Form :action="store()">
+    <input name="title" />
+    <input name="excerpt" />
+    <button type="submit">Save</button>
+  </Form>
+</template>
+```
+
+Inertia reads the URL and the HTTP method from the Wayfinder object. You do not also pass `method="post"` unless you are posting to a plain string, which is what the [CRUD guide](/laravel-inertia-vue-crud) does before this page. `store()` with no arguments matches `POST /posts`. An update action that needs the id is `update(post.id)` from the same generated module. Use the function the generator named after the controller method.
+
+<Callout type="heads-up" title="store() vs store.url()">
+
+A `<Link>` infers the method from that same object: `:href="store()"`. `store()` is a POST, so the link is a POST. `store.url()` is only the URL string, and a string href is a GET. Check the generated file before you invent a helper. The generator is the API. This page does not describe a second one.
+
+</Callout>
+
+<TryIt title="Watch the build catch a rename">
+
+Rename `store` to `save` in `PostController` and its route, then run `php artisan wayfinder:generate` and `npx vue-tsc --noEmit`. The old import now fails type-checking instead of failing in the browser.
+
+</TryIt>
+
+## Where this stops
+
+Wayfinder does not validate the body. The form request from [Precognition](/laravel-precognition-vue) still does. It does not know which user may call `update`. That is a [policy](/laravel-vue-policies). A tutorial that says `route()` and Ziggy is the [Ziggy map](/laravel-ziggy-vue). Do not install that package beside these generated functions.
+
+## Recap
+
+- Wayfinder writes one TypeScript function per controller action.
+- Pass the function to `<Form>` or `<Link>`; Inertia reads URL and method.
+- Regenerate after new routes; clear `route:cache` first on deploy.
+- Validation and authorization still live in Laravel.
+
+## FAQ
+
+<FAQ items={[
+  { q: 'Does the Laravel Vue starter kit use Ziggy or Wayfinder?', a: 'Wayfinder. It generates typed functions per controller action; Ziggy is not installed.' },
+  { q: 'Why is my Wayfinder import missing?', a: 'The file was not generated yet. Run `php artisan wayfinder:generate`, and on deploy clear a stale `route:cache` first.' },
+  { q: 'Should I commit the Wayfinder generated files?', a: 'You can gitignore `resources/js/wayfinder`, `resources/js/actions` and `resources/js/routes`; they are rebuilt.' },
+]} />
+
+## Next steps
+
+- [Ziggy or Wayfinder](/laravel-ziggy-vue)
+- [TypeScript props for Laravel + Vue pages](/typescript-laravel-vue-pages)
+- [CRUD with Inertia and Vue](/laravel-inertia-vue-crud)
+
+## Sources
+
+- [Laravel Wayfinder on GitHub](https://github.com/laravel/wayfinder)
+- [Inertia v3: Forms](https://inertiajs.com/docs/v3/the-basics/forms)

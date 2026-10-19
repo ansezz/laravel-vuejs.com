@@ -1,0 +1,16 @@
+---
+// End-of-post call to action: share + join the community (Facebook group, Telegram).
+import Icon from '../Icon.astro'
+import { GROUPS } from '../../config/site'
+---
+<section class="community-cta" aria-labelledby="cta-title">
+  <div>
+    <p class="kicker">Found this useful?</p>
+    <h2 id="cta-title">Ask questions, share what you built.</h2>
+    <p>Join thousands of Laravel and Vue developers in our Facebook group, or get new posts in your Telegram feed. Sharing this article helps too.</p>
+  </div>
+  <div class="row">
+    <a class="btn btn-primary btn-sm" href={GROUPS[0].url} target="_blank" rel="noopener"><Icon name="facebook" size={16} /> Join the Facebook group</a>
+    <a class="btn btn-sm" href="https://t.me/LaravelVueJs" target="_blank" rel="noopener"><Icon name="telegram" size={16} /> Follow on Telegram</a>
+  </div>
+</section>

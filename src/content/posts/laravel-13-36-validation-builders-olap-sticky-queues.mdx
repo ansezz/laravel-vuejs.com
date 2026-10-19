@@ -1,0 +1,292 @@
+---
+id: 155
+title: "Laravel 13.36: validation rule builders, Vitess olap() and sticky queue flushes"
+seoTitle: "Laravel 13.36: Rule Builders, olap() and Sticky Queues"
+excerpt: "Laravel 13.36 adds Rule:: builders for almost every validation rule, DB::olap() for PlanetScale, and a flag that stops queue workers sticking to the write database."
+date: 2026-10-14T00:30:00Z
+updated: 2026-10-14T01:00:00Z
+snippet: "Rule::requiredWith('phone', 'email')"
+categories: [laravel]
+tags: [laravel, release]
+---
+Your Form Request is a wall of strings like `'required_with:phone,email'`, your PlanetScale report dies at 100,000 rows, and your queue workers quietly read from the primary all day. Laravel **13.36** has a fix for each, and none of them change how your app behaves until you opt in.
+
+<TLDR
+  audience="Laravel 13 developers (Form Requests, queues, read replicas, PlanetScale)"
+  learn={['The new `Rule::` builders for almost every validation rule', '`DB::olap()` and `isVitess()` for big Vitess queries', '`Worker::$flushStickyConnections` for read replicas', 'Queued mailables, the `background` connection and the smaller fixes']}
+  tested="Laravel 13.36.0 · PHP 8.4 · Pest 4 (SQLite; olap() checked on the non-Vitess path only)"
+>
+
+- **13.36.0** was released on **October 13, 2026**: about 50 changes, mostly fixes, plus a handful of opt-in features.
+- `Rule::requiredWith()`, `Rule::confirmed()`, `Rule::ip()`, `Rule::regex()`, `Rule::missingIf()` and ~50 more give you autocompletion instead of magic strings. Plain strings keep working.
+- `DB::olap(fn () => ...)` runs a query in Vitess OLAP mode and is a no-op on plain MySQL. `Worker::$flushStickyConnections = true` sends workers back to the read replica after each job.
+- Queued mailables now respect `#[DeleteWhenMissingModels]` and `#[FailOnTimeout]`, and a Markdown mail escaping fix makes this a good release to take soon.
+
+</TLDR>
+
+## What's new at a glance
+
+| Feature | PR | Replaces |
+|---|---|---|
+| `Rule::` builders for the remaining rules | [#61833](https://github.com/laravel/framework/pull/61833) | Hand-typed strings like `'required_with:phone,email'` |
+| `DB::olap()` and `isVitess()` | [#61932](https://github.com/laravel/framework/pull/61932) | `set workload = 'olap'` in a `try`/`finally` |
+| `Worker::$flushStickyConnections` | [#61915](https://github.com/laravel/framework/pull/61915) | Workers pinned to the write primary until the next deploy |
+| `background` connection in the framework config | [#61917](https://github.com/laravel/framework/pull/61917) | "The [background] queue connection has not been configured" |
+| `DeleteWhenMissingModels` / `FailOnTimeout` on mailables | [#61899](https://github.com/laravel/framework/pull/61899) | Deleted-model mail jobs piling up in `failed_jobs` |
+
+## Validation rule builders for (almost) every rule
+
+Laravel already had objects for the complex rules: `Rule::unique()`, `Rule::enum()`, `Password::min()`, `Rule::date()`. Everything else was a string you had to remember and spell right. In 13.36, `Rule` gets a static method for nearly every remaining rule, so your IDE can autocomplete them and jump to their code.
+
+<CodeCompare before="Laravel 13.35" after="Laravel 13.36">
+
+```php title="app/Http/Requests/StoreAccountRequest.php"
+public function rules(): array
+{
+    return [
+        'account_type' => ['required', 'in:personal,business'],
+        'company' => ['missing_if:account_type,personal'],
+        'email' => ['required_without:phone', 'email'],
+        'phone' => ['required_without:email', 'regex:/^\+?[0-9 ]{7,15}$/'],
+        'password' => ['required', 'confirmed:password_repeat'],
+        'server_ip' => ['nullable', 'ipv4'],
+        'terms' => ['accepted'],
+    ];
+}
+```
+
+```php title="app/Http/Requests/StoreAccountRequest.php"
+use Illuminate\Validation\Rule;
+
+public function rules(): array
+{
+    return [
+        'account_type' => [Rule::required(), Rule::in(['personal', 'business'])],
+        'company' => [Rule::missingIf('account_type', 'personal')],
+        'email' => [Rule::requiredWithout('phone'), Rule::email()],
+        'phone' => [Rule::requiredWithout('email'), Rule::regex('/^\+?[0-9 ]{7,15}$/')],
+        'password' => [Rule::required(), Rule::confirmed()->customField('password_repeat')],
+        'server_ip' => [Rule::nullable(), Rule::ip()->version(4)],
+        'terms' => [Rule::accepted()],
+    ];
+}
+```
+
+</CodeCompare>
+
+Both versions validate exactly the same way: we ran the same payloads through both and got the same errors. Pick the style your team reads faster.
+
+### What you get
+
+There are three kinds of new methods:
+
+| Kind | Examples | Returns |
+|---|---|---|
+| Simple rules | `Rule::required()`, `Rule::nullable()`, `Rule::accepted()`, `Rule::boolean(strict: true)` | The plain string (`'required'`, `'boolean:strict'`) |
+| Rules with fields or values | `Rule::requiredWith()`, `Rule::requiredWithoutAll()`, `Rule::missingIf()`, `Rule::presentIf()`, `Rule::prohibits()`, `Rule::requiredIfAccepted()` | A small rule object |
+| Rules with options | `Rule::confirmed()->customField()`, `Rule::ip()->version(4)`, `Rule::uuid()->version(7)`, `Rule::url()->protocols(['https'])`, `Rule::distinct()->ignoreCase()` | A fluent builder |
+
+`Rule::date()` also gained `equals()`, so `Rule::date()->equals('2026-10-14')` gives you `date_equals` next to `before()`, `after()` and friends.
+
+<Callout type="gotcha" title="it's Rule::ip(), not Rule::ipAddress()">
+
+The class is `Illuminate\Validation\Rules\IpAddress`, but the helper is `Rule::ip()`. `version()` accepts only `4` or `6` and throws an `InvalidArgumentException` for anything else, which is better than a silent typo like `'ip4'`.
+
+</Callout>
+
+### Commas in values are finally safe
+
+The rule objects are handed to the validator as arrays, not glued into a string. So a value that contains a comma (or a regex with a `|`) no longer needs manual quoting:
+
+```php
+(string) Rule::presentIf('mode', 'a,b'); // present_if:mode,"a,b"
+
+Validator::make(['mode' => 'a,b'], ['note' => [Rule::presentIf('mode', 'a,b')]])->fails(); // true
+Validator::make(['mode' => 'a'], ['note' => [Rule::presentIf('mode', 'a,b')]])->passes(); // true
+```
+
+With the string `'present_if:mode,a,b'`, the same rule would match `a` **or** `b`. That's the kind of bug you only find in production.
+
+<TryIt title="See the string each builder produces">
+
+```bash
+php artisan tinker --execute="dump((string) Illuminate\Validation\Rule::requiredWith('phone', 'email'), (string) Illuminate\Validation\Rule::ip()->version(6))"
+```
+
+</TryIt>
+
+You should see `required_with:phone,email` and `ipv6`. Your Vue side doesn't change at all: errors still arrive in `form.errors` with the same keys and messages.
+
+## DB::olap() for big PlanetScale and Vitess queries
+
+PlanetScale (and Vitess in general) runs queries in OLTP mode, which caps how many rows a query can touch. Large reports need OLAP mode. Before, you had to switch it yourself and remember to switch back:
+
+<CodeCompare before="Before" after="After">
+
+```php
+try {
+    DB::statement("set workload = 'olap'");
+
+    $revenue = Order::query()
+        ->selectRaw("customer_id, date_format(created_at, '%Y-%m') as month, sum(total) as revenue")
+        ->groupBy('customer_id', 'month')
+        ->get();
+} finally {
+    DB::statement("set workload = 'oltp'");
+}
+```
+
+```php title="app/Actions/BuildRevenueReport.php"
+use Illuminate\Support\Facades\DB;
+
+$revenue = DB::olap(fn () => Order::query()
+    ->selectRaw("customer_id, date_format(created_at, '%Y-%m') as month, sum(total) as revenue")
+    ->where('created_at', '>=', now()->subYears(3))
+    ->groupBy('customer_id', 'month')
+    ->get()
+);
+```
+
+</CodeCompare>
+
+The old version had two bugs hiding in it. `DB::statement()` only switched the **write** connection, so with read replicas your `SELECT` still ran as OLTP. And forgetting the `finally` leaked OLAP mode into the next job or request.
+
+`olap()` sets the workload on both the read and write PDO, returns whatever your callback returns and always switches back to `oltp`. It's a method on `MySqlConnection`, so `DB::olap()` uses your default connection and `DB::connection('planetscale')->olap()` targets another one.
+
+<Callout type="tip" title="same code locally and in production">
+
+If the server is not Vitess, `olap()` just runs the callback. We checked that path: no `set workload` query is sent. So the report works on your local MySQL and on PlanetScale without an `if`. Need to branch yourself? `DB::connection()->isVitess()` checks the server version string for "Vitess" or "PlanetScale".
+
+</Callout>
+
+## Stop queue workers sticking to the write database
+
+With separate `read` and `write` hosts and `'sticky' => true`, any write pins the connection's reads to the primary, so you read your own writes. Great for a web request. Not great for a worker: one job that writes keeps **every following job** on that worker reading from the primary, until the worker restarts.
+
+<Diagram name="laravel-sticky-queue-worker-flow" alt="Job 1 writes on the write connection. Between jobs the worker resets its state. By default, job 2 still reads from the write primary because the connection is sticky. With Worker::$flushStickyConnections set to true, job 2 reads from the read replica again." caption="What the new flag changes between two jobs on the same worker" />
+
+13.36 adds an opt-in flag that forgets that "I wrote something" state after each job:
+
+```php title="app/Providers/AppServiceProvider.php"
+use Illuminate\Queue\Worker;
+
+public function boot(): void
+{
+    Worker::$flushStickyConnections = true; // [!code ++]
+}
+```
+
+It is off by default because some apps (knowingly or not) rely on job B reading what job A just wrote on the same worker. If your jobs depend on each other, make that explicit with a chain or a batch, then turn the flag on.
+
+It only matters if your `config/database.php` connection looks like this:
+
+```php title="config/database.php"
+'mysql' => [
+    'driver' => 'mysql',
+    'read' => ['host' => [env('DB_READ_HOST')]],
+    'write' => ['host' => [env('DB_WRITE_HOST')]],
+    'sticky' => true,
+    // ...
+],
+```
+
+## The background queue connection works without your own config
+
+Laravel 13 apps can dispatch to a `background` connection, but it only existed in the app skeleton's `config/queue.php`. If you deleted that file (Laravel merges the framework defaults) or regenerated it with `php artisan config:publish queue`, dispatching failed:
+
+```text
+InvalidArgumentException  The [background] queue connection has not been configured.
+```
+
+The framework's own `config/queue.php` now ships it too, so this works out of the box:
+
+```php
+ProcessPodcast::dispatch($podcast)->onConnection('background');
+```
+
+If your app already defines `background`, yours wins, because `queue.connections` is merged with your config.
+
+## Queued mailables respect DeleteWhenMissingModels and FailOnTimeout
+
+These attributes worked on jobs, but queued mailables ignored them, because the internal `SendQueuedMailable` job never copied them over.
+
+```php title="app/Mail/OrderShipped.php"
+use Illuminate\Queue\Attributes\DeleteWhenMissingModels;
+use Illuminate\Queue\Attributes\FailOnTimeout;
+
+#[DeleteWhenMissingModels]
+#[FailOnTimeout]
+class OrderShipped extends Mailable implements ShouldQueue
+{
+    use Queueable, SerializesModels;
+
+    public function __construct(public Order $order) {}
+}
+```
+
+Now, if the order is deleted before a `Mail::to($user)->later(...)` mail goes out, the job is quietly deleted instead of landing in `failed_jobs` with a `ModelNotFoundException`. And with `#[FailOnTimeout]`, a mail that timed out on a slow SMTP server fails instead of being retried, so your customer doesn't get it twice. The `$deleteWhenMissingModels` and `$failOnTimeout` properties work too.
+
+## Smaller changes worth knowing
+
+| Change | PR | What it fixes |
+|---|---|---|
+| Morph map aliases in `constrain()`, `morphWith()`, `morphWithCount()` and `loadMorph()` | [#61898](https://github.com/laravel/framework/pull/61898) | With `enforceMorphMap()`, keys like `'post'` were silently ignored, so filters didn't apply and nested relations didn't load |
+| `#[UniqueFor]` on broadcast events | [#61981](https://github.com/laravel/framework/pull/61981) | `#[UniqueFor(60)]` on a `ShouldBeUnique` + `ShouldBroadcast` event is now recognised |
+| `Schema::getColumn()` is case-insensitive | [#61967](https://github.com/laravel/framework/pull/61967) | Matches `hasColumn()`, so `getColumn('users', 'Email')` no longer returns `[]` |
+| Markdown mail escaping | [#61755](https://github.com/laravel/framework/pull/61755) | User input in Markdown mail could use escaping tricks to bypass inline Markdown protection |
+| Notification `locale()` | [#61904](https://github.com/laravel/framework/pull/61904), [#61959](https://github.com/laravel/framework/pull/61959) | The locale is no longer ignored after sending, or leaked into later notifications |
+| Unique queued listeners | [#61974](https://github.com/laravel/framework/pull/61974) | Locks are released when the transaction rolls back |
+
+### Backports to 12.x (already in 13.x)
+
+13.36 also lists a few `[12.x]` PRs, merged up from the 12.x branch. They are backports of features 13.x already had:
+
+- **`EncodedParameter`** ([#61871](https://github.com/laravel/framework/pull/61871), from [#61610](https://github.com/laravel/framework/pull/61610) in 13.33): wrap an already-encoded route parameter so `route()` doesn't encode its `?`, `%` or `#` again. New on Laravel 12 in **v12.70.0** (same day).
+- **Named S3 credential providers** ([#61757](https://github.com/laravel/framework/pull/61757), from [#61676](https://github.com/laravel/framework/pull/61676) in 13.34): `'credentials' => 'ecs'` or `'instance'` on S3 disks, like SQS. On Laravel 12 since v12.69.3.
+- Query fixes ([#61838](https://github.com/laravel/framework/pull/61838)) and a Blade cache file per `$echoFormat` ([#61822](https://github.com/laravel/framework/pull/61822)), also in v12.70.0.
+
+## Upgrade notes
+
+Run `composer update laravel/framework` (13.36.0 or later). Every feature above is opt-in: string rules keep working, `olap()` and the sticky flag do nothing until you call or set them, and an existing `background` connection in your config is kept.
+
+Two fixes can change behaviour you might be relying on: queued mailables with `#[DeleteWhenMissingModels]` now disappear instead of failing, and morph map keys in `constrain()` now actually filter. Both are what the code already said it would do. On Laravel 12, take **12.70.0** for the backports.
+
+## Recap
+
+- `Rule::requiredWith()`, `Rule::confirmed()->customField()`, `Rule::ip()->version(4)` and ~50 more make Form Requests autocomplete, and values with commas are safe.
+- `DB::olap()` runs big Vitess/PlanetScale queries in OLAP mode on both connections, and is a no-op elsewhere.
+- `Worker::$flushStickyConnections = true` stops workers reading from the primary forever after one write.
+- The `background` queue connection now works without your own `config/queue.php`.
+- Queued mailables respect `#[DeleteWhenMissingModels]` and `#[FailOnTimeout]`.
+
+## FAQ
+
+<FAQ items={[
+  { q: 'Do I have to rewrite my validation strings to Rule:: builders?', a: 'No. Strings keep working and you can mix both styles in the same array. The builders mostly help with autocompletion and with values that contain commas.' },
+  { q: 'Is there a Rule::ipAddress() method?', a: 'No, the helper is `Rule::ip()`. Call `->version(4)` or `->version(6)` for `ipv4` or `ipv6`.' },
+  { q: 'Does DB::olap() break on regular MySQL or MariaDB?', a: 'No. If `isVitess()` is false, it simply runs your callback without sending any `set workload` query.' },
+  { q: 'Should I enable Worker::$flushStickyConnections?', a: 'If you use read replicas with `sticky` enabled and your jobs don’t rely on reading another job’s writes on the same worker, yes. It is off by default only for backwards compatibility.' },
+  { q: 'What does Laravel 12.70 include?', a: 'Three changes: the `EncodedParameter` backport for pre-encoded route parameters, query fixes and a Blade cache fix for custom `$echoFormat`.' },
+]} />
+
+## Next steps
+
+- [Laravel 13.35: QUERY routes, Markdown responses and model defaults()](/laravel-13-35-query-routes-markdown-responses): last week's release.
+- [Form Requests with Inertia and Vue](/laravel-form-request-inertia): where the new `Rule::` builders live.
+- [Run a queued job and show its progress in Vue](/laravel-vue-queued-job): put the queue changes to work.
+- [Laravel validation docs](https://laravel.com/docs/13.x/validation)
+
+## Sources
+
+- [Laravel v13.36.0 release notes](https://github.com/laravel/framework/releases/tag/v13.36.0)
+- [Laravel v12.70.0 release notes](https://github.com/laravel/framework/releases/tag/v12.70.0)
+- [PR #61833: validation rule builders for remaining rules](https://github.com/laravel/framework/pull/61833)
+- [PR #61932: `isVitess()` and `olap()`](https://github.com/laravel/framework/pull/61932)
+- [PR #61915: flush sticky connections between jobs](https://github.com/laravel/framework/pull/61915)
+- [PR #61917: `background` connection in the default queue config](https://github.com/laravel/framework/pull/61917)
+- [PR #61899: `DeleteWhenMissingModels` and `FailOnTimeout` on queued mailables](https://github.com/laravel/framework/pull/61899)
+- [PR #61898: morph map aliases in `constrain()`, `morphWith()` and `loadMorph()`](https://github.com/laravel/framework/pull/61898)
+- [PR #61981: `UniqueFor` on broadcast events](https://github.com/laravel/framework/pull/61981)
+- [PR #61967: case-insensitive `Schema::getColumn()`](https://github.com/laravel/framework/pull/61967)
+- [PR #61755: Markdown mail escaping fix](https://github.com/laravel/framework/pull/61755)
+- [Vitess workload modes](https://vitess.io/docs/24.0/reference/compatibility/mysql-compatibility/#workload)

@@ -1,0 +1,155 @@
+---
+id: 22
+title: "Test a Laravel and Vue app"
+excerpt: "Pest hits the Laravel routes. Vitest and Vue Test Utils hit one component. The starter kit does not ship a Vitest script until you add one."
+description: "Test Laravel and Vue with Pest on the HTTP routes and Vitest plus Vue Test Utils on a single component."
+seoTitle: "Test Laravel and Vue"
+date: 2026-10-10T05:50:00Z
+snippet: "php artisan test --filter=PostsTest"
+categories: [laravel, vuejs]
+tags: [laravel, vuejs, testing]
+---
+
+Your Pest suite is green and the page still renders blank, or your Vue tests pass while the query is wrong. Each side needs its own test, and neither should pretend to be the other. Here is the split, plus the Vitest setup the starter kit doesn't include.
+
+<TLDR
+  audience="Laravel + Vue developers adding tests"
+  learn={['What Pest covers and what Vitest covers', 'How to add Vitest to the starter kit', 'What not to mock']}
+  applies="Laravel 13 · Pest · Vitest · @vue/test-utils · Vue 3"
+>
+
+- Pest + `assertInertia`: routes, validation, queries and the props Inertia receives.
+- Vitest + `@vue/test-utils`: markup that renders from props, with no server.
+- The kit has no Vitest: install `vitest @vue/test-utils jsdom` and add `vitest.config.ts`.
+- Don’t mount a page and stub Inertia’s router just to see a heading.
+
+</TLDR>
+
+A Laravel and Vue app has two test runs because the two sides fail differently. Pest can prove a POST creates a row and that Inertia received `posts.data`. It does not mount the Vue page. Vitest can prove a component renders a title from a prop. It does not hit SQLite. [The requirements](/requirements) name both Pest and Vitest. This page is how to add the Vue half without pretending the starter kit already has it.
+
+| | Pest (PHP) | Vitest (JS) |
+|---|---|---|
+| Proves | A POST creates a row; Inertia got `posts.data` | A component renders a title from a prop |
+| Does not | Mount the Vue page | Hit SQLite |
+
+## Feature tests first
+
+The feature tests for create, an empty title, and search are already in the [CRUD guide](/laravel-inertia-vue-crud). Run those first.
+
+```bash
+php artisan test --filter=PostsTest
+```
+
+Feature tests use the session stack. They do not need a CSRF token. `assertInertia` reads the props the controller returned. If `posts.data` is missing, the controller is still returning a plain array, which is the bug the CRUD page calls out.
+
+## A component test
+
+<Callout type="heads-up" title="Vitest is not in the kit">
+
+Do not claim the kit's `package.json` already has Vitest. Add it.
+
+</Callout>
+
+```bash
+npm install -D vitest @vue/test-utils jsdom
+```
+
+```ts title="vitest.config.ts"
+import { defineConfig } from "vitest/config";
+import vue from "@vitejs/plugin-vue";
+
+export default defineConfig({
+  plugins: [vue()],
+  test: {
+    environment: "jsdom",
+  },
+});
+```
+
+Keep this file next to the kit's `vite.config.ts`. A component test should not boot Inertia's router. Pass props and read the text.
+
+```vue title="resources/js/components/PostTitle.vue"
+<script setup lang="ts">
+defineProps<{ title: string }>();
+</script>
+
+<template>
+  <h2>{{ title }}</h2>
+</template>
+```
+
+```ts title="resources/js/components/PostTitle.test.ts"
+import { mount } from "@vue/test-utils";
+import { describe, expect, it } from "vitest";
+import PostTitle from "./PostTitle.vue";
+
+describe("PostTitle", () => {
+  it("renders the title", () => {
+    const wrapper = mount(PostTitle, {
+      props: { title: "Hello Laravel 13" },
+    });
+
+    expect(wrapper.text()).toContain("Hello Laravel 13");
+  });
+});
+```
+
+```json title="package.json"
+{
+  "scripts": {
+    "test:unit": "vitest run"
+  }
+}
+```
+
+<TryIt title="Run the first component test">
+
+```bash
+npm run test:unit
+```
+
+</TryIt>
+
+<Callout type="gotcha" title="window at import time">
+
+`jsdom` is there so `mount` has a document. If the component reads `window` at import time, the test fails the same way [server rendering](/inertia-ssr) fails. Move that read into `onMounted`, or pass the value in as a prop.
+
+</Callout>
+
+## What not to mock
+
+<Callout type="gotcha" title="brittle page mocks">
+
+Do not mount `posts/Index.vue` and stub `router.get` just to see a heading. That test breaks every time Inertia's API moves, and it never notices a wrong SQL `when`. The Pest test owns the query. The Vitest test owns markup that has no server.
+
+</Callout>
+
+Typed props for the page itself are [TypeScript on Vue pages](/typescript-laravel-vue-pages). The stack you are testing is [Inertia, a SPA, or Nuxt](/laravel-vue-in-2026).
+
+## Recap
+
+- Two runners, two jobs: Pest for the server, Vitest for components.
+- Add Vitest yourself; the kit does not ship it.
+- Component tests pass props, not routers.
+- Keep queries tested in Pest.
+
+## FAQ
+
+<FAQ items={[
+  { q: 'Does the Laravel Vue starter kit include Vitest?', a: 'No. It ships Pest for PHP. Install `vitest`, `@vue/test-utils` and `jsdom` to test Vue components.' },
+  { q: 'How do I test Inertia props in Laravel?', a: 'Use `assertInertia` in a Pest feature test to check the component name and props like `posts.data`.' },
+  { q: 'Should I mount Inertia pages in Vitest?', a: 'Usually not. Mount small components with props. Pages depend on Inertia’s router, and their data is better tested in Pest.' },
+]} />
+
+## Next steps
+
+- [CRUD with Inertia and Vue](/laravel-inertia-vue-crud)
+- [TypeScript props for Laravel + Vue pages](/typescript-laravel-vue-pages)
+- [Server-side rendering with Inertia](/inertia-ssr)
+
+## Sources
+
+- [Laravel 13: Testing](https://laravel.com/docs/13.x/testing)
+- [Inertia v3: Testing](https://inertiajs.com/docs/v3/advanced/testing)
+- [Vitest: Getting started](https://vitest.dev/guide/)
+- [Vue Test Utils](https://test-utils.vuejs.org/guide/)

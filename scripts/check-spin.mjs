@@ -138,10 +138,13 @@ for (const item of spinIdeas) {
     fail(`${item.id} prompt has no screens`);
   if (!item.prompt.includes("Models:")) fail(`${item.id} prompt has no models`);
   const slug = item.guide.replace(/^\//, "");
-  const post = fileURLToPath(
-    new URL(`../src/content/posts/${slug}.md`, import.meta.url),
+  // Posts are .mdx since the post-style migration; accept .md too.
+  const published = ["md", "mdx"].some((ext) =>
+    existsSync(
+      fileURLToPath(new URL(`../src/content/posts/${slug}.${ext}`, import.meta.url)),
+    ),
   );
-  if (!existsSync(post)) fail(`${item.guide} is not a published guide file`);
+  if (!published) fail(`${item.guide} is not a published guide file`);
 }
 
 const relay = spinIdeas.find((item) => item.id === "relay");

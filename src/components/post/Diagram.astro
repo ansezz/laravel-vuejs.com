@@ -1,0 +1,17 @@
+---
+// Pre-rendered Mermaid diagram (docs/diagrams/<name>.mmd -> public/diagrams/<name>-{light,dark}.svg via `npm run diagrams`).
+// alt describes the flow in words, for screen readers and for the Markdown copy of the post.
+// width/height come from the SVG's viewBox at build time, so the lazy-loaded image reserves its space (no layout shift).
+interface Props { name: string; alt: string; caption?: string }
+const { name, alt, caption } = Astro.props
+const files = import.meta.glob<string>('/public/diagrams/*-light.svg', { query: '?raw', import: 'default', eager: true })
+const svg = files[`/public/diagrams/${name}-light.svg`]
+if (!svg) throw new Error(`<Diagram>: public/diagrams/${name}-light.svg not found (run npm run diagrams)`)
+const [, , w, h] = (svg.match(/viewBox="([^"]+)"/)?.[1] ?? '0 0 800 450').split(/[\s,]+/).map(Number)
+const width = Math.round(w), height = Math.round(h)
+---
+<figure class="diagram">
+  <img class="only-light" src={`/diagrams/${name}-light.svg`} alt={alt} loading="lazy" decoding="async" width={width} height={height}>
+  <img class="only-dark" src={`/diagrams/${name}-dark.svg`} alt="" aria-hidden="true" loading="lazy" decoding="async" width={width} height={height}>
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>

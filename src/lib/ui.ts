@@ -106,10 +106,17 @@ export function initUi() {
 
   document.querySelectorAll<HTMLButtonElement>(".copy-btn").forEach((btn) =>
     btn.addEventListener("click", async () => {
+      // Copy the "after" state: lines marked as removed in diff-style blocks are skipped.
+      const pre = btn.closest(".code")?.querySelector("pre");
+      const lines = [...(pre?.querySelectorAll<HTMLElement>(".line") ?? [])];
       const code =
         btn.dataset.copy ??
-        btn.closest(".code")?.querySelector("pre")?.innerText ??
-        "";
+        (lines.length
+          ? lines
+              .filter((l) => !l.classList.contains("remove"))
+              .map((l) => l.textContent ?? "")
+              .join("\n")
+          : (pre?.innerText ?? ""));
       try {
         await navigator.clipboard.writeText(code.replace(/\n$/, ""));
       } catch {
@@ -150,6 +157,19 @@ export function initUi() {
 
   // Forms posting to the Worker (/api/forms/*): send with fetch and show the result inline.
   // Without JS they still work as normal POSTs (the Worker redirects to /thanks or /form-error).
+  // Cheat sheet PDFs (soft gate): a newsletter signup reveals the download link, and this browser remembers it.
+  const unlock = (f: HTMLFormElement) => {
+    const target = f.dataset.unlock && document.getElementById(f.dataset.unlock);
+    if (!target) return;
+    target.hidden = false;
+    f.hidden = true;
+  };
+  document.querySelectorAll<HTMLFormElement>("form[data-unlock]").forEach((f) => {
+    try {
+      if (localStorage.getItem("cheatsheets") === "1") unlock(f);
+    } catch {}
+  });
+
   document.querySelectorAll<HTMLFormElement>("form[data-api]").forEach((f) => {
     const ts = f.querySelector<HTMLInputElement>('input[name="ts"]');
     if (ts) ts.value = String(Date.now());
@@ -181,6 +201,12 @@ export function initUi() {
           f.reset();
           f.classList.add("sent");
           say(out.message, "ok");
+          if (f.dataset.unlock) {
+            try {
+              localStorage.setItem("cheatsheets", "1");
+            } catch {}
+            unlock(f);
+          }
         } else
           say(out.error ?? "Something went wrong. Please try again.", "error");
       } catch {

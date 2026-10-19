@@ -1,0 +1,121 @@
+---
+id: 20
+title: "Laravel Fortify with Vue"
+excerpt: "The Vue starter kit already ships Fortify screens. Install Fortify when the front end is a separate SPA, or when those actions need a new field."
+description: "Use Laravel Fortify with Vue: the starter kit already has the screens, and a separate SPA posts to Fortify after the Sanctum cookie."
+seoTitle: "Laravel Fortify with Vue"
+date: 2026-10-10T05:30:00Z
+snippet: "php artisan fortify:install"
+categories: [laravel, vuejs]
+tags: [laravel, vuejs]
+---
+
+You want login, registration and password reset for a Vue app without a second auth stack. Here is when Fortify is the right install, and what to edit instead when it isn't.
+
+<TLDR
+  audience="Laravel + Vue developers adding or customizing auth"
+  learn={['Where the starter kit already uses Fortify', 'How a separate Vue SPA posts to Fortify endpoints', 'What to customize, and where']}
+  applies="Laravel 13 · Fortify · Sanctum · Vue starter kit"
+>
+
+- The Vue starter kit already ships Fortify: edit `app/Actions/Fortify/*`, not a second login route.
+- A separate SPA: install Fortify, set `views` to `false`, post to `/login` after `GET /sanctum/csrf-cookie`.
+- Fortify on a SPA is the session cookie, not a bearer token.
+- Turn features on and off in `config/fortify.php`.
+
+</TLDR>
+
+Search results for "Laravel Fortify Vue" still start with `composer require laravel/fortify` on top of Breeze. The current Vue starter kit already did that work. Login, registration, password reset, and email verification are Vue pages, and the actions that write the user live in `app/Actions/Fortify`. Installing Fortify a second time does not give you a better login form.
+
+Use this page in two cases. You are changing those actions. Or the browser is a separate SPA and Fortify should expose the auth endpoints without rendering views. The cookie, the CSRF call, and CORS are [Sanctum for a Vue SPA](/laravel-sanctum-vue-spa). Which front end you are building is [Inertia, a SPA, or Nuxt](/laravel-vue-in-2026). GitHub as the only login is [Socialite](/laravel-socialite-vue).
+
+## Case 1: the starter kit
+
+Open `app/Actions/Fortify/CreateNewUser.php` when registration needs another column. The `create` method already validates name, email, and password. Add the column to that array and to the `User::create` call. Do the same kind of edit in `ResetUserPassword` when the reset rules change.
+
+The Vue pages are under `resources/js/pages/auth`. They post to Fortify. You do not register a second `POST /login`.
+
+The full route list, including two-factor routes this page does not copy, is in the [Fortify docs for Laravel 13](https://laravel.com/docs/13.x/fortify).
+
+## Case 2: a separate SPA
+
+Fortify is the right install when Laravel is the API and Vue is another origin. The views stay off. The SPA renders the forms and posts to Fortify.
+
+```bash
+composer require laravel/fortify
+php artisan fortify:install
+php artisan migrate
+```
+
+```php title="config/fortify.php"
+'views' => true, // [!code --]
+'views' => false, // [!code ++]
+```
+
+With views off, Fortify does not try to return a Blade login page. These are the POST endpoints a first SPA usually needs:
+
+- `/login`
+- `/register`
+- `/forgot-password`
+- `/reset-password`
+- `/email/verification-notification`
+
+<TryIt title="See every route Fortify registered">
+
+```bash
+php artisan route:list --path=login
+php artisan route:list --path=password
+```
+
+</TryIt>
+
+<Callout type="heads-up" title="419, 422, and no bearer tokens">
+
+Send them after `GET /sanctum/csrf-cookie`, with credentials, the same way the Sanctum guide posts `/login`. A 419 is still CSRF. A 422 is validation. Fortify's register endpoint returns validation errors for a duplicate email. Show `errors.email` from that JSON. Do not store a bearer token from these responses. Fortify's SPA story is the session cookie.
+
+</Callout>
+
+`POST /logout` is also Fortify's. Call it when the user signs out, then send them to the SPA's login route.
+
+## What you customize
+
+Features are flags in `config/fortify.php`, not extra packages. Registration, password reset, and email verification are already named there. Turn a feature off in that file rather than deleting a route by hand.
+
+<Callout type="tip" title="one source of truth for password rules">
+
+Keep password rules in `CreateNewUser` and `ResetUserPassword`. A Vue page that reimplements the same rules will drift. The server is the check that runs.
+
+</Callout>
+
+## Where this stops
+
+Fortify does not authorize "may this user edit this post". That is a [policy](/laravel-vue-policies) or a [permission](/laravel-vue-permissions). It also does not build the CRUD behind the login. That stays the [CRUD guide](/laravel-inertia-vue-crud).
+
+## Recap
+
+- The Vue starter kit is already Fortify; customize `CreateNewUser` and `ResetUserPassword`.
+- Install Fortify yourself only for a separate SPA, with `views` off.
+- Post after the CSRF cookie, with credentials. 419 = CSRF, 422 = validation.
+- Authorization is a policy, not Fortify.
+
+## FAQ
+
+<FAQ items={[
+  { q: 'Do I need to install Fortify on the Laravel Vue starter kit?', a: 'No. The kit already uses Fortify. Its actions are in `app/Actions/Fortify` and its pages in `resources/js/pages/auth`.' },
+  { q: 'How do I add a field to registration with Fortify?', a: 'Add the validation rule and the column to `CreateNewUser::create`, then add the input to the Vue register page.' },
+  { q: 'Why does my SPA get a 419 from Fortify /login?', a: 'The CSRF cookie is missing or the session domain is wrong. Call `GET /sanctum/csrf-cookie` first and send credentials.' },
+  { q: 'Does Fortify return an API token for my Vue SPA?', a: 'No. Fortify’s SPA flow uses the session cookie. Use Sanctum tokens only for mobile apps or scripts.' },
+]} />
+
+## Next steps
+
+- [Sanctum for a Vue SPA](/laravel-sanctum-vue-spa): the cookie and CSRF steps.
+- [Laravel and Vue CORS errors](/laravel-vue-cors)
+- [Breeze, Jetstream, and the Vue starter kit](/laravel-breeze-jetstream-vue)
+- [Laravel docs: Fortify](https://laravel.com/docs/13.x/fortify)
+
+## Sources
+
+- [Laravel 13: Fortify](https://laravel.com/docs/13.x/fortify)
+- [Laravel 13: Sanctum, SPA authentication](https://laravel.com/docs/13.x/sanctum#spa-authentication)
+- [Laravel 13: Starter kits](https://laravel.com/docs/13.x/starter-kits)

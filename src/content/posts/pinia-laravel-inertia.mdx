@@ -1,0 +1,155 @@
+---
+id: 11
+title: "When to use Pinia with Laravel and Inertia"
+excerpt: "Page props already hold the posts. Pinia is for client state that should survive the next visit, such as a draft."
+description: "Pinia with Laravel and Inertia: install it on the Vue starter kit, and keep server state in props instead of a store."
+seoTitle: "Pinia with Laravel and Inertia"
+date: 2026-10-10T04:00:00Z
+snippet: "npm install pinia"
+categories: [vuejs, laravel]
+tags: [vuejs, inertia, pinia]
+---
+Pinia shows up on most Vue job posts, so people add it to a new Laravel app on day one. Then the post list lives in two places and one of them is stale. Here is the line between page props and a store, and how to install Pinia on the starter kit without breaking SSR.
+
+<TLDR
+  audience="Laravel + Vue developers deciding whether they need Pinia"
+  learn={['Which state stays in Inertia props', 'Which state belongs in a Pinia store', 'How to install Pinia in `withApp`, SSR-safe']}
+  applies="Laravel 13 · Vue starter kit · @inertiajs/vue3 3.9 · Pinia 3 · Vue 3.5"
+>
+
+- Server data (posts, users, counts) stays in page props. A store that mirrors Eloquent goes stale.
+- Pinia is for client state the server doesn't own: a draft, an open palette, a wizard step.
+- Install it inside the starter kit's `withApp` callback so each server render gets its own store.
+
+</TLDR>
+
+An Inertia page already receives its data as props. Copying the post list into a store gives you two sources of truth and a stale screen.
+
+Use Pinia for state the server does not own.
+
+## What stays in props
+
+The [CRUD guide](/laravel-inertia-vue-crud) loads posts in the controller and types them with `defineProps`. Search lives in the query string. After a save, the redirect renders the index again and the list is fresh.
+
+That is the server state. Do not `router.reload` into a Pinia store "so every component can read it." Pass the prop, or read a shared prop Inertia already keeps. A store that mirrors Eloquent will be wrong the moment someone else creates a row, unless you also build the [Reverb](/laravel-reverb-vue) path to patch it.
+
+## What belongs in a store
+
+A draft title the author typed on `/posts/create`, then lost by opening the list, is client state. So is a command palette that is open, or a multi-step wizard you have not turned into URLs yet.
+
+| State | Where it lives |
+|---|---|
+| Posts, users, counts from the database | Page props |
+| Search term, filters, current page | The query string |
+| A draft that should survive leaving the page | Pinia |
+| An open command palette or modal | Pinia (or a local `ref`) |
+| Anything a refresh must remember | The URL or the database |
+
+<Callout type="tip" title="the refresh test">
+
+If a refresh should forget it, it can live in Pinia. If a refresh should remember it, put it in the URL or in the database.
+
+</Callout>
+
+## Install it on the starter kit
+
+```bash
+npm install pinia
+```
+
+The Vue starter kit mounts Inertia in `resources/js/app.ts` with `withApp`. Add Pinia inside that callback, and create the instance there, so a server render does not reuse another request's state. Keep the `title`, `layout`, `progress`, and focus directive the file already has.
+
+```ts title="resources/js/app.ts"
+import { createPinia } from "pinia"; // [!code ++]
+
+// inside the withApp callback resources/js/app.ts already has
+withApp(app) {
+  app.use(createPinia()); // [!code ++]
+},
+```
+
+<Callout type="gotcha" title="don't add a setup callback">
+
+A manual `setup` callback turns off the Vite plugin's SSR wiring. Stay in `withApp`.
+
+</Callout>
+
+### A draft store
+
+```ts title="resources/js/stores/draft.ts"
+import { defineStore } from "pinia";
+import { ref } from "vue";
+
+export const useDraftStore = defineStore("draft", () => {
+  const title = ref("");
+  const excerpt = ref("");
+
+  function clear() {
+    title.value = "";
+    excerpt.value = "";
+  }
+
+  return { title, excerpt, clear };
+});
+```
+
+```vue title="resources/js/pages/posts/Create.vue"
+<script setup lang="ts">
+import { useDraftStore } from "@/stores/draft";
+
+const draft = useDraftStore();
+</script>
+
+<template>
+  <input v-model="draft.title" name="title" />
+  <textarea v-model="draft.excerpt" name="excerpt" />
+</template>
+```
+
+`v-model` is justified here because the store is the source. The `<Form>` component in the CRUD guide does not need it: the browser owns the inputs until submit. Use the store when leaving the page should keep the text.
+
+<Callout type="gotcha" title="clear the draft">
+
+Call `draft.clear()` after a successful create, or the next new post opens with the old sentence.
+
+</Callout>
+
+<TryIt title="Watch the draft survive">
+
+Type a title on `/posts/create`, click to `/posts`, then come back. The text is still there. Refresh the page and it is gone, which is exactly the promise of client state.
+
+</TryIt>
+
+## Vue Router apps
+
+A separate SPA from the [Sanctum guide](/laravel-sanctum-vue-spa) has no Inertia props. Pinia is a normal place for the current user after `GET /api/user`, and for data you do not want to refetch on every route. Still treat the API as the source. Write the response into the store. Do not let the store be the only copy of a record you have not saved.
+
+Vuex is the old answer. New Vue 3 code uses Pinia. The starter kit does not install either until you do.
+
+## Recap
+
+- Page props are your server state; don't copy them into a store.
+- Pinia holds client state the server doesn't own and a refresh may forget.
+- Install it inside `withApp` so SSR requests don't share a store.
+- In a Vue Router SPA, Pinia can cache API responses, but the API stays the source.
+
+## FAQ
+
+<FAQ items={[
+  { q: 'Do I need Pinia with Inertia?', a: 'Often not. Inertia passes server data as page props. Add Pinia when you have client-only state, like a draft or an open palette, that must survive a visit.' },
+  { q: 'Where do I register Pinia on the Laravel Vue starter kit?', a: 'Inside the `withApp(app)` callback in `resources/js/app.ts`, with `app.use(createPinia())`.' },
+  { q: 'Should I still use Vuex?', a: 'No. Vuex is the old answer; new Vue 3 code uses Pinia.' },
+]} />
+
+## Next steps
+
+- [Build a CRUD with Laravel, Inertia and Vue](/laravel-inertia-vue-crud): server state in props.
+- [Server-render an Inertia app](/inertia-ssr): why the store is created per request.
+- [Authenticate a Vue SPA with Sanctum](/laravel-sanctum-vue-spa): Pinia in a Vue Router app.
+- [Pinia docs](https://pinia.vuejs.org/)
+
+## Sources
+
+- [Pinia: Getting started](https://pinia.vuejs.org/getting-started.html)
+- [Pinia: Server-side rendering](https://pinia.vuejs.org/ssr/)
+- [Inertia v3: Client-side setup](https://inertiajs.com/docs/v3/installation/client-side-setup)

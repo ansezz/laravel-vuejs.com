@@ -1,0 +1,22 @@
+---
+// TL;DR box at the top of every post: the answer in 2-4 bullets (slot), plus who it's for, what you'll learn and versions.
+// `tested` = versions we ran the code with; `applies` = versions the post is written for (when it was checked against docs, not run).
+import Icon from '../Icon.astro'
+import { inline } from '../../lib/inline-md'
+interface Props { audience?: string; learn?: string[]; tested?: string; applies?: string }
+const { audience, learn = [], tested, applies } = Astro.props
+---
+<section class="tldr" aria-label="TL;DR">
+  <p class="tldr-title"><strong>TL;DR</strong></p>
+  <div class="tldr-body"><slot /></div>
+  {(learn.length > 0 || audience || tested || applies) && (
+    <div class="tldr-meta">
+      {learn.length > 0 && <div><p class="tldr-label"><strong>What you'll learn</strong></p><ul>{learn.map(l => <li set:html={inline(l)} />)}</ul></div>}
+      <div class="tldr-facts">
+        {audience && <p><Icon name="users" size={15} /> <span><strong>Who it's for:</strong> <span set:html={inline(audience)} /></span></p>}
+        {tested && <p><Icon name="check" size={15} /> <span><strong>Tested with:</strong> <span set:html={inline(tested)} /></span></p>}
+        {applies && <p><Icon name="layers" size={15} /> <span><strong>Applies to:</strong> <span set:html={inline(applies)} /></span></p>}
+      </div>
+    </div>
+  )}
+</section>

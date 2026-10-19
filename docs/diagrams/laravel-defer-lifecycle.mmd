@@ -1,0 +1,16 @@
+flowchart LR
+  A["`**1. Request**
+  controller saves
+  the order`"] --> B["`**2. defer()**
+  closure is queued
+  in memory`"]
+  B --> C["`**3. Response sent**
+  browser gets the
+  Inertia redirect`"]
+  C --> D{"`**status < 400**
+  or always()?`"}
+  D -- yes --> E["`**4. Callbacks run**
+  same PHP process,
+  errors are logged`"]
+  D -- no --> F["`**Skipped**
+  4xx / 5xx`"]

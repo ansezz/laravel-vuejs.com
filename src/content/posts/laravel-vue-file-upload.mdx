@@ -1,0 +1,207 @@
+---
+id: 12
+title: "Upload files from Vue to Laravel with Inertia"
+excerpt: "Send an image with the Inertia Form component, validate it, store it on the public disk, and show upload progress."
+description: "Laravel and Vue file uploads with Inertia 3: a file input, image rules, the public disk, and progress while the request runs."
+seoTitle: "Laravel Vue file upload"
+date: 2026-10-10T04:10:00Z
+snippet: "php artisan storage:link"
+categories: [laravel, vuejs]
+tags: [laravel, vuejs, inertia]
+---
+
+The upload "works", the database has a path, and the image is a broken icon. Or the file field is empty on every `PUT`. Uploading a cover image in Laravel + Vue is ordinary multipart, with three traps. Here is the full flow.
+
+<TLDR
+  audience="Laravel + Vue developers adding image uploads"
+  learn={['How to store an upload on the public disk', 'How to send a file from the Inertia `<Form>`', 'How to replace old files and plan for production']}
+  applies="Laravel 13 · Inertia 3 · Vue 3"
+>
+
+- Run `php artisan storage:link`, or saved files 404.
+- Validate with `image` and `max:2048` (kilobytes), `store()` on the `public` disk, save the path.
+- File + update: POST with `_method=put`; PHP does not fill files on a real PUT.
+- Delete the old file when replacing; use S3-style storage with more than one server.
+
+</TLDR>
+
+A file input in an Inertia form is still a normal multipart request. Laravel validates it, stores it, and redirects back. You do not need a second upload library for a cover image on the [post form](/laravel-inertia-vue-crud).
+
+## The column and the link
+
+```bash
+php artisan make:migration add_cover_path_to_posts_table --table=posts
+php artisan storage:link
+```
+
+```php title="database/migrations/xxxx_add_cover_path_to_posts_table.php"
+public function up(): void
+{
+    Schema::table('posts', function (Blueprint $table) {
+        $table->string('cover_path')->nullable();
+    });
+}
+```
+
+<Callout type="gotcha" title="no link, no image">
+
+Add `cover_path` to the model's `$fillable` array. `storage:link` points `public/storage` at `storage/app/public`, which is where the `public` disk writes. Without the link, the file saves and the `<img>` 404s.
+
+</Callout>
+
+## Validate and store
+
+```php title="app/Http/Controllers/PostController.php"
+public function update(Request $request, Post $post): RedirectResponse
+{
+    $data = $request->validate([
+        'title' => ['required', 'string', 'max:255'],
+        'excerpt' => ['required', 'string'],
+        'cover' => ['nullable', 'image', 'max:2048'],
+    ]);
+
+    if ($request->hasFile('cover')) {
+        $data['cover_path'] = $request->file('cover')->store('covers', 'public');
+        unset($data['cover']);
+    }
+
+    $post->update($data);
+
+    return to_route('posts.edit', $post);
+}
+```
+
+<Callout type="heads-up" title="kilobytes, and paths not bytes">
+
+`max:2048` is kilobytes, about 2 MB. `image` checks the content, not only the extension. `store()` returns a path like `covers/abc.jpg`. Save that path. Do not put the file bytes in the database.
+
+</Callout>
+
+Unset `cover` before `update()` so Eloquent does not try to write the uploaded file object into a string column.
+
+Pass the current path to the page:
+
+```php
+'post' => $post->only(['id', 'title', 'excerpt', 'cover_path']),
+```
+
+## The Vue form
+
+<Callout type="gotcha" title="files and PUT">
+
+The `<Form>` component from `@inertiajs/vue3` sends a file field as `multipart/form-data`. PHP does not fill that file on a real `PUT`, `PATCH`, or `DELETE`. Post the form and send `_method` of `put`, which is the spoof Laravel documents. Keep the `name` attribute. That is the key Laravel validates.
+
+</Callout>
+
+```vue title="resources/js/pages/posts/Edit.vue"
+<script setup lang="ts">
+import { Form } from "@inertiajs/vue3";
+
+defineProps<{
+  post: {
+    id: number;
+    title: string;
+    excerpt: string;
+    cover_path: string | null;
+  };
+}>();
+</script>
+
+<template>
+  <Form
+    :action="`/posts/${post.id}`"
+    method="post"
+    #default="{ errors, processing, progress }"
+    class="space-y-4"
+  >
+    <input type="hidden" name="_method" value="put" />
+    <input name="title" :defaultValue="post.title" />
+    <p v-if="errors.title">{{ errors.title }}</p>
+
+    <textarea name="excerpt" :defaultValue="post.excerpt" />
+    <p v-if="errors.excerpt">{{ errors.excerpt }}</p>
+
+    <img
+      v-if="post.cover_path"
+      :src="`/storage/${post.cover_path}`"
+      alt=""
+      class="max-h-40"
+    />
+
+    <input type="file" name="cover" accept="image/*" />
+    <p v-if="errors.cover">{{ errors.cover }}</p>
+    <progress v-if="progress" :value="progress.percentage" max="100" />
+
+    <button :disabled="processing">Save</button>
+  </Form>
+</template>
+```
+
+`progress` is set while the body is uploading. `processing` stays true until Laravel responds. Disable the button for the whole request, not only while the bar moves.
+
+<TryIt title="Upload something that isn't an image">
+
+Rename a text file to `cover.jpg` and upload it. `image` checks the content, so you should see "The cover field must be an image" under the input, and nothing in `storage/app/public/covers`.
+
+</TryIt>
+
+A validation error for `cover` ("The cover field must be an image") comes back on the same page, the same way `errors.title` does in the CRUD guide.
+
+## Replace and delete
+
+`store()` does not remove the previous file. If the post already has a cover, delete it before saving the new one:
+
+```php title="app/Http/Controllers/PostController.php"
+use Illuminate\Support\Facades\Storage;
+
+if ($request->hasFile('cover')) {
+    if ($post->cover_path) {
+        Storage::disk('public')->delete($post->cover_path);
+    }
+
+    $data['cover_path'] = $request->file('cover')->store('covers', 'public');
+}
+```
+
+Do this in the same request as the database update. A queue is the wrong place for "the user just picked a new avatar" unless the file is large enough that the HTTP request times out.
+
+## Production
+
+The `public` disk is fine for images you are happy to serve from the app server. For anything private, use a non-public disk and a temporary URL. For more than one server, the local disk is the wrong place: the next request may hit a machine that does not have the file. Point the disk at S3-compatible storage then. The Vue form does not change.
+
+| Where | Disk | `storage:link` |
+|---|---|---|
+| One server, public images | `public` | Once per machine |
+| Private files | Non-public disk + temporary URL | n/a |
+| Several servers | S3-compatible | n/a |
+| Laravel Cloud | Attached bucket | Skip (disk resets) |
+
+`php artisan storage:link` is once per machine when that machine serves the `public` disk. Laravel Cloud resets the app disk on each deploy, so do not rely on the symlink there. The [deploy guide](/deploy-laravel-vue) is the rest of that list. It will not create the `covers` directory for you. `store()` does that on first upload.
+
+## Recap
+
+- Link the storage once; save paths, not bytes.
+- `image` + `max` in kilobytes on the server.
+- Spoof `PUT` with `_method` when a file is attached.
+- Clean up replaced files; move to object storage when you scale.
+
+## FAQ
+
+<FAQ items={[
+  { q: 'Why does my Laravel uploaded image return 404?', a: 'The `public/storage` symlink is missing. Run `php artisan storage:link` on the machine that serves the `public` disk.' },
+  { q: 'Why is the file empty when I update with Inertia?', a: 'PHP does not parse multipart files on a real PUT or PATCH. Send the form as POST with `_method` set to `put`.' },
+  { q: 'Is Laravel max:2048 in megabytes?', a: 'No, kilobytes. `max:2048` is about 2 MB for files.' },
+  { q: 'Does storing a new file delete the old one?', a: 'No. Delete the previous path with `Storage::disk(\'public\')->delete()` in the same request.' },
+]} />
+
+## Next steps
+
+- [CRUD with Inertia and Vue](/laravel-inertia-vue-crud)
+- [Laravel Precognition with Vue](/laravel-precognition-vue): live validation, including files.
+- [Deploy a Laravel + Vue app](/deploy-laravel-vue)
+
+## Sources
+
+- [Laravel 13: File storage](https://laravel.com/docs/13.x/filesystem)
+- [Laravel 13: Validation, files](https://laravel.com/docs/13.x/validation#validating-files)
+- [Inertia v3: File uploads](https://inertiajs.com/docs/v3/the-basics/file-uploads)

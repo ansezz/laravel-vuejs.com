@@ -1,0 +1,13 @@
+flowchart LR
+  B["`**1. Packages**
+  bump PHP + npm
+  republish config`"] --> C["`**2–4. Code fixes**
+  renamed APIs
+  Axios imports
+  data-inertia`"]
+  C --> D["`**5–6. New setup**
+  Vite plugin
+  slim app.ts, SSR`"]
+  D --> E["`**7. Verify**
+  tests, vue-tsc
+  smoke test`"]

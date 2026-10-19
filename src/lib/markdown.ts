@@ -1,4 +1,5 @@
-import { allPosts, categories, absolute, type Post } from "./content";
+import { CHEATSHEETS } from "../data/cheatsheets";
+import { allPosts, categories, type Post } from "./content";
 import { agentPrompt, agentTaskFor, firstApp } from "../data/agent-tasks";
 import { traps } from "../data/traps";
 import {
@@ -10,27 +11,9 @@ import {
   GITHUB_URL,
 } from "../config/site";
 
-// Clean Markdown versions of posts for /<slug>.md, /llms.txt and /llms-full.txt (answer engines and LLM tools).
+// /llms.txt index. The Markdown copies of posts (/<slug>.md) and /llms-full.txt are generated after the build from the
+// rendered HTML by scripts/markdown.mjs, so MDX building blocks (TL;DR, callouts, before/after, FAQ) come out as Markdown.
 const day = (d: Date) => d.toISOString().slice(0, 10);
-
-// Turns the post source into portable Markdown (placeholders resolved, site-relative links made absolute).
-export function postBody(post: Post) {
-  return (post.entry.body ?? "")
-    .replaceAll("{{CONTACT_EMAIL}}", CONTACT_EMAIL)
-    .replace(/\]\((\/[^)\s]*)\)/g, (_, p) => `](${SITE_URL}${p})`)
-    .trim();
-}
-
-export function postMarkdown(post: Post) {
-  const meta = [
-    `URL: ${absolute(post.url)}`,
-    `Author: ${post.author}${post.author === AUTHOR.name ? ` (${SITE_URL}${AUTHOR.url})` : ""}`,
-    `Published: ${day(post.date)}`,
-    ...(post.updated ? [`Updated: ${day(post.updated)}`] : []),
-    `Topics: ${[...post.categories.map((c) => c.name), ...post.tags.map((t) => t.name)].filter((v, i, a) => a.indexOf(v) === i).join(", ")}`,
-  ];
-  return `# ${post.title}\n\n> ${post.excerpt}\n\n${meta.map((m) => `- ${m}`).join("\n")}\n\n${postBody(post)}\n`;
-}
 
 export async function llmsIndex() {
   const posts = await allPosts();
@@ -64,6 +47,11 @@ ${categories
   })
   .filter(Boolean)
   .join("\n")}
+## Cheat sheets
+
+- [Cheat sheets](${SITE_URL}/cheatsheets): printable one-page references, checked against the official docs
+${CHEATSHEETS.map((s) => `- [${s.title}](${SITE_URL}/cheatsheets/${s.slug}): ${s.description} (checked ${s.checked})`).join("\n")}
+
 ## Roadmap
 
 - [Laravel and Vue roadmap](${SITE_URL}/path): tick topics in the browser. Each track credits the roadmap.sh map it leans on.
@@ -102,9 +90,5 @@ ${categories
 `;
 }
 
-export async function llmsFull() {
-  const posts = await allPosts();
-  return `# ${SITE_NAME}: full text of every article\n\n> ${SITE_DESCRIPTION} Source: ${SITE_URL}. Generated ${day(new Date())}.\n\n${posts.map((p) => postMarkdown(p)).join("\n\n---\n\n")}`;
-}
 export const markdownResponse = (body: string, type = "text/markdown") =>
   new Response(body, { headers: { "Content-Type": `${type}; charset=utf-8` } });

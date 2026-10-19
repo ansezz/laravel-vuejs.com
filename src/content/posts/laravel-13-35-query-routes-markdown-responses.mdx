@@ -1,0 +1,337 @@
+---
+id: 10
+title: "Laravel 13.35: QUERY routes, Markdown responses and model defaults()"
+seoTitle: "Laravel 13.35: QUERY routes, Markdown responses, defaults()"
+excerpt: "Laravel 13.35 adds Route::query() for the new HTTP QUERY method, response()->markdown(), Schedule::alwaysOnOneServer(), percentage memory limits for queue workers, array-based fake assertions and an opt-in defaults() method for Eloquent models. Before and after code for each."
+date: 2026-10-10T03:28:00Z
+snippet: "Route::query('/products/search', ...)"
+categories: [laravel]
+tags: [laravel, release]
+---
+You have a search endpoint with twelve filters, a scheduler running on three servers and a test suite full of closures. Laravel **13.35** has a small, opt-in fix for each.
+
+<TLDR
+  audience="Laravel 13 developers"
+  learn={['`Route::query()` for the HTTP QUERY method', '`response()->markdown()`', '`Schedule::alwaysOnOneServer()` and `--memory=75%`', 'Array fake assertions and model `defaults()`']}
+  applies="Laravel 13.35.0 and later"
+>
+
+- **13.35.0** was tagged on **October 6, 2026**: 60-plus changes, mostly fixes, plus six small features.
+- QUERY routes, Markdown responses, one-server scheduling, percentage memory limits, array checks in fakes and an opt-in `defaults()` method on models.
+- Everything is opt-in: `composer update laravel/framework` and adopt what you need.
+
+</TLDR>
+
+## What's new at a glance
+
+| Feature | Replaces |
+|---|---|
+| `Route::query()` | A POST used for reading, or a huge query string |
+| `response()->markdown()` | Setting `Content-Type: text/markdown` by hand |
+| `Schedule::alwaysOnOneServer()` | Remembering `->onOneServer()` on every task |
+| `queue:work --memory=75%` | A megabyte number that drifts from your container size |
+| Array checks in `assertPushed()` and friends | A closure per assertion |
+| `defaults()` with `HasDefaultAttributes` | Overriding the model constructor |
+
+## QUERY routes: a GET with a body
+
+`QUERY` is a new HTTP method from the IETF HTTP working group. Think of it as **a GET with a body**: it is safe and repeatable like GET, but you can send a JSON payload instead of squeezing complex filters into the URL. It is a good fit for search endpoints with many filters.
+
+Until now you had two bad options: a very long query string, or a POST that is not really a write.
+
+<CodeCompare before="Before" after="After">
+
+```php title="routes/web.php"
+// A POST used for reading, just to get a request body
+Route::post('/products/search', SearchProductsController::class);
+```
+
+```php title="routes/web.php"
+use App\Http\Controllers\SearchProductsController;
+
+Route::query('/products/search', SearchProductsController::class);
+```
+
+</CodeCompare>
+
+The controller reads the body like any other request:
+
+```php title="app/Http/Controllers/SearchProductsController.php"
+class SearchProductsController
+{
+    public function __invoke(SearchProductsRequest $request): JsonResponse
+    {
+        $products = Product::query()
+            ->whereIn('category_id', $request->validated('categories', []))
+            ->where('price', '>=', $request->validated('min', 0))
+            ->where('price', '<=', $request->validated('max', PHP_INT_MAX))
+            ->paginate(20);
+
+        return response()->json($products);
+    }
+}
+```
+
+HTML forms can't send QUERY, but `fetch` can. From a Vue component:
+
+```ts title="resources/js/pages/products/Search.vue"
+const response = await fetch("/products/search", {
+  method: "QUERY",
+  headers: { "Content-Type": "application/json", Accept: "application/json" },
+  body: JSON.stringify({ categories: [3, 7], min: 10, max: 250 }),
+});
+```
+
+Testing helpers already exist:
+
+```php title="tests/Feature/ProductSearchTest.php"
+it('filters products by category', function () {
+    Product::factory()->count(2)->create(['category_id' => 3]);
+    Product::factory()->create(['category_id' => 7]);
+
+    $this->queryJson('/products/search', ['categories' => [3]])
+        ->assertOk()
+        ->assertJsonCount(2, 'data');
+});
+```
+
+<Callout type="gotcha" title="QUERY is CSRF-checked on web routes">
+
+On `web` routes, QUERY requests are **CSRF-checked** like POST, because the handler is your code and Laravel can't guarantee it has no side effects. Send the `X-XSRF-TOKEN` header from your front end, or use `api` routes.
+
+</Callout>
+
+`QUERY` is now part of `Router::$verbs`, so `Route::any()` and `Route::redirect()` match it too.
+
+## Markdown responses with response()->markdown()
+
+Laravel already had `$request->wantsMarkdown()` (handy for AI agents and tools that ask for `text/markdown`), but no way to answer in Markdown without setting the header yourself.
+
+<CodeCompare before="Before" after="After">
+
+```php
+return response($post->markdown, 200, ['Content-Type' => 'text/markdown']);
+```
+
+```php title="app/Http/Controllers/PostController.php"
+public function show(Request $request, Post $post): Response|InertiaResponse
+{
+    if ($request->wantsMarkdown()) {
+        return response()->markdown($post->body_markdown);
+    }
+
+    return Inertia::render('posts/show', [
+        'post' => PostResource::make($post),
+    ]);
+}
+```
+
+</CodeCompare>
+
+Status codes and extra headers work like `response()->make()`. The `Content-Type` is always `text/markdown`, even if you pass another one in `$headers`.
+
+## Run every scheduled task on one server
+
+When you run the scheduler on several servers or containers, every task runs on every one of them unless you add `->onOneServer()`. Forget it once and your users get the same report email three times.
+
+Before, you wrapped tasks in a group by hand. Now you turn it on once, in a service provider:
+
+<CodeCompare before="Before" after="After">
+
+```php title="routes/console.php"
+Schedule::onOneServer()->group(function () {
+    Schedule::command('reports:send')->dailyAt('08:00');
+    Schedule::command('invoices:remind')->hourly();
+    // ...and everyone must remember to add new tasks inside this group
+});
+```
+
+```php title="app/Providers/AppServiceProvider.php"
+use Illuminate\Support\Facades\Schedule;
+
+public function boot(): void
+{
+    Schedule::alwaysOnOneServer();
+}
+```
+
+</CodeCompare>
+
+Now every scheduled task behaves as if it had `->onOneServer()`, and `routes/console.php` goes back to a plain list.
+
+<Callout type="gotcha" title="name your closures">
+
+Like `onOneServer()`, it needs a shared cache store (Redis, Memcached, database or DynamoDB). Closures without a name are skipped, so give them one.
+
+</Callout>
+
+```php title="routes/console.php"
+Schedule::call(fn () => Cache::forget('stats'))->name('clear-stats')->hourly();
+```
+
+## Queue worker memory as a percentage
+
+`--memory` tells a worker to restart after it uses a given amount of memory. It was always a number of megabytes, so it had to be updated every time you resized your containers.
+
+<CodeCompare before="Before" after="After">
+
+```bash
+# memory_limit is 1G in this container; remember to change 768 when it changes
+php artisan queue:work --memory=768
+```
+
+```bash
+php artisan queue:work --memory=75%
+```
+
+</CodeCompare>
+
+The percentage is taken from PHP's `memory_limit`, so the same command works on a small and a large container.
+
+<Callout type="heads-up" title="self-managed workers only">
+
+Laravel Cloud managed queues don't take custom worker options, so this is for workers you run yourself.
+
+</Callout>
+
+## Array checks in fake assertions
+
+Checking that a job was pushed with the right data used to need a closure for every assertion.
+
+<CodeCompare before="Before" after="After">
+
+```php
+Queue::assertPushed(ProcessPodcast::class, function (ProcessPodcast $job) use ($podcast, $user) {
+    return $job->podcast->is($podcast)
+        && $job->user->is($user)
+        && $job->status === 'pending';
+});
+```
+
+```php
+Queue::assertPushed(ProcessPodcast::class, [
+    'podcast' => $podcast,
+    'user' => $user,
+    'status' => 'pending',
+]);
+```
+
+</CodeCompare>
+
+Models are compared with `is()`, so it checks the record, not the object instance. It works with `Queue`, `Bus`, `Event` and `Notification` fakes, so this is valid too:
+
+```php
+Event::assertDispatched(OrderShipped::class, ['order' => $order]);
+```
+
+Closures still work when you need more complex logic.
+
+## Model defaults() that can call code
+
+Eloquent's `$attributes` property sets default values, but it can only hold constants. You couldn't use an enum's value or a config setting without overriding the constructor.
+
+<CodeCompare before="Before" after="After">
+
+```php
+class Post extends Model
+{
+    public function __construct(array $attributes = [])
+    {
+        $this->attributes['status'] = PostStatus::Draft->value;
+        $this->attributes['locale'] = config('app.locale');
+
+        parent::__construct($attributes);
+    }
+}
+```
+
+```php
+use Illuminate\Database\Eloquent\Concerns\HasDefaultAttributes;
+
+class Post extends Model
+{
+    use HasDefaultAttributes;
+
+    protected function defaults(): array
+    {
+        return [
+            'status' => PostStatus::Draft->value,
+            'locale' => config('app.locale'),
+            'views' => 0,
+        ];
+    }
+}
+```
+
+</CodeCompare>
+
+```php
+$post = new Post(['title' => 'Hello']);
+
+$post->status; // 'draft'
+$post->locale; // 'en'
+$post->isDirty('status'); // false
+```
+
+<TryIt title="Try it in Tinker">
+
+```bash
+php artisan tinker --execute="dump((new App\Models\Post(['title' => 'Hello']))->status)"
+```
+
+</TryIt>
+
+Values you pass to the constructor or `create()` win over the defaults. The method is only called on models that use the `HasDefaultAttributes` trait, so existing models are not affected.
+
+## Notable fixes
+
+A few bug fixes in this release that may affect real apps:
+
+- `chunkById()` and `lazyById()` no longer loop forever on models with a cast primary key.
+- `cursorPaginate()` keeps union, select and join bindings.
+- `incrementOrCreate()` on relations now sets the foreign key and keeps extra attributes.
+- `withCasts()` on a cloned query no longer changes the casts of the original query.
+- Several reference cycles (in `PendingRequest::throw()` and Mailable callbacks) are fixed, which helps long-running workers and Octane.
+- `schedule:list` shows the right times around daylight saving changes.
+
+Bonus from the same release: local disks accept `'lazy_root_creation' => true` in `config/filesystems.php`, so the root folder is only created when the first file is written.
+
+## Upgrade notes
+
+Run `composer update laravel/framework` (13.35.0 or later). `Route::query()`, `response()->markdown()`, `defaults()`, and the new flags are opt-in. `QUERY` is also added to `Router::$verbs`, so an existing `Route::any()` or `Route::redirect()` matches it without a new route.
+
+## Recap
+
+- `Route::query()` gives search endpoints a request body without pretending to be a POST (and it is CSRF-checked on `web`).
+- `response()->markdown()` answers `wantsMarkdown()` requests in one line.
+- `Schedule::alwaysOnOneServer()` makes every named task single-server.
+- `queue:work --memory=75%` follows PHP's `memory_limit`.
+- Fake assertions accept arrays, and `HasDefaultAttributes` lets model defaults use enums and config.
+
+## FAQ
+
+<FAQ items={[
+  { q: 'What is the HTTP QUERY method?', a: 'A newer HTTP method that is safe and repeatable like GET but carries a request body, which suits search endpoints with many filters. Laravel 13.35 adds `Route::query()` for it.' },
+  { q: 'Can an HTML form send a QUERY request?', a: 'No. Use `fetch` with `method: "QUERY"`, and send the `X-XSRF-TOKEN` header on `web` routes.' },
+  { q: 'Does alwaysOnOneServer() need Redis?', a: 'It needs a shared cache store, like `onOneServer()`: Redis, Memcached, database or DynamoDB.' },
+  { q: 'Will defaults() change my existing models?', a: 'No. It is only called on models that use the `HasDefaultAttributes` trait, and values passed to the constructor or `create()` still win.' },
+]} />
+
+## Next steps
+
+- [Inertia 3.9: background polling and the navigate type](/inertia-3-9-background-polling-navigate-type): the other release from the same week.
+- [Run a queued job and show its progress in Vue](/laravel-vue-queued-job): put the queue worker options to work.
+- [Test a Laravel + Vue app](/test-laravel-vue): where the array assertions shine.
+- [Laravel releases on GitHub](https://github.com/laravel/framework/releases)
+
+## Sources
+
+- [Laravel v13.35.0 release notes](https://github.com/laravel/framework/releases/tag/v13.35.0)
+- [PR #61797: QUERY route method](https://github.com/laravel/framework/pull/61797)
+- [PR #61800: `response()->markdown()`](https://github.com/laravel/framework/pull/61800)
+- [PR #61789: `alwaysOnOneServer()`](https://github.com/laravel/framework/pull/61789)
+- [PR #61753: percentage `--memory` for `queue:work`](https://github.com/laravel/framework/pull/61753)
+- [PR #61770: array properties in fake assertions](https://github.com/laravel/framework/pull/61770)
+- [PR #61813: opt-in `defaults()` trait](https://github.com/laravel/framework/pull/61813)
+- [PR #61799: `lazy_root_creation` for local disks](https://github.com/laravel/framework/pull/61799)
+

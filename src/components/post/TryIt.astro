@@ -1,0 +1,10 @@
+---
+// "Try it yourself": a copy-paste block or small exercise, visually set apart.
+import Icon from '../Icon.astro'
+interface Props { title?: string }
+const { title = 'Try it yourself' } = Astro.props
+---
+<section class="try-it" aria-label={title}>
+  <p class="try-title"><Icon name="zap" size={16} /> <strong>{title}</strong></p>
+  <slot />
+</section>

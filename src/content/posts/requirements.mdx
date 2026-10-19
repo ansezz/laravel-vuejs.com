@@ -1,0 +1,143 @@
+---
+id: 3
+title: "What you need to build with Laravel 13 and Vue 3 in 2026"
+excerpt: "PHP versions, extensions, Node.js, databases and the packages worth knowing: a practical checklist for a modern Laravel + Vue stack, and how it compares with the stack this site started on."
+date: 2019-05-18T02:48:53Z
+updated: 2026-10-10T00:00:00Z
+snippet: "php -v  # 8.3+"
+featured: true
+categories: [laravel]
+tags: [laravel, php, vuejs, tooling]
+---
+Your laptop still has PHP 8.1 and Node 18 from the last project, and the first `composer create-project` fails in a way that wastes an afternoon. Here is the 2026 checklist for a Laravel + Vue stack, the three commands that check it, and how it compares with the stack this blog started on.
+
+<TLDR
+  audience="Developers setting up a machine for Laravel 13 and Vue 3"
+  learn={['Which PHP, Node and database versions you need', 'The fastest way to install them', 'How the 2019 stack maps to 2026 choices']}
+  applies="Laravel 13 · PHP 8.3–8.5 · Node 20.19+ / 22.12+ · Vue 3.5 · Vite 8 · October 2026"
+>
+
+- **Laravel 13** (released March 17, 2026) needs **PHP 8.3 to 8.5** and Composer 2.
+- **Vite 8** needs **Node 20.19+ or 22.12+**; Node 18 is out.
+- New apps start on **SQLite**; MySQL, MariaDB, PostgreSQL and SQL Server work in production.
+- Fastest install: Laravel Herd (macOS/Windows), php.new, or Sail (Docker).
+
+</TLDR>
+
+This blog was first built on Laravel 5, Nova, GraphQL, Nuxt 2 and Apollo. A lot has changed since then.
+
+<Callout type="heads-up" title="versions move fast">
+
+Check the official [Laravel release notes](https://laravel.com/docs/releases) and the [Vue releases](https://github.com/vuejs/core/releases) before you start.
+
+</Callout>
+
+## The server side
+
+**Laravel 13** was released on March 17, 2026. It needs **PHP 8.3 to 8.5**. Laravel 12 (PHP 8.2 to 8.5) stopped getting bug fixes in August 2026 and gets security fixes until February 2027, so new projects should start on 13.
+
+| Laravel | PHP | Bug fixes until | Security fixes until |
+|---|---|---|---|
+| 12 | 8.2–8.5 | August 2026 | February 2027 |
+| 13 | 8.3–8.5 | current | current |
+
+### PHP extensions
+
+Your PHP install needs these extensions. Most PHP distributions ship them by default:
+
+- Ctype, cURL, DOM, Fileinfo, Filter, Hash
+- Mbstring, OpenSSL, PCRE, PDO, Session
+- Tokenizer, XML
+
+### Composer and a database
+
+- **Composer 2**, the PHP package manager
+- **A database.** New Laravel apps use **SQLite** out of the box, which is perfect for getting started. MySQL, MariaDB, PostgreSQL and SQL Server are all supported for production.
+
+### The quickest way to install it all
+
+- **macOS and Windows:** [Laravel Herd](https://herd.laravel.com) installs PHP, Composer and the Laravel installer in one go.
+- **Linux, macOS or Windows:** [php.new](https://php.new) gives you a one-line installer.
+- **Docker:** [Laravel Sail](https://laravel.com/docs/sail) if you prefer containers. Our [Sail guide](/laravel-sail-vue) covers the Vue side.
+
+<TryIt title="Check what you have">
+
+```bash
+php -v          # PHP 8.3 or newer
+composer -V     # Composer 2.x
+php -m          # lists the loaded extensions
+```
+
+</TryIt>
+
+## The front-end side
+
+- **Node.js 20.19+ or 22.12+**, with npm, pnpm or Bun. Node 24 LTS is inside that second range.
+- **Vue 3.5**, the current stable line. Vue 3.6, with the opt-in _Vapor mode_ that skips the virtual DOM, is in release candidate as of October 2026.
+- **Vite 8**, which Laravel uses to build front-end assets (it now bundles with Rolldown)
+- **Inertia 3**, the glue between Laravel and Vue in the official starter kits (Inertia 2 stopped getting bug fixes on September 26, 2026)
+- **Tailwind CSS 4** for styling, and **Nuxt 4** if you want a standalone Vue front end (Nuxt 3 reached end of life on July 31, 2026)
+
+<Callout type="gotcha" title="Node 18 won't do">
+
+Vite 8 rejects Node 18 and Node 20 below 20.19. Upgrade Node before you run `npm install`.
+
+</Callout>
+
+```bash
+node -v   # v20.19+ or v22.12+
+npm -v
+```
+
+## Then and now
+
+Here is the stack this blog started with, next to what we would pick for a new project today:
+
+| Job         | Then (2019)                | Now (2026)                                                                                 |
+| ----------- | -------------------------- | ------------------------------------------------------------------------------------------ |
+| Framework   | Laravel 5.8                | Laravel 13                                                                                 |
+| Admin panel | Nova                       | Nova 5 or Filament                                                                         |
+| API         | GraphQL with Lighthouse    | Inertia 3 for app pages; JSON:API resources or Lighthouse for public APIs                  |
+| Front end   | Nuxt 2, Vue 2, Options API | Vue 3.5 with `<script setup>` and TypeScript, via Inertia or Nuxt 4                        |
+| State       | Vuex                       | Pinia, or Inertia page props                                                               |
+| Styling     | Bootstrap 3, Stylus        | Tailwind CSS 4                                                                             |
+| Auth        | Passport, Socialite        | Starter kit auth or WorkOS AuthKit; Sanctum for SPA and mobile tokens; Socialite for OAuth |
+| Search      | Scout + Algolia            | Scout (Algolia, Meilisearch or Typesense), or vector search with pgvector                  |
+| Debugging   | Telescope                  | Telescope, Pail, and Pulse or Nightwatch in production                                     |
+| Testing     | PHPUnit                    | Pest, plus Vitest for components                                                           |
+
+## A good default
+
+If you are not sure where to start, use the official **Laravel + Vue starter kit**. You get Laravel 13, Inertia 3, Vue 3 with TypeScript, Tailwind and shadcn-vue, plus login, registration and email verification already wired up. Our [setup guide](/application-setup) walks you through it. If you are choosing between Inertia, a separate Vue SPA, and Nuxt, read [which stack to use](/laravel-vue-in-2026).
+
+## Recap
+
+- PHP 8.3–8.5, Composer 2 and the default extensions for Laravel 13.
+- Node 20.19+ or 22.12+ for Vite 8.
+- SQLite to start; a server database when production needs it.
+- The Vue starter kit is the default way in.
+
+## FAQ
+
+<FAQ items={[
+  { q: 'Which PHP version does Laravel 13 need?', a: 'PHP 8.3 to 8.5.' },
+  { q: 'Which Node.js version does Vite 8 need?', a: 'Node 20.19+ or 22.12+. Node 24 LTS works; Node 18 does not.' },
+  { q: 'Do I need MySQL to start a Laravel app?', a: 'No. New Laravel apps use SQLite out of the box. Switch to MySQL, MariaDB, PostgreSQL or SQL Server when production needs it.' },
+  { q: 'Should I start a new project on Laravel 12?', a: 'No. Laravel 12 stopped getting bug fixes in August 2026 and gets security fixes until February 2027. Start on 13.' },
+]} />
+
+## Next steps
+
+- [Set up a Laravel 13 + Vue 3 app in ten minutes](/application-setup)
+- [Laravel and Vue in 2026: Inertia, a SPA, or Nuxt](/laravel-vue-in-2026)
+- [Laravel Sail with Vue and Vite](/laravel-sail-vue): the Docker route.
+- [Start here: machine checks](/tools/start): the same checks as a copyable list.
+
+## Sources
+
+- [Laravel release notes and support policy](https://laravel.com/docs/releases)
+- [Laravel 13: Installation and server requirements](https://laravel.com/docs/13.x/deployment#server-requirements)
+- [Vite: getting started (Node.js versions)](https://vite.dev/guide/)
+- [Vue releases on GitHub](https://github.com/vuejs/core/releases)
+- [Inertia support policy](https://inertiajs.com/docs/v3/getting-started)
+- [Nuxt documentation](https://nuxt.com/docs)
