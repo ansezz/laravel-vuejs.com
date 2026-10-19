@@ -106,7 +106,7 @@ Turn it on for one result set: `Post::all()->withRelationshipAutoloading()`. For
 
 ## Real-world example: an Inertia posts page
 
-The controller on the right of the comparison above is the real one from the lab. Here is the Vue page that reads those props. Nothing changes on the front end, which is the point: the backend stops caring which fields the card grows next sprint.
+The "automatic eager loading" controller above is the real one from the lab. Here is the Vue page that reads those props. Nothing changes on the front end, which is the point: the backend stops caring which fields the card grows next sprint.
 
 ```vue title="resources/js/pages/Posts/Index.vue"
 <script setup lang="ts">
