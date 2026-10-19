@@ -1,0 +1,229 @@
+---
+import ToolPage from '../components/ToolPage.astro'
+import { SITE_URL } from '../config/site'
+import { cases } from '../data/which'
+
+const description = 'Four files in each round. One line would break the app. Open the file and click that line.'
+const badFile = (item: (typeof cases)[number]) =>
+  item.files.find((file) => file.lines.some((line) => line.bad))?.name ?? ''
+---
+<ToolPage title="Which file" lead={description} description={description}>
+  <p class="pkg-set-note">This page does not chat. Four files. One line is wrong. Nothing is sent off this page.</p>
+  <div class="which" id="which" data-site={SITE_URL} data-total={cases.length}>
+    <script is:inline>
+      document.getElementById('which')?.setAttribute('data-live', '')
+    </script>
+    {cases.map((item, index) => (
+      <section class="which-round" data-task={item.task} data-file={badFile(item)} aria-labelledby={`which-${item.id}`}>
+        <p class="kicker">Round {index + 1} of {cases.length}</p>
+        <h2 id={`which-${item.id}`} tabindex="-1">{item.task}</h2>
+        <p class="which-ask">Open a file. Click the line that would break the app.</p>
+        <div class="which-files">
+          {item.files.map((file) => (
+            <div class="which-file">
+              <button type="button" class="which-name" aria-expanded="true">{file.name}</button>
+              <div class="which-lines">
+                {file.lines.map((line, lineIndex) => (
+                  <button type="button" class="which-line" data-bad={line.bad ? '1' : '0'}>
+                    <span class="which-no" aria-hidden="true">{String(lineIndex + 1).padStart(2, '0')}</span>
+                    <span class="which-text">{line.text}</span>
+                    <span class="which-mark">{line.bad ? 'Breaks the app' : 'Fine'}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+        <p class="which-status" aria-live="polite"></p>
+        <div class="which-answer">
+          <p>{item.rule}</p>
+          <a href={item.guide}>{item.guideTitle}</a>
+        </div>
+        <button type="button" class="btn which-next">{index === cases.length - 1 ? 'See the score' : 'Next folder'}</button>
+      </section>
+    ))}
+    <section class="which-score" aria-labelledby="which-score-title">
+      <p class="kicker">Score</p>
+      <h2 id="which-score-title" tabindex="-1">You found <span data-which-count>0</span> of {cases.length}.</h2>
+      <p class="which-perfect">You opened the right file every time. Paste the prompt on the guide, not the one on this page.</p>
+      <ul class="which-misses"></ul>
+      <div class="which-actions">
+        <button type="button" class="copy-btn ask-copy" data-copy="" aria-label="Copy the score">
+          <svg class="i-copy" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          <svg class="i-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+          <span class="copy-label">Copy the score</span>
+        </button>
+        <button type="button" class="btn" data-which-again>Play again</button>
+      </div>
+    </section>
+    <p class="which-static-note">With JavaScript off, every file stays open and the bad line is marked. The score needs the script.</p>
+  </div>
+  <script>
+    const root = document.querySelector<HTMLElement>('#which')
+    if (root?.dataset.live !== undefined) {
+      const rounds = [...root.querySelectorAll<HTMLElement>('.which-round')]
+      const score = root.querySelector<HTMLElement>('.which-score')
+      const misses = root.querySelector<HTMLElement>('.which-misses')
+      const perfect = root.querySelector<HTMLElement>('.which-perfect')
+      const count = root.querySelector<HTMLElement>('[data-which-count]')
+      const copy = root.querySelector<HTMLButtonElement>('.which-score .copy-btn')
+      const total = rounds.length
+      const site = root.dataset.site ?? ''
+      let index = 0
+      let found = 0
+
+      const namesOf = (parent: Element, selector: string) =>
+        [...parent.querySelectorAll<HTMLElement>(selector)].map((node) => node.textContent ?? '').join('\n')
+
+      const shuffleNodes = (parent: Element, selector: string) => {
+        const nodes = [...parent.querySelectorAll<HTMLElement>(`:scope > ${selector}`)]
+        const before = namesOf(parent, `:scope > ${selector}`)
+        for (let guard = 0; guard < 8; guard += 1) {
+          for (let i = nodes.length - 1; i > 0; i -= 1) {
+            const j = Math.floor(Math.random() * (i + 1))
+            const current = nodes[i]
+            const other = nodes[j]
+            if (!current || !other) continue
+            nodes[i] = other
+            nodes[j] = current
+          }
+          for (const node of nodes) parent.append(node)
+          if (namesOf(parent, `:scope > ${selector}`) !== before) break
+        }
+      }
+
+      const shuffleRound = (round: HTMLElement) => {
+        const files = round.querySelector('.which-files')
+        if (files) shuffleNodes(files, '.which-file')
+        round.querySelectorAll<HTMLElement>('.which-file').forEach((file) => {
+          const lines = file.querySelector('.which-lines')
+          if (lines) shuffleNodes(lines, '.which-line')
+          file.querySelectorAll<HTMLElement>('.which-no').forEach((node, i) => {
+            node.textContent = String(i + 1).padStart(2, '0')
+          })
+        })
+      }
+
+      const closeFiles = (round: HTMLElement) => {
+        round.querySelectorAll<HTMLElement>('.which-file').forEach((file) => file.classList.remove('is-open'))
+        round.querySelectorAll<HTMLButtonElement>('.which-name').forEach((button) => {
+          button.setAttribute('aria-expanded', 'false')
+        })
+      }
+
+      const show = (next: number, focus = false) => {
+        rounds.forEach((round, i) => round.classList.toggle('is-on', i === next))
+        if (focus) rounds[next]?.querySelector<HTMLElement>('h2')?.focus()
+      }
+
+      const finish = () => {
+        rounds.forEach((round) => round.classList.remove('is-on'))
+        if (count) count.textContent = String(found)
+        perfect?.classList.toggle('is-on', found === total)
+        if (misses) {
+          misses.replaceChildren()
+          for (const round of rounds) {
+            if (round.classList.contains('is-found')) continue
+            const link = round.querySelector<HTMLAnchorElement>('.which-answer a')
+            const item = document.createElement('li')
+            item.textContent = `${round.dataset.task ?? ''} ${round.dataset.file ?? ''} `
+            if (link) item.append(link.cloneNode(true))
+            misses.append(item)
+          }
+          misses.classList.toggle('is-on', misses.childElementCount > 0)
+        }
+        if (copy) {
+          copy.dataset.copy = `I found the bad line in ${found} of ${total} files.\n${site}/which`
+        }
+        score?.classList.add('is-on')
+        score?.querySelector<HTMLElement>('h2')?.focus()
+      }
+
+      const reset = () => {
+        found = 0
+        index = 0
+        score?.classList.remove('is-on')
+        perfect?.classList.remove('is-on')
+        misses?.classList.remove('is-on')
+        misses?.replaceChildren()
+        for (const round of rounds) {
+          round.classList.remove('is-on', 'is-done', 'is-found', 'is-missed')
+          const status = round.querySelector('.which-status')
+          if (status) status.textContent = ''
+          closeFiles(round)
+          round.querySelectorAll<HTMLButtonElement>('.which-line').forEach((button) => {
+            button.disabled = false
+            button.classList.remove('is-bad', 'is-safe')
+          })
+          shuffleRound(round)
+        }
+        show(0, true)
+      }
+
+      root.addEventListener('click', (event) => {
+        const target = event.target
+        if (!(target instanceof Element)) return
+        if (target.closest('[data-which-again]')) {
+          reset()
+          return
+        }
+        const next = target.closest<HTMLButtonElement>('.which-next')
+        if (next) {
+          const round = next.closest('.which-round')
+          if (!round?.classList.contains('is-done')) return
+          if (index < total - 1) {
+            index += 1
+            show(index, true)
+          } else {
+            finish()
+          }
+          return
+        }
+        const round = target.closest<HTMLElement>('.which-round')
+        if (!round || !round.classList.contains('is-on') || round.classList.contains('is-done')) return
+        const name = target.closest<HTMLButtonElement>('.which-name')
+        if (name) {
+          const file = name.closest<HTMLElement>('.which-file')
+          const open = file?.classList.contains('is-open') ?? false
+          closeFiles(round)
+          if (file && !open) {
+            file.classList.add('is-open')
+            name.setAttribute('aria-expanded', 'true')
+          }
+          return
+        }
+        const button = target.closest<HTMLButtonElement>('.which-line')
+        if (!button) return
+        const bad = button.dataset.bad === '1'
+        round.querySelectorAll<HTMLButtonElement>('.which-line').forEach((line) => {
+          line.disabled = true
+        })
+        if (bad) {
+          found += 1
+          button.classList.add('is-bad')
+          round.classList.add('is-found')
+        } else {
+          button.classList.add('is-safe')
+          const culprit = round.querySelector<HTMLButtonElement>('[data-bad="1"]')
+          culprit?.classList.add('is-bad')
+          culprit?.closest<HTMLElement>('.which-file')?.classList.add('is-open')
+          culprit?.closest<HTMLElement>('.which-file')?.querySelector('.which-name')?.setAttribute('aria-expanded', 'true')
+          round.classList.add('is-missed')
+        }
+        const status = round.querySelector('.which-status')
+        if (status) {
+          status.textContent = bad
+            ? 'That line would break the app.'
+            : 'That line is fine. The marked line is the one that breaks the app.'
+        }
+        round.classList.add('is-done')
+      })
+
+      for (const round of rounds) {
+        closeFiles(round)
+        shuffleRound(round)
+      }
+      show(0)
+    }
+  </script>
+</ToolPage>

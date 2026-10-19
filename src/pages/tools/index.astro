@@ -1,11 +1,16 @@
 ---
 import Base from '../../layouts/Base.astro'
 import PageHero from '../../components/PageHero.astro'
+import { traps } from '../../data/traps'
 
 const description = 'Machine checks, the setup commands in order, the lines the setup guide shows, a stack recipe, a file map, October release notes, a 2019 to 2026 pick list, a compatibility card, and an AGENTS.md file for Laravel and Vue projects.'
 const tools = [
   { href: '/starter', title: 'Starter prompt', lead: 'Tick Laravel and Vue modules. Copy one prompt that reads those guides.' },
   { href: '/fix', title: 'Fix the app you have', lead: 'Paste an error, or composer.json and package.json. Copy the prompt for the matching guides.' },
+  { href: '/trap', title: 'Catch the bad line', lead: `${traps.length} prompts. One line in each would break the app. Click that line.` },
+  { href: '/strike', title: 'Cross out the bad line', lead: 'Paste your instructions. Cross out a line the guides forbid. Copy what is left.' },
+  { href: '/which', title: 'Which file', lead: 'Four files. One line would break the app. Open the file and click that line.' },
+  { href: '/spin', title: "Today's project", lead: 'Run the reel. It stops on one project you can build today. Copy the prompt.' },
   { href: '/tools/start', title: 'Start here', lead: 'Machine checks from the requirements article, then the commands in the order the setup guide runs them.' },
   { href: '/tools/samples', title: 'Samples', lead: 'Lines the setup guide prints. A method or a class body is not a whole file.' },
   { href: '/tools/recipe', title: 'Stack recipe', lead: 'Tick the jobs. The commands use the same packages as the chart. They do not pin versions.' },

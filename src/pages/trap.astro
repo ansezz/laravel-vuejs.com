@@ -1,0 +1,191 @@
+---
+import ToolPage from '../components/ToolPage.astro'
+import { SITE_URL } from '../config/site'
+import { traps } from '../data/traps'
+
+const description = `${traps.length} prompts. Each one has a single line that would break a Laravel and Vue app. Click that line.`
+---
+<ToolPage title="Catch the bad line" lead={description} description={description}>
+  <p class="pkg-set-note">This page does not chat. One line in each prompt is wrong. The guide under it is the correction.</p>
+  <div class="trap" id="trap" data-site={SITE_URL} data-total={traps.length}>
+    <script is:inline>
+      document.getElementById('trap')?.setAttribute('data-live', '')
+    </script>
+    {traps.map((trap, index) => (
+      <section class="trap-round" data-task={trap.task} aria-labelledby={`trap-${trap.id}`}>
+        <p class="kicker">Round {index + 1} of {traps.length}</p>
+        <h2 id={`trap-${trap.id}`} tabindex="-1">{trap.task}</h2>
+        <p class="trap-ask">Click the line that would break the app.</p>
+        <div class="trap-lines" role="group" aria-label={trap.task}>
+          {trap.lines.map((line, lineIndex) => (
+            <button type="button" class="trap-line" data-bad={line.bad ? '1' : '0'}>
+              <span class="trap-no" aria-hidden="true">{String(lineIndex + 1).padStart(2, '0')}</span>
+              <span class="trap-text">{line.text}</span>
+              <span class="trap-mark">{line.bad ? 'Breaks the app' : 'Fine'}</span>
+            </button>
+          ))}
+        </div>
+        <p class="trap-status" aria-live="polite"></p>
+        <div class="trap-answer">
+          <p>{trap.rule}</p>
+          <a href={trap.guide}>{trap.guideTitle}</a>
+        </div>
+        <button type="button" class="btn trap-next">{index === traps.length - 1 ? 'See the score' : 'Next prompt'}</button>
+      </section>
+    ))}
+    <section class="trap-score" aria-labelledby="trap-score-title">
+      <p class="kicker">Score</p>
+      <h2 id="trap-score-title" tabindex="-1">You caught <span data-trap-count>0</span> of {traps.length}.</h2>
+      <p class="trap-perfect">You found every bad line. Paste the prompt on the guide, not the one on this page.</p>
+      <ul class="trap-misses"></ul>
+      <div class="trap-actions">
+        <button type="button" class="copy-btn ask-copy" data-copy="" aria-label="Copy the score">
+          <svg class="i-copy" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          <svg class="i-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+          <span class="copy-label">Copy the score</span>
+        </button>
+        <button type="button" class="btn" data-trap-again>Play again</button>
+      </div>
+    </section>
+    <p class="trap-static-note">With JavaScript off, every round stays open and the bad line is marked. The score needs the script.</p>
+  </div>
+  <script>
+    const root = document.querySelector<HTMLElement>('#trap')
+    if (root?.dataset.live !== undefined) {
+      const rounds = [...root.querySelectorAll<HTMLElement>('.trap-round')]
+      const score = root.querySelector<HTMLElement>('.trap-score')
+      const misses = root.querySelector<HTMLElement>('.trap-misses')
+      const perfect = root.querySelector<HTMLElement>('.trap-perfect')
+      const count = root.querySelector<HTMLElement>('[data-trap-count]')
+      const copy = root.querySelector<HTMLButtonElement>('.trap-score .copy-btn')
+      const total = rounds.length
+      const site = root.dataset.site ?? ''
+      let index = 0
+      let caught = 0
+
+      const lineOrder = (round: HTMLElement) =>
+        [...round.querySelectorAll('.trap-text')].map((node) => node.textContent ?? '').join('\n')
+
+      const shuffleRound = (round: HTMLElement) => {
+        const list = round.querySelector('.trap-lines')
+        if (!list) return
+        const buttons = [...list.querySelectorAll<HTMLButtonElement>('.trap-line')]
+        const before = lineOrder(round)
+        for (let guard = 0; guard < 8; guard += 1) {
+          for (let i = buttons.length - 1; i > 0; i -= 1) {
+            const j = Math.floor(Math.random() * (i + 1))
+            const current = buttons[i]
+            const other = buttons[j]
+            if (!current || !other) continue
+            buttons[i] = other
+            buttons[j] = current
+          }
+          for (const button of buttons) list.append(button)
+          if (lineOrder(round) !== before) break
+        }
+        round.querySelectorAll<HTMLElement>('.trap-no').forEach((node, i) => {
+          node.textContent = String(i + 1).padStart(2, '0')
+        })
+      }
+
+      const shuffleAll = () => {
+        for (const round of rounds) shuffleRound(round)
+      }
+
+      const show = (next: number, focus = false) => {
+        rounds.forEach((round, i) => round.classList.toggle('is-on', i === next))
+        if (focus) rounds[next]?.querySelector<HTMLElement>('h2')?.focus()
+      }
+
+      const finish = () => {
+        rounds.forEach((round) => round.classList.remove('is-on'))
+        if (count) count.textContent = String(caught)
+        perfect?.classList.toggle('is-on', caught === total)
+        if (misses) {
+          misses.replaceChildren()
+          for (const round of rounds) {
+            if (round.classList.contains('is-caught')) continue
+            const link = round.querySelector<HTMLAnchorElement>('.trap-answer a')
+            const item = document.createElement('li')
+            item.textContent = `${round.dataset.task ?? ''} `
+            if (link) item.append(link.cloneNode(true))
+            misses.append(item)
+          }
+          misses.classList.toggle('is-on', misses.childElementCount > 0)
+        }
+        if (copy) {
+          copy.dataset.copy = `I caught ${caught} of ${total} bad prompt lines.\n${site}/trap`
+        }
+        score?.classList.add('is-on')
+        score?.querySelector<HTMLElement>('h2')?.focus()
+      }
+
+      const reset = () => {
+        caught = 0
+        index = 0
+        score?.classList.remove('is-on')
+        perfect?.classList.remove('is-on')
+        misses?.classList.remove('is-on')
+        misses?.replaceChildren()
+        for (const round of rounds) {
+          round.classList.remove('is-on', 'is-done', 'is-caught', 'is-missed')
+          const status = round.querySelector('.trap-status')
+          if (status) status.textContent = ''
+          round.querySelectorAll<HTMLButtonElement>('.trap-line').forEach((button) => {
+            button.disabled = false
+            button.classList.remove('is-bad', 'is-safe')
+          })
+        }
+        shuffleAll()
+        show(0, true)
+      }
+
+      root.addEventListener('click', (event) => {
+        const target = event.target
+        if (!(target instanceof Element)) return
+        if (target.closest('[data-trap-again]')) {
+          reset()
+          return
+        }
+        const next = target.closest<HTMLButtonElement>('.trap-next')
+        if (next) {
+          const round = next.closest('.trap-round')
+          if (!round?.classList.contains('is-done')) return
+          if (index < total - 1) {
+            index += 1
+            show(index, true)
+          } else {
+            finish()
+          }
+          return
+        }
+        const button = target.closest<HTMLButtonElement>('.trap-line')
+        const round = button?.closest<HTMLElement>('.trap-round')
+        if (!button || !round || !round.classList.contains('is-on') || round.classList.contains('is-done')) return
+        const bad = button.dataset.bad === '1'
+        round.querySelectorAll<HTMLButtonElement>('.trap-line').forEach((line) => {
+          line.disabled = true
+        })
+        if (bad) {
+          caught += 1
+          button.classList.add('is-bad')
+          round.classList.add('is-caught')
+        } else {
+          button.classList.add('is-safe')
+          round.querySelector<HTMLButtonElement>('[data-bad="1"]')?.classList.add('is-bad')
+          round.classList.add('is-missed')
+        }
+        const status = round.querySelector('.trap-status')
+        if (status) {
+          status.textContent = bad
+            ? 'That line would break the app.'
+            : 'That line is fine. The marked line is the one that breaks the app.'
+        }
+        round.classList.add('is-done')
+      })
+
+      shuffleAll()
+      show(0)
+    }
+  </script>
+</ToolPage>

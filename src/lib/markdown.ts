@@ -1,6 +1,7 @@
 import { CHEATSHEETS } from "../data/cheatsheets";
 import { allPosts, categories, type Post } from "./content";
 import { agentPrompt, agentTaskFor, firstApp } from "../data/agent-tasks";
+import { traps } from "../data/traps";
 import {
   SITE_URL,
   SITE_NAME,
@@ -60,6 +61,10 @@ ${CHEATSHEETS.map((s) => `- [${s.title}](${SITE_URL}/cheatsheets/${s.slug}): ${s
 - [Developer tools](${SITE_URL}/tools): machine checks, the setup commands in order, the lines the setup guide shows, a stack recipe, a file map, October release notes, a 2019 to 2026 pick list, a compatibility card, and an AGENTS.md file
 - [Starter prompt](${SITE_URL}/starter): tick Laravel and Vue modules. The prompt reads those guides and copies their constraints. The same prompt downloads as AGENTS.md, and the query string keeps the ticks.
 - [Fix the app you have](${SITE_URL}/fix): paste an error, or composer.json and package.json. The prompt reads the matching guides.
+- [Catch the bad line](${SITE_URL}/trap): ${traps.length} prompts, one wrong line each. The correction links to the guide.
+- [Cross out the bad line](${SITE_URL}/strike): paste your instructions. A line the guides forbid is crossed out. Copy what is left.
+- [Which file](${SITE_URL}/which): four files, one bad line. Open the file and click that line.
+- [Today's project](${SITE_URL}/spin): run the reel. It stops on one project you can build today. Copy the prompt.
 - [Start here](${SITE_URL}/tools/start) ([Markdown](${SITE_URL}/tools/start.md)): machine checks and the setup commands in order
 - [Samples](${SITE_URL}/tools/samples) ([Markdown](${SITE_URL}/tools/samples.md)): the lines the Vue starter kit setup guide prints
 - [Stack recipe](${SITE_URL}/tools/recipe): tick the jobs. The commands use the same packages as the chart. They do not pin versions

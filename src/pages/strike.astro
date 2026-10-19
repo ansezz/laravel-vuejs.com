@@ -1,0 +1,99 @@
+---
+import ToolPage from '../components/ToolPage.astro'
+import { strikes } from '../data/strikes'
+
+const description = 'Paste the instructions you wrote. This page crosses out a line the guides forbid. Copy what is left.'
+const example = [
+  'Add a posts page.',
+  "Install Ziggy and call route('posts.store').",
+  'Post the form with Inertia.',
+].join('\n')
+---
+<ToolPage title="Cross out the bad line" lead={description} description={description}>
+  <p class="pkg-set-note">This page does not chat. Paste the instructions you wrote for your editor. One line each. To practice first, <a href="/trap">catch the bad line</a>.</p>
+  <div class="strike" id="strike" data-example={example}>
+    <script is:inline>
+      document.getElementById('strike')?.setAttribute('data-live', '')
+    </script>
+    <label class="strike-field">
+      <span class="kicker">Your instructions</span>
+      <textarea id="strike-paste" class="input fix-paste" rows="8" spellcheck="false" placeholder={example}></textarea>
+    </label>
+    <div class="strike-actions">
+      <button type="button" class="btn" data-strike-example>Try an example</button>
+      <button type="button" class="copy-btn ask-copy" data-copy="" disabled aria-label="Copy what is left">
+        <svg class="i-copy" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        <svg class="i-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+        <span class="copy-label">Copy what is left</span>
+      </button>
+    </div>
+    <p class="strike-status" aria-live="polite">Paste the instructions. One line each.</p>
+    <div class="strike-lines"></div>
+    <div class="strike-static">
+      <p>With JavaScript off, the box does not cross anything out. These are the lines it crosses out.</p>
+      <ul>
+        {strikes.map((rule) => (
+          <li><a href={rule.guide}>{rule.guideTitle}</a>. {rule.reason}</li>
+        ))}
+      </ul>
+    </div>
+  </div>
+  <script>
+    import { keptText, markLines } from '../data/strikes'
+
+    const root = document.querySelector<HTMLElement>('#strike')
+    if (root?.dataset.live !== undefined) {
+      const box = root.querySelector<HTMLTextAreaElement>('#strike-paste')
+      const lines = root.querySelector<HTMLElement>('.strike-lines')
+      const status = root.querySelector<HTMLElement>('.strike-status')
+      const copy = root.querySelector<HTMLButtonElement>('.copy-btn')
+      const sample = root.dataset.example ?? ''
+
+      const paint = () => {
+        if (!box || !lines || !status || !copy) return
+        const marks = markLines(box.value)
+        const struck = marks.filter((mark) => mark.rule).length
+        lines.replaceChildren()
+        for (const mark of marks) {
+          const row = document.createElement('div')
+          row.className = mark.rule ? 'strike-line is-out' : 'strike-line'
+          const text = document.createElement('p')
+          text.className = 'strike-text'
+          text.textContent = mark.text
+          row.append(text)
+          if (mark.rule) {
+            const reason = document.createElement('p')
+            reason.className = 'strike-reason'
+            reason.append(mark.rule.reason + ' ')
+            const link = document.createElement('a')
+            link.href = mark.rule.guide
+            link.textContent = mark.rule.guideTitle
+            reason.append(link)
+            row.append(reason)
+          }
+          lines.append(row)
+        }
+        const left = keptText(marks)
+        copy.dataset.copy = left
+        copy.disabled = left.length === 0
+        if (marks.length === 0) {
+          status.textContent = 'Paste the instructions. One line each.'
+        } else if (struck === 0) {
+          status.textContent = 'Nothing to cross out. Copy it as it is.'
+        } else if (struck === marks.length) {
+          status.textContent = 'Every line was crossed out. Nothing left to copy.'
+        } else {
+          status.textContent = struck === 1 ? 'Crossed out 1 line.' : `Crossed out ${struck} lines.`
+        }
+      }
+
+      box?.addEventListener('input', paint)
+      root.querySelector('[data-strike-example]')?.addEventListener('click', () => {
+        if (!box) return
+        box.value = sample
+        paint()
+        box.focus()
+      })
+    }
+  </script>
+</ToolPage>
