@@ -1,0 +1,248 @@
+---
+id: 163
+title: "Laravel Concurrency::run(): load three slow dashboard queries in parallel"
+seoTitle: "Laravel Concurrency::run(): Parallel Queries"
+excerpt: "Hidden gem: Concurrency::run() runs closures in child PHP processes and returns all results together. Measured gains, the ~200 ms overhead, and the one-closure-per-line trap. Tested on Laravel 13.37."
+date: 2026-10-24T01:00:00Z
+snippet: "[$a, $b] = Concurrency::run([fn () => …, fn () => …]);"
+categories: [laravel, vuejs]
+tags: [laravel, php, inertia, vuejs]
+---
+Your Inertia dashboard shows revenue, signups and open tickets. Each number takes 400 ms to compute, they don't depend on each other, and PHP runs them one after another: 1.2 seconds before the page even starts rendering. Laravel can run them side by side with one call that most apps have never used.
+
+<TLDR
+  audience="Laravel 11–13 developers with slow, independent work in one request (dashboards, reports, external APIs)"
+  learn={['What `Concurrency::run()` does under the hood', 'Real timings: where it wins and where its overhead loses', 'Named results, timeouts, exceptions and `Concurrency::defer()`', 'The traps: one closure per line, autoloadable classes, the `fork` driver']}
+  tested="Laravel 13.37 · PHP 8.3 · process driver · laravel/serializable-closure 2.1"
+>
+
+- `Concurrency::run([fn () => …, fn () => …])` runs each closure in its **own PHP process** and returns the results in the same order (or by key).
+- Three 400 ms tasks took **595 ms** instead of ~1,200 ms. But a single task took **~610 ms**: every call pays roughly **200 ms** of process startup.
+- Exceptions thrown in a child are **rethrown in the parent** with their original class. Context travels into the children.
+- Put **each closure on its own line**. Two closures on one line both returned the first one's result in our test.
+
+</TLDR>
+
+## What Concurrency is and why people miss it
+
+`Concurrency` arrived in **Laravel 11.23** (September 2024), in the same release as `defer()` and `Cache::flexible`. It has its own docs page, tucked between Collections and Context, and most tutorials still reach for a queue or nothing at all.
+
+Under the hood, Laravel serializes each closure with `laravel/serializable-closure`, starts a hidden `php artisan invoke-serialized-closure` process per closure, waits for all of them, and unserializes the results. Your closures run with a fully booted app: config, database, Eloquent, facades.
+
+<Diagram name="laravel-concurrency-run-flow" alt="The parent request serializes three closures and starts one php artisan invoke-serialized-closure process per closure, passing along the current Context. The three child processes boot Laravel and run their closure at the same time. The parent waits for all three, unserializes the results, and returns them in the original order or by key. If any child throws, the parent rethrows that exception." caption="One child process per closure, all started at once." />
+
+## The usual way vs the gem
+
+<CodeCompare before="sequential" after="Concurrency::run()">
+
+```php title="app/Http/Controllers/DashboardController.php"
+public function __invoke()
+{
+    return Inertia::render('Dashboard', [
+        'revenue' => $this->revenue(),     // ~400 ms
+        'signups' => $this->signups(),     // ~400 ms
+        'tickets' => $this->openTickets(), // ~400 ms
+    ]);                                    // ≈ 1.2 s
+}
+```
+
+```php title="app/Http/Controllers/DashboardController.php"
+use Illuminate\Support\Facades\Concurrency;
+
+public function __invoke()
+{
+    $stats = Concurrency::run([ // [!code highlight]
+        'revenue' => fn () => Order::thisMonth()->sum('total'),
+        'signups' => fn () => User::where('created_at', '>=', now()->subWeek())->count(),
+        'tickets' => fn () => Ticket::open()->count(),
+    ]);                                    // ≈ 0.6 s
+
+    return Inertia::render('Dashboard', $stats);
+}
+```
+
+</CodeCompare>
+
+Named keys come back as named keys, so `$stats` drops straight into the props. With a plain list, destructure: `[$revenue, $signups] = Concurrency::run([...])`.
+
+## What we measured
+
+Each task was `usleep(400_000)`, run from a booted Laravel 13.37 app on PHP 8.3 with the default `process` driver:
+
+| Scenario | Time |
+|---|---|
+| 3 × 400 ms, `sync` driver (one after another) | 800 ms for 2 tasks, so ~1,200 ms for 3 |
+| 3 × 400 ms, `process` driver | **595 ms** |
+| 1 × 400 ms, `process` driver | **611 ms** |
+| 1 trivial task (`fn () => 1`), `process` driver | **222 ms** |
+| 2 × 100 ms, sequential vs `process` (`Benchmark::measure`) | **200 ms** vs **322 ms** |
+
+The last three lines are the catch. Each call boots a fresh PHP process per closure, and that costs about 200 ms here. At 100 ms per task, the concurrent version was already **slower** than doing the work in sequence. Concurrency pays off when the tasks are **slow and independent**: several hundred milliseconds each, at least two of them.
+
+<Callout type="tip" title="measure before and after">
+
+Wrap the old code in `Benchmark::dd(fn () => …, iterations: 5)` and then the new one. If the gain isn't obvious, the work wasn't slow enough, and a cache (or [`Cache::flexible`](/laravel-cache-flexible-swr)) is the better fix.
+
+</Callout>
+
+## Real-world example: a dashboard with an external API
+
+Concurrency shines when one of the slow tasks waits on the network. Here the Stripe balance call and two heavy aggregates run together, with a timeout so a hung API can't hold the page forever:
+
+```php title="app/Http/Controllers/DashboardController.php"
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Order;
+use App\Models\Ticket;
+use Illuminate\Support\Facades\Concurrency;
+use Illuminate\Support\Facades\Http;
+use Inertia\Inertia;
+
+class DashboardController
+{
+    public function __invoke()
+    {
+        $stats = Concurrency::run([
+            'revenue' => fn () => Order::whereMonth('created_at', now()->month)->sum('total'),
+            'tickets' => fn () => Ticket::where('status', 'open')->count(),
+            'balance' => fn () => Http::withToken(config('services.stripe.secret'))
+                ->get('https://api.stripe.com/v1/balance')
+                ->json('available.0.amount'),
+        ], timeout: 5); // seconds, per task (process driver only)
+
+        return Inertia::render('Dashboard', $stats);
+    }
+}
+```
+
+```vue title="resources/js/pages/Dashboard.vue"
+<script setup lang="ts">
+defineProps<{ revenue: number; tickets: number; balance: number | null }>()
+</script>
+
+<template>
+    <dl class="grid grid-cols-3 gap-4">
+        <div><dt>Revenue this month</dt><dd>{{ revenue }}</dd></div>
+        <div><dt>Open tickets</dt><dd>{{ tickets }}</dd></div>
+        <div><dt>Stripe balance</dt><dd>{{ balance ?? '—' }}</dd></div>
+    </dl>
+</template>
+```
+
+<Callout type="pro-tip" title="or let Inertia defer the slow one">
+
+If only one prop is slow, an [Inertia deferred prop](/inertia-partial-reloads) renders the page first and loads it afterwards. Concurrency is for when the page genuinely needs all of them up front.
+
+</Callout>
+
+## Exceptions, timeouts and Context
+
+**Exceptions are rethrown in the parent.** A child that throws `new RuntimeException('boom in child')` surfaced in the parent as `RuntimeException: boom in child`, so your normal `try`/`catch` and the exception handler work. The other results are lost: one failure fails the whole call. Catch inside the closure if a missing number is acceptable:
+
+```php title="app/Http/Controllers/DashboardController.php"
+'balance' => function () {
+    try {
+        return Http::timeout(3)->get('https://api.stripe.com/v1/balance')->json('available.0.amount');
+    } catch (\Throwable $e) {
+        report($e);
+        return null; // the dashboard shows "—" instead of a 500
+    }
+},
+```
+
+**Timeouts kill the child.** With `timeout: 1` and a task that sleeps three seconds, the parent got an `Illuminate\Process\Exceptions\ProcessTimedOutException`. The timeout applies to each task, on the `process` driver only.
+
+**Context travels.** The process driver passes the current [Context](/laravel-context-request-id-logs-queued-jobs) to each child, so `Context::get('request_id')` inside a closure returned the parent's value and log lines from the children carry the same request id.
+
+## Concurrency::defer(): parallel and after the response
+
+When you don't need the results, `Concurrency::defer()` combines the two gems: the closures run concurrently, **after** the response is sent, like [`defer()`](/laravel-defer-helper-after-response):
+
+```php title="app/Http/Controllers/OrderController.php"
+Concurrency::defer([
+    fn () => Crm::syncOrder($order->id),
+    fn () => Analytics::track('order.placed', $order->id),
+]);
+```
+
+## Gotchas
+
+**One closure per line.** This one cost us ten minutes. `Concurrency::run([fn () => 'A', fn () => 'B'])` returned `["A","A"]`. Closures are serialized by reading their source code, and `laravel/serializable-closure` can't tell apart two closures with the same signature on the same line. Its README says so. Put each closure on its own line, which you want for readability anyway.
+
+**Captured objects are serialized, not shared.** A closure that does `use ($user)` gets a copy: an Eloquent model in `use` arrived intact in our test, changes made in the child never reach the parent, and an object of a class the child can't autoload fails with an "incomplete object" error. Anonymous classes can't be serialized at all.
+
+**No transactions across children.** Each child opens its own database connection. Don't split one unit of work across closures and expect `DB::transaction()` in the parent to cover them.
+
+**The `fork` driver is CLI-only.** It is faster (no new PHP boot) and needs `composer require spatie/fork`, but PHP can't fork inside a web request. Use it in Artisan commands and queued jobs: `Concurrency::driver('fork')->run([...])`.
+
+**Use `sync` in tests if you mock things.** Fakes like `Http::fake()` live in the parent process; a child boots a fresh app without them. In our test, a faked URL inside `Concurrency::run()` made a real request (and failed with a `ConnectionException`), while the `sync` driver returned the fake. Add `<env name="CONCURRENCY_DRIVER" value="sync"/>` to `phpunit.xml`.
+
+## Try it yourself
+
+<TryIt title="Time it in tinker">
+
+```bash
+php artisan tinker
+```
+
+```php
+use Illuminate\Support\Benchmark;
+use Illuminate\Support\Facades\Concurrency;
+
+Benchmark::measure([
+    'sequential' => fn () => [usleep(400_000), usleep(400_000), usleep(400_000)],
+    'concurrent' => fn () => Concurrency::run([
+        fn () => usleep(400_000),
+        fn () => usleep(400_000),
+        fn () => usleep(400_000),
+    ]),
+]);
+// ['sequential' => ~1200.0, 'concurrent' => ~600.0] (ms)
+```
+
+Change `400_000` to `100_000` and watch the concurrent version lose (we got 200 ms vs 322 ms).
+
+</TryIt>
+
+## How useful is this?
+
+| | Score |
+|---|---|
+| Time saved per use | ★★★★☆ Halves a slow dashboard with one wrapper |
+| How often you'll reach for it | ★★☆☆☆ Only for slow, independent work; most queries are too fast |
+| Risk if misused | ★★★☆☆ Slower pages for fast tasks, the same-line trap, fakes not reaching children |
+| **Overall** | **3.5 / 5**: a sharp tool for the right job, measure first |
+
+## Recap
+
+- `Concurrency::run()` runs each closure in its own PHP process and returns all results, by position or by key.
+- It saved half the time on three 400 ms tasks, and cost ~200 ms on a single one. Measure.
+- Child exceptions are rethrown in the parent; `timeout:` kills slow children; Context goes along.
+- `Concurrency::defer()` runs them in parallel after the response.
+- One closure per line, autoloadable classes only, `fork` in the CLI, `sync` in tests.
+
+## FAQ
+
+<FAQ items={[
+  { q: 'How do I run database queries in parallel in Laravel?', a: 'Wrap each query in a closure and pass them to `Concurrency::run()`. Each runs in its own PHP process with its own connection, and you get all results back together. It only helps when each query is slow, because every child costs about 200 ms to start.' },
+  { q: 'What happens if one closure throws an exception?', a: 'The parent rethrows it with the same class and message, and the other results are discarded. Catch inside the closure and return a fallback if one missing value is acceptable.' },
+  { q: 'Why do two closures return the same result?', a: 'They are on the same line. `laravel/serializable-closure` identifies closures by their source, so two closures with the same signature on one line can be confused. Put each closure on its own line.' },
+  { q: 'Does Http::fake() work inside Concurrency::run()?', a: 'Not with the default process driver, because each child boots a fresh application. Use the `sync` driver in tests so closures run in the test process.' },
+  { q: 'Which Laravel version added Concurrency?', a: 'Laravel 11.23, in September 2024. This post was tested on 13.37 with the default process driver.' },
+]} />
+
+## Next steps
+
+- [Laravel defer(): run code after the response](/laravel-defer-helper-after-response)
+- [Cache::flexible: serve stale cache while it refreshes](/laravel-cache-flexible-swr)
+- [Laravel Context: one request id everywhere](/laravel-context-request-id-logs-queued-jobs)
+- [Laravel docs: Concurrency](https://laravel.com/docs/13.x/concurrency)
+
+## Sources
+
+- [Laravel docs: Concurrency](https://laravel.com/docs/13.x/concurrency) (drivers, named results, timeouts, `defer`)
+- [`Illuminate\Concurrency\ProcessDriver`](https://github.com/laravel/framework/blob/13.x/src/Illuminate/Concurrency/ProcessDriver.php), which starts `invoke-serialized-closure` and passes the Context
+- [laravel/serializable-closure README](https://github.com/laravel/serializable-closure#readme), on closures defined on the same line
+- [Laravel 11.23 release](https://github.com/laravel/framework/releases/tag/v11.23.0) (Concurrency, `defer()`, `Cache::flexible`)

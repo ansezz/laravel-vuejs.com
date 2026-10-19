@@ -1,0 +1,329 @@
+---
+id: 162
+title: "Vue 3.5 onWatcherCleanup: cancel stale requests in a live search, plus pause() and resume()"
+seoTitle: "Vue onWatcherCleanup: Cancel Stale Requests in a Watcher"
+excerpt: "Hidden gem: onWatcherCleanup() aborts the previous keystroke's request and debounce timer before a watcher re-runs, and on unmount. With watch pause()/resume(). Tested on Vue 3.5.44."
+date: 2026-10-22T01:00:00Z
+snippet: "onWatcherCleanup(() => controller.abort())"
+categories: [vuejs, laravel]
+tags: [vuejs, typescript, inertia, laravel]
+---
+You type "lara", the results for "lar" arrive last, and the list shows the wrong thing. Every live search written with `watch` has this bug until someone adds an `AbortController`, a `clearTimeout`, and a flag for the unmount case. Vue 3.5 folded all three into one call most people haven't noticed: `onWatcherCleanup()`.
+
+<TLDR
+  audience="Vue 3 developers building search, filters and autocomplete against a Laravel API, with or without Inertia"
+  learn={['What `onWatcherCleanup()` does and when it runs', 'A debounced, cancellable `useLiveSearch()` composable', 'The one rule: call it before any `await`', 'The watch handle\'s `pause()` and `resume()`, and what resume replays']}
+  tested="Vue 3.5.44 · TypeScript · Vitest 5 + @vue/test-utils 2 + jsdom (5 tests, fake timers)"
+>
+
+- Inside a `watch` or `watchEffect` callback, `onWatcherCleanup(fn)` registers `fn` to run **before the next run** of that watcher and **when the watcher stops** (component unmount).
+- Put `controller.abort()` and `clearTimeout(timer)` in it, and a keystroke cancels the previous keystroke's request and timer. No flags, no closures over "latest id".
+- It must be called **synchronously**. After an `await` it warns and registers nothing; use the callback's `onCleanup` argument there.
+- `watch()` returns a handle with `pause()`, `resume()` and `stop()`. Resume runs the callback **once** with the latest value if the source changed while paused.
+
+</TLDR>
+
+## What onWatcherCleanup is and why people miss it
+
+`onWatcherCleanup` shipped in **Vue 3.5.0** (September 3, 2024) as part of the reactivity rewrite, next to bigger headlines: reactive props destructure, `useTemplateRef()`, `useId()`, lazy hydration. It is one short entry in the Reactivity API page, and the watchers guide mentions it only under "Side Effect Cleanup". If you learned `watch` on Vue 3.0, you learned the third-argument `onCleanup` and never looked again.
+
+The idea: while a watcher callback is running, Vue knows which watcher is active. `onWatcherCleanup(fn)` attaches `fn` to that watcher. Vue calls every attached cleanup before the callback runs again and when the watcher is stopped, which happens automatically when the component that created it unmounts.
+
+<Diagram name="vue-watcher-cleanup-flow" alt="A query ref changes. The watcher first runs the cleanups registered during its previous run: clear the debounce timer and abort the AbortController. Then the callback runs again: it creates a new controller, registers a new cleanup with onWatcherCleanup, starts a new timer, and the timer starts the fetch with the controller's signal. When the component unmounts, the watcher stops and the same cleanup runs, aborting any request in flight." caption="Cleanups run before the next run and on stop." />
+
+## The usual way vs the gem
+
+<CodeCompare before="watch + manual bookkeeping" after="onWatcherCleanup">
+
+```ts title="resources/js/composables/useLiveSearch.ts"
+let timer: ReturnType<typeof setTimeout> | undefined
+let controller: AbortController | undefined
+
+watch(query, (q) => {
+    clearTimeout(timer)
+    controller?.abort()
+    controller = new AbortController()
+    const signal = controller.signal
+
+    timer = setTimeout(async () => {
+        results.value = await fetcher(q, signal)
+    }, 250)
+})
+
+onUnmounted(() => {
+    clearTimeout(timer)
+    controller?.abort()
+})
+```
+
+```ts title="resources/js/composables/useLiveSearch.ts"
+watch(query, (q) => {
+    const controller = new AbortController()
+    const timer = setTimeout(async () => {
+        results.value = await fetcher(q, controller.signal)
+    }, 250)
+
+    onWatcherCleanup(() => { // [!code highlight]
+        clearTimeout(timer) // [!code highlight]
+        controller.abort() // [!code highlight]
+    }) // [!code highlight]
+})
+```
+
+</CodeCompare>
+
+No module-level variables, nothing to reset, and the unmount case is covered because stopping the watcher runs the same cleanup.
+
+## Real-world example: a live search against a Laravel endpoint
+
+The Laravel side is a plain JSON route. Validate the query, cap the results, and let the database do the work:
+
+```php title="routes/web.php"
+use App\Http\Controllers\PostSearchController;
+
+Route::middleware('auth')->get('/posts/search', PostSearchController::class)->name('posts.search');
+```
+
+```php title="app/Http/Controllers/PostSearchController.php"
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Post;
+use Illuminate\Http\Request;
+
+class PostSearchController
+{
+    public function __invoke(Request $request)
+    {
+        $q = $request->string('q')->trim()->limit(100, '');
+
+        return Post::query()
+            ->whereLike('title', "%{$q}%")
+            ->orderByDesc('published_at')
+            ->limit(10)
+            ->get(['id', 'title', 'slug']);
+    }
+}
+```
+
+The composable: a debounced, cancellable search that any component can use.
+
+```ts title="resources/js/composables/useLiveSearch.ts"
+import { onWatcherCleanup, ref, watch, type Ref } from 'vue'
+
+export type Fetcher<T> = (query: string, signal: AbortSignal) => Promise<T[]>
+
+export function useLiveSearch<T>(query: Ref<string>, fetcher: Fetcher<T>, delay = 250) {
+    const results = ref<T[]>([]) as Ref<T[]>
+    const loading = ref(false)
+
+    const handle = watch(query, (q) => {
+        const controller = new AbortController()
+        const timer = setTimeout(run, delay)
+
+        // Runs when `query` changes again, or when the watcher is stopped (component unmount).
+        onWatcherCleanup(() => { // [!code highlight]
+            clearTimeout(timer) // [!code highlight]
+            controller.abort() // [!code highlight]
+        }) // [!code highlight]
+
+        async function run() {
+            if (q.trim().length < 2) {
+                results.value = []
+                return
+            }
+
+            loading.value = true
+
+            try {
+                results.value = await fetcher(q, controller.signal)
+            } catch (error) {
+                if ((error as Error).name !== 'AbortError') throw error
+            } finally {
+                if (!controller.signal.aborted) loading.value = false
+            }
+        }
+    })
+
+    return { results, loading, pause: handle.pause, resume: handle.resume, stop: handle.stop }
+}
+```
+
+And the component, which knows nothing about timers or controllers:
+
+```vue title="resources/js/components/posts/PostSearch.vue"
+<script setup lang="ts">
+import { ref } from 'vue'
+import { useLiveSearch } from '@/composables/useLiveSearch'
+
+interface Result {
+    id: number
+    title: string
+    slug: string
+}
+
+const q = ref('')
+
+const { results, loading } = useLiveSearch<Result>(q, async (query, signal) => {
+    const response = await fetch(`/posts/search?q=${encodeURIComponent(query)}`, {
+        signal,
+        headers: { Accept: 'application/json' },
+    })
+
+    if (!response.ok) throw new Error(`Search failed: ${response.status}`)
+
+    return response.json()
+})
+</script>
+
+<template>
+    <label for="post-search" class="sr-only">Search posts</label>
+    <input id="post-search" v-model="q" type="search" placeholder="Search posts…" autocomplete="off" />
+
+    <p v-if="loading">Searching…</p>
+    <ul v-else-if="results.length">
+        <li v-for="r in results" :key="r.id"><a :href="`/posts/${r.slug}`">{{ r.title }}</a></li>
+    </ul>
+</template>
+```
+
+### What the tests showed
+
+We drove the composable with Vitest's fake timers and a fake fetcher that rejects with an `AbortError` when its signal fires, the way `fetch()` does. Typing `l`, `la`, `lar`, `lara` with a 50 ms debounce and a 100 ms "network":
+
+| Keystroke | What happened |
+|---|---|
+| `l` | Timer fired, query too short, results cleared, no request |
+| `la` | Timer **cleared** by the next keystroke's cleanup: no request was ever sent |
+| `lar` | Request sent, then **aborted** by the cleanup when `lara` arrived |
+| `lara` | Request sent and resolved: `['result for lara']`, `loading` back to `false` |
+
+Two requests instead of four, and the stale one can't overwrite the list. Unmounting the component in the middle of a request aborted it too, with no `onUnmounted` in sight.
+
+<Callout type="tip" title="using Inertia's useHttp instead of fetch?">
+
+Same pattern. Our [`useHttp` live search](/inertia-3-optimistic-updates-usehttp) had to call `search.cancel()` by hand on every keystroke. Put that call inside `onWatcherCleanup()` and the watcher does it for you, including on unmount.
+
+</Callout>
+
+## The one rule: before the first await
+
+`onWatcherCleanup()` finds "the current watcher" through a global that Vue sets while your callback runs synchronously. Once your callback awaits, that global is gone. Calling it afterwards logs this warning and registers nothing:
+
+```text
+[Vue warn]: onWatcherCleanup() was called when there was no active watcher to associate with.
+```
+
+Our test confirmed it: a cleanup registered before the `await` ran, one registered after it never did, and the warning appeared once per callback run. The second argument, `failSilently`, swallows the warning but still registers nothing.
+
+If you really need to register a cleanup after an `await`, use the callback's own argument. It is bound to the watcher instance, so it works at any point:
+
+```ts title="resources/js/composables/useLiveSearch.ts"
+watch(query, async (q, _previous, onCleanup) => {
+    const token = await getToken()          // an await first...
+    const controller = new AbortController()
+    onCleanup(() => controller.abort())     // ...then this still works
+    results.value = await fetcher(q, token, controller.signal)
+})
+```
+
+`watchEffect` gets `onCleanup` as its first argument.
+
+## pause() and resume() on the watch handle
+
+Also new in 3.5: `watch()` returns a `WatchHandle`. Calling it still stops the watcher, and it now has `pause()`, `resume()` and `stop()` methods. A paused watcher ignores changes; resuming it runs the callback **once** with the latest value if the source changed in the meantime, and not at all if nothing changed.
+
+```ts title="resources/js/components/posts/PostSearch.vue"
+const { results, pause, resume } = useLiveSearch<Result>(q, fetcher)
+
+// Bulk-filling the input from a saved search? Don't fire a request per field.
+pause()
+q.value = saved.query
+resume() // one request for the final value
+```
+
+In our test, three changes while paused produced one callback run on resume, with the last value; pausing and resuming with no change produced none; after `stop()` nothing ran again.
+
+## Gotchas
+
+**It is per run, not per watcher.** Every run of the callback registers its own cleanups. Register inside the callback, not once outside it.
+
+**Cleanups run before the callback, not in parallel.** The abort happens, then your new fetch starts. Code after `await fetcher()` in the old run still executes when the promise rejects: catch the `AbortError` (as above) or you will see unhandled rejections in the console.
+
+**`loading` and aborted runs.** If you set `loading = false` in a `finally` without checking the signal, the old run's `finally` turns the spinner off while the new request is still running. The composable checks `controller.signal.aborted` for that reason.
+
+**Watchers created after an `await` in `setup()` are not tied to the component.** They don't stop on unmount, so their cleanups don't run then either. Create watchers synchronously in `setup()` or stop them yourself.
+
+**`onWatcherCleanup` is not `onScopeDispose`.** `onScopeDispose` runs once when the effect scope ends. `onWatcherCleanup` runs on every re-run of one watcher and on its stop.
+
+## Try it yourself
+
+<TryIt title="Prove the abort in one Vitest test">
+
+```ts title="tests/liveSearch.test.ts"
+import { expect, it, vi } from 'vitest'
+import { nextTick, ref } from 'vue'
+import { useLiveSearch } from '@/composables/useLiveSearch'
+
+it('aborts the previous keystroke', async () => {
+    vi.useFakeTimers()
+    const aborted: string[] = []
+    const q = ref('')
+    useLiveSearch(q, (query, signal) => new Promise((resolve) => {
+        const t = setTimeout(() => resolve([query]), 100)
+        signal.addEventListener('abort', () => { clearTimeout(t); aborted.push(query) })
+    }), 10)
+
+    q.value = 'lar';  await nextTick(); vi.advanceTimersByTime(20) // request for "lar" in flight
+    q.value = 'lara'; await nextTick()                              // cleanup aborts it
+
+    expect(aborted).toEqual(['lar'])
+})
+```
+
+Swap the fake for a real `fetch` and an `AbortError` shows up in the Network tab as a cancelled request.
+
+</TryIt>
+
+## How useful is this?
+
+| | Score |
+|---|---|
+| Time saved per use | ★★★★☆ Deletes two module variables, an `onUnmounted` and a flag per watcher |
+| How often you'll reach for it | ★★★★☆ Every watcher that fetches: search, filters, autocomplete, detail panels |
+| Risk if misused | ★★☆☆☆ Only the "after await" trap, and Vue warns about it |
+| **Overall** | **4 / 5**: the correct default for async watchers since 3.5 |
+
+If you have a `watch` that calls `fetch` or `axios`, you can switch today.
+
+## Recap
+
+- `onWatcherCleanup(fn)` runs `fn` before the watcher's next run and when it stops, including on unmount.
+- Abort the request and clear the timer there, and a live search can't show stale results.
+- Call it synchronously, before any `await`; after an `await`, use the callback's `onCleanup` argument.
+- `watch()` returns a handle: `pause()` ignores changes, `resume()` catches up once with the latest value, `stop()` ends it.
+
+## FAQ
+
+<FAQ items={[
+  { q: 'How do I cancel a fetch when a Vue watcher re-runs?', a: 'Create an `AbortController` inside the callback, pass `controller.signal` to `fetch`, and register `onWatcherCleanup(() => controller.abort())` before any `await`. Vue aborts the previous request before the callback runs again and when the watcher stops.' },
+  { q: 'Why does Vue warn "onWatcherCleanup() was called when there was no active watcher"?', a: 'You called it after an `await` (or outside a watcher). It must run synchronously during the callback. Move it above the first `await`, or use the `onCleanup` argument the callback receives.' },
+  { q: 'Does onWatcherCleanup run when the component unmounts?', a: 'Yes, as long as the watcher was created synchronously in `setup()`. Unmounting stops the watcher, and stopping runs its registered cleanups. Our test aborted an in-flight request this way.' },
+  { q: 'What happens to changes made while a watcher is paused?', a: 'They are ignored while paused. On `resume()`, if the source changed, the callback runs once with the latest value. If nothing changed, it does not run.' },
+  { q: 'Which Vue version do I need?', a: '`onWatcherCleanup`, `pause()` and `resume()` arrived in Vue 3.5.0 (September 2024). This post was tested on 3.5.44.' },
+]} />
+
+## Next steps
+
+- [Optimistic updates and useHttp in Inertia 3](/inertia-3-optimistic-updates-usehttp), the Inertia-flavoured live search
+- [Inertia 3.9: pause polling in background tabs](/inertia-3-9-background-polling-navigate-type)
+- [Vue 3 Composition API cheat sheet](/cheatsheets)
+- [Vue docs: Side Effect Cleanup](https://vuejs.org/guide/essentials/watchers.html#side-effect-cleanup)
+
+## Sources
+
+- [Vue docs: Watchers, Side Effect Cleanup and Stopping a Watcher](https://vuejs.org/guide/essentials/watchers.html#side-effect-cleanup)
+- [Vue API: onWatcherCleanup() and the WatchHandle](https://vuejs.org/api/reactivity-core.html#onwatchercleanup)
+- [Vue 3.5.0 release](https://github.com/vuejs/core/releases/tag/v3.5.0) and the [3.5.0 changelog entry](https://github.com/vuejs/core/blob/main/CHANGELOG.md): `onWatcherCleanup` ([#9927](https://github.com/vuejs/core/pull/9927)), pause/resume ([#9651](https://github.com/vuejs/core/pull/9651)), `deep: number` ([#9572](https://github.com/vuejs/core/pull/9572))
+- [`packages/reactivity/src/watch.ts`](https://github.com/vuejs/core/blob/main/packages/reactivity/src/watch.ts), where the active-watcher check and the warning live

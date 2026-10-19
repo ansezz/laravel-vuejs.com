@@ -1,7 +1,7 @@
 ---
 import ToolPage from '../../components/ToolPage.astro'
-import { SHIPPED_ROWS } from '../../data/dev-tools'
-const lead = 'New APIs from the two release articles published here on October 10, 2026. Laravel 13.35.0 was tagged on October 6. Inertia 3.9.0 came out on October 9, and 3.9.1 followed the same day. Install 3.9.1. QUERY also matches existing Route::any() and Route::redirect() routes. The articles also list bug fixes.'
+import { SHIPPED_ROWS, SHIPPED_SOURCES } from '../../data/dev-tools'
+const lead = 'New opt-in APIs from the release articles published here, from Laravel 13.35 (October 6, 2026) to Laravel 13.37 and Wayfinder 0.1.23 (October 16). On Inertia, install 3.9.1. QUERY also matches existing Route::any() and Route::redirect() routes. The articles also list bug fixes.'
 ---
 <ToolPage title="What shipped" lead={lead}>
   <p class="pkg-set-note">{lead}</p>
@@ -28,8 +28,7 @@ const lead = 'New APIs from the two release articles published here on October 1
     </table>
   </div>
   <p class="pkg-actions">
-    <a class="btn" href="/laravel-13-35-query-routes-markdown-responses">Laravel 13.35</a>
-    <a class="btn" href="/inertia-3-9-background-polling-navigate-type">Inertia 3.9</a>
+    {SHIPPED_SOURCES.map(source => <a class="btn" href={source.path}>{source.label}</a>)}
     <a class="btn" href="/tools/shipped.md">Markdown for assistants</a>
   </p>
 </ToolPage>
