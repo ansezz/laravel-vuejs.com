@@ -1,27 +1,28 @@
 ---
-id: 160
-title: "This week in Laravel & Vue: Laravel 12.70 query hardening, Pinia 4.1, Vue 3.5.44, Oct 19, 2026"
-seoTitle: "This week in Laravel & Vue: patches (Oct 19, 2026)"
-excerpt: "The small releases you might have missed: Laravel 12.70 closes two query injection holes, Horizon 5.50.1 fixes horizon:listen, Pinia 4.1 adds getStores(), Vue 3.5.44 lands 25 fixes."
+id: 159
+title: "This week in Laravel & Inertia: AI failure events, Oct 19, 2026"
+seoTitle: "This week in Laravel & Inertia: AI SDK events (Oct 19, 2026)"
+excerpt: "AI SDK 1.2.2/1.2.3 add failure events and wider classification, Wayfinder 0.1.23 builds without a database, and Laravel 12.70 backports fixes."
 date: 2026-10-19T00:30:00Z
-snippet: "composer update laravel/framework laravel/horizon && npm update vue pinia"
+snippet: "php artisan wayfinder:generate --skip-database"
 categories: [laravel, vuejs]
-tags: [laravel, vuejs, pinia, release]
+tags: [laravel, inertia, release]
 ---
-Laravel 13.36 and 13.37 took the headlines this week. Underneath them, the 12.x line got a query hardening release, Horizon stopped ignoring half your project, Pinia grew a long-requested helper and Vue shipped its biggest patch of the year.
+Your embeddings job failed at 3 a.m., failover quietly saved it, and your dashboard shows nothing. Your CI build has been "generating Wayfinder types" for 30 minutes because it's trying to reach a database that doesn't exist there.
 
-Here is everything small that shipped in the Laravel and Vue world since [last week's roundup](/this-week-in-laravel-inertia-2026-10-12), in one five-minute read.
+This week's small releases fix both. Here's everything that shipped in the Laravel and Inertia world since last Monday, in one short read.
 
 <TLDR
-  audience="Laravel + Vue developers on Laravel 12 or 13, Inertia 2 or 3"
-  learn={['Which patch releases shipped between Oct 13 and Oct 17 and what they fix', 'Who should update first', 'The one-line update commands']}
-  applies="Laravel 12.70.0 · Horizon 5.50.1 · Telescope 5.26.0 · Sail 1.69.0 · Pinia 4.1.0 · Vue 3.5.44 · Wayfinder 0.1.23 · Nuxt 4.6.2 (checked against the release notes and PRs)"
+  audience="Laravel + Vue developers using the AI SDK, Wayfinder, or still on Laravel 12"
+  learn={['How to listen for failed AI calls, including ones failover recovered from', 'How to build Wayfinder types without a database', 'Which Laravel 12.70 backports you want']}
+  tested="laravel/ai 1.2.3 on Laravel 13.37 · PHP 8.4 · Pest 4 (5 tests / 14 assertions: failure events, failover, openai-compatible classification, the listener and the test below) · Wayfinder 0.1.23 `--skip-database` against an unreachable database · `EncodedParameter` and `whereRowValues` on 13.37"
+  applies="Laravel 12.70.0 (backports checked against the PRs; the same code was run on its 13.x originals)"
 >
 
-- **Still on Laravel 12?** Update to **12.70.0** today. `cursorPaginate()` no longer treats an order column with parentheses as raw SQL, and `whereRowValues()` rejects bogus operators.
-- **Horizon 5.50.1** makes `horizon:listen` restart on changes in `config/`, `database/` and `resources/` again when you have chokidar 5.
-- **Pinia 4.1.0** adds `getStores(pinia)` so you can loop over every live store without touching internals.
-- **Vue 3.5.44** is 25 bug fixes, several closing issues from 2022. Nothing changes in your code; update.
+- **Laravel AI SDK 1.2.2** fires an event when an embeddings, image, audio, transcription, reranking or classification call fails: `EmbeddingsFailed`, `ClassificationFailed` and friends. They fire even when failover rescues the call.
+- **AI SDK 1.2.2 and 1.2.3** also bring classification to the `openai-compatible` driver and image classification to TypeSafe and OpenRouter, and fix a streaming bug with structured sub-agents.
+- **Wayfinder 0.1.23** adds `wayfinder:generate --skip-database`, so builds never open a database connection. The Vite plugin option is `skipDatabase: true`.
+- **Laravel 12.70.0** backports `EncodedParameter`, two query-builder hardening fixes and a Blade cache fix. Update if you're still on 12.
 
 </TLDR>
 
@@ -29,195 +30,258 @@ Here is everything small that shipped in the Laravel and Vue world since [last w
 
 | Package | Version | Released (UTC) | Should you hurry? |
 |---|---|---|---|
-| `laravel/framework` (12.x line) | 12.70.0 | Oct 13 | **Yes**, if user input ever reaches `cursorPaginate` ordering or `whereRowValues` |
-| `laravel/horizon` | 5.50.1 | Oct 13 | Yes, if `horizon:listen` stopped restarting after `npm install chokidar` |
-| `laravel/telescope` | 5.26.0 | Oct 13 | New installs only; existing apps copy one line |
-| `laravel/sail` | 1.69.0 | Oct 13 | Only if you use the MongoDB service |
-| `vue` | 3.5.44 | Oct 13 | Yes, it is all fixes |
-| `pinia` | 4.1.0 | Oct 14 | Nice to have |
-| `laravel/ai` | 1.2.2, 1.2.3 | Oct 14, 15 | Yes, if you classify images or stream agents with sub-agents |
-| `laravel/wayfinder` | 0.1.23 | Oct 16 | Only if `wayfinder:generate` runs where the database isn't reachable |
-| `nuxt` | 4.6.2 | Oct 16 | Nice to have |
+| `laravel/ai` | 1.2.2 | Oct 14 | Yes, if you use conversations on OpenAI, Azure or xAI |
+| `laravel/ai` | 1.2.3 | Oct 15 | Yes, if you're on Laravel 12 with AI conversations |
+| `laravel/wayfinder` | 0.1.23 | Oct 16 | Only if your build has no database |
+| `laravel/framework` (12.x line) | 12.70.0 | Oct 13 | Yes, on Laravel 12 (query hardening) |
 
-<Callout type="heads-up" title="The big releases have their own posts">
+<Callout type="heads-up" title="On Laravel 13 already?">
 
-This week's minor releases are covered in full: [Laravel 13.36](/laravel-13-36-validation-builders-olap-sticky-queues) (validation rule builders, `DB::olap()`, sticky queue flushes), [Laravel 13.37](/laravel-13-37-numeric-strict-queue-jxl) (`Rule::numeric(strict: true)`, queue filters, JPEG XL) and [Wayfinder 0.1.22 + Precognition 2.1.1](/wayfinder-precognition-query-method) (the QUERY method end-to-end).
+Everything in Laravel 12.70.0 was already on 13.x: `EncodedParameter` since 13.33, the query fixes since 13.35 and the Blade cache fix since 13.36. The newest 13.x release got its own post: [Laravel 13.37: strict Rule::numeric(), queue filters and JPEG XL](/laravel-13-37-numeric-strict-queue-jxl).
 
 </Callout>
 
-## Laravel 12.70.0: two query holes closed, one backport
+## AI SDK 1.2.2: events for failed AI calls
 
-The release notes say "Address query issues", which undersells it. [PR #61838](https://github.com/laravel/framework/pull/61838) backports a hardening commit that landed on 13.x on Oct 2 and shipped in Laravel 13.35.
+Until now, embeddings, images, audio, transcription, reranking and classification dispatched a "starting" event and a "done" event, but nothing when the call blew up. So a listener that opened a span or a log line could never close it on failure.
 
-**`cursorPaginate()` order columns.** Until now, any order column containing parentheses was passed through as a raw `Expression`, because that is how aliased expressions like `count(*) as total` were recognised. A column name such as `id) or 1=1 or (id` therefore ended up unquoted in the `WHERE` clause. The raw wrapping now also requires the resolved original column to differ from the column name, so a plain identifier with parentheses is quoted like any other.
+Version 1.2.2 adds six failure events: `EmbeddingsFailed`, `ImageFailed`, `AudioFailed`, `TranscriptionFailed`, `RerankingFailed` and `ClassificationFailed`. Each one carries the `invocationId` (the same one the start event had), the `provider`, the `model`, the `prompt` and the `exception`.
 
-**`whereRowValues()` operators.** The method accepted any string as the operator. It now runs the same `invalidOperator()` check as `where()` and throws an `InvalidArgumentException` for anything that isn't a known operator.
+The file and vector store operations got the same treatment: `StoringFileFailed`, `CreatingStoreFailed`, `AddingFileToStoreFailed` and `RemovingFileFromStoreFailed`. They carry the store and file IDs instead of a model and prompt.
 
-```php title="app/Http/Controllers/ProductController.php"
-// Never let the request pick the order column directly.
-$column = $request->enum('sort', ProductSort::class)?->column() ?? 'id';
+<Diagram name="laravel-ai-failure-events-failover" alt="An embeddings call starts with GeneratingEmbeddings on provider A. If provider A answers, EmbeddingsGenerated fires. If it throws, the new EmbeddingsFailed event fires with the provider, model and exception. If the error allows failover and another provider is configured, provider B tries and fires EmbeddingsGenerated on success. Otherwise the original exception is rethrown unchanged." caption="One EmbeddingsFailed per failed attempt, even when failover saves the call." />
 
-return Product::query()
-    ->orderBy($column)
-    ->cursorPaginate(25);
-```
+### Log every failed AI call with one listener
 
-If you already whitelist sort columns, as above, you were fine before. Update anyway, because the paginator is now safe even when a future refactor forgets to.
+With event discovery, a listener in `app/Listeners` is registered from the type-hint on its `handle` method. A union type covers several events at once:
 
-**`EncodedParameter`** ([#61871](https://github.com/laravel/framework/pull/61871)). 12.69.2 started encoding `?`, `%` and `#` in route parameters, which broke `%id%`-style placeholders that JavaScript fills in later ([#61499](https://github.com/laravel/framework/issues/61499)). The 13.x fix is now on 12.x: wrap a value that is already encoded and `route()` leaves it alone. We ran the wrapper on Laravel 13.37, where the class is identical: `%id%` comes out as `/users/%id%` instead of `/users/%25id%25`.
+```php title="app/Listeners/ReportFailedAiCall.php"
+<?php
 
-```php title="resources/views/users/index.blade.php"
-@php use Illuminate\Routing\EncodedParameter; @endphp
+namespace App\Listeners;
 
-<table data-show-url="{{ route('users.show', ['user' => new EncodedParameter('%id%')]) }}">
-```
+use Illuminate\Support\Facades\Log;
+use Laravel\Ai\Events\ClassificationFailed;
+use Laravel\Ai\Events\EmbeddingsFailed;
+use Laravel\Ai\Events\ImageFailed;
 
-The last change, [#61822](https://github.com/laravel/framework/pull/61822), gives Blade a separate compiled cache file per configured `$echoFormat`, so switching the format no longer serves views compiled under the old one.
-
-```bash
-composer update laravel/framework
-php artisan --version   # Laravel Framework 12.70.0
-```
-
-## Horizon 5.50.1: horizon:listen with chokidar 5
-
-The docs say `npm install --save-dev chokidar`, which today installs chokidar 5. Horizon's file watcher only expanded its glob paths for chokidar 4, so on 5.x the globs went straight to chokidar, which dropped glob support in 4.0. Result: `horizon:listen` restarted for changes in `app/` and `routes/` but ignored `config/`, `database/`, `public/` and `resources/`.
-
-[PR #1832](https://github.com/laravel/horizon/pull/1832) checks the major version instead, the way Octane does. If you pinned `chokidar@4` as a workaround, you can drop the pin.
-
-```bash
-composer update laravel/horizon
-php artisan horizon:listen
-```
-
-## Telescope 5.26.0: set-cookie joins the hidden headers
-
-Outside `local`, the generated `TelescopeServiceProvider` already hides the `cookie`, `x-csrf-token` and `x-xsrf-token` request headers. [PR #1769](https://github.com/laravel/telescope/pull/1769) adds `set-cookie` to the stub, since it carries the fresh session token.
-
-The stub only affects new installs. Existing apps add the header themselves:
-
-```php title="app/Providers/TelescopeServiceProvider.php"
-Telescope::hideRequestHeaders([
-    'cookie',
-    'set-cookie', // [!code ++]
-    'x-csrf-token',
-    'x-xsrf-token',
-]);
-```
-
-## Sail 1.69.0: the MongoDB service works as advertised
-
-[PR #902](https://github.com/laravel/sail/pull/902) fixes six things in the MongoDB service at once: the compose stub no longer overrides the image's health check, `sail mongodb` uses port 27017 inside the container instead of the forwarded host port, `MONGODB_USERNAME` and `MONGODB_PASSWORD` now land in `MONGODB_URI` (with `authSource=admin`), the config volume is mounted on existing installs too, the test suite gets its own `MONGODB_DATABASE`, and `DB_CONNECTION` defaults to `mongodb` when no SQL service is selected.
-
-```bash
-composer update laravel/sail
-php artisan sail:install   # re-run and pick mongodb to refresh the service
-```
-
-## Pinia 4.1.0: getStores() and a dispose warning
-
-`getStores(pinia)` ([#3194](https://github.com/vuejs/pinia/pull/3194)) returns a fresh array of the stores currently registered on a Pinia instance, setup stores included, disposed stores excluded. The use case is "do something to every store" without reaching into `pinia._s`, which could loop forever when you dispose and recreate stores while iterating it.
-
-```ts title="resources/js/auth/logout.ts"
-import { getStores } from 'pinia'
-import { pinia } from '@/pinia'
-
-export function clearStores() {
-    for (const store of getStores(pinia)) {
-        store.$reset() // option stores; give setup stores their own $reset
+class ReportFailedAiCall
+{
+    public function handle(EmbeddingsFailed|ClassificationFailed|ImageFailed $event): void
+    {
+        Log::warning('AI call failed', [
+            'invocation' => $event->invocationId,
+            'provider' => $event->provider->name(),
+            'model' => $event->model,
+            'error' => $event->exception->getMessage(),
+        ]);
     }
 }
 ```
 
-The second feature ([#3193](https://github.com/vuejs/pinia/pull/3193)) is a dev-only warning, `PINIA_R1008`, when you call `$dispose()` on a store instance that has already been replaced by a newer one with the same id. The stale call no longer removes the new instance from the registry either.
+Nothing else changes: the exception is rethrown exactly as before, so your existing `try`/`catch` blocks and failover setup keep working.
 
-Fixes in the same release: shallow refs patched with the object syntax trigger updates, HMR keeps the runtime state of empty placeholder objects, and `@pinia/nuxt` resolves `storesDirs` per layer.
+<Callout type="gotcha" title="A failed event doesn't mean the user saw an error">
 
-```bash
-npm install pinia@^4.1.0
-```
-
-## Vue 3.5.44: 25 fixes, some years in the making
-
-No features, just fixes, and a few close issues that have been open since 2022:
-
-- **Reactivity:** watcher callbacks that run inside another effect no longer track dependencies for that effect (`#5009`), a `once` watcher stops even when its callback throws, and shallow collections keep their shallow semantics.
-- **Templates:** `v-show` keeps its transition in production builds, `playsinline` is treated as a boolean attribute, and an invalid `v-for` range renders nothing instead of throwing in production.
-- **Transitions:** nested `<TransitionGroup>`s measure against their moving outer item (`#5385`, `#1531`), and `<Transition>` handles component roots wrapped in comments (`#6080`, `#5500`).
-- **Teleport, KeepAlive, Suspense:** `targetStart` moves with its children, a pruned KeepAlive component is unmounted when its vnode was cloned on mount, and resolved async components mount in their own namespace (SVG inside Suspense).
-- **SSR:** async `setup()` errors propagate through the server renderer.
-
-```bash
-npm install vue@^3.5.44
-```
-
-<Callout type="gotcha" title="3.6.0-rc.12 is not 3.5.44">
-
-Vue **3.6.0-rc.11** (Oct 10) and **rc.12** (Oct 16) also shipped this week. They are Vapor mode release candidates with dozens of `runtime-vapor` fixes each. Stay on 3.5.x in production until 3.6.0 is final.
+The events fire once per failed **attempt**, including attempts that failover recovers from. In our test, provider A returned a 503, the backup answered, and we got one `EmbeddingsFailed` (provider A) plus one `EmbeddingsGenerated` (the backup). Alert on the rate of failures per provider, not on every single event.
 
 </Callout>
 
-## Laravel AI SDK 1.2.2 and 1.2.3
+<TryIt title="Prove it in your own test suite">
 
-Two patch releases in two days. **1.2.2** (Oct 14) runs structured sub-agents unstreamed when the parent agent streams (they used to fail with "Streaming structured output is not currently supported"), adds classification to the `openai-compatible` provider, dispatches `*Failed` events for embeddings, images, audio, transcription, reranking and classification, and keeps the call id on an interrupted tool result so OpenAI conversations recover after a failed turn. **1.2.3** (Oct 15) lets TypeSafe and OpenRouter classify image attachments and restores non-incrementing conversation ids on Laravel 12.
+```php title="tests/Feature/AiFailureEventsTest.php"
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Http;
+use Laravel\Ai\Embeddings;
+use Laravel\Ai\Events\EmbeddingsFailed;
 
-We tested the lot in [Laravel AI SDK 1.2.2 and 1.2.3](/laravel-ai-sdk-1-2-3-classification-failure-events).
+test('a failed embeddings call is reported', function () {
+    config()->set('ai.providers.local', [
+        'driver' => 'openai-compatible',
+        'url' => 'https://ai.test/v1',
+        'key' => 'test',
+        'models' => ['embeddings' => ['default' => 'local-embed', 'dimensions' => 8]],
+    ]);
+
+    Event::fake([EmbeddingsFailed::class]);
+    Http::fake(['ai.test/*' => Http::response(['error' => ['message' => 'boom']], 500)]);
+
+    expect(fn () => Embeddings::for(['hello'])->generate(provider: 'local'))
+        ->toThrow(Exception::class);
+
+    Event::assertDispatched(EmbeddingsFailed::class, fn ($e) => $e->model === 'local-embed');
+});
+```
+
+</TryIt>
+
+## Classification on more providers (1.2.2 and 1.2.3)
+
+Classification arrived in [AI SDK 1.2](/laravel-ai-sdk-1-2-skills-approval-cohere), on OpenAI's decisions endpoint. Two patches widen where it runs.
+
+**1.2.2: the `openai-compatible` driver.** Some OpenAI-compatible servers implement the decisions endpoint too. The driver now sends the same `/decisions` request to your configured `url`. There is no default classification model, so set one:
+
+```php title="config/ai.php" {6-8}
+'providers' => [
+    'local' => [
+        'driver' => 'openai-compatible',
+        'url' => env('LOCAL_AI_URL'),
+        'key' => env('LOCAL_AI_API_KEY'),
+        'models' => [
+            'classification' => ['default' => env('LOCAL_AI_CLASSIFIER')],
+        ],
+    ],
+],
+```
+
+```php title="app/Http/Controllers/TicketController.php"
+use Laravel\Ai\Classification;
+use Laravel\Ai\Classification\Boolean;
+
+$result = Classification::of($ticket->body)
+    ->question('urgent', new Boolean('Does this ticket need an immediate response?'))
+    ->classify(provider: 'local');
+
+$result['urgent']->isTrue(threshold: 0.8);
+```
+
+**1.2.3: images on TypeSafe and OpenRouter.** Image attachments used to throw on both. Now the same `Classification::of($text, $images)` call works on OpenAI, TypeSafe and OpenRouter. On OpenAI, images attached under a string key are sent with their name, so a question can say "the `front` photo".
+
+<Callout type="tip" title="Classification is still experimental">
+
+The official docs flag the classification API as experimental, so it may change in a minor release. At the time of writing, the docs' provider list and event list don't mention these 1.2.2/1.2.3 additions yet. The pull requests in *Sources* are the reference.
+
+</Callout>
+
+## Smaller AI SDK fixes you may have hit
+
+| Fix | Version | Who it affects |
+|---|---|---|
+| Structured-output sub-agents run unstreamed when the parent streams | 1.2.2 (#1117) | You stream an agent whose tools include a [structured-output agent](/laravel-ai-structured-output-vue). The tool result was "Agent failed: Streaming structured output is not currently supported." |
+| A failed turn's interrupted tool result keeps its call ID | 1.2.2 (#1133) | Conversations on OpenAI, Azure OpenAI or xAI that got stuck returning HTTP 400 after a failed turn. They continue on the next prompt, no data fix needed. |
+| `Conversation` and `ConversationMessage` are non-incrementing again on Laravel 12 | 1.2.3 (#1137) | Laravel 12 apps that create conversations through Eloquent. The string ID was overwritten with the database row ID. |
+
+The sub-agent fix is a fallback, not streamed structured output: the sub-agent answers in one piece, while `InvokingTool` and `ToolInvoked` still fire.
 
 ```bash
 composer update laravel/ai
+composer show laravel/ai | grep versions   # * v1.2.3
 ```
 
-## Wayfinder 0.1.23: generate without a database
+## Wayfinder 0.1.23: generate types without a database
 
-[PR #331](https://github.com/laravel/wayfinder/pull/331) adds `--skip-database` to `wayfinder:generate`. Route model binding types are read from each model's `@property` docblocks instead of the database schema, so the command never opens a connection. It exists because a build box that cannot reach the database retries every connection and a one-minute generate turned into thirty.
+Wayfinder types route model bindings by reading your table schema. In a build container with no database, every bound model waits for the connection to time out, twice, because Laravel retries it. The PR author reports generations that should take a minute hanging for more than 30.
+
+The new flag skips the schema and reads the model's `@property` docblocks instead:
+
+<CodeCompare before="Build needs a database" after="0.1.23, no database">
+
+```bash title="Dockerfile"
+RUN php artisan wayfinder:generate
+```
+
+```bash title="Dockerfile"
+RUN php artisan wayfinder:generate --skip-database
+```
+
+</CodeCompare>
+
+If you generate through Vite, `@laravel/vite-plugin-wayfinder` 0.1.11 (same day) passes the flag for you:
+
+```ts title="vite.config.ts" {9}
+import { wayfinder } from '@laravel/vite-plugin-wayfinder'
+import vue from '@vitejs/plugin-vue'
+import laravel from 'laravel-vite-plugin'
+import { defineConfig } from 'vite'
+
+export default defineConfig({
+    plugins: [
+        laravel({ input: ['resources/js/app.ts'], refresh: true }),
+        wayfinder({ skipDatabase: true }),
+        vue(),
+    ],
+})
+```
+
+The types are only as good as your docblocks. Here's what we got for a `posts/{post}` route:
+
+| `Post` model docblock | Generated parameter type |
+|---|---|
+| `@property int $id` | `number` |
+| none | `string \| number` |
+
+<Callout type="gotcha" title="The flag in the PR text is not the one that shipped">
+
+The pull request description (and the Vite plugin PR) say `--model-docblocks` / `modelDocblocks`. The code that shipped in 0.1.23 uses **`--skip-database`**, and the Vite plugin option is **`skipDatabase`**. Use those, as the READMEs do.
+
+</Callout>
+
+Without the flag, nothing changes: Wayfinder still queries the schema and only falls back to docblocks if that query throws. More on typed routes in [Wayfinder + Precognition and the QUERY method](/wayfinder-precognition-query-method).
+
+## Laravel 12.70.0: backports for the 12.x line
+
+Three fixes from 13.x, for apps that haven't upgraded yet.
+
+**`EncodedParameter` for pre-encoded route values.** Since 12.69, `%`, `?` and `#` in route parameters are always encoded. That's a security fix, but it double-encoded values you had already encoded. Wrap those in `EncodedParameter` and they're used as-is:
+
+```php title="app/Http/Controllers/FileController.php"
+use Illuminate\Routing\EncodedParameter;
+
+route('files.show', ['path' => 'report%202026.pdf']);
+// .../files/report%25202026.pdf  (encoded again)
+
+route('files.show', ['path' => new EncodedParameter('report%202026.pdf')]);
+// .../files/report%202026.pdf
+```
+
+**Query-builder hardening (#61838).** `whereRowValues()` now rejects an invalid operator with an `InvalidArgumentException`, and cursor pagination now quotes an order column that contains parentheses instead of passing it through as raw SQL (aliased select expressions still work). Both matter if any part of a column name or operator ever comes from a request.
+
+**A Blade cache file per echo format (#61822).** Compiled views now get a different file name when the echo format isn't the default, for example after `Blade::withoutDoubleEncoding()` or while Markdown mail renders. Views compiled with one format are no longer reused with another.
 
 ```bash
-php artisan wayfinder:generate --skip-database
+composer update laravel/framework
+php artisan view:clear
+php artisan --version   # Laravel Framework 12.70.0
 ```
-
-## Nuxt 4.6.2
-
-A fix-only patch: server island heads follow the `useHeadSafe` rules, server route rules match case-insensitively unless routing is set to sensitive, error state survives an aborted navigation, and the dev server's Vite error overlay and `vue` resolution are fixed. Nothing to change.
 
 ## Upgrade notes
 
-- None of these releases has breaking changes. Run `composer update` and `npm update`, then your test suite.
-- Laravel 12 apps that pass user input to `orderBy()` before `cursorPaginate()`: update first, then audit the whitelist anyway.
-- Telescope: the `set-cookie` line is yours to add; the stub won't touch an existing provider.
-- If you pin exact versions, bump them: `laravel/framework:^12.70`, `laravel/horizon:^5.50.1`, `vue@3.5.44`, `pinia@4.1.0`.
+- No breaking changes this week. Run `composer update` (and `npm update` for the Vite plugin), then your tests.
+- **AI SDK:** the new events are opt-in, nothing fires that you don't listen to. If you alert on them, remember they include attempts that failover recovered.
+- **Wayfinder:** add `@property` docblocks to bound models before turning on `--skip-database`, or those parameters fall back to `string | number`.
+- **Laravel 12:** `php artisan view:clear` after the update is optional but tidy, since compiled view file names can change.
 
 ## Recap
 
-- **Laravel 12.70.0** closes two query injection paths and backports `EncodedParameter`. Update today.
-- **Horizon 5.50.1** fixes `horizon:listen` with chokidar 5; drop your `chokidar@4` pin.
-- **Pinia 4.1.0** adds `getStores()`; **Vue 3.5.44** is 25 fixes with no API change.
-- **AI SDK 1.2.2/1.2.3**, **Wayfinder 0.1.23**, **Telescope 5.26.0**, **Sail 1.69.0** and **Nuxt 4.6.2** are small, safe updates.
+- **AI SDK 1.2.2** gives you `*Failed` events for every model operation, failovers included.
+- **AI SDK 1.2.2 and 1.2.3** run classification on `openai-compatible`, TypeSafe and OpenRouter, and fix three bugs in streaming and conversations.
+- **Wayfinder 0.1.23**: `--skip-database` (or `skipDatabase: true` in Vite) for database-free builds.
+- **Laravel 12.70.0**: `EncodedParameter` plus query and Blade fixes. On 13.x you already have them.
 
 ## FAQ
 
 <FAQ items={[
-  { q: 'Is Laravel 12.70 a security release?', a: 'The release notes do not label it one, but PR #61838 stops `cursorPaginate()` from injecting an order column with parentheses as raw SQL and makes `whereRowValues()` validate its operator. Treat it as one and update.' },
-  { q: 'I am on Laravel 13. Do I need to do anything for these query fixes?', a: 'No. The same commit landed on 13.x on Oct 2 and shipped in Laravel 13.35. Laravel 13.36 and 13.37 include it too.' },
-  { q: 'horizon:listen only restarts when I edit app/ or routes/. Why?', a: 'You have chokidar 5 and Horizon older than 5.50.1. Its file watcher only expanded glob paths for chokidar 4. Run `composer update laravel/horizon`.' },
-  { q: 'Does getStores() return setup stores too?', a: 'Yes. It returns every store currently registered on the Pinia instance, including setup stores, and leaves out disposed ones. Each call returns a new array.' },
-  { q: 'Should I try Vue 3.6.0-rc.12?', a: 'Only on a branch. It is a release candidate for Vapor mode, and this week\'s two RCs are long lists of Vapor fixes. Production apps stay on Vue 3.5.44.' },
+  { q: 'Why did I get an EmbeddingsFailed event when the request succeeded?', a: 'The events fire once per failed attempt. If failover moved the call to another provider, you get a failed event for the first provider and a generated event for the second.' },
+  { q: 'Do the new AI failure events replace try/catch?', a: 'No. The exception is still rethrown unchanged. The events are for logging, metrics and tracing; your error handling stays where it is.' },
+  { q: 'Is it --model-docblocks or --skip-database?', a: 'It is `--skip-database` in Wayfinder 0.1.23 and `skipDatabase` in the Vite plugin 0.1.11. The PR descriptions mention the earlier name.' },
+  { q: 'I am on Laravel 13. Do I need anything from 12.70.0?', a: 'No. The same changes shipped in Laravel 13.33, 13.35 and 13.36.' },
+  { q: 'Is classification safe to use in production?', a: 'It works, but the docs mark it experimental, so pin your `laravel/ai` version and read the release notes before you update.' },
 ]} />
 
 ## Next steps
 
-- [Laravel 13.37: strict Rule::numeric(), queue filters and JPEG XL](/laravel-13-37-numeric-strict-queue-jxl)
-- [Laravel 13.36: validation rule builders, Vitess olap() and sticky queue flushes](/laravel-13-36-validation-builders-olap-sticky-queues)
-- [Pinia with Laravel and Inertia](/pinia-laravel-inertia)
-- [Laravel Telescope in development only](/laravel-telescope-dev-only)
+- [Laravel AI SDK 1.2: Skills, tool approval and Cohere](/laravel-ai-sdk-1-2-skills-approval-cohere), where classification first landed.
+- [Laravel AI SDK 1.2.1: Stop middleware for agent runs](/laravel-ai-sdk-1-2-1-stop-middleware)
+- [Wayfinder + Precognition catch up with Laravel's QUERY routes](/wayfinder-precognition-query-method)
+- [Laravel AI SDK docs: events](https://laravel.com/docs/13.x/ai-sdk#events)
 
 ## Sources
 
-- [Laravel v12.70.0 release](https://github.com/laravel/framework/releases/tag/v12.70.0), [PR #61838 (query hardening)](https://github.com/laravel/framework/pull/61838), [commit 2c32946 on 13.x](https://github.com/laravel/framework/commit/2c32946), [PR #61871 (EncodedParameter backport)](https://github.com/laravel/framework/pull/61871), [PR #61610 (EncodedParameter)](https://github.com/laravel/framework/pull/61610), [issue #61499](https://github.com/laravel/framework/issues/61499), [PR #61822 (Blade cache per echoFormat)](https://github.com/laravel/framework/pull/61822)
-- [Horizon v5.50.1 release](https://github.com/laravel/horizon/releases/tag/v5.50.1), [PR #1832](https://github.com/laravel/horizon/pull/1832)
-- [Telescope v5.26.0 release](https://github.com/laravel/telescope/releases/tag/v5.26.0), [PR #1769](https://github.com/laravel/telescope/pull/1769)
-- [Sail v1.69.0 release](https://github.com/laravel/sail/releases/tag/v1.69.0), [PR #902](https://github.com/laravel/sail/pull/902)
-- [Pinia v4.1.0 release](https://github.com/vuejs/pinia/releases/tag/v4.1.0), [PR #3194 (getStores)](https://github.com/vuejs/pinia/pull/3194), [PR #3193 (dispose warning)](https://github.com/vuejs/pinia/pull/3193)
-- [Vue 3.5.44 changelog](https://github.com/vuejs/core/blob/main/CHANGELOG.md), [Vue 3.6.0-rc.12 changelog](https://github.com/vuejs/core/blob/minor/CHANGELOG.md)
-- [Laravel AI v1.2.2](https://github.com/laravel/ai/releases/tag/v1.2.2) and [v1.2.3](https://github.com/laravel/ai/releases/tag/v1.2.3)
-- [Wayfinder v0.1.23 release](https://github.com/laravel/wayfinder/releases/tag/v0.1.23), [PR #331](https://github.com/laravel/wayfinder/pull/331)
-- [Nuxt v4.6.2 release](https://github.com/nuxt/nuxt/releases/tag/v4.6.2)
+- [Laravel AI v1.2.2 release](https://github.com/laravel/ai/releases/tag/v1.2.2): [PR #1090 (failure events)](https://github.com/laravel/ai/pull/1090), [PR #1128 (openai-compatible classification)](https://github.com/laravel/ai/pull/1128), [PR #1117 (structured sub-agents)](https://github.com/laravel/ai/pull/1117), [PR #1133 (call id)](https://github.com/laravel/ai/pull/1133)
+- [Laravel AI v1.2.3 release](https://github.com/laravel/ai/releases/tag/v1.2.3): [PR #1137 (non-incrementing models)](https://github.com/laravel/ai/pull/1137), [PR #1134 (image classification)](https://github.com/laravel/ai/pull/1134)
+- [Laravel AI SDK docs: classification](https://laravel.com/docs/13.x/ai-sdk#classification), [OpenAI-compatible providers](https://laravel.com/docs/13.x/ai-sdk#openai-compatible-providers) and [events](https://laravel.com/docs/13.x/ai-sdk#events)
+- [Laravel events docs: union-type listeners and discovery](https://laravel.com/docs/13.x/events#event-discovery)
+- [Wayfinder v0.1.23 release](https://github.com/laravel/wayfinder/releases/tag/v0.1.23), [PR #331](https://github.com/laravel/wayfinder/pull/331), [README](https://github.com/laravel/wayfinder/blob/v0.1.23/README.md)
+- [Vite plugin Wayfinder v0.1.11](https://github.com/laravel/vite-plugin-wayfinder/releases/tag/v0.1.11), [PR #34](https://github.com/laravel/vite-plugin-wayfinder/pull/34)
+- [Laravel v12.70.0 release](https://github.com/laravel/framework/releases/tag/v12.70.0): [PR #61871 (EncodedParameter)](https://github.com/laravel/framework/pull/61871), [PR #61838 (query fixes)](https://github.com/laravel/framework/pull/61838), [PR #61822 (Blade cache)](https://github.com/laravel/framework/pull/61822)
+- [Laravel Blade docs: HTML entity encoding](https://laravel.com/docs/12.x/blade#html-entity-encoding) and [cursor pagination](https://laravel.com/docs/12.x/pagination#cursor-pagination)

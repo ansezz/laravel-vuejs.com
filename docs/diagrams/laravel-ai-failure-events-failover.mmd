@@ -1,0 +1,17 @@
+flowchart LR
+  A["`**GeneratingEmbeddings**
+  attempt starts on
+  provider A`"] --> B{"`**Provider A
+  answers?**`"}
+  B -- "yes" --> C["`**EmbeddingsGenerated**
+  listeners close the call`"]
+  B -- "throws" --> D["`**EmbeddingsFailed**
+  new in 1.2.2:
+  provider, model, exception`"]
+  D --> E{"`**Failover error and
+  a backup provider?**`"}
+  E -- "yes" --> F["`**Provider B tries**
+  success fires
+  EmbeddingsGenerated`"]
+  E -- "no" --> G["`**Exception rethrown**
+  unchanged, as before`"]
