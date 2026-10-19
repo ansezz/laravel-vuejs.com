@@ -19,6 +19,7 @@
     "check:links": "node scripts/check-links.mjs",
     "check:packages": "node --experimental-strip-types scripts/check-packages.mjs",
     "check:tools": "node --experimental-strip-types scripts/check-tools.mjs",
+    "check:live": "node scripts/check-live.mjs",
     "lhci": "npx --yes @lhci/cli@0.15.x autorun",
     "check:worker": "tsc -p worker",
     "db:migrate:local": "wrangler d1 migrations apply laravel-vuejs-forms --local",

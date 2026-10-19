@@ -1,0 +1,37 @@
+name: Post-deploy check
+
+# After Cloudflare Workers Builds deploys a push to master, verify the live site: key pages, headers, feeds, sitemap,
+# the newest post and its Markdown twin, the forms API, and that every post whose date has passed is live.
+# Also runs daily after the "Publish scheduled posts" workflow (07:05 UTC) to confirm scheduled posts went out.
+on:
+  push:
+    branches: [master]
+  schedule:
+    - cron: '45 7 * * *'
+  workflow_dispatch:
+    inputs:
+      site:
+        description: 'Site to check (default: production)'
+        default: 'https://laravel-vuejs.space'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: post-deploy
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Check the live site
+        env:
+          SITE_URL: ${{ inputs.site || 'https://laravel-vuejs.space' }}
+          # On a push, first wait (up to 15 minutes) until the live /version.json reports this commit.
+          EXPECT_SHA: ${{ github.event_name == 'push' && github.sha || '' }}
+        run: node scripts/check-live.mjs

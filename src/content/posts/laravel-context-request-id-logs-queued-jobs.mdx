@@ -1,0 +1,302 @@
+---
+id: 161
+title: "Laravel Context: one request id on every log line and in every queued job"
+seoTitle: "Laravel Context: Request IDs in Logs and Queued Jobs"
+excerpt: "Hidden gem: the Context facade stamps a request id, user and route on every log line and carries them into queued jobs. Hidden values stay out of logs. Tested on Laravel 13.37."
+date: 2026-10-20T01:00:00Z
+snippet: "Context::add('request_id', $id)"
+categories: [laravel, vuejs]
+tags: [laravel, php, inertia, vuejs]
+---
+A user reports "my order didn't sync". You open the log, find forty `crm sync done` lines from that minute, and none of them says which order, which user or which request. The job that did the work ran in a queue worker, three seconds and one process away from the request that started it.
+
+Laravel has shipped a fix for this since 11.0, and most apps still pass ids around by hand. It is called **Context**.
+
+<TLDR
+  audience="Laravel 11–13 developers, including Inertia + Vue apps with queued jobs"
+  learn={['What `Context::add()` does to every log line', 'How context rides along with queued jobs', 'Hidden values, scopes and stacks', 'The gotchas: log line layout, hidden ≠ secret, tests and long-running workers']}
+  tested="Laravel 13.37 · PHP 8.3 · database queue + queue:work · PHPUnit (2 tests / 11 assertions)"
+>
+
+- `Context::add('request_id', $id)` in a middleware, and **every** log line in that request ends with `{"request_id":"…"}`. No `Log::withContext()`, no passing ids into helpers.
+- When you dispatch a job, the context is **serialised into the job payload** and restored in the worker. The job's log lines carry the same ids.
+- `Context::addHidden()` keeps a value out of the logs but still available in code (and in the job).
+- `Context::scope()` adds data for one closure, `Context::push()` builds stacks, `dehydrating()` / `hydrated()` carry things like the locale into jobs.
+
+</TLDR>
+
+## What Context is and why people miss it
+
+Context arrived in **Laravel 11.0** (March 2024), in the same release as the slim application skeleton, health routes and per-second rate limiting. It got one paragraph in the release notes and its own docs page, "Context", which sits between Concurrency and Contracts in the sidebar. Most people never open it.
+
+The idea: a request-scoped key-value store that Laravel's logger reads on every write, and that the queue serialises with every dispatched job. Set a value once, early, and it follows the request everywhere, including into the worker.
+
+<Diagram name="laravel-context-flow" alt="A request enters a middleware that calls Context::add with a request id and user id. Every Log::info call in the request writes those values at the end of the line. When a job is dispatched, the context, including hidden values, is serialised into the queue payload. The worker hydrates it before running the job, so the job's log lines carry the same request id and user id. Hidden values are available in code but never written to the log." caption="One Context::add(), then it follows the request into the worker." />
+
+## The usual way vs the gem
+
+Before Context, the honest options were `Log::withContext()` (works for the request, but a queued job starts with a clean logger) or passing `$requestId` into every job constructor and every `Log::info()` call.
+
+<CodeCompare before="Log::withContext()" after="Context">
+
+```php title="app/Http/Middleware/AddRequestContext.php"
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+
+public function handle(Request $request, Closure $next)
+{
+    $requestId = $request->header('X-Request-Id') ?? (string) Str::uuid();
+
+    Log::withContext(['request_id' => $requestId]);
+
+    // ...and remember to pass $requestId into every job you dispatch.
+    return $next($request);
+}
+```
+
+```php title="app/Http/Middleware/AddRequestContext.php"
+use Illuminate\Support\Facades\Context;
+use Illuminate\Support\Str;
+
+public function handle(Request $request, Closure $next)
+{
+    Context::add([ // [!code highlight]
+        'request_id' => $request->header('X-Request-Id') ?? (string) Str::uuid(),
+        'user_id' => $request->user()?->id,
+        'route' => $request->path(),
+    ]);
+
+    return $next($request);
+}
+```
+
+</CodeCompare>
+
+Register it once for the `web` and `api` groups:
+
+```php title="bootstrap/app.php"
+->withMiddleware(function (Middleware $middleware) {
+    $middleware->append(\App\Http\Middleware\AddRequestContext::class);
+})
+```
+
+That is the whole gem. Everything below is what you get for free.
+
+## Real-world example: an Inertia checkout with a queued CRM sync
+
+An Inertia form posts to `/orders`. The controller logs, saves, and queues a sync to the CRM:
+
+```php title="app/Http/Controllers/OrderController.php"
+use App\Jobs\SyncOrderToCrm;
+use Illuminate\Support\Facades\Log;
+
+public function store(StoreOrderRequest $request)
+{
+    $order = $request->user()->orders()->create($request->validated());
+
+    Log::info('order placed', ['order_id' => $order->id]);
+
+    SyncOrderToCrm::dispatch($order);
+
+    return to_route('orders.show', $order);
+}
+```
+
+```php title="app/Jobs/SyncOrderToCrm.php"
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Support\Facades\Log;
+
+class SyncOrderToCrm implements ShouldQueue
+{
+    use Queueable;
+
+    public function __construct(public Order $order) {}
+
+    public function handle(): void
+    {
+        // ...talk to the CRM...
+
+        Log::info('crm sync done', ['order_id' => $this->order->id]);
+    }
+}
+```
+
+Neither file mentions a request id. This is what the log gets, in the exact layout our test app produced (the second line written by `php artisan queue:work` after the request had finished and the context had been flushed):
+
+```text
+[2026-10-17 06:56:04] local.INFO: order placed {"order_id":42} {"request_id":"req-123","user_id":1,"route":"orders"}
+[2026-10-17 06:56:04] local.INFO: crm sync done {"order_id":42} {"request_id":"req-123","user_id":1,"route":"orders"}
+```
+
+Grep for `req-123` and you have the full story of that request, across processes. If your front door (Cloudflare, nginx, a load balancer) already sets a request id header, use it and the same id shows up in your proxy logs too.
+
+<Callout type="pro-tip" title="Inertia partial reloads and polling">
+
+Add `'inertia' => $request->header('X-Inertia') === 'true'` and `'partial' => $request->header('X-Inertia-Partial-Data')` to the same `Context::add()` call. Noisy log lines from a polling component become filterable in one go.
+
+</Callout>
+
+## Hidden values: in the job, not in the log
+
+Some things are useful in a job but must not be logged: an API token, a card's last four, a raw email. `addHidden()` stores them in a second bucket that the logger never sees:
+
+```php title="app/Http/Middleware/AddRequestContext.php"
+Context::addHidden('api_token', $request->bearerToken());
+```
+
+```php title="app/Jobs/SyncOrderToCrm.php"
+$token = Context::getHidden('api_token'); // available here
+Context::get('api_token');                // null: hidden keys are invisible to get()
+```
+
+In our test, `Log::info('crm sync done', ['hidden_in_job' => Context::getHidden('api_token')])` printed the token because we asked for it explicitly, while the shared part of the line (`{"request_id":…}`) never contained it. Every method has a `Hidden` twin: `hasHidden()`, `forgetHidden()`, `pushHidden()`, `getHidden()`.
+
+## Scopes and stacks
+
+`scope()` adds data for the duration of one closure and restores the previous context afterwards. The `data` and `hidden` arguments are merged in for that closure only:
+
+```php title="app/Services/Checkout.php"
+Context::scope(function () use ($order) {
+    Context::add('step', 'payment');
+    Log::info('charging card');       // {"request_id":"req-1","breadcrumbs":["cart","checkout"],"gateway":"stripe","step":"payment"}
+}, data: ['gateway' => 'stripe'], hidden: ['card_last4' => $order->card_last4]);
+
+Log::info('after scope');             // {"request_id":"req-1","breadcrumbs":["cart","checkout"]}
+Context::get('step');                 // null
+```
+
+`push()` appends to a list, which is handy for breadcrumbs or for collecting the queries a request ran:
+
+```php title="app/Providers/AppServiceProvider.php"
+use Illuminate\Database\Events\QueryExecuted;
+use Illuminate\Support\Facades\Context;
+use Illuminate\Support\Facades\DB;
+
+DB::listen(function (QueryExecuted $event) {
+    Context::push('queries', [$event->time, $event->sql]);
+});
+```
+
+`Context::stackContains('breadcrumbs', 'checkout')` checks a stack, and accepts a closure for anything fancier.
+
+## Carry the locale into the job with dehydrating() and hydrated()
+
+Two events let you change what travels with a job and what happens when it arrives. The classic use is the locale, so a queued notification is rendered in the language of the request that queued it:
+
+```php title="app/Providers/AppServiceProvider.php"
+use Illuminate\Log\Context\Repository;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Context;
+
+public function boot(): void
+{
+    Context::dehydrating(function (Repository $context) {
+        $context->addHidden('locale', Config::get('app.locale'));
+    });
+
+    Context::hydrated(function (Repository $context) {
+        if ($context->hasHidden('locale')) {
+            Config::set('app.locale', $context->getHidden('locale'));
+        }
+    });
+}
+```
+
+We dispatched a job with the locale set to `fr`, switched the process back to `en`, flushed the context and ran `queue:work`. Inside the job `app.locale` was `fr` again, and because it was hidden, no `"locale"` key appeared in the job's log line.
+
+<Callout type="gotcha" title="use the $context argument, not the facade">
+
+Inside `dehydrating()` and `hydrated()`, write to the `Repository` you are given. Calling `Context::add()` there changes the context of the **current** process, not the one being packed for the job.
+
+</Callout>
+
+## Gotchas
+
+**Hidden means hidden from logs, not secret.** The queue payload carries both buckets. This is the `illuminate:log:context` key of our job in the `jobs` table:
+
+```json
+{"data":{"request_id":"s:7:\"req-123\";","user_id":"i:1;","route":"s:6:\"orders\";"},"hidden":{"api_token":"s:10:\"secret-abc\";"}}
+```
+
+Anyone who can read your queue store (Redis, the `jobs` table, the Horizon dashboard's payload view, a `failed_jobs` row) can read hidden context. Keep real secrets in config and put only a reference in context.
+
+**Your `Log::info()` array comes first, the shared context second.** A line reads `message {your array} {context}`. Dashboards that parse "the JSON at the end of the line" will pick up the shared context; make sure your parser handles two objects.
+
+**Tests share one process.** Within a test, context persists across `$this->get()` and `$this->post()` calls (each test boots a fresh application, so it does not leak between tests). Call `Context::flush()` when a later assertion needs a clean slate. We had to, to prove the worker took the ids from the job payload and not from the process.
+
+**Objects are shared by reference.** Mutating an object you put in context inside a `scope()` closure mutates it outside the scope too. Scopes restore keys, not object state.
+
+**Workers start each job clean.** Before a job runs, the worker calls `hydrate()` with that job's payload, and `hydrate()` flushes first. A job dispatched from a scheduled command therefore starts with an empty context, and nothing leaks from the previous job. We didn't test Octane; keys your middleware sets on every request are overwritten each time, so the risk there is limited to keys you only set sometimes. Prefer `scope()` for those.
+
+**Models travel as ids.** Put an Eloquent model in context and the payload stores its class and key, like a queued job does. It is re-fetched on hydrate, and a deleted model comes back as `null` (the `ModelNotFoundException` is reported, not thrown).
+
+**`Context::remember()` is per request, not a cache.** `Context::remember('permissions', fn () => $user->permissions)` saves the second lookup inside one request and does nothing across requests. For that you still want `Cache::remember` or [`Cache::flexible`](/laravel-cache-flexible-swr).
+
+## Try it yourself
+
+<TryIt title="See the id flow into a job in tinker">
+
+```bash
+php artisan tinker
+```
+
+```php
+use Illuminate\Support\Facades\Context;
+use Illuminate\Support\Facades\Log;
+
+Context::add('request_id', 'demo-1');
+Context::addHidden('api_token', 'secret');
+
+Log::info('from the request');
+// storage/logs/laravel.log: ... from the request {"request_id":"demo-1"}
+
+dispatch(fn () => Log::info('from the job', ['token' => Context::getHidden('api_token')]));
+// sync queue: ... from the job {"token":"secret"} {"request_id":"demo-1"}
+```
+
+Switch `QUEUE_CONNECTION` to `database` or `redis`, run `php artisan queue:work --once` in a second terminal, and the second line still carries `demo-1`.
+
+</TryIt>
+
+## How useful is this?
+
+| | Score |
+|---|---|
+| Time saved per use | ★★★★★ One middleware, then never pass a request id again |
+| How often you'll reach for it | ★★★★☆ Every app with a queue and a log you actually read |
+| Risk if misused | ★★☆☆☆ Only if you treat hidden values as secrets |
+| **Overall** | **4.5 / 5**: the cheapest observability win in Laravel |
+
+If you already log in controllers and jobs, add the middleware today and your next bug report comes with a request id.
+
+## Recap
+
+- `Context::add()` once in a middleware, and every log line in the request ends with your keys.
+- Dispatched jobs carry the context in their payload and restore it in the worker.
+- `addHidden()` keeps values out of logs but **not** out of the queue store.
+- `scope()`, `push()` and `stackContains()` cover per-closure data and breadcrumbs; `dehydrating()` / `hydrated()` cover things like the locale.
+- Log lines read `message {your array} {context}`. Parse accordingly.
+
+## FAQ
+
+<FAQ items={[
+  { q: 'How do I add a request id to every Laravel log line?', a: 'Call `Context::add(\'request_id\', $id)` in a middleware. Laravel appends the context to every log entry written during that request, and to log entries written by jobs the request dispatches.' },
+  { q: 'Does Laravel Context work with queued jobs?', a: 'Yes. When a job is dispatched the current context is serialised into the job payload under `illuminate:log:context`, and the worker restores it before `handle()` runs. The job\'s log lines show the same values.' },
+  { q: 'What is the difference between Context::add and Log::withContext?', a: '`Log::withContext()` only affects the logger in the current process. `Context` is a separate store that the logger reads from and that also travels with queued jobs and can hold hidden values.' },
+  { q: 'Are hidden context values secure?', a: 'They are kept out of log lines and out of `Context::get()`, but they are serialised into the queue payload in plain text. Treat hidden as "not logged", not as "encrypted".' },
+  { q: 'Which Laravel version added Context?', a: 'Laravel 11.0, released March 12, 2024. It is unchanged in spirit on Laravel 12 and 13; this post was tested on 13.37.' },
+]} />
+
+## Next steps
+
+- [Laravel defer(): run code after the response](/laravel-defer-helper-after-response), the other 11.x helper most apps skip
+- [queue:work vs queue:listen](/laravel-queue-work-vs-listen), for the worker that will hydrate your context
+- [Log stacks: one channel for the file, one for Slack](/laravel-log-stack-vue)
+- [The failed_jobs table, explained](/laravel-failed-jobs-table-vue)
+
+## Sources
+
+- [Laravel docs: Context](https://laravel.com/docs/13.x/context) (capturing, stacks, hidden context, events)
+- [Laravel 11 release notes](https://laravel.com/docs/11.x/releases#laravel-11) (Context introduced in 11.0)
+- [`Illuminate\Log\Context\Repository`](https://github.com/laravel/framework/blob/13.x/src/Illuminate/Log/Context/Repository.php) and [`Illuminate\Log\Context\ContextServiceProvider`](https://github.com/laravel/framework/blob/13.x/src/Illuminate/Log/Context/ContextServiceProvider.php), where the queue payload and log integration live

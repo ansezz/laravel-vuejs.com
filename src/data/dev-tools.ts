@@ -584,8 +584,17 @@ export type ShippedRow = {
   sourcePath: string;
 };
 
-// New APIs from the two release articles published on 2026-10-10.
+// The release articles the rows come from, oldest first. Every row cites one of these; check-tools enforces it.
 // Bug-fix lists stay in the articles. No unpublished post is cited here.
+export const SHIPPED_SOURCES: readonly { path: string; label: string; date: string }[] = [
+  { path: "/laravel-13-35-query-routes-markdown-responses", label: "Laravel 13.35", date: "October 6, 2026" },
+  { path: "/inertia-3-9-background-polling-navigate-type", label: "Inertia 3.9", date: "October 9, 2026" },
+  { path: "/laravel-13-36-validation-builders-olap-sticky-queues", label: "Laravel 13.36", date: "October 13, 2026" },
+  { path: "/wayfinder-precognition-query-method", label: "Wayfinder 0.1.22 + Precognition 2.1.1", date: "October 15, 2026" },
+  { path: "/laravel-13-37-numeric-strict-queue-jxl", label: "Laravel 13.37", date: "October 16, 2026" },
+  { path: "/this-week-in-laravel-inertia-2026-10-19", label: "Wayfinder 0.1.23 (weekly roundup)", date: "October 16, 2026" },
+];
+
 export const SHIPPED_ROWS: readonly ShippedRow[] = [
   {
     id: "query",
@@ -668,32 +677,84 @@ export const SHIPPED_ROWS: readonly ShippedRow[] = [
       "No Laravel change is required. inertiajs/inertia-laravel 3.5 works with @inertiajs/vue3 3.9.1. Nothing in 3.9 is a breaking change. Older encrypted history entries are loaded from the server again. On Inertia 2, version 2.3.29 from the same day has the history IV fix and the prefetch cache flush.",
     sourcePath: "/inertia-3-9-background-polling-navigate-type",
   },
+  {
+    id: "rule-builders",
+    release: "Laravel 13.36",
+    change: "Rule builders",
+    use: "Rule::requiredWith(), Rule::confirmed(), Rule::ip(), Rule::regex(), Rule::missingIf() and about 50 more replace rule strings like required_with:phone,email, so the IDE autocompletes them.",
+    watch:
+      "Plain strings keep working and both styles mix in one array. The helper is Rule::ip(), not Rule::ipAddress(). Values that contain commas are safe in the builder form.",
+    sourcePath: "/laravel-13-36-validation-builders-olap-sticky-queues",
+  },
+  {
+    id: "sticky",
+    release: "Laravel 13.36",
+    change: "Sticky queue workers",
+    use: "Worker::$flushStickyConnections = true sends queue workers back to the read replica after each job. DB::olap(fn () => ...) runs a query in Vitess OLAP mode.",
+    watch:
+      "Both are opt-in. DB::olap() does nothing on plain MySQL. Queued mailables now respect DeleteWhenMissingModels and FailOnTimeout.",
+    sourcePath: "/laravel-13-36-validation-builders-olap-sticky-queues",
+  },
+  {
+    id: "query-clients",
+    release: "Wayfinder 0.1.22",
+    change: "QUERY from Vue",
+    use: "Wayfinder 0.1.22 generates search.query() and search.form.query() for Route::query() routes. Precognition 2.1.1 adds client.query(url, data) with the data in the body.",
+    watch:
+      "HTML forms only send GET and POST, so the form helper sends POST with _method=QUERY. CSRF still applies to QUERY on web routes. It needs Laravel 13.35 or later.",
+    sourcePath: "/wayfinder-precognition-query-method",
+  },
+  {
+    id: "numeric-strict",
+    release: "Laravel 13.37",
+    change: "Strict numbers",
+    use: "Rule::numeric(strict: true) accepts int and float values and rejects numeric strings, so a JSON API can insist on 42 instead of \"42\".",
+    watch:
+      "Plain numeric still accepts \"42\". Form posts send strings, so use strict only for JSON input.",
+    sourcePath: "/laravel-13-37-numeric-strict-queue-jxl",
+  },
+  {
+    id: "failed-jobs",
+    release: "Laravel 13.37",
+    change: "Failed job commands",
+    use: "php artisan queue:failed --queue=emails lists the failed jobs of one queue. php artisan queue:forget 1 2 3 deletes several failed jobs at once.",
+    watch:
+      "queue:forget still takes job IDs, not a queue name. List first, then forget.",
+    sourcePath: "/laravel-13-37-numeric-strict-queue-jxl",
+  },
+  {
+    id: "skip-database",
+    release: "Wayfinder 0.1.23",
+    change: "Types without a database",
+    use: "php artisan wayfinder:generate --skip-database builds route model binding types from the models' @property docblocks, so CI never opens a database connection. The Vite plugin option is skipDatabase: true.",
+    watch:
+      "Types are only as good as the docblocks. Keep @property up to date on models that are bound in routes.",
+    sourcePath: "/this-week-in-laravel-inertia-2026-10-19",
+  },
 ];
+
+export const shippedSource = (path: string) => SHIPPED_SOURCES.find((s) => s.path === path);
 
 export function shippedMarkdown(): string {
   const lines = [
     "# What just shipped for Laravel and Vue",
     "",
-    `Copied from the two release articles on ${SITE_URL}. Laravel 13.35.0 was tagged on October 6, 2026. Inertia 3.9.0 came out on October 9, 2026, and 3.9.1 followed the same day. Install 3.9.1. These rows are the new APIs. QUERY also matches existing Route::any() and Route::redirect() routes. The articles also list bug fixes.`,
+    `Copied from the release articles on ${SITE_URL}. ${SHIPPED_SOURCES.map((s) => `${s.label}: ${s.date}`).join(". ")}. On Inertia, install 3.9.1, not 3.9.0. These rows are the new APIs. QUERY also matches existing Route::any() and Route::redirect() routes. The articles also list bug fixes.`,
     "",
-    "Update Laravel with `composer update laravel/framework` for 13.35.0 or later. Update the Vue adapter with `npm install @inertiajs/vue3@^3.9.1`.",
+    "Update Laravel with `composer update laravel/framework` for 13.37.0 or later. Update the Vue adapter with `npm install @inertiajs/vue3@^3.9.1`.",
     "",
     "| Release | Change | Use | Watch | Source |",
     "| --- | --- | --- | --- | --- |",
   ];
   for (const row of SHIPPED_ROWS) {
-    const source =
-      row.sourcePath === "/laravel-13-35-query-routes-markdown-responses"
-        ? `[Laravel 13.35](${SITE_URL}${row.sourcePath})`
-        : `[Inertia 3.9](${SITE_URL}${row.sourcePath})`;
+    const source = shippedSource(row.sourcePath);
     lines.push(
-      `| ${row.release} | ${row.change} | ${row.use} | ${row.watch} | ${source} |`,
+      `| ${row.release} | ${row.change} | ${row.use} | ${row.watch} | [${source?.label ?? row.release}](${SITE_URL}${row.sourcePath}) |`,
     );
   }
   lines.push(
     "",
-    `Laravel 13.35 article: ${SITE_URL}/laravel-13-35-query-routes-markdown-responses`,
-    `Inertia 3.9 article: ${SITE_URL}/inertia-3-9-background-polling-navigate-type`,
+    ...SHIPPED_SOURCES.map((s) => `${s.label} article: ${SITE_URL}${s.path}`),
     `HTML table: ${SITE_URL}/tools/shipped`,
   );
   return lines.join("\n");

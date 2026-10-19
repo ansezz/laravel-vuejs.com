@@ -1,0 +1,16 @@
+flowchart LR
+  A["`**1. Request**
+  POST /orders`"] --> B["`**Middleware**
+  Context::add(request_id, user_id)
+  Context::addHidden(token)`"]
+  B --> C["`**Log::info()**
+  line ends with
+  {request_id, user_id}`"]
+  B --> D["`**dispatch(job)**
+  payload carries
+  data + hidden`"]
+  D --> E["`**Worker hydrates**
+  same request_id, user_id`"]
+  E --> F["`**Job Log::info()**
+  same ids on the line,
+  token still not logged`"]
