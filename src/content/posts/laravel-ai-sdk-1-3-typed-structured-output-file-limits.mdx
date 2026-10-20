@@ -1,0 +1,379 @@
+---
+id: 161
+title: "Laravel AI SDK 1.3: typed structured output and file limits"
+seoTitle: "Laravel AI SDK 1.3: Typed Structured Output, File Limits"
+excerpt: "Laravel AI SDK 1.3 types structured responses for PHPStan, caps remote files at 100 MB and hardens file IDs. Two changes can break your app on upgrade."
+date: 2026-10-20T00:30:00Z
+snippet: "$response = (new LeadScorer)->prompt($lead); // StructuredAgentResponse"
+categories: [laravel, vuejs]
+tags: [laravel, vuejs, inertia, release, upgrade]
+---
+You write `$response['score']` and PHPStan says you can't, so every call site gets an inline `@var`. Meanwhile a user pastes a link to a 2 GB video and your queue worker runs out of memory. Laravel AI SDK 1.3 fixes both. It's mostly a hardening release, but **two changes can break your app on upgrade**, so read this before you run `composer update`.
+
+<TLDR
+  audience="Laravel 13 developers using laravel/ai agents, structured output or remote files"
+  learn={['Why PHPStan now knows `prompt()` returns a `StructuredAgentResponse`', 'The structured-output behaviour change that can throw on upgrade', 'The new 100 MB limit on remote files and how to change it', 'Raw provider metadata on stored files, safer file IDs and the smaller fixes']}
+  tested="Laravel 13.37 · laravel/ai 1.3.0 · PHPStan 2.3 · Pest 4 · PHP 8.4"
+>
+
+- **1.3.0** (Oct 19, 2026) gives `prompt()` and `agent()` conditional return types: PHPStan infers `StructuredAgentResponse` for `HasStructuredOutput` agents. No more inline `@var`.
+- **Breaking 1:** structured agents now *always* return `StructuredAgentResponse`. A run with no payload (stopped early, faked with a string, paused for approval) has `structured === []`, and `$response['score']` throws.
+- **Breaking 2:** remote files (`Image::fromUrl()`, `Document::fromUrl()`, ...) stop downloading at **100 MB** with an `InvalidArgumentException`. Change it with `ai.remote_files.max_size`, in kilobytes.
+- Also: `$stored->raw` on `Files::put()` / `Files::get()`, file and store IDs URL-encoded as one path segment, and fixes for MCP schemas, Anthropic server tools and Gemini.
+
+</TLDR>
+
+## What's in 1.3
+
+| Change | PR | Why you care |
+|---|---|---|
+| **Typed `prompt()` for structured agents** | [#1138](https://github.com/laravel/ai/pull/1138) | PHPStan knows `$response['score']` is fine. **Behaviour change** for empty runs |
+| **100 MB limit on remote files** | [#1139](https://github.com/laravel/ai/pull/1139) | Huge downloads fail fast with a clear message. **Upgrade note** |
+| Raw HTTP response on stored files | [#1146](https://github.com/laravel/ai/pull/1146) | Read `bytes`, `purpose`, `expires_at` without a second API call |
+| File, store and document IDs encoded | [#1140](https://github.com/laravel/ai/pull/1140) | A crafted ID can't hit another endpoint |
+| Schema normalizer node budget | [#1145](https://github.com/laravel/ai/pull/1145) | A tiny MCP schema can't eat the worker |
+| HTML escaping in image responses | [#1149](https://github.com/laravel/ai/pull/1149) | `toHtml()` escapes the MIME type and data too |
+| Anthropic text split around server tools | [#1143](https://github.com/laravel/ai/pull/1143) | "Let me check.The answer..." gets its blank line |
+| Gemini metadata filters, Gemini thought step | [#1144](https://github.com/laravel/ai/pull/1144), [#1150](https://github.com/laravel/ai/pull/1150) | `whereNotIn()` works; remembered tool chats stop failing with a 400 |
+
+Everything below ran in a Laravel 13.37 app with `laravel/ai` 1.3.0: 11 Pest tests (faked agents and `Http::fake()`, no API key charged), plus PHPStan 2.3 on the same calls against 1.2.3 and 1.3.0.
+
+## Typed structured responses for PHPStan
+
+Structured output works like this, straight from the [docs](https://laravel.com/docs/13.x/ai-sdk#structured-output): implement `HasStructuredOutput`, return a schema, read the response like an array.
+
+```php title="app/Ai/Agents/LeadScorer.php"
+<?php
+
+namespace App\Ai\Agents;
+
+use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Laravel\Ai\Contracts\Agent;
+use Laravel\Ai\Contracts\HasStructuredOutput;
+use Laravel\Ai\Promptable;
+use Stringable;
+
+class LeadScorer implements Agent, HasStructuredOutput
+{
+    use Promptable;
+
+    public function instructions(): Stringable|string
+    {
+        return 'Score the sales lead from 1 to 10 and give one reason.';
+    }
+
+    public function schema(JsonSchema $schema): array
+    {
+        return [
+            'score' => $schema->integer()->min(1)->max(10)->required(),
+            'reason' => $schema->string()->required(),
+        ];
+    }
+}
+```
+
+Until 1.2.3, `prompt()` was declared as returning `AgentResponse`, even though a structured agent handed you a `StructuredAgentResponse` at runtime. Static analysis believed the declaration.
+
+<CodeCompare before="1.2.3" after="1.3.0">
+
+```php title="app/Http/Controllers/LeadController.php"
+use Laravel\Ai\Responses\StructuredAgentResponse;
+
+/** @var StructuredAgentResponse $response */
+$response = (new LeadScorer)->prompt($lead->notes);
+
+$score = $response['score'];
+```
+
+```php title="app/Http/Controllers/LeadController.php"
+$response = (new LeadScorer)->prompt($lead->notes); // [!code highlight]
+
+$score = $response['score'];
+```
+
+</CodeCompare>
+
+`Promptable::prompt()` now carries `@return ($this is HasStructuredOutput ? StructuredAgentResponse : AgentResponse)`, and the `agent()` helper does the same based on its `schema` argument. Here is what PHPStan 2.3 inferred in our app:
+
+| Call | 1.2.3 | 1.3.0 |
+|---|---|---|
+| `(new LeadScorer)->prompt(...)` | `AgentResponse` | `StructuredAgentResponse` |
+| `LeadScorer::make()->prompt(...)` | `AgentResponse` | `StructuredAgentResponse` |
+| `agent(schema: fn ($schema) => [...])->prompt(...)` | `AgentResponse` | `StructuredAgentResponse` |
+| `(new TicketTriage)->prompt(...)` (no schema) | `AgentResponse` | `AgentResponse` |
+
+On 1.2.3, `$response->structured` failed from level 3 ("Access to an undefined property AgentResponse::$structured") and `$response['score']` failed at level 9 ("Cannot access offset 'score'"). On 1.3.0 both are clean, so you can delete those `@var` lines.
+
+## Behaviour change: structured agents always return a structured response
+
+To make that return type honest, a structured agent now returns `StructuredAgentResponse` in **every** case, including runs that produced no structured payload. That's the part that can bite.
+
+| The run... | 1.2.3 returned | 1.3.0 returns |
+|---|---|---|
+| Produced structured output | `StructuredAgentResponse` | Same, unchanged |
+| Was stopped before its first step ([Stop middleware](/laravel-ai-sdk-1-2-1-stop-middleware)) | Plain `AgentResponse`, `text: ''` | `StructuredAgentResponse`, `structured: []` |
+| Was faked with a string, like `LeadScorer::fake(['Plain text'])` | Plain `AgentResponse` with that text | `StructuredAgentResponse`, `structured: []`, `text` kept |
+| Paused for tool approval (Bedrock) or a rejected resume | No structured payload | `StructuredAgentResponse`, `structured: []` |
+
+And because the response casts from `structured`, not from `text`, the casts change too. We checked each one with the string-faked agent:
+
+```php title="tests/Feature/LeadScorerTest.php"
+LeadScorer::fake(['Plain text']);
+
+$response = (new LeadScorer)->prompt('ACME');
+
+$response->text;       // 'Plain text'
+$response->structured; // []
+$response->toArray();  // []
+(string) $response;    // '[]' (was 'Plain text' on 1.2.3)
+$response['score'];    // ErrorException: Undefined array key "score"
+```
+
+<Callout type="gotcha" title="instanceof checks and string fakes">
+
+If you told the two cases apart with `$response instanceof StructuredAgentResponse`, that check is now always true for structured agents. Check `$response->structured === []` instead. Tests that fake a structured agent with a plain string and then read `(string) $response` or `$response['field']` will fail after the upgrade: fake it with an array, like `LeadScorer::fake([['score' => 8, 'reason' => 'Budget approved']])`.
+
+</Callout>
+
+A safe controller treats an empty payload as "no answer yet" instead of reading keys blindly. Here it is with Inertia:
+
+```php title="app/Http/Controllers/LeadController.php"
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Ai\Agents\LeadScorer;
+use App\Models\Lead;
+use Inertia\Inertia;
+use Inertia\Response;
+
+class LeadController
+{
+    public function show(Lead $lead): Response
+    {
+        $response = (new LeadScorer)->prompt($lead->notes);
+
+        return Inertia::render('leads/Show', [
+            'lead' => $lead->only('id', 'company'),
+            'score' => $response->structured === [] ? null : $response->toArray(), // [!code highlight]
+        ]);
+    }
+}
+```
+
+```vue title="resources/js/pages/leads/Show.vue"
+<script setup lang="ts">
+defineProps<{
+    lead: { id: number; company: string }
+    score: { score: number; reason: string } | null
+}>()
+</script>
+
+<template>
+    <h1>{{ lead.company }}</h1>
+    <p v-if="score">Score {{ score.score }}/10: {{ score.reason }}</p>
+    <p v-else>No score yet. Try again in a minute.</p>
+</template>
+```
+
+The Vue page gets either the two fields or `null`, never the provider payload. Our [structured output guide](/laravel-ai-structured-output-vue) covers the rest of that pattern.
+
+## Remote files stop at 100 MB
+
+`Image::fromUrl()`, `Document::fromUrl()`, `Audio::fromUrl()` and `Video::fromUrl()` create remote files. When the SDK has to download one itself, it used to read the whole body with no limit, and a compressed body could expand with no limit either. A big file filled worker memory and failed late with a memory error.
+
+Since 1.3 the download has a ceiling:
+
+- A `Content-Length` over the limit fails **before** the body downloads.
+- Without a `Content-Length`, the stream stops as soon as the limit is crossed.
+- The limit counts **decoded** bytes, so a gzip bomb hits it too.
+- Either way you get an `InvalidArgumentException` that names the limit.
+
+<Diagram name="ai-sdk-remote-file-size-limit" alt="When the SDK downloads a remote file, it first checks the Content-Length header. If the declared size is over the limit, it throws an exception that names the limit without downloading the body. If the size is under the limit or missing, it streams the body and counts the decoded bytes. If the count crosses the limit, it throws the same exception; otherwise the file is inlined into the request or uploaded." caption="The limit is checked twice: on the headers and while the body streams." />
+
+This is the message we got with a 1 MB limit and a 5 MB file:
+
+```text
+InvalidArgumentException: The remote file URL [https://example.com/huge.png] exceeds the maximum size of 1024 kilobytes.
+```
+
+The default is `102400` kilobytes (100 MB). To change it, add a `remote_files` key to your config. It isn't in the published `config/ai.php` yet, so add it by hand:
+
+```php title="config/ai.php"
+return [
+    // ...
+
+    'remote_files' => [
+        'max_size' => 25 * 1024, // kilobytes, so 25 MB
+    ],
+];
+```
+
+Then catch the exception where users give you URLs:
+
+```php title="app/Http/Controllers/KnowledgeBaseController.php"
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use InvalidArgumentException;
+use Laravel\Ai\Files\Document;
+
+class KnowledgeBaseController
+{
+    public function store(Request $request): RedirectResponse
+    {
+        $request->validate(['url' => ['required', 'url:https']]);
+
+        try {
+            $stored = Document::fromUrl($request->input('url'))->put();
+        } catch (InvalidArgumentException) {
+            return back()->withErrors(['url' => 'We could not use that file. Files must be under 25 MB.']);
+        }
+
+        return back()->with('file_id', $stored->id);
+    }
+}
+```
+
+<Callout type="heads-up" title="when the SDK downloads, and when it doesn't">
+
+The limit applies when the SDK fetches the bytes itself: storing a remote file with `->put()`, or providers that inline attachments, like Gemini. When a provider accepts a URL, for example OpenAI and Anthropic image attachments, the SDK sends the URL and the provider does the fetching. The same `InvalidArgumentException` class is also thrown for blocked private or internal URLs, so treat it as "this URL can't be used".
+
+</Callout>
+
+## Raw provider metadata on stored files
+
+Text responses already had a [`raw` property](https://laravel.com/docs/13.x/ai-sdk#raw-http-responses). In 1.3, `StoredFileResponse` (from `Files::put()` and `->put()`) and `FileResponse` (from `Files::get()` and `->get()`) get it too, on OpenAI, Anthropic, Gemini and OpenRouter.
+
+```php title="app/Actions/StoreKnowledgeFile.php"
+use Laravel\Ai\Files\Document;
+
+$stored = Document::fromString('Hello, World!', 'text/plain')->put(name: 'notes.txt', provider: 'openai');
+
+$stored->id;                        // 'file-abc123'
+$stored->raw?->json('bytes');       // 13
+$stored->raw?->json('filename');    // 'notes.txt'
+$stored->raw?->json('purpose');     // 'user_data'
+```
+
+The keys are whatever the provider returns: OpenAI sends `bytes`, `created_at`, `filename`, `purpose` and `expires_at`, other providers have their own fields.
+
+Keep the `?->`: like on text responses, `raw` is `null` on faked responses (`Files::fake()`). It's also dropped when the response is serialized, so a queued job won't choke on it. We checked both.
+
+## File and store IDs can't jump endpoints
+
+The OpenAI, Azure, Anthropic, OpenRouter and Gemini file and store gateways used to put IDs into the URL path as they were. If an ID ever came from user input, `/`, `?` or `..` could point the request somewhere else:
+
+<CodeCompare before="1.2.3" after="1.3.0">
+
+```php title="app/Http/Controllers/FileController.php"
+Files::delete('../vector_stores/vs_123', provider: 'openai');
+// DELETE https://api.openai.com/v1/vector_stores/vs_123  ← a vector store!
+```
+
+```php title="app/Http/Controllers/FileController.php"
+Files::delete('../vector_stores/vs_123', provider: 'openai');
+// DELETE https://api.openai.com/v1/files/..%2Fvector_stores%2Fvs_123
+```
+
+</CodeCompare>
+
+Every file, store and document ID is now URL-encoded as one path segment. An empty ID, `.` or `..` throws `InvalidArgumentException: [..] is not a valid provider resource ID.` before any request. Real IDs only use URL-safe characters, so `file-abc123` goes out exactly as before.
+
+Still, don't let users pick provider IDs: look them up from your own table, scoped to the current user.
+
+## The smaller fixes
+
+**MCP schemas ([#1145](https://github.com/laravel/ai/pull/1145)).** A small MCP tool schema that reuses a `$ref` in sibling properties could expand to 2^30 nodes and exhaust the worker. The normalizer now stops after 10,000 nodes, and `McpTool::schema()` returns `[]` for that tool instead of crashing.
+
+**Image HTML ([#1149](https://github.com/laravel/ai/pull/1149)).** `ImageResponse::toHtml()` already escaped `alt`. It now escapes the MIME type and image data as well.
+
+**Anthropic server tools ([#1143](https://github.com/laravel/ai/pull/1143)).** When Claude runs `web_search` or `web_fetch` mid-answer, the text before and after the tool is now separated by a blank line, in `$response->text`, in the stream and in stored messages.
+
+**Gemini ([#1144](https://github.com/laravel/ai/pull/1144), [#1150](https://github.com/laravel/ai/pull/1150)).** [File search](https://laravel.com/docs/13.x/ai-sdk#file-search) filters escape quotes and backslashes, reject invalid keys, group each condition and support `whereNotIn()`. And remembered conversations with tools stop failing with "Model turns with thought summaries must start with a thought block" once a step had both text and a tool call.
+
+## Upgrade notes
+
+```bash
+composer update laravel/ai
+composer show laravel/ai | grep versions   # versions : * v1.3.0
+```
+
+<Steps>
+
+1. **Search for structured fallbacks.** Find code that checks `instanceof StructuredAgentResponse`, casts a structured response to a string, or reads keys without checking. Use `$response->structured === []` for the "no payload" case.
+2. **Fix string fakes.** `LeadScorer::fake(['some text'])` now gives an empty `structured`. Fake structured agents with arrays.
+3. **Decide on a file size limit.** If you accept remote files over 100 MB, set `ai.remote_files.max_size` (kilobytes). If 100 MB is too generous for your workers, lower it.
+4. **Catch `InvalidArgumentException`** where users submit URLs, and show a friendly error.
+5. **Check Anthropic text assertions.** Tests or snapshots that compare the exact text around server tools now see a blank line between remarks.
+6. **Delete your `@var` lines.** PHPStan or Larastan now infers the structured type.
+
+</Steps>
+
+<Callout type="tip" title="still on 0.x?">
+
+`laravel/ai` **v0.11.3** shipped the same day with backports, including the same 100 MB remote file limit and `ai.remote_files.max_size` key ([#1151](https://github.com/laravel/ai/pull/1151)), conversation pagination, OpenRouter reranking and OpenRouter audio input. The typed structured responses are 1.x only. We'll cover 0.11.3 in Monday's roundup.
+
+</Callout>
+
+## Try it yourself
+
+<TryIt title="See the structured behaviour change in one test">
+
+```php title="tests/Feature/LeadScorerTest.php"
+use App\Ai\Agents\LeadScorer;
+use Laravel\Ai\Responses\StructuredAgentResponse;
+
+test('an empty structured run is still a structured response', function () {
+    LeadScorer::fake(['Plain text']);
+
+    $response = (new LeadScorer)->prompt('ACME, 200 seats');
+
+    expect($response)->toBeInstanceOf(StructuredAgentResponse::class)
+        ->and($response->structured)->toBe([])
+        ->and($response->text)->toBe('Plain text')
+        ->and((string) $response)->toBe('[]');
+});
+```
+
+On 1.2.3 the first assertion fails. Swap the fake for `[['score' => 8, 'reason' => 'Budget approved']]` and `$response['score']` comes back as `8`.
+
+</TryIt>
+
+## Recap
+
+- `prompt()` on a `HasStructuredOutput` agent is now typed as `StructuredAgentResponse`: delete your `@var` lines.
+- Structured agents always return a structured response. Empty runs have `structured === []`, cast to `[]`, and throw on `$response['key']`.
+- Remote files the SDK downloads stop at 100 MB (decoded bytes). Change it with `ai.remote_files.max_size` in kilobytes.
+- Stored and retrieved files expose `$response->raw`, and file, store and document IDs are encoded as one path segment.
+- Also fixed: MCP schema blow-ups, image HTML escaping, Anthropic text around server tools, Gemini filters and thought steps.
+
+## FAQ
+
+<FAQ items={[
+  { q: 'Is Laravel AI SDK 1.3 a breaking upgrade?', a: 'For most apps, no. Two changes can break code: structured agents now always return `StructuredAgentResponse` (empty `structured` when there is no payload), and remote files over 100 MB now throw an `InvalidArgumentException`.' },
+  { q: 'How do I remove the @var on structured agent responses?', a: 'Update to laravel/ai 1.3. `Promptable::prompt()` now has a conditional return type, so PHPStan infers `StructuredAgentResponse` for agents that implement `HasStructuredOutput`, and `AgentResponse` for the rest.' },
+  { q: 'How do I change the remote file size limit?', a: 'Add `remote_files.max_size` to `config/ai.php`, in kilobytes. The default is 102400 (100 MB). It is not in the published config file yet, so add the key yourself.' },
+  { q: 'Why does my structured response cast to "[]"?', a: 'The run produced no structured payload: it was stopped before its first step, faked with a plain string, or paused for tool approval. Check `$response->structured === []` before reading keys; the model text is still on `$response->text`.' },
+  { q: 'How do I read provider metadata for an uploaded file?', a: 'Use `$stored->raw?->json(...)` on the response from `Files::put()` or `->put()`, for example `bytes` or `purpose`. `Files::get()` responses have it too. It is `null` on faked responses.' },
+]} />
+
+## Next steps
+
+- [Return a structured score from the AI SDK](/laravel-ai-structured-output-vue)
+- [Laravel AI SDK 1.2.1: Stop middleware for agent runs](/laravel-ai-sdk-1-2-1-stop-middleware)
+- [Fake an AI agent in a Pest test](/pest-fake-ai-agent-vue)
+- [Laravel AI SDK docs: Structured output](https://laravel.com/docs/13.x/ai-sdk#structured-output) and [Files](https://laravel.com/docs/13.x/ai-sdk#files)
+
+## Sources
+
+- Laravel docs: [Structured output](https://laravel.com/docs/13.x/ai-sdk#structured-output), [Attachments](https://laravel.com/docs/13.x/ai-sdk#attachments), [Files](https://laravel.com/docs/13.x/ai-sdk#files), [Raw HTTP responses](https://laravel.com/docs/13.x/ai-sdk#raw-http-responses), [File search](https://laravel.com/docs/13.x/ai-sdk#file-search), [MCP tools](https://laravel.com/docs/13.x/ai-sdk#mcp-tools)
+- [laravel/ai v1.3.0 release notes](https://github.com/laravel/ai/releases/tag/v1.3.0) and [full changelog v1.2.3...v1.3.0](https://github.com/laravel/ai/compare/v1.2.3...v1.3.0)
+- [PR #1138: Narrow the prompt return type for structured output agents](https://github.com/laravel/ai/pull/1138) ([`StructuredAgentResponse.php`](https://github.com/laravel/ai/blob/v1.3.0/src/Responses/StructuredAgentResponse.php))
+- [PR #1139: Limit the size of fetched remote files](https://github.com/laravel/ai/pull/1139) ([`UntrustedUrl.php`](https://github.com/laravel/ai/blob/v1.3.0/src/Files/UntrustedUrl.php))
+- [PR #1146: Raw HTTP responses on stored and retrieved files](https://github.com/laravel/ai/pull/1146) and [PR #1140: Encode file and store IDs as one path segment](https://github.com/laravel/ai/pull/1140)
+- [PR #1145](https://github.com/laravel/ai/pull/1145), [PR #1149](https://github.com/laravel/ai/pull/1149), [PR #1143](https://github.com/laravel/ai/pull/1143), [PR #1144](https://github.com/laravel/ai/pull/1144), [PR #1150](https://github.com/laravel/ai/pull/1150)
+- [laravel/ai v0.11.3 release notes](https://github.com/laravel/ai/releases/tag/v0.11.3) and [PR #1151 (0.x backport)](https://github.com/laravel/ai/pull/1151)
