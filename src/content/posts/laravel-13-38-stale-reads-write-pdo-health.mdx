@@ -1,0 +1,258 @@
+---
+id: 164
+title: "Laravel 13.38: no more stale reads after a write, usingWritePdo and a cache-safe /up"
+seoTitle: "Laravel 13.38: PreventStaleDatabaseReads, usingWritePdo"
+excerpt: "Laravel 13.38 adds PreventStaleDatabaseReads, Connection::usingWritePdo(), CountCrashesAsExceptions for listeners/mail/notifications and a route-cache-safe /up."
+date: 2026-10-20T15:30:00Z
+snippet: "PreventStaleDatabaseReads::for(5)"
+categories: [laravel]
+tags: [laravel, release]
+---
+Your user renames a post, hits refresh, and sees the **old** title. Nothing is broken: the read replica is just two seconds behind. They file a bug anyway. Laravel **13.38** ships the fix as one line of middleware, plus a scoped way to force the writer and a `/up` route that finally survives `route:cache` on another machine.
+
+<TLDR
+  audience="Laravel 13 developers using read replicas, queues, broadcasting or route caching"
+  learn={['`PreventStaleDatabaseReads`: read-your-own-writes across requests', '`DB::connection()->usingWritePdo()` vs `onWriteConnection()`', '`#[CountCrashesAsExceptions]` on listeners, mailables and notifications', '`UniqueJobSkipped` for unique broadcasts, float `Rule::unique()->where()`, cache-safe `/up`']}
+  tested="Laravel 13.38.0 · PHP 8.4 · Pest 4 (7 tests / 17 assertions: stale-read middleware on a sqlite read/write connection, usingWritePdo restore on throw, CountCrashesAsExceptions on SendQueuedMailable, UniqueJobSkipped for a unique broadcast, float unique where, /up route serialization, date rule on an array)"
+>
+
+- **13.38.0** was released on **October 20, 2026** (10:47 UTC). Every new feature is opt-in.
+- Append `PreventStaleDatabaseReads` to the `web` group and a user's reads hit the **write** connection for 2 seconds (or `::for(5)`) after they wrote something.
+- `DB::connection()->usingWritePdo(fn () => …)` forces the writer for *everything* in the callback, relations included, and restores the old state even if it throws.
+- `#[CountCrashesAsExceptions]` now works on queued listeners, mailables and notifications; unique broadcasts fire `UniqueJobSkipped`; `/up` is now an invokable `HealthCheck` class, so cached routes work after you move the app.
+
+</TLDR>
+
+## What's new at a glance
+
+| Change | PR | What it replaces |
+|---|---|---|
+| `PreventStaleDatabaseReads` middleware | [#62078](https://github.com/laravel/framework/pull/62078) | A home-made "sticky for a few seconds" middleware |
+| `Connection::usingWritePdo()` | [#62099](https://github.com/laravel/framework/pull/62099) | Toggling `useWriteConnectionWhenReading()` on and off by hand |
+| `CountCrashesAsExceptions` on listeners, mail, notifications | [#62048](https://github.com/laravel/framework/pull/62048) | The attribute being silently ignored outside jobs |
+| `UniqueJobSkipped` for unique broadcasts | [#62077](https://github.com/laravel/framework/pull/62077) | "Where did my broadcast go?" |
+| Floats in `Rule::unique()->where()` | [#62059](https://github.com/laravel/framework/pull/62059) | A PHPStan error on `where('price', 9.99)` |
+| `/up` as `HealthCheck` class | [#62049](https://github.com/laravel/framework/pull/62049) | `FileNotFoundException` on `/up` after `route:cache` in CI |
+
+## Stop showing users stale data after a write
+
+The `sticky` option in `config/database.php` only lasts for **the current request**. The next request goes back to the replica, which may not have the row yet. `PreventStaleDatabaseReads` carries that stickiness across requests through the session ([docs](https://laravel.com/docs/13.x/database#preventing-stale-database-reads)).
+
+<CodeCompare before="Laravel 13.37" after="Laravel 13.38">
+
+```php title="app/Http/Middleware/StickToWriter.php"
+// A custom middleware you had to write and maintain
+public function handle(Request $request, Closure $next)
+{
+    $db = DB::connection();
+    $db->useWriteConnectionWhenReading(
+        $request->session()->get('wrote_at', 0) >= now()->subSeconds(2)->timestamp
+    );
+
+    $response = $next($request);
+
+    if ($db->hasModifiedRecords()) {
+        $request->session()->put('wrote_at', now()->timestamp);
+    }
+
+    return $response;
+}
+```
+
+```php title="bootstrap/app.php"
+use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Foundation\Http\Middleware\PreventStaleDatabaseReads; // [!code ++]
+
+->withMiddleware(function (Middleware $middleware): void {
+    $middleware->web(append: [
+        PreventStaleDatabaseReads::class, // [!code ++]
+    ]);
+})
+```
+
+</CodeCompare>
+
+Need a longer window because your replica lag spikes? Pass seconds with `for()`, which simply builds the `Class:5` middleware string:
+
+```php title="routes/web.php"
+use App\Http\Controllers\PostController;
+use Illuminate\Foundation\Http\Middleware\PreventStaleDatabaseReads;
+
+Route::middleware(PreventStaleDatabaseReads::for(5))->group(function () {
+    Route::get('/posts/{post}', [PostController::class, 'show']);
+    Route::put('/posts/{post}', [PostController::class, 'update']);
+});
+```
+
+With Inertia, this is exactly the `PUT` → redirect → `GET` round trip your Vue page makes after `form.put()`. The redirected `GET` now reads from the writer, so the page shows the new title instead of the old one.
+
+We checked it on 13.38 with a sqlite connection that has separate `read` and `write` configs:
+
+| Request | Connection used for reads |
+|---|---|
+| `GET` with no recent write | `read` |
+| `POST` that writes, then `GET` | `write` |
+| Same `GET` 3 seconds later (default 2s window) | `read` |
+
+<Callout type="gotcha" title="Session only, default connection only">
+
+It must run **after** `StartSession` (the `web` group already does that), so it is not for stateless APIs. It only protects the user who wrote the data, on the **default** connection. Other users can still see replica lag.
+
+</Callout>
+
+## usingWritePdo: force the writer for a whole callback
+
+`User::onWriteConnection()` only applies to that one query. Chain `->posts()` after it and the relation query quietly goes back to the replica. `usingWritePdo()` scopes the writer to everything inside the callback ([docs](https://laravel.com/docs/13.x/database#using-the-write-connection-for-reads)).
+
+<CodeCompare before="onWriteConnection()" after="usingWritePdo()">
+
+```php title="app/Actions/LoadDrafts.php"
+$drafts = User::onWriteConnection()
+    ->where('email', $email)
+    ->first()
+    ?->posts()            // ⚠️ back on the replica
+    ->whereNull('published_at')
+    ->get();
+```
+
+```php title="app/Actions/LoadDrafts.php"
+use Illuminate\Support\Facades\DB;
+
+$drafts = DB::connection()->usingWritePdo(fn () => User::query() // [!code ++]
+    ->where('email', $email)
+    ->first()
+    ?->posts()            // ✅ also on the writer
+    ->whereNull('published_at')
+    ->get());
+```
+
+</CodeCompare>
+
+It returns whatever the callback returns, and puts the previous read preference back in a `finally` block. We threw an exception inside the callback in our lab: the read PDO was the replica again afterwards.
+
+## Count worker crashes on listeners, mailables and notifications
+
+Laravel already lets you mark a job with `#[CountCrashesAsExceptions]` so an out-of-memory kill counts towards `maxExceptions` ([docs](https://laravel.com/docs/13.x/queues#max-exceptions)). On a queued listener, mailable or notification it was silently ignored, so a listener that crashed every time was retried forever. 13.38 copies the flag onto the wrapper jobs.
+
+```php title="app/Listeners/ExportOrders.php"
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Queue\Attributes\CountCrashesAsExceptions;
+use Illuminate\Queue\Attributes\MaxExceptions;
+
+#[MaxExceptions(3), CountCrashesAsExceptions] // now respected here too
+class ExportOrders implements ShouldQueue
+{
+    public function handle(OrdersImported $event): void
+    {
+        // the export that eats all the memory
+    }
+}
+```
+
+## UniqueJobSkipped for unique broadcast events
+
+A broadcast event that implements `ShouldBeUnique` is dropped while its lock is held. That was invisible. Now Laravel fires `Illuminate\Queue\Events\UniqueJobSkipped` with the `UniqueBroadcastEvent` as `$event->job`, the same event queued jobs already fire.
+
+```php title="app/Providers/AppServiceProvider.php"
+use Illuminate\Broadcasting\UniqueBroadcastEvent;
+use Illuminate\Queue\Events\UniqueJobSkipped;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Log;
+
+Event::listen(function (UniqueJobSkipped $e) {
+    if ($e->job instanceof UniqueBroadcastEvent) {
+        Log::info('Broadcast skipped', ['event' => $e->job->event::class]);
+    }
+});
+```
+
+Handy if your Vue page uses Echo and you are wondering why one `PriceUpdated` never arrived.
+
+## Floats in Rule::unique()->where()
+
+This always worked at runtime, but the docblock said `int|string|…`, so PHPStan complained. The type now includes `float`:
+
+```php title="app/Http/Requests/StoreProductRequest.php"
+Rule::unique('products', 'sku')->where('price', 9.99);
+// unique:products,sku,NULL,id,price,"9.99"
+```
+
+## A /up health route that survives route:cache
+
+`withRouting(health: '/up')` used to register a closure that loaded its view via `__DIR__`. When you run `php artisan optimize` in CI or a Docker build stage, the closure is serialized with the **build machine's** absolute path. Deploy to another path and every `/up` returns a `FileNotFoundException`, which is a fun way to fail a load-balancer health check.
+
+The route now points to `Illuminate\Foundation\Http\HealthCheck@__invoke`, so `__DIR__` is resolved on the server that answers. Same responses, same `DiagnosingHealth` event. You do not need to change anything; just re-run `route:cache` after upgrading.
+
+<Callout type="tip" title="Multi-stage Docker builds">
+
+If you dropped `health:` or skipped `route:cache` to work around this, you can put them back on 13.38.
+
+</Callout>
+
+## Notable fixes
+
+- **Date rules** (`after`, `before`, …) no longer throw a `TypeError` when the value is not a date, for example an array. They just fail validation ([#62103](https://github.com/laravel/framework/pull/62103)).
+- **Unique scheduled jobs** release their lock if dispatching fails, so the next run is not blocked ([#62083](https://github.com/laravel/framework/pull/62083)).
+- **`lazy()` / `lazyById()`** free the previous chunk, lowering peak memory on big exports ([#62086](https://github.com/laravel/framework/pull/62086)).
+- **Eloquent:** `whereBetween()` with collection bounds ([#62062](https://github.com/laravel/framework/pull/62062)), `clone()` on relations ([#62081](https://github.com/laravel/framework/pull/62081)), `ofMany()` aliases in closures ([#62051](https://github.com/laravel/framework/pull/62051)), self-referencing one-of-many aggregates ([#62043](https://github.com/laravel/framework/pull/62043)), and a child `#[Connection]` attribute now beats an inherited `$connection` ([#62065](https://github.com/laravel/framework/pull/62065)).
+- **Collections:** `mode()` no longer truncates floats ([#62063](https://github.com/laravel/framework/pull/62063)).
+- **Notifications:** the `NotificationFailed` flag is reset before each channel ([#62074](https://github.com/laravel/framework/pull/62074)).
+- **SQLite:** altering a table with a foreign key to a table name that needs quoting ([#62084](https://github.com/laravel/framework/pull/62084)).
+- Laravel Cloud logging formatter restored ([#62068](https://github.com/laravel/framework/pull/62068)).
+
+## Upgrade notes
+
+- `composer update laravel/framework` and you are on 13.38. No breaking changes, no config to publish.
+- Re-run `php artisan optimize` (or `route:cache`) so the cached `/up` route points at the new `HealthCheck` class.
+- Check the [#62065](https://github.com/laravel/framework/pull/62065) fix if a child model uses `#[Connection]` while a parent sets `$connection`: the child's attribute now wins, which may change which database it queries.
+
+<TryIt title="See usingWritePdo restore the replica">
+
+```php title="tests/Feature/WritePdoTest.php"
+use Illuminate\Support\Facades\DB;
+
+it('scopes the writer to the callback', function () {
+    config()->set('database.connections.rw', [
+        'driver' => 'sqlite', 'database' => ':memory:',
+        'read' => ['database' => ':memory:'], 'write' => ['database' => ':memory:'],
+    ]);
+    $c = DB::connection('rw');
+
+    expect($c->usingWritePdo(fn ($db) => $db->getReadPdo() === $db->getPdo()))->toBeTrue()
+        ->and($c->getReadPdo())->not->toBe($c->getPdo());
+});
+```
+
+</TryIt>
+
+## Recap
+
+- `PreventStaleDatabaseReads` gives each user read-your-own-writes for 2 seconds (or `::for(n)`) across requests.
+- `usingWritePdo()` forces the writer for a callback, relations included, and always restores state.
+- `#[CountCrashesAsExceptions]` finally works on queued listeners, mailables and notifications.
+- Unique broadcasts fire `UniqueJobSkipped`, `Rule::unique()->where()` accepts floats, and `/up` works with cached routes anywhere.
+
+## FAQ
+
+<FAQ items={[
+  { q: 'Do I need PreventStaleDatabaseReads without read replicas?', a: 'No. With a single database connection there is no replica lag, so the middleware has nothing to fix.' },
+  { q: 'Is PreventStaleDatabaseReads the same as the sticky option?', a: '`sticky` only covers the current request. The middleware stores the last write time in the session and keeps the next requests on the writer for a few seconds.' },
+  { q: 'Can I use it on API routes?', a: 'Only if they have a session. It needs `StartSession` to run first, so token-based stateless APIs are not covered.' },
+  { q: 'Does usingWritePdo affect other connections?', a: 'No. It only changes the connection you call it on, for the duration of the callback.' },
+  { q: 'Do I have to change my health route?', a: 'No. `withRouting(health: \'/up\')` keeps working; just rebuild your route cache after upgrading.' },
+]} />
+
+## Next steps
+
+- [Laravel 13.37: strict Rule::numeric(), queue filters and JPEG XL](/laravel-13-37-numeric-strict-queue-jxl)
+- [Laravel 13.36: validation builders, OLAP and sticky queues](/laravel-13-36-validation-builders-olap-sticky-queues)
+- [Read and write connections in the Laravel docs](https://laravel.com/docs/13.x/database#read-and-write-connections)
+
+## Sources
+
+- [laravel/framework v13.38.0 release notes](https://github.com/laravel/framework/releases/tag/v13.38.0)
+- [Docs: Preventing stale database reads](https://laravel.com/docs/13.x/database#preventing-stale-database-reads)
+- [Docs: Using the write connection for reads](https://laravel.com/docs/13.x/database#using-the-write-connection-for-reads)
+- [Docs: Max exceptions and CountCrashesAsExceptions](https://laravel.com/docs/13.x/queues#max-exceptions)
+- PRs: [#62078](https://github.com/laravel/framework/pull/62078), [#62099](https://github.com/laravel/framework/pull/62099), [#62048](https://github.com/laravel/framework/pull/62048), [#62077](https://github.com/laravel/framework/pull/62077), [#62059](https://github.com/laravel/framework/pull/62059), [#62049](https://github.com/laravel/framework/pull/62049)
+- [laravel/docs commit documenting the new middleware](https://github.com/laravel/docs/commit/9d2857ad)
