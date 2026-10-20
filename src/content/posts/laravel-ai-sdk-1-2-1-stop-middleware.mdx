@@ -4,6 +4,7 @@ title: "Laravel AI SDK 1.2.1: Stop middleware for agent runs"
 seoTitle: "Laravel AI SDK 1.2.1: Stop Middleware for Agents"
 excerpt: "Laravel AI SDK 1.2.1 adds Stop::when, Stop::unless and StepResult::stop() to end agent runs early. Tested stop button, token budgets and a Vue 3 + Inertia 3 UI."
 date: 2026-10-13T01:00:00Z
+updated: 2026-10-20T00:30:00Z
 snippet: "Stop::when(fn (PendingStep $step) => Cache::has($key))"
 categories: [laravel, vuejs]
 tags: [laravel, vuejs, inertia, release, upgrade]
@@ -235,7 +236,7 @@ The PR description says a stopped stream finishes with a `stop` reason, but the 
 
 Two more details from the tests worth knowing:
 
-- A **structured agent** stopped before its first step returns a plain `AgentResponse` with empty text, not a structured one. Guard your `$response['field']` access.
+- A **structured agent** stopped before its first step returns a plain `AgentResponse` with empty text, not a structured one. Guard your `$response['field']` access. *Update: since [laravel/ai 1.3](/laravel-ai-sdk-1-3-typed-structured-output-file-limits) it returns a `StructuredAgentResponse` with `structured: []` instead.*
 - With `RemembersConversations`, a stopped turn is **saved up to its last tool result**. Stopped before step one? Only the user message is stored.
 
 ## Wire a Stop button with Vue and Inertia

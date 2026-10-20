@@ -1,0 +1,16 @@
+flowchart LR
+  A["`**1. Remote file**
+  fromUrl() is
+  downloaded by the SDK`"] --> B{"`**Content-Length**
+  over the limit?`"}
+  B -- yes --> X["`**Rejected**
+  exception names
+  the limit`"]
+  B -- "no or missing" --> C["`**2. Stream the body**
+  count decoded bytes`"]
+  C --> D{"`**Over the
+  limit?**`"}
+  D -- yes --> X
+  D -- no --> E["`**3. Done**
+  file inlined
+  or uploaded`"]
