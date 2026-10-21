@@ -1,0 +1,179 @@
+---
+id: 167
+title: "PHP critical security release: two 9.2 RCEs, update to 8.5.12, 8.4.27, 8.3.36 or 8.2.35 now"
+seoTitle: "PHP critical security release: CVSS 9.2 RCEs, update now"
+excerpt: "PHP 8.5.12, 8.4.27, 8.3.36 and 8.2.35 fix two critical unauthenticated remote code execution bugs (CVSS 9.2). What happened, who is exposed, and how to patch Laravel servers on Docker, Forge, Vapor, Cloud and Coolify."
+date: 2026-10-21T15:00:00Z
+snippet: "php -v"
+categories: [laravel]
+tags: [php, release, upgrade]
+---
+On **October 21, 2026** the PHP project shipped an emergency security release. Two bugs, both rated **CVSS v4.0 9.2**, both allow **unauthenticated remote code execution**. If your server runs PHP to answer web requests, this is a "patch tonight" release, not a "next sprint" one.
+
+<TLDR
+  audience="Anyone running Laravel (or any PHP app) in production: VPS, Docker, Forge, Vapor, Laravel Cloud, Coolify"
+  learn={['What the two vulnerabilities are and who is exposed', 'Which PHP versions fix them', 'Exact update steps for apt, Docker, Forge, Vapor, Cloud and Coolify', 'Stop-gap settings if you cannot update right now']}
+>
+
+- Update to **PHP 8.5.12, 8.4.27, 8.3.36 or 8.2.35**. Every earlier release on those branches is affected.
+- **CVE-2026-109618** (RCE via OOM corruption) and **CVE-2026-109619** (RCE via stale global state), both 9.2.
+- PHP-FPM, Apache mod_php, php-cgi, FrankenPHP and LiteSpeed are all in scope. php.net rates **mod_php** highest risk.
+- Updating is the **only complete fix**. After updating, restart **every** PHP process (FPM, Octane, Horizon, queue workers).
+
+</TLDR>
+
+## What happened
+
+The PHP security team pre-announced the release on October 20 with a fixed date (21 October, 14:00 UTC) and published it on October 21 together with a [security advisory on php.net](https://www.php.net/) and two GitHub advisories:
+
+| CVE | Advisory | Name | What goes wrong |
+|---|---|---|---|
+| CVE-2026-109618 | [GHSA-w8hw-w9fx-j79w](https://github.com/php/php-src/security/advisories/GHSA-w8hw-w9fx-j79w) | RCE via OOM corruption | An out-of-memory error can interrupt PHP while internal request data is only partly initialized. Request cleanup then treats that invalid data as valid. |
+| CVE-2026-109619 | [GHSA-6wmf-4rv5-p3rp](https://github.com/php/php-src/security/advisories/GHSA-6wmf-4rv5-p3rp) | RCE via stale global state | Request-owned state can survive after its memory was freed. A later request on the same worker may use it before normal initialization resets it. |
+
+## Why it's critical
+
+- **No authentication, over the network.** The CVSS v4.0 vector for the OOM bug is `AV:N/AC:H/AT:P/PR:N/UI:N/VC:H/VI:H/VA:H`: remote, no privileges, no user interaction, full impact on the server.
+- **It can fire before your code runs.** Per the advisory, a complete RCE was validated over HTTP against **Apache mod_php** with default memory and input limits. The multipart body parsing that triggers it happens before any Laravel middleware, validation or WAF rule in your app.
+- **FPM is not off the hook.** The advisory says source analysis supports PHP-FPM as susceptible (no complete FPM exploit has been demonstrated). FrankenPHP is considered likely susceptible in the same way as mod_php.
+- **Your Laravel version does not matter.** This is in the PHP engine, so `composer update` alone fixes nothing.
+
+<Callout type="gotcha" title="config.platform is not your server">
+`"config": {"platform": {"php": "8.4.27"}}` in `composer.json` only tells Composer which PHP version to *pretend* it has when resolving dependencies. It does not install or patch anything. Check the real runtime on the server.
+</Callout>
+
+## Step 1: check what you are actually running
+
+Check on the **server**, not your laptop, and check the web runtime, not just the CLI (they can be different builds):
+
+```bash title="terminal"
+php -v                         # CLI version
+php-fpm8.4 -v                  # FPM binary (name varies by distro)
+docker compose exec app php -v # inside your container
+```
+
+You can also add a temporary route behind auth that returns `PHP_VERSION`, or run `php artisan about` and read the PHP version line.
+
+You are patched if you see **8.5.12+, 8.4.27+, 8.3.36+ or 8.2.35+**. Distribution packages may keep an older version string with a backported fix, so check your vendor's security notice for the package version.
+
+## Step 2: update PHP
+
+### Ubuntu / Debian servers
+
+Linux distributions and LTS vendors received the patches in advance, so updated packages should be available or arriving soon:
+
+```bash title="terminal"
+sudo apt update
+sudo apt install --only-upgrade 'php8.4*'   # match your version
+sudo systemctl restart php8.4-fpm           # and apache2 if you use mod_php
+```
+
+### Docker
+
+Rebuild on a fresh official image and make sure you don't reuse a cached base layer:
+
+```dockerfile title="Dockerfile"
+FROM php:8.4-fpm   # or pin the patched tag: php:8.4.27-fpm
+```
+
+```bash title="terminal"
+docker build --pull --no-cache -t my-app .
+docker compose up -d --force-recreate
+```
+
+If you pin a full version tag (for example `php:8.4.26-fpm`), bump it to the patched one. Images built on Alpine, Debian or another base follow the same rule: rebuild with `--pull`.
+
+### Laravel Forge
+
+Forge installs PHP from OS packages, so SSH in (or use Forge's commands) and run the package upgrade above for each installed PHP version, then restart PHP-FPM from the server's PHP tab and redeploy. Also restart daemons (queue workers, Horizon) so they pick up the new binary.
+
+### Laravel Vapor
+
+Vapor runs PHP from its runtime images, so a **redeploy** is how you pick up a patched runtime once it is published. If you use a Docker runtime, rebuild your image on the patched base (with `--pull`) and deploy.
+
+### Laravel Cloud
+
+Redeploy each environment so it gets the latest patched PHP runtime, and confirm the PHP version in the environment settings.
+
+### Coolify
+
+Trigger a **redeploy** with build cache disabled so the base image is pulled again (Nixpacks or Dockerfile builds), then check `php -v` in the container terminal.
+
+## Step 3: restart every PHP process
+
+Long-running processes keep the old binary in memory until they restart:
+
+```bash title="terminal"
+sudo systemctl restart php8.4-fpm
+php artisan octane:reload     # if you use Octane
+php artisan horizon:terminate # Horizon restarts under Supervisor
+php artisan queue:restart     # plain queue workers
+```
+
+## If you can't update right now
+
+The [php.net advisory](https://www.php.net/) lists measures that **reduce exposure** to specific attack paths. They do **not** make a server safe. Apply them in `php.ini` or the FPM pool (not `ini_set()` or `.user.ini`) and restart every worker.
+
+For **CVE-2026-109618** (OOM corruption):
+
+```ini title="/etc/php/8.4/fpm/pool.d/www.conf"
+php_admin_value[memory_limit] = -1
+php_admin_value[post_max_size] = 8M        ; 32M if you need uploads
+php_admin_value[upload_max_filesize] = 6M  ; keep below post_max_size
+```
+
+- Make sure no other pool, directory or app setting puts a finite `memory_limit` back.
+- Enforce request size, field count, multipart part count and header limits at the web server or proxy too, including for requests without a usable `Content-Length`.
+- Use a container or cgroup memory limit as the availability boundary. Do **not** use `RLIMIT_AS` / `RLIMIT_DATA`: they trigger the vulnerable path.
+
+For **CVE-2026-109619** (stale global state):
+
+```ini title="php.ini"
+session.upload_progress.enabled = 0
+fatal_error_backtraces = 0   ; PHP 8.5 only
+```
+
+- Remove invalid or deprecated per-request settings that emit diagnostics before startup. Hiding them with `error_reporting`, `display_errors` or `@` does not help.
+- Fix attacker-reachable fatal errors and execution timeouts (callbacks, upload and import processing, cleanup).
+
+<Callout type="heads-up" title="memory_limit=-1 has a cost">
+Without a PHP memory limit, a runaway request can use all the memory you give the container. That's why php.net pairs it with a container/cgroup limit. Treat it as a temporary bridge until you update.
+</Callout>
+
+## PHP 8.1 and older
+
+PHP 8.1 and earlier get **no new releases** from the PHP project. Given the severity, the security team published minimal source backports for **7.4, 8.0 and 8.1** for people building from source. Otherwise, check with your distribution or LTS vendor, or upgrade to a supported branch. For Laravel 12/13 apps, that means moving to 8.3 or newer anyway.
+
+## PHP 8.2 reaches end of life on December 31, 2026
+
+8.2.35 fixes these bugs, but PHP 8.2 receives **no security fixes after 31 December 2026**. If you are on 8.2, patch tonight, then plan the jump to 8.4 or 8.5.
+
+## Recap
+
+- Two unauthenticated RCEs, both CVSS 9.2: CVE-2026-109618 and CVE-2026-109619.
+- Update to 8.5.12, 8.4.27, 8.3.36 or 8.2.35 (or your vendor's patched package).
+- Rebuild Docker images with `--pull`, redeploy on Forge, Vapor, Cloud or Coolify, and restart every PHP process.
+- Config mitigations only narrow the attack paths. Updating is the fix.
+
+## FAQ
+
+<FAQ items={[
+  { q: 'Do I need to update Laravel?', a: 'No. Both bugs are in PHP itself. Update the PHP runtime; your Laravel version does not change the risk.' },
+  { q: 'I only use PHP-FPM behind Nginx. Am I safe?', a: 'No. php.net lists PHP-FPM as at risk. The demonstrated exploit was against mod_php, but the advisory says source analysis supports FPM as susceptible.' },
+  { q: 'Is a WAF or Laravel middleware enough?', a: 'No. On mod_php the attack happens during request body parsing, before your application code runs. Proxy-level request limits help, but only the update is a complete fix.' },
+  { q: 'My distro package still says 8.x.y lower than the fixed version.', a: 'Distributions often backport fixes without changing the upstream version. Check your vendor security notice for the patched package version.' },
+  { q: 'What about the PHP CLI only (cron, artisan)?', a: 'php.net scopes the risk to installations serving web requests. Update the CLI anyway; it is usually the same package.' },
+]} />
+
+## Next steps
+
+- [Laravel 13.38: no more stale reads after a write](/laravel-13-38-stale-reads-write-pdo-health)
+- [PHP supported versions](https://www.php.net/supported-versions.php)
+
+## Sources
+
+- [php.net: Security advisory, critical remote code execution vulnerabilities, update now (21 Oct 2026)](https://www.php.net/)
+- [GHSA-w8hw-w9fx-j79w: RCE via OOM corruption (CVE-2026-109618)](https://github.com/php/php-src/security/advisories/GHSA-w8hw-w9fx-j79w)
+- [GHSA-6wmf-4rv5-p3rp: RCE via stale global state (CVE-2026-109619)](https://github.com/php/php-src/security/advisories/GHSA-6wmf-4rv5-p3rp)
+- [PHP 8 ChangeLog](https://www.php.net/ChangeLog-8.php)
+- [Pre-announcement on The PHP Foundation discourse](https://discourse.thephp.foundation/t/php-dev-upcoming-critical-php-security-release/6249)
