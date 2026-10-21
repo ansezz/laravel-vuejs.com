@@ -593,6 +593,8 @@ export const SHIPPED_SOURCES: readonly { path: string; label: string; date: stri
   { path: "/wayfinder-precognition-query-method", label: "Wayfinder 0.1.22 + Precognition 2.1.1", date: "October 15, 2026" },
   { path: "/laravel-13-37-numeric-strict-queue-jxl", label: "Laravel 13.37", date: "October 16, 2026" },
   { path: "/this-week-in-laravel-inertia-2026-10-19", label: "Wayfinder 0.1.23 (weekly roundup)", date: "October 16, 2026" },
+  { path: "/laravel-ai-sdk-1-3-typed-structured-output-file-limits", label: "Laravel AI SDK 1.3", date: "October 19, 2026" },
+  { path: "/laravel-13-38-stale-reads-write-pdo-health", label: "Laravel 13.38", date: "October 20, 2026" },
 ];
 
 export const SHIPPED_ROWS: readonly ShippedRow[] = [
@@ -731,6 +733,33 @@ export const SHIPPED_ROWS: readonly ShippedRow[] = [
       "Types are only as good as the docblocks. Keep @property up to date on models that are bound in routes.",
     sourcePath: "/this-week-in-laravel-inertia-2026-10-19",
   },
+  {
+    id: "ai-structured",
+    release: "Laravel AI SDK 1.3",
+    change: "Typed structured output",
+    use: "prompt() on an agent that implements HasStructuredOutput now returns StructuredAgentResponse for PHPStan, so $response['score'] needs no inline @var.",
+    watch:
+      "Breaking: a structured run with no payload (stopped early, faked with a string, paused for approval) has structured === [] and $response['score'] throws. Remote files from fromUrl() stop at 100 MB; raise it with ai.remote_files.max_size, in kilobytes.",
+    sourcePath: "/laravel-ai-sdk-1-3-typed-structured-output-file-limits",
+  },
+  {
+    id: "stale-reads",
+    release: "Laravel 13.38",
+    change: "Read your own writes",
+    use: "Append PreventStaleDatabaseReads to the web group and a user's reads use the write connection for 2 seconds after they wrote something, or PreventStaleDatabaseReads::for(5) for longer. DB::connection()->usingWritePdo(fn () => ...) forces the writer inside one callback.",
+    watch:
+      "Both are opt-in and only matter with read replicas. usingWritePdo() restores the previous state even when the callback throws.",
+    sourcePath: "/laravel-13-38-stale-reads-write-pdo-health",
+  },
+  {
+    id: "health-check",
+    release: "Laravel 13.38",
+    change: "Cache-safe /up",
+    use: "The /up health route now points to the invokable Illuminate\\Foundation\\Http\\HealthCheck class, so a route cache built in CI keeps working on the server.",
+    watch:
+      "Run php artisan optimize (or route:cache) again after upgrading so the cached /up route points at the new class.",
+    sourcePath: "/laravel-13-38-stale-reads-write-pdo-health",
+  },
 ];
 
 export const shippedSource = (path: string) => SHIPPED_SOURCES.find((s) => s.path === path);
@@ -741,7 +770,7 @@ export function shippedMarkdown(): string {
     "",
     `Copied from the release articles on ${SITE_URL}. ${SHIPPED_SOURCES.map((s) => `${s.label}: ${s.date}`).join(". ")}. On Inertia, install 3.9.1, not 3.9.0. These rows are the new APIs. QUERY also matches existing Route::any() and Route::redirect() routes. The articles also list bug fixes.`,
     "",
-    "Update Laravel with `composer update laravel/framework` for 13.37.0 or later. Update the Vue adapter with `npm install @inertiajs/vue3@^3.9.1`.",
+    "Update Laravel with `composer update laravel/framework` for 13.38.0 or later. Update the Vue adapter with `npm install @inertiajs/vue3@^3.9.1`.",
     "",
     "| Release | Change | Use | Watch | Source |",
     "| --- | --- | --- | --- | --- |",

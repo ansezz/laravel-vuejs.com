@@ -33,6 +33,15 @@ let cache: Post[] | undefined
 export async function allPosts(): Promise<Post[]> {
   if (cache) return cache
   const all = await getCollection('posts')
+  // Ids order every list (higher = newer), so two posts must never share one. Checked across scheduled posts too:
+  // a future-dated post is not on the live site, which makes its id easy to reuse by mistake.
+  const byId = new Map<number, string[]>()
+  for (const e of all) byId.set(e.data.id, [...(byId.get(e.data.id) ?? []), e.id])
+  const duplicates = [...byId].filter(([, slugs]) => slugs.length > 1)
+  if (duplicates.length) {
+    const max = Math.max(...byId.keys())
+    throw new Error(`Duplicate post id(s): ${duplicates.map(([id, slugs]) => `${id} (${slugs.join(', ')})`).join('; ')}. Next free id: ${max + 1}.`)
+  }
   const entries = all.filter(e => isPublished(e.data.date))
   const hidden = all.length - entries.length
   if (hidden) console.info(`[scheduled publishing] ${hidden} future-dated post(s) left out of this build: ${all.filter(e => !entries.includes(e)).map(e => `${e.id} (${e.data.date.toISOString()})`).join(', ')}`)

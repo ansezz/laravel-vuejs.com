@@ -291,6 +291,9 @@ for (const phrase of [
   "queue:failed --queue=emails",
   "search.query()",
   "--skip-database",
+  "PreventStaleDatabaseReads",
+  "HealthCheck",
+  "ai.remote_files.max_size",
   "https://laravel-vuejs.space/laravel-13-37-numeric-strict-queue-jxl",
 ]) {
   if (!shipped.includes(phrase)) fail(`shipped markdown is missing ${phrase}`);
