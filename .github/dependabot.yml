@@ -26,6 +26,10 @@ updates:
         update-types: ["version-update:semver-major"]
       - dependency-name: wrangler
         update-types: ["version-update:semver-major"]
+      # @astrojs/check (npm run check) peers on typescript ^5 || ^6, so a TypeScript 7 bump fails npm ci.
+      # Remove this once @astrojs/check accepts TypeScript 7 (still ^5 || ^6 in 0.9.11).
+      - dependency-name: typescript
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: github-actions
     directory: /
     schedule:
