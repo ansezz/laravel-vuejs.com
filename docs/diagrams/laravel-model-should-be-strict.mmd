@@ -1,0 +1,23 @@
+flowchart LR
+  A["`**Model::shouldBeStrict()**
+  in AppServiceProvider`"] --> B["`**preventLazyLoading**
+  relation read on a
+  list of 2+ models`"]
+  A --> C["`**preventSilently**
+  **DiscardingAttributes**
+  key not in Fillable
+  on create / fill / update`"]
+  A --> D["`**preventAccessing**
+  **MissingAttributes**
+  column not selected
+  or typo on a fetched model`"]
+  B --> E{"`**Handler
+  registered?**`"}
+  C --> E
+  D --> E
+  E -- "no" --> F["`**Throw**
+  LazyLoadingViolation /
+  MassAssignment /
+  MissingAttribute`"]
+  E -- "yes" --> G["`**Call your handler**
+  log it and carry on`"]

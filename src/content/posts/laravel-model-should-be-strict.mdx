@@ -1,0 +1,269 @@
+---
+id: 168
+title: "Laravel Model::shouldBeStrict(): make silent Eloquent bugs loud"
+seoTitle: "Laravel shouldBeStrict(): Catch Silent Eloquent Bugs"
+excerpt: "Hidden gem: one line turns dropped fields, typo'd attributes and N+1 queries into loud errors in development. Tested on Laravel 13.38."
+date: 2026-10-22T02:30:00Z
+snippet: "Model::shouldBeStrict(! $this->app->isProduction());"
+categories: [laravel, vuejs]
+tags: [laravel, php, inertia, testing]
+---
+The Vue form says "Profile saved". The toast is green. The timezone never changed, because `timezone` was validated but never added to the model's fillable list, and Eloquent threw it away without a word. Laravel has one line that turns that silence into an error you see the first time you click Save.
+
+<TLDR
+  audience="Laravel 10–13 developers, including Inertia + Vue apps"
+  learn={['The three checks `Model::shouldBeStrict()` switches on', 'Default behaviour vs strict mode side by side', 'A safe production setup with violation handlers', 'Gotchas: single models, freshly created models, unguarded models, automatic eager loading']}
+  tested="Laravel 13.38 · PHP 8.4 · SQLite 3.46 · Pest"
+>
+
+- Add `Model::shouldBeStrict(! $this->app->isProduction());` to `AppServiceProvider::boot()`.
+- It turns on three checks at once: **lazy loading** throws, **non-fillable keys** on `create()` / `update()` throw instead of vanishing, and **reading a column you didn't select** (or a typo) throws instead of returning `null`.
+- In production you can keep the checks on and **log** instead of throw with `handleLazyLoadingViolationUsing`, `handleDiscardedAttributeViolationUsing` and `handleMissingAttributeViolationUsing`. Since Laravel 13.32 the handlers receive the exception, so `report($e)` is one line.
+- It is not a full safety net: single models, new models and just-created models skip some checks.
+
+</TLDR>
+
+## What shouldBeStrict is and why people miss it
+
+`Model::shouldBeStrict()` landed in Laravel 9.35 (October 2022, [PR #44283](https://github.com/laravel/framework/pull/44283)). It is a shortcut that calls three switches for you:
+
+```php title="vendor/laravel/framework/src/Illuminate/Database/Eloquent/Model.php"
+public static function shouldBeStrict(bool $shouldBeStrict = true)
+{
+    static::preventLazyLoading($shouldBeStrict);
+    static::preventSilentlyDiscardingAttributes($shouldBeStrict);
+    static::preventAccessingMissingAttributes($shouldBeStrict);
+}
+```
+
+Why most people miss it: the [13.x docs](https://laravel.com/docs/13.x/eloquent#configuring-eloquent-strictness) document the first two switches and never mention the one-liner or the third switch. You find `shouldBeStrict()` by reading the source, or you don't find it.
+
+<Diagram name="laravel-model-should-be-strict" alt="Model::shouldBeStrict() in AppServiceProvider turns on three checks. preventLazyLoading fires when you read a relation on a model that came from a list of two or more. preventSilentlyDiscardingAttributes fires when create, fill or update gets a key that is not fillable. preventAccessingMissingAttributes fires when you read a column you did not select, or a typo, on a fetched model. Each check then asks: is a handler registered? If no, Laravel throws LazyLoadingViolationException, MassAssignmentException or MissingAttributeException. If yes, it calls your handler so you can log and carry on." caption="One call, three checks, and you choose between throw and log." />
+
+| Check | Default behaviour | With `shouldBeStrict()` |
+|---|---|---|
+| Relation read on a list of models | Lazy loads, one query per row (N+1) | `LazyLoadingViolationException` |
+| Non-fillable key in `create()` / `update()` / `fill()` | Dropped without a word | `MassAssignmentException` |
+| Column not selected, or a typo, on a fetched model | Returns `null` | `MissingAttributeException` |
+
+## The usual way vs the gem
+
+The usual way is no way at all: you find these bugs in production, from a support ticket. Here is the same code in our Laravel 13.38 lab, before and after one line.
+
+<CodeCompare before="default Eloquent" after="Model::shouldBeStrict()">
+
+```php title="tinker"
+#[Fillable(['user_id', 'title', 'body'])]
+class Post extends Model {}
+
+Post::create([..., 'is_featured' => true]);
+// saved, is_featured silently dropped
+
+$user = User::select('id', 'name')->first();
+$user->email;    // null
+$user->is_admn;  // null (typo, no warning)
+
+Post::all()->each(fn ($post) => $post->user->name);
+// 1 + 6 queries, the classic N+1
+```
+
+```php title="tinker"
+#[Fillable(['user_id', 'title', 'body'])]
+class Post extends Model {}
+
+Post::create([..., 'is_featured' => true]);
+// MassAssignmentException: Add fillable property [is_featured]
+// to allow mass assignment on [App\Models\Post].
+
+$user = User::select('id', 'name')->first();
+$user->email;
+// MissingAttributeException: The attribute [email] either does not
+// exist or was not retrieved for model [App\Models\User].
+
+Post::all()->each(fn ($post) => $post->user->name);
+// LazyLoadingViolationException: Attempted to lazy load [user]
+// on model [App\Models\Post] but lazy loading is disabled.
+```
+
+</CodeCompare>
+
+The setup is one line, scoped to every environment except production:
+
+```php title="app/Providers/AppServiceProvider.php"
+use Illuminate\Database\Eloquent\Model;
+
+public function boot(): void
+{
+    Model::shouldBeStrict(! $this->app->isProduction()); // [!code ++]
+}
+```
+
+Your test suite runs with `APP_ENV=testing`, so strict mode is on in CI too. That is where it earns its keep.
+
+<Callout type="tip" title="The typo case is the scary one">
+
+`if ($user->is_admn)` returns `null` by default, which is falsy, so the check quietly fails closed. Flip it around (`if (! $user->is_admn)`) and it quietly fails **open**. Strict mode throws on the first request either way.
+
+</Callout>
+
+## Real-world example: the Inertia profile form
+
+The bug from the intro, in full. The form request validates `timezone`, the controller passes the validated data to `update()`, and the model's fillable list was written before anyone thought of timezones.
+
+```php title="app/Http/Controllers/ProfileController.php"
+public function update(ProfileUpdateRequest $request): RedirectResponse
+{
+    $request->user()->update($request->validated()); // name, email, timezone
+
+    return back()->with('success', 'Profile saved');
+}
+```
+
+```php title="app/Models/User.php"
+#[Fillable(['name', 'email'])] // timezone missing
+class User extends Authenticatable
+{
+    // ...
+}
+```
+
+Without strict mode, the Vue page gets a redirect, a green toast and the old timezone. In the lab, the same `update()` with an extra key saved `name` and dropped the rest without a trace.
+
+With strict mode, the request throws `MassAssignmentException: Add fillable property [timezone] to allow mass assignment on [App\Models\User]`. The update does not run at all, so you see the error page in development instead of half-saved data. The fix is the obvious one: add `timezone` to `#[Fillable]`.
+
+### The appended accessor trap
+
+The missing-attribute check also catches a quieter Inertia bug. You trim a list query to the columns the table needs, and forget that the model appends an accessor that reads a column you just removed.
+
+```php title="app/Models/Post.php"
+#[Appends(['excerpt'])]
+class Post extends Model
+{
+    protected function excerpt(): Attribute
+    {
+        return Attribute::get(fn () => Str::limit($this->body, 120));
+    }
+}
+```
+
+```php title="app/Http/Controllers/PostController.php"
+return Inertia::render('Posts/Index', [
+    'posts' => Post::select('id', 'title')->get(), // no body
+]);
+```
+
+By default every card gets an empty excerpt. With strict mode, serializing the prop throws `MissingAttributeException` for `body`, and you notice before your users do. In the lab, plain `toArray()` on a trimmed model without appends did not throw: it only serializes what you selected.
+
+## A safe production setup
+
+Throwing in production is usually not what you want. The other common setup keeps the checks on everywhere and reports violations in production instead of crashing:
+
+```php title="app/Providers/AppServiceProvider.php"
+use Illuminate\Database\Eloquent\Model;
+
+public function boot(): void
+{
+    Model::shouldBeStrict();
+
+    if ($this->app->isProduction()) {
+        Model::handleLazyLoadingViolationUsing(fn (Model $model, string $relation, Throwable $e) => report($e));
+        Model::handleMissingAttributeViolationUsing(fn (Model $model, string $key, Throwable $e) => report($e));
+        Model::handleDiscardedAttributeViolationUsing(fn (Model $model, array $keys, Throwable $e) => report($e));
+    }
+}
+```
+
+The exception as a third argument is new: [PR #61504](https://github.com/laravel/framework/pull/61504) shipped in Laravel 13.32. On older versions, build it yourself (`new LazyLoadingViolationException($model, $relation)`), as the [docs example](https://laravel.com/docs/13.x/eloquent-relationships#preventing-lazy-loading) does with a plain `info()` log.
+
+What the handlers do instead of throwing, measured in the lab:
+
+| Violation | With a handler registered |
+|---|---|
+| Lazy loading | Handler runs, then the relation still loads (6 posts → 7 queries) |
+| Discarded attribute | Handler runs, the key is still dropped, the rest saves |
+| Missing attribute | Handler's return value is used (`report()` returns nothing, so you get `null`) |
+
+All three exceptions reached the exception handler through `report()`, so Sentry, Nightwatch or your log channel see them like any other error.
+
+## Gotchas
+
+**Lazy loading only throws on lists.** Laravel marks models for the check only when a query returns two or more of them. `Post::first()->user` and a `get()` that returns one row lazy loaded without complaint in the lab. Strict mode catches N+1, not every lazy load.
+
+**New and just-created models skip the missing-attribute check.** `new User([...])->is_admin` and `User::create([...])->is_admin` both returned `null`. Re-fetch the same row and the typo throws. That matters in tests, where most models come straight out of a factory.
+
+<Callout type="gotcha" title="Factories hide some violations">
+
+A test that does `Post::factory()->create()` and then reads `$post->user` exercises a single, freshly created model: neither the lazy loading check nor the missing-attribute check fires. Write at least one test per list page that fetches two or more records the way the controller does.
+
+</Callout>
+
+**Unguarded models bypass the discard check.** Inside `Model::unguarded(fn () => ...)`, or on a model with `#[Unguarded]`, every key is fillable, so there is nothing to discard. `is_featured` saved fine in the lab.
+
+**`isset()` does not throw.** `isset($user->email)` on a trimmed model returned `false`. Handy when you genuinely don't know if a column was selected.
+
+**Automatic eager loading runs first.** If you also enabled [automatic eager loading](/laravel-automatic-eager-loading), a missing relation on a list is loaded for the whole collection before the lazy-loading check, so strict mode stops warning about it. The other two checks are unaffected.
+
+## Try it yourself
+
+<TryIt title="Find your silent bugs in two minutes">
+
+```php title="app/Providers/AppServiceProvider.php"
+public function boot(): void
+{
+    Model::shouldBeStrict(! $this->app->isProduction());
+}
+```
+
+```bash
+php artisan test
+```
+
+</TryIt>
+
+Every failure that shows up is a bug you already had: a dropped field, a typo or an N+1. Fix them, or note them and add a handler while you clean up.
+
+## How useful is this?
+
+| | Score |
+|---|---|
+| Time saved per use | ★★★★★ One line, and the bug names the field and the model |
+| How often you'll reach for it | ★★★★☆ Set once per app, then it works on every request and test |
+| Risk if misused | ★★☆☆☆ Turned on in production without handlers, a missed N+1 becomes a 500 |
+| **Overall** | **4.5 / 5**: the cheapest code review Eloquent offers |
+
+If you are starting a new Laravel app today, add it before the first model. If the app is old, run the test suite with it on and count the red.
+
+## Recap
+
+- `Model::shouldBeStrict()` turns on `preventLazyLoading`, `preventSilentlyDiscardingAttributes` and `preventAccessingMissingAttributes`.
+- Use `! $this->app->isProduction()` to keep it in local and CI, or keep it on and register handlers in production.
+- Since Laravel 13.32 the handlers receive the exception, so `report($e)` is all you need.
+- It checks lists for N+1 and fetched models for missing attributes; single, new and just-created models skip those.
+- Tested on Laravel 13.38 with 10 Pest tests in a scratch app.
+
+## FAQ
+
+<FAQ items={[
+  { q: 'Should I enable shouldBeStrict in production?', a: 'Not with exceptions. Either pass `! $this->app->isProduction()`, or keep it on and register the three `handle...ViolationUsing` callbacks to `report()` violations instead of throwing.' },
+  { q: 'Which Laravel version do I need?', a: '`shouldBeStrict()` exists since Laravel 9.35. The violation handlers receive the exception as a third argument since Laravel 13.32. We tested on Laravel 13.38.' },
+  { q: 'Is preventAccessingMissingAttributes in the docs?', a: 'Not in the 13.x docs. The docs cover `preventLazyLoading` and `preventSilentlyDiscardingAttributes`; the third switch and `shouldBeStrict()` live in `Illuminate\\Database\\Eloquent\\Model` and PR #44283.' },
+  { q: 'Does it work with automatic eager loading?', a: 'Yes, but the autoloader runs before the lazy loading check, so N+1 on collections is fixed instead of reported. Dropped attributes and missing attributes still throw.' },
+  { q: 'Will it break my Inertia props?', a: 'Only if a prop really reads a column you did not select, usually through an appended accessor or an API resource. Plain `toArray()` on a trimmed model serializes the selected columns and does not throw.' },
+]} />
+
+## Next steps
+
+- [Laravel automatic eager loading](/laravel-automatic-eager-loading), the other half of the N+1 story
+- [Form requests with Inertia](/laravel-form-request-inertia), where validated data meets `#[Fillable]`
+- [API resources for Vue](/laravel-api-resources-vue), to keep Inertia props to the fields you chose
+- [Laravel docs: Configuring Eloquent strictness](https://laravel.com/docs/13.x/eloquent#configuring-eloquent-strictness)
+
+## Sources
+
+- [Laravel 13 docs: Configuring Eloquent strictness](https://laravel.com/docs/13.x/eloquent#configuring-eloquent-strictness)
+- [Laravel 13 docs: Mass assignment exceptions](https://laravel.com/docs/13.x/eloquent#mass-assignment-exceptions)
+- [Laravel 13 docs: Preventing lazy loading](https://laravel.com/docs/13.x/eloquent-relationships#preventing-lazy-loading)
+- [laravel/framework PR #44283: `preventAccessingMissingAttributes()` and `shouldBeStrict()` (Laravel 9.35)](https://github.com/laravel/framework/pull/44283)
+- [laravel/framework PR #44664: handlers for discarded and missing attribute violations](https://github.com/laravel/framework/pull/44664)
+- [laravel/framework v13.32.0 release (PR #61504: pass the exception to violation callbacks)](https://github.com/laravel/framework/releases/tag/v13.32.0)
+- [Source: `Illuminate\Database\Eloquent\Model::shouldBeStrict`](https://github.com/laravel/framework/blob/13.x/src/Illuminate/Database/Eloquent/Model.php)
