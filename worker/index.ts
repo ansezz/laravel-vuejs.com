@@ -128,7 +128,7 @@ function cheatsheetNext(form: Form, input: FormData) {
 
 // Static asset headers (the _headers file is not applied when the Worker runs first, so they live here).
 // Security headers. The CSP allows our own files, the exact inline scripts of this build (hashes from dist/_csp.json,
-// written by scripts/csp.mjs), Cloudflare Web Analytics, and Disqus (loaded only after a click). Inline style
+// written by scripts/csp.mjs), Cloudflare Web Analytics, Disqus (loaded only after a click) and the sponsor network (PARTNER_HOSTS). Inline style
 // attributes are used throughout the markup, so styles keep 'unsafe-inline'.
 const PERMISSIONS_POLICY = 'accelerometer=(), autoplay=(), camera=(), display-capture=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), midi=(), payment=(), usb=(), browsing-topics=()'
 // A fresh nonce per HTML response: we don't use it ourselves (our inline scripts are covered by hashes), but Cloudflare's
@@ -136,14 +136,17 @@ const PERMISSIONS_POLICY = 'accelerometer=(), autoplay=(), camera=(), display-ca
 // nonce from this header and adds it to the script it injects, so it runs without 'unsafe-inline' and without a CSP error.
 // https://developers.cloudflare.com/cloudflare-challenges/challenge-types/javascript-detections/#if-you-have-a-content-security-policy-csp
 const nonce = () => btoa(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(16))))
+// Google's sponsor network (src/components/Partner.astro): its script, its consent message (Funding Choices) and the
+// frames it serves. Only pages with a configured slot load any of it.
+const PARTNER_HOSTS = 'https://*.googlesyndication.com https://*.doubleclick.net https://*.google.com https://*.adtrafficquality.google https://*.gstatic.com'
 const csp = (hashes: string[]) => [
   "default-src 'self'",
-  `script-src 'self' 'nonce-${nonce()}' ${hashes.join(' ')} https://static.cloudflareinsights.com https://*.disqus.com https://*.disquscdn.com`,
+  `script-src 'self' 'nonce-${nonce()}' ${hashes.join(' ')} https://static.cloudflareinsights.com https://*.disqus.com https://*.disquscdn.com ${PARTNER_HOSTS}`,
   "style-src 'self' 'unsafe-inline' https://*.disquscdn.com",
   "img-src 'self' data: https:",
   "font-src 'self'",
-  "connect-src 'self' https://cloudflareinsights.com https://*.disqus.com",
-  'frame-src https://disqus.com https://*.disqus.com',
+  `connect-src 'self' https://cloudflareinsights.com https://*.disqus.com ${PARTNER_HOSTS}`,
+  `frame-src https://disqus.com https://*.disqus.com ${PARTNER_HOSTS}`,
   "frame-ancestors 'none'", "base-uri 'self'", "form-action 'self'", "object-src 'none'", "manifest-src 'self'", 'upgrade-insecure-requests',
 ].join('; ')
 let scriptHashes: string[] = []

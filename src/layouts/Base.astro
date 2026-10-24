@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css'
+import PartnerMeta from '../components/PartnerMeta.astro'
 import geistSans from '@fontsource-variable/geist/files/geist-latin-wght-normal.woff2?url'
 import geistMono from '@fontsource-variable/geist-mono/files/geist-mono-latin-wght-normal.woff2?url'
 import newsreader from '@fontsource-variable/newsreader/files/newsreader-latin-wght-normal.woff2?url'
@@ -91,6 +92,7 @@ const graph = { '@context': 'https://schema.org', '@graph': [org, website, ...js
   <link rel="sitemap" href="/sitemap.xml">
   <script is:inline>(function(){try{var t=localStorage.getItem('theme');if(!t)t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.dataset.theme=t}catch(e){}})()</script>
   <script type="application/ld+json" set:html={JSON.stringify(graph)} />
+  <PartnerMeta />
 </head>
 <body>
   <Header />

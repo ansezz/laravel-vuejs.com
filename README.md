@@ -41,6 +41,21 @@ npm run check:live       # the post-deploy check against the live site (SITE_URL
 
 Generated files that are committed, with the script that makes them: `public/og/*.jpg` (`scripts/og.mjs`, see [Writing a post](#writing-a-post)), `public/diagrams/*.svg` (`npm run diagrams`, Mermaid sources in `docs/diagrams/`) and `public/cheatsheets/pdf/*.pdf` (`npm run cheatsheets:pdf`, sheets in `src/data/cheatsheets.ts`). The last two need a Chromium binary (`CHROME_PATH`).
 
+## Sponsor slots
+
+Article pages can show up to three responsive sponsor slots from Google's publisher network: after the TL;DR, mid-article on long posts (1,200+ words, 4+ sections; placed before the middle section, never inside code) and at the end before related articles. The homepage and other pages show none. Everything lives in `src/components/Partner.astro`; `/ads.txt` is built by `src/pages/ads.txt.ts`.
+
+Set these build variables (Cloudflare: Workers & Pages > laravel-vuejs > Settings > Build > Variables; locally in `.env`, see `.env.example`):
+
+| Variable | Example | Effect |
+| --- | --- | --- |
+| `PUBLIC_PARTNER_ID` | `ca-pub-1164486976906720` | Publisher ID. Empty: no slot renders, no script loads, `/ads.txt` is empty. |
+| `PUBLIC_PARTNER_SLOT_TOP` | `1234567890` | Slot after the TL;DR. Empty: skipped. |
+| `PUBLIC_PARTNER_SLOT_MID` | | Mid-article slot (long posts only). Empty: skipped. |
+| `PUBLIC_PARTNER_SLOT_END` | | Slot before related articles. Empty: skipped. |
+
+The script loads async, once, on the first interaction, when the browser is idle, or when a slot nears the viewport. No auto placement and no tag manager. The site has no cookie banner of its own, so consent in the EEA/UK/Switzerland comes from Google's certified consent message: turn on Privacy & messaging (European regulations message) in the publisher dashboard.
+
 ## Project layout
 
 | Path | What it is |

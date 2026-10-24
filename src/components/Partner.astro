@@ -1,0 +1,76 @@
+---
+// Sponsor slot on article pages. Every Google-required string for the partner network lives in this one file
+// (plus the root ads.txt endpoint, src/pages/ads.txt.ts). Nothing renders, and no script loads, when PUBLIC_PARTNER_ID
+// or this slot's PUBLIC_PARTNER_SLOT_* variable is empty. The script loads async, once, and lazily: on the first
+// interaction, when the browser is idle, or when a slot comes within ~600px of the viewport, whichever comes first.
+// The script is inline and rendered only with an active slot (the CSP build step hashes it); it runs once per page.
+// `deferred` renders the slot inside a <template> that the page script places later (the mid-article slot).
+interface Props { slot: 'top' | 'mid' | 'end'; deferred?: boolean }
+const { slot, deferred = false } = Astro.props
+const client = (import.meta.env.PUBLIC_PARTNER_ID ?? '').trim()
+const ids = {
+  top: (import.meta.env.PUBLIC_PARTNER_SLOT_TOP ?? '').trim(),
+  mid: (import.meta.env.PUBLIC_PARTNER_SLOT_MID ?? '').trim(),
+  end: (import.meta.env.PUBLIC_PARTNER_SLOT_END ?? '').trim(),
+}
+const id = ids[slot]
+const on = Boolean(client && id)
+---
+{on && !deferred && (
+  <aside class="partner" aria-label="Sponsor" data-partner={slot}>
+    <p class="partner-label">Sponsor</p>
+    <ins class="adsbygoogle partner-unit" style="display:block" data-ad-client={client} data-ad-slot={id} data-ad-format="auto" data-full-width-responsive="true"></ins>
+  </aside>
+)}
+{on && deferred && (
+  <template data-partner-template={slot}>
+    <aside class="partner" aria-label="Sponsor" data-partner={slot}>
+      <p class="partner-label">Sponsor</p>
+      <ins class="adsbygoogle partner-unit" style="display:block" data-ad-client={client} data-ad-slot={id} data-ad-format="auto" data-full-width-responsive="true"></ins>
+    </aside>
+  </template>
+)}
+
+<style>
+  .partner { margin: 2.2em 0; padding: 10px 12px 12px; border: 1px solid var(--border); background: var(--bg-elev); }
+  .partner-label { margin: 0 0 8px; font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+  /* Reserved height so the page doesn't jump when the unit fills in. */
+  .partner-unit { min-height: 280px; width: 100%; }
+  @media (max-width: 640px) { .partner-unit { min-height: 250px; } }
+</style>
+
+{on && <script is:inline>
+  (() => {
+    const w = window
+    function boot() {
+      if (w.__partnerBooted) return
+      // Place the mid-article slot at the marker the markdown pipeline left (long posts only, never inside code).
+      const tpl = document.querySelector('template[data-partner-template="mid"]')
+      const mark = document.querySelector('[data-partner-mark]')
+      if (tpl && mark) mark.replaceWith(tpl.content.cloneNode(true))
+      const units = [...document.querySelectorAll('ins.adsbygoogle[data-ad-client]')]
+      if (!units.length) return
+      w.__partnerBooted = true
+      let loaded = false
+      const events = ['pointerdown', 'keydown', 'scroll', 'touchstart']
+      const io = 'IntersectionObserver' in w ? new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) load() }, { rootMargin: '600px 0px' }) : null
+      const idle = 'requestIdleCallback' in w ? requestIdleCallback(() => load(), { timeout: 4000 }) : setTimeout(() => load(), 3000)
+      function load() {
+        if (loaded) return
+        loaded = true
+        if (io) io.disconnect()
+        events.forEach(e => w.removeEventListener(e, load))
+        if ('cancelIdleCallback' in w) cancelIdleCallback(idle); else clearTimeout(idle)
+        const s = document.createElement('script')
+        s.async = true
+        s.crossOrigin = 'anonymous'
+        s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=' + encodeURIComponent(units[0].dataset.adClient || '')
+        document.head.appendChild(s)
+        units.forEach(() => (adsbygoogle = window.adsbygoogle || []).push({}))
+      }
+      units.forEach(u => io && io.observe(u))
+      events.forEach(e => w.addEventListener(e, load, { once: true, passive: true }))
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true }); else boot()
+  })()
+</script>}

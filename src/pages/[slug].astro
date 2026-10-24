@@ -7,7 +7,8 @@ import NewsletterBand from '../components/NewsletterBand.astro'
 import { render } from 'astro:content'
 import { allPosts, related, fmtDate, absolute, type Post } from '../lib/content'
 import CommunityCTA from '../components/post/CommunityCTA.astro'
-import TLDR from '../components/post/TLDR.astro'
+import TLDRPartner from '../components/post/TLDRPartner.astro'
+import Partner from '../components/Partner.astro'
 import Callout from '../components/post/Callout.astro'
 import CodeCompare from '../components/post/CodeCompare.astro'
 import Steps from '../components/post/Steps.astro'
@@ -16,7 +17,7 @@ import FAQ from '../components/post/FAQ.astro'
 import Diagram from '../components/post/Diagram.astro'
 import Figure from '../components/post/Figure.astro'
 // Building blocks available in every .mdx post without imports (see docs/POST-STYLE.md).
-const components = { TLDR, Callout, CodeCompare, Steps, TryIt, FAQ, Diagram, Figure }
+const components = { TLDR: TLDRPartner, Callout, CodeCompare, Steps, TryIt, FAQ, Diagram, Figure }
 import { SITE_NAME, SITE_URL, DISQUS_SHORTNAME, GITHUB_URL, AUTHOR } from '../config/site'
 import AgentTask from '../components/AgentTask.astro'
 import { agentTaskFor, nextStation } from '../data/agent-tasks'
@@ -104,7 +105,9 @@ const jsonld = [{
             <ol>{headings.map(h => <li class={`d${h.depth}`}><a href={`#${h.slug}`}>{h.text}</a></li>)}</ol>
           </details>
         )}
+        {!/<TLDR[\s>]/.test(post.entry.body ?? '') && <Partner slot="top" />}
         <div class="prose post-body" id="article"><Content components={components} /></div>
+        <Partner slot="mid" deferred />
         <CommunityCTA />
         <footer class="post-foot">
           <div class="card-cats">
@@ -142,6 +145,7 @@ const jsonld = [{
     </div>
   </article>
 
+  <div class="container"><Partner slot="end" /></div>
   <section class="container section-tight" aria-labelledby="related">
     <div class="section-head"><div><p class="kicker">Keep reading</p><h2 id="related">Related articles</h2></div></div>
     <div class="grid grid-3">{related(post, posts).map(p => <PostCard post={p} />)}</div>
