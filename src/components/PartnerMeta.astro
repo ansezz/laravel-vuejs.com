@@ -1,0 +1,5 @@
+---
+// Site verification for Google's publisher network, on every page <head> when PUBLIC_PARTNER_ID is set (no slot needed).
+const client = (import.meta.env.PUBLIC_PARTNER_ID ?? '').trim()
+---
+{client && <meta name="google-adsense-account" content={client} />}
