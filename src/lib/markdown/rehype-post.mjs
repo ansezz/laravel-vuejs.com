@@ -37,7 +37,19 @@ export function transformerFrame() {
 }
 
 export default function rehypePost() {
-  return tree => walk(tree)
+  return tree => { walk(tree); markPartner(tree) }
+}
+
+// Long posts get an empty, zero-height marker before the middle top-level h2; the sponsor slot (src/components/Partner.astro)
+// replaces it in the browser when a mid slot is configured. Only top-level positions, so never inside code or components.
+const LONG_POST_WORDS = 1200
+const words = n => n.type === 'element' && (n.tagName === 'pre' || n.tagName === 'code') ? 0 : n.type === 'text' ? n.value.split(/\s+/).filter(Boolean).length : (n.children ?? []).reduce((a, c) => a + words(c), 0)
+function markPartner(tree) {
+  if (words(tree) < LONG_POST_WORDS) return
+  const h2 = tree.children.map((n, i) => [n, i]).filter(([n]) => n.type === 'element' && n.tagName === 'h2')
+  if (h2.length < 4) return
+  const [, at] = h2[Math.floor(h2.length / 2)]
+  tree.children.splice(at, 0, el('div', { dataPartnerMark: '', hidden: true }))
 }
 function walk(node) {
   if (!node.children) return

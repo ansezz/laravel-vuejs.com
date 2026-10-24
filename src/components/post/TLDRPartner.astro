@@ -1,0 +1,7 @@
+---
+// TL;DR box followed by the top sponsor slot (used as <TLDR> in post bodies, see src/pages/[slug].astro).
+import TLDR from './TLDR.astro'
+import Partner from '../Partner.astro'
+---
+<TLDR {...Astro.props}><slot /></TLDR>
+<Partner slot="top" />
